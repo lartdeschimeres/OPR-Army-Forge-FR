@@ -96,6 +96,15 @@ DEFAULT_FALLBACK_UNIT_PER_POINTS = 200
 
 st.title('OPR Army Builder 🇫🇷')
 
+if 'selected_faction_name' not in st.session_state:
+    st.session_state.selected_faction_name = None
+
+if 'selected_faction_path' not in st.session_state:
+    st.session_state.selected_faction_path = None
+
+if 'faction' not in st.session_state:
+    st.session_state.faction = faction
+    
 # Choix du jeu OPR
 selected_game = st.selectbox('Variante OPR (jeu)', GAMES, index=0)
 
