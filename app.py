@@ -171,6 +171,7 @@ else:
     sel_idx = st.selectbox("Sélectionner la faction", names, index=0)
     selected_entry = faction_options[names.index(sel_idx)]
     selected_faction_path = selected_entry.get('file')
+    selected_faction_name = selected_entry.get('name')
 
     # si on a un fichier JSON, le charger et remplacer la variable faction
     if selected_faction_path:
@@ -178,6 +179,10 @@ else:
             try:
                 with open(selected_faction_path, encoding='utf-8') as f:
                     faction = json.load(f)
+    
+                # 🔒 Sécurité : forcer la cohérence nom affiché / JSON
+                faction['faction'] = selected_faction_name
+    
             except Exception as e:
                 st.error(f"Impossible de lire le fichier JSON de la faction: {selected_faction_path} — {e}")
         else:
