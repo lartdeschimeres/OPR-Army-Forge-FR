@@ -85,14 +85,22 @@ if not units:
     st.stop()
 
 # -------------------------------------------------
-# SESSION STATE
+# SESSION STATE POUR LA LISTE D'ARMÉE
 # -------------------------------------------------
-if "selected_unit" not in st.session_state:
-    st.session_state.selected_unit = units[0]["name"]
+if "army_list" not in st.session_state:
+    st.session_state.army_list = []
+if "army_total_cost" not in st.session_state:
+    st.session_state.army_total_cost = 0
 
 # -------------------------------------------------
 # SÉLECTEUR D’UNITÉ
 # -------------------------------------------------
+st.divider()
+st.subheader("Ajouter une unité à l'armée")
+
+if "selected_unit" not in st.session_state:
+    st.session_state.selected_unit = units[0]["name"]
+
 def unit_label(u):
     return f"{u['name']} ({u['base_cost']} pts | Q{u['quality']}+ / D{u['defense']}+)"
 
@@ -109,52 +117,30 @@ st.session_state.selected_unit = selected_name
 unit = next(u for u in units if u["name"] == selected_name)
 
 # -------------------------------------------------
-# PROFIL DE BASE
-# -------------------------------------------------
-st.divider()
-st.subheader("Profil de base")
-
-st.write(f"**Type :** {unit.get('type','—')}")
-st.write(f"**Qualité :** {unit.get('quality','?')}+")
-st.write(f"**Défense :** {unit.get('defense','?')}+")
-st.write(f"**Coût de base :** {unit.get('base_cost',0)} pts")
-
-# -------------------------------------------------
 # OPTIONS & CALCUL
 # -------------------------------------------------
-st.divider()
-st.subheader("Options")
-
 total_cost = unit.get("base_cost", 0)
 final_rules = list(unit.get("special_rules", []))
 final_weapons = list(unit.get("weapons", []))
 
 for group in unit.get("upgrade_groups", []):
     key = f"{unit['name']}_{group['group']}"
-
     options = ["— Aucun —"] + [opt["name"] for opt in group["options"]]
-
-    choice = st.selectbox(
-        group["group"],
-        options,
-        key=key
-    )
+    choice = st.selectbox(group["group"], options, key=key)
 
     if choice != "— Aucun —":
         opt = next(o for o in group["options"] if o["name"] == choice)
         total_cost += opt.get("cost", 0)
-
         if "special_rules" in opt:
             final_rules.extend(opt["special_rules"])
-
         if "weapon" in opt:
             final_weapons = [opt["weapon"]]
 
 # -------------------------------------------------
-# PROFIL FINAL
+# PROFIL FINAL DE L'UNITÉ
 # -------------------------------------------------
 st.divider()
-st.subheader("Profil final")
+st.subheader("Profil final de l'unité")
 
 st.markdown(f"## 💰 Coût total : **{total_cost} pts**")
 
@@ -176,3 +162,53 @@ if final_weapons:
         )
 else:
     st.write("—")
+
+# -------------------------------------------------
+# BOUTON POUR AJOUTER L'UNITÉ À L'ARMÉE
+# -------------------------------------------------
+if st.button("➕ Ajouter à l'armée"):
+    st.session_state.army_list.append({
+        "name": unit["name"],
+        "cost": total_cost,
+        "rules": final_rules,
+        "weapons": final_weapons
+    })
+    st.session_state.army_total_cost += total_cost
+    st.success(f"Unité {unit['name']} ajoutée à l'armée !")
+
+# -------------------------------------------------
+# AFFICHAGE DE LA LISTE D'ARMÉE
+# -------------------------------------------------
+st.divider()
+st.subheader("Liste de l'armée")
+
+if not st.session_state.army_list:
+    st.write("Aucune unité ajoutée pour le moment.")
+else:
+    for i, army_unit in enumerate(st.session_state.army_list, 1):
+        st.write(f"{i}. **{army_unit['name']}** ({army_unit['cost']} pts)")
+        if army_unit["rules"]:
+            st.write(f"   - Règles spéciales : {', '.join(army_unit['rules'])}")
+        if army_unit["weapons"]:
+            for w in army_unit["weapons"]:
+                st.write(f"   - Arme : {w.get('name', 'Arme')} (A{w.get('attacks', '?')}, PA{w.get('armor_piercing', '?')})")
+
+    st.markdown(f"### 💰 **Coût total de l'armée : {st.session_state.army_total_cost} pts**")
+
+# -------------------------------------------------
+# CHAMP POUR LE COÛT TOTAL SOUHAITÉ DE L'ARMÉE
+# -------------------------------------------------
+st.divider()
+army_target_cost = st.number_input(
+    "Coût total souhaité pour l'armée (en points) :",
+    min_value=0,
+    value=1000,
+    step=50
+)
+
+# -------------------------------------------------
+# INDICATEUR DE PROGRÈS
+# -------------------------------------------------
+progress = st.session_state.army_total_cost / army_target_cost
+st.progress(progress)
+st.write(f"Progression : {st.session_state.army_total_cost}/{army_target_cost} pts")
