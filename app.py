@@ -9,63 +9,66 @@ st.set_page_config(page_title="OPR Army Builder FR", layout="centered")
 st.title("OPR Army Builder 🇫🇷")
 
 BASE_DIR = Path(__file__).resolve().parent
-GAMES_DIR = BASE_DIR / "lists" / "data"
+FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 
 # -------------------------------------------------
-# CHARGEMENT DES JEUX
+# CHARGEMENT DES FACTIONS ET EXTRACTION DES JEUX
 # -------------------------------------------------
-if not GAMES_DIR.exists():
-    st.error(f"Dossier jeux introuvable : {GAMES_DIR}")
+if not FACTIONS_DIR.exists():
+    st.error(f"Dossier factions introuvable : {FACTIONS_DIR}")
     st.stop()
 
-game_dirs = [d for d in GAMES_DIR.iterdir() if d.is_dir()]
-
-if not game_dirs:
-    st.error("Aucun jeu trouvé")
-    st.stop()
-
-# Sélecteur de jeu
-selected_game = st.selectbox(
-    "Sélectionner le jeu",
-    [d.name for d in game_dirs]
-)
-
-# -------------------------------------------------
-# CHARGEMENT DES FACTIONS POUR LE JEU SÉLECTIONNÉ
-# -------------------------------------------------
-GAME_FACTIONS_DIR = GAMES_DIR / selected_game
-
-if not GAME_FACTIONS_DIR.exists():
-    st.error(f"Dossier factions introuvable pour le jeu {selected_game}")
-    st.stop()
-
-faction_files = sorted(GAME_FACTIONS_DIR.glob("*.json"))
+faction_files = sorted(FACTIONS_DIR.glob("*.json"))
 
 if not faction_files:
-    st.error(f"Aucun fichier faction trouvé pour le jeu {selected_game}")
+    st.error("Aucun fichier faction trouvé")
     st.stop()
 
+# Extraire les jeux uniques depuis les fichiers
+games = set()
 faction_map = {}
 
 for fp in faction_files:
     try:
         with open(fp, encoding="utf-8") as f:
             data = json.load(f)
+            game = data.get("game", "Inconnu")
+            games.add(game)
             name = data.get("faction", fp.stem)
-            faction_map[name] = fp
+            faction_map[name] = {"file": fp, "game": game}
     except Exception as e:
         st.warning(f"Impossible de lire {fp.name} : {e}")
+
+if not games:
+    st.error("Aucun jeu trouvé dans les fichiers")
+    st.stop()
+
+# Sélecteur de jeu
+selected_game = st.selectbox(
+    "Sélectionner le jeu",
+    sorted(games)
+)
+
+# Filtrer les factions pour le jeu sélectionné
+game_factions = {
+    name: info for name, info in faction_map.items()
+    if info["game"] == selected_game
+}
+
+if not game_factions:
+    st.error(f"Aucune faction trouvée pour le jeu {selected_game}")
+    st.stop()
 
 # Sélecteur de faction
 selected_faction = st.selectbox(
     "Sélectionner la faction",
-    sorted(faction_map.keys())
+    sorted(game_factions.keys())
 )
 
 # -------------------------------------------------
 # CHARGEMENT DE LA FACTION
 # -------------------------------------------------
-FACTION_PATH = faction_map[selected_faction]
+FACTION_PATH = game_factions[selected_faction]["file"]
 
 with open(FACTION_PATH, encoding="utf-8") as f:
     faction = json.load(f)
