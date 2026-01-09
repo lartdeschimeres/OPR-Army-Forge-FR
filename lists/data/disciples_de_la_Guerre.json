@@ -78,3 +78,38 @@
           "options": [
             { "name": "Cheval", "cost": 15, "special_rules": ["Impact (1)", "Rapide"] },
             {
+              "name": "Grande bête",
+              "cost": 65,
+              "special_rules": ["Griffes lourdes (A1, PA (1))", "Coriace (+3)", "Impact (2)", "Rapide"]
+            },
+            {
+              "name": "Monture démoniaque",
+              "cost": 75,
+              "special_rules": ["Griffes lourdes (A1, PA (1))", "Coriace (+3)", "Impact (2)", "Effrayant (1)", "Rapide"]
+            },
+            {
+              "name": "Char",
+              "cost": 120,
+              "special_rules": ["Sabots (A2)", "Coriace (+6)", "Impact (4)", "Rapide"]
+            },
+            {
+              "name": "Char bestial",
+              "cost": 135,
+              "special_rules": ["Griffes lourdes (A2, PA (1))", "Coriace (+6)", "Effrayant (1)", "Impact (4)", "Rapide"]
+            },
+            {
+              "name": "Manticore",
+              "cost": 155,
+              "special_rules": ["Griffes perforantes (A6, Perforant)", "Coriace (+6)", "Effrayant (1)", "Volant"]
+            },
+            {
+              "name": "Dragon du Ravage",
+              "cost": 320,
+              "special_rules": ["Griffes lourdes (A6, PA (1))", "Piétinement (A4, PA (1))", "Attaque de souffle", "Coriace (+12)", "Effrayant (2)", "Volant"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
