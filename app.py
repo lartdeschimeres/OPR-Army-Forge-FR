@@ -2,19 +2,26 @@ import json
 import streamlit as st
 from pathlib import Path
 
-# -----------------------------
-# CONFIG
-# -----------------------------
-FACTIONS_DIR = Path("data/factions")
+# -------------------------------------------------
+# CONFIG GÉNÉRALE
+# -------------------------------------------------
+st.set_page_config(page_title="OPR Army Builder FR", layout="centered")
+st.title("OPR Army Builder 🇫🇷")
 
+BASE_DIR = Path(__file__).resolve().parent
+FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
+
+# -------------------------------------------------
+# CHARGEMENT DES FACTIONS
+# -------------------------------------------------
 if not FACTIONS_DIR.exists():
-    st.error("Dossier data/factions introuvable")
+    st.error(f"Dossier factions introuvable : {FACTIONS_DIR}")
     st.stop()
 
 faction_files = sorted(FACTIONS_DIR.glob("*.json"))
 
 if not faction_files:
-    st.error("Aucun fichier faction trouvé dans data/factions")
+    st.error("Aucun fichier faction trouvé")
     st.stop()
 
 faction_map = {}
@@ -29,42 +36,35 @@ for fp in faction_files:
         st.warning(f"Impossible de lire {fp.name} : {e}")
 
 selected_faction = st.selectbox(
-    "Choisir la faction",
-    list(faction_map.keys())
+    "Sélectionner la faction",
+    sorted(faction_map.keys())
 )
 
 FACTION_PATH = faction_map[selected_faction]
 
-st.set_page_config(page_title="OPR Army Builder 🇫🇷", layout="centered")
-st.title("OPR Army Builder 🇫🇷")
-
-# -----------------------------
-# LOAD FACTION
-# -----------------------------
-if not FACTION_PATH.exists():
-    st.error(f"Fichier faction introuvable : {FACTION_PATH}")
-    st.stop()
-
 with open(FACTION_PATH, encoding="utf-8") as f:
     faction = json.load(f)
 
-st.subheader(f"Faction : {faction['faction']}")
-st.caption(f"Jeu : {faction['game']}")
+# -------------------------------------------------
+# AFFICHAGE FACTION
+# -------------------------------------------------
+st.subheader(f"Faction : {faction.get('faction','Inconnue')}")
+st.caption(f"Jeu : {faction.get('game','?')}")
 
 units = faction.get("units", [])
 if not units:
-    st.warning("Aucune unité dans cette faction.")
+    st.warning("Aucune unité disponible pour cette faction.")
     st.stop()
 
-# -----------------------------
+# -------------------------------------------------
 # SESSION STATE
-# -----------------------------
-if "selected_unit_name" not in st.session_state:
-    st.session_state.selected_unit_name = units[0]["name"]
+# -------------------------------------------------
+if "selected_unit" not in st.session_state:
+    st.session_state.selected_unit = units[0]["name"]
 
-# -----------------------------
-# UNIT SELECTOR
-# -----------------------------
+# -------------------------------------------------
+# SÉLECTEUR D’UNITÉ
+# -------------------------------------------------
 def unit_label(u):
     return f"{u['name']} ({u['base_cost']} pts | Q{u['quality']}+ / D{u['defense']}+)"
 
@@ -73,31 +73,31 @@ unit_names = [u["name"] for u in units]
 selected_name = st.selectbox(
     "Choisir une unité",
     unit_names,
-    index=unit_names.index(st.session_state.selected_unit_name),
+    index=unit_names.index(st.session_state.selected_unit),
     format_func=lambda n: unit_label(next(u for u in units if u["name"] == n))
 )
 
-st.session_state.selected_unit_name = selected_name
+st.session_state.selected_unit = selected_name
 unit = next(u for u in units if u["name"] == selected_name)
 
-# -----------------------------
-# BASE PROFILE
-# -----------------------------
+# -------------------------------------------------
+# PROFIL DE BASE
+# -------------------------------------------------
 st.divider()
 st.subheader("Profil de base")
 
-st.write(f"**Type :** {unit['type']}")
-st.write(f"**Qualité :** {unit['quality']}+")
-st.write(f"**Défense :** {unit['defense']}+")
-st.write(f"**Coût de base :** {unit['base_cost']} pts")
+st.write(f"**Type :** {unit.get('type','—')}")
+st.write(f"**Qualité :** {unit.get('quality','?')}+")
+st.write(f"**Défense :** {unit.get('defense','?')}+")
+st.write(f"**Coût de base :** {unit.get('base_cost',0)} pts")
 
-# -----------------------------
-# OPTIONS
-# -----------------------------
+# -------------------------------------------------
+# OPTIONS & CALCUL
+# -------------------------------------------------
 st.divider()
 st.subheader("Options")
 
-total_cost = unit["base_cost"]
+total_cost = unit.get("base_cost", 0)
 final_rules = list(unit.get("special_rules", []))
 final_weapons = list(unit.get("weapons", []))
 
@@ -114,7 +114,7 @@ for group in unit.get("upgrade_groups", []):
 
     if choice != "— Aucun —":
         opt = next(o for o in group["options"] if o["name"] == choice)
-        total_cost += opt["cost"]
+        total_cost += opt.get("cost", 0)
 
         if "special_rules" in opt:
             final_rules.extend(opt["special_rules"])
@@ -122,22 +122,26 @@ for group in unit.get("upgrade_groups", []):
         if "weapon" in opt:
             final_weapons = [opt["weapon"]]
 
-# -----------------------------
-# FINAL PROFILE
-# -----------------------------
+# -------------------------------------------------
+# PROFIL FINAL
+# -------------------------------------------------
 st.divider()
 st.subheader("Profil final")
 
 st.markdown(f"## 💰 Coût total : **{total_cost} pts**")
 
 st.markdown("### 🛡️ Règles spéciales")
-for r in sorted(set(final_rules)):
-    st.write(f"- {r}")
+if final_rules:
+    for r in sorted(set(final_rules)):
+        st.write(f"- {r}")
+else:
+    st.write("—")
 
 st.markdown("### ⚔️ Armes")
 for w in final_weapons:
     st.write(
         f"- **{w.get('name','Arme')}** | "
-        f"A{w['attacks']} | PA({w['armor_piercing']}) "
+        f"A{w.get('attacks','?')} | "
+        f"PA({w.get('armor_piercing','?')}) "
         f"{' '.join(w.get('special_rules', []))}"
     )
