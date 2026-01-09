@@ -77,4 +77,4 @@
           "type": "mount",
           "options": [
             { "name": "Cheval", "cost": 15, "special_rules": ["Impact (1)", "Rapide"] },
-            { "name": "Grande bête", "cost": 65, "special_rules": ["Griffes lourdes (A1, PA (1)", "Coriace (+3)", "Impact (2)", "Rapide"]},
+            { "name": "Grande bête", "cost": 65, "special_rules": ["Griffes lourdes (A1, PA (1)", "Coriace (+3)", "Impact (2)", "Rapide"]}
