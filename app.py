@@ -1,7 +1,6 @@
-import streamlit as st
 import json
-import streamlit as st
 from pathlib import Path
+import streamlit as st
 
 # -------------------------------------------------
 # CONFIG GÉNÉRALE
@@ -121,7 +120,7 @@ for group in unit.get("upgrade_groups", []):
             final_rules.extend(opt["special_rules"])
 
         if "weapon" in opt:
-            final_weapons = [opt["weapon"]]
+            final_weapons = [opt["weapon"]]  # Remplacement des armes de base
 
 # -------------------------------------------------
 # PROFIL FINAL
@@ -139,10 +138,13 @@ else:
     st.write("—")
 
 st.markdown("### ⚔️ Armes")
-for w in final_weapons:
-    st.write(
-        f"- **{w.get('name','Arme')}** | "
-        f"A{w.get('attacks','?')} | "
-        f"PA({w.get('armor_piercing','?')}) "
-        f"{' '.join(w.get('special_rules', []))}"
-    )
+if final_weapons:
+    for w in final_weapons:
+        st.write(
+            f"- **{w.get('name','Arme')}** | "
+            f"A{w.get('attacks','?')} | "
+            f"PA({w.get('armor_piercing','?')}) "
+            f"{' '.join(w.get('special_rules', []))}"
+        )
+else:
+    st.write("—")
