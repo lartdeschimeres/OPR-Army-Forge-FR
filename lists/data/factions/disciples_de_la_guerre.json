@@ -1,5 +1,5 @@
 {
-  "faction": "disciples_de_la_guerre",
+  "faction": "Disciples de la Guerre",
   "game": "Age of Fantasy",
   "version": "FR-0.1",
   "status": "stub",
@@ -7,7 +7,7 @@
   "units": [
     {
       "name": "Maître de la Guerre Élu",
-      "type": "Hero",
+      "type": "Héros",
       "size": 1,
       "base_cost": 60,
       "quality": 4,
@@ -32,10 +32,10 @@
 
       "upgrade_groups": [
         {
-          "group": "Améliorations de rôle",
+          "group": "Amélioration",
           "type": "upgrade",
           "options": [
-            { "name": "Conquérant", "cost": 20, "special_rules": ["Aura d’Éclaireur"] },
+            { "name": "Conquérant (Aura d’Éclaireur)", "cost": 20, "special_rules": ["Aura d’Éclaireur"] },
             { "name": "Marauder", "cost": 30, "special_rules": ["Aura de combattant imprévisible"] },
             { "name": "Porteur de la bannière de l’armée", "cost": 30, "special_rules": ["Effrayant (3)"] },
             { "name": "Mage", "cost": 35, "special_rules": ["Aura de Voile fluctuant"] },
@@ -73,7 +73,7 @@
         },
 
         {
-          "group": "Montures",
+          "group": "Monture",
           "type": "mount",
           "options": [
             { "name": "Cheval", "cost": 15, "special_rules": ["Impact (1)", "Rapide"] },
