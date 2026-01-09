@@ -1,3 +1,7 @@
+import streamlit as st
+st.error("DEBUG – NOUVELLE VERSION DU CODE CHARGÉE")
+st.stop()
+
 import json
 import streamlit as st
 from pathlib import Path
