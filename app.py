@@ -66,18 +66,28 @@ selected_faction = st.selectbox(
 )
 
 # -------------------------------------------------
-# CHARGEMENT DE LA FACTION
+# CHAMP POUR LE COÛT TOTAL SOUHAITÉ DE L'ARMÉE
 # -------------------------------------------------
-FACTION_PATH = game_factions[selected_faction]["file"]
-
-with open(FACTION_PATH, encoding="utf-8") as f:
-    faction = json.load(f)
+army_target_cost = st.number_input(
+    "Coût total souhaité pour l'armée (en points) :",
+    min_value=0,
+    value=1000,
+    step=50
+)
 
 # -------------------------------------------------
 # AFFICHAGE FACTION
 # -------------------------------------------------
 st.subheader(f"Faction : {faction.get('faction','Inconnue')}")
 st.caption(f"Jeu : {faction.get('game', selected_game)}")
+
+# -------------------------------------------------
+# CHARGEMENT DE LA FACTION
+# -------------------------------------------------
+FACTION_PATH = game_factions[selected_faction]["file"]
+
+with open(FACTION_PATH, encoding="utf-8") as f:
+    faction = json.load(f)
 
 units = faction.get("units", [])
 if not units:
@@ -186,29 +196,25 @@ if not st.session_state.army_list:
     st.write("Aucune unité ajoutée pour le moment.")
 else:
     for i, army_unit in enumerate(st.session_state.army_list, 1):
-        st.write(f"{i}. **{army_unit['name']}** ({army_unit['cost']} pts)")
-        if army_unit["rules"]:
-            st.write(f"   - Règles spéciales : {', '.join(army_unit['rules'])}")
-        if army_unit["weapons"]:
-            for w in army_unit["weapons"]:
-                st.write(f"   - Arme : {w.get('name', 'Arme')} (A{w.get('attacks', '?')}, PA{w.get('armor_piercing', '?')})")
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.write(f"{i}. **{army_unit['name']}** ({army_unit['cost']} pts)")
+            if army_unit["rules"]:
+                st.write(f"   - Règles spéciales : {', '.join(army_unit['rules'])}")
+            if army_unit["weapons"]:
+                for w in army_unit["weapons"]:
+                    st.write(f"   - Arme : {w.get('name', 'Arme')} (A{w.get('attacks', '?')}, PA{w.get('armor_piercing', '?')})")
+        with col2:
+            if st.button(f"❌", key=f"delete_{i}"):
+                st.session_state.army_total_cost -= army_unit["cost"]
+                st.session_state.army_list.pop(i-1)
+                st.rerun()
 
     st.markdown(f"### 💰 **Coût total de l'armée : {st.session_state.army_total_cost} pts**")
 
 # -------------------------------------------------
-# CHAMP POUR LE COÛT TOTAL SOUHAITÉ DE L'ARMÉE
-# -------------------------------------------------
-st.divider()
-army_target_cost = st.number_input(
-    "Coût total souhaité pour l'armée (en points) :",
-    min_value=0,
-    value=1000,
-    step=50
-)
-
-# -------------------------------------------------
 # INDICATEUR DE PROGRÈS
 # -------------------------------------------------
-progress = st.session_state.army_total_cost / army_target_cost
+progress = st.session_state.army_total_cost / army_target_cost if army_target_cost > 0 else 0.0
 st.progress(progress)
 st.write(f"Progression : {st.session_state.army_total_cost}/{army_target_cost} pts")
