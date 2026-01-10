@@ -107,7 +107,7 @@ if "army_total_cost" not in st.session_state:
     st.session_state.army_total_cost = 0
 
 # -------------------------------------------------
-# SÉLECTEUR D’UNITÉ
+# SÉLECTEUR D'UNITÉ
 # -------------------------------------------------
 st.divider()
 st.subheader("Configurer une unité")
@@ -181,7 +181,7 @@ st.markdown(f"### 💰 Coût total : **{total_cost} pts**")
 # -------------------------------------------------
 if st.button("➕ Ajouter à l'armée"):
     # Déterminer l'arme actuelle (de base ou remplacée)
-    current_weapon = final_weapons[0] if final_weapons else unit.get("weapons", [{}])[0]
+    current_weapon = final_weapons[0] if final_weapons else unit.get("weapons", [{"name": "Arme non définie"}])[0]
 
     st.session_state.army_list.append({
         "name": unit["name"],
