@@ -110,7 +110,7 @@ if "army_total_cost" not in st.session_state:
 # SÉLECTEUR D’UNITÉ
 # -------------------------------------------------
 st.divider()
-st.subheader("Ajouter une unité à l'armée")
+st.subheader("Configurer une unité")
 
 if "selected_unit" not in st.session_state:
     st.session_state.selected_unit = units[0]["name"]
@@ -136,6 +136,7 @@ unit = next(u for u in units if u["name"] == selected_name)
 total_cost = unit.get("base_cost", 0)
 final_rules = list(unit.get("special_rules", []))
 final_weapons = list(unit.get("weapons", []))
+selected_options = {}
 
 # Affichage des armes de base
 st.subheader("Armes de base")
@@ -149,7 +150,7 @@ for w in unit.get("weapons", []):
 
 # Séparateur pour les options
 st.divider()
-st.subheader("Options d'amélioration")
+st.subheader("Options disponibles")
 
 # -------------------------------------------------
 # OPTIONS PAR GROUPE (Rôle, Montures, etc.)
@@ -167,16 +168,10 @@ for group in unit.get("upgrade_groups", []):
     if choice != "— Aucun —":
         opt = next(o for o in group["options"] if o["name"] == choice)
         total_cost += opt.get("cost", 0)
+        selected_options[group["group"]] = opt
         if "special_rules" in opt:
             final_rules.extend(opt["special_rules"])
         if "weapon" in opt:
-            st.markdown("**⚠️ Arme remplacée :**")
-            st.write(
-                f"- **{opt['weapon'].get('name', 'Arme')}** | "
-                f"A{opt['weapon'].get('attacks', '?')} | "
-                f"PA({opt['weapon'].get('armor_piercing', '?')}) | "
-                f"{' '.join(opt['weapon'].get('special_rules', []))}"
-            )
             final_weapons = [opt["weapon"]]
 
 # -------------------------------------------------
@@ -214,7 +209,8 @@ if st.button("➕ Ajouter à l'armée"):
         "name": unit["name"],
         "cost": total_cost,
         "rules": final_rules,
-        "weapons": final_weapons
+        "weapons": final_weapons,
+        "options": selected_options
     })
     st.session_state.army_total_cost += total_cost
     st.success(f"Unité {unit['name']} ajoutée à l'armée !")
@@ -229,16 +225,34 @@ if not st.session_state.army_list:
     st.write("Aucune unité ajoutée pour le moment.")
 else:
     for i, army_unit in enumerate(st.session_state.army_list, 1):
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            st.write(f"{i}. **{army_unit['name']}** ({army_unit['cost']} pts)")
+        with st.expander(f"{i}. {army_unit['name']} ({army_unit['cost']} pts)"):
+            st.markdown(f"**Coût :** {army_unit['cost']} pts")
+
             if army_unit["rules"]:
-                st.write(f"   - Règles spéciales : {', '.join(army_unit['rules'])}")
+                st.markdown("**Règles spéciales :**")
+                for rule in sorted(set(army_unit["rules"])):
+                    st.write(f"- {rule}")
+
             if army_unit["weapons"]:
+                st.markdown("**Armes :**")
                 for w in army_unit["weapons"]:
-                    st.write(f"   - Arme : {w.get('name', 'Arme')} (A{w.get('attacks', '?')}, PA{w.get('armor_piercing', '?')})")
+                    st.write(
+                        f"- **{w.get('name', 'Arme')}** | "
+                        f"A{w.get('attacks', '?')} | "
+                        f"PA({w.get('armor_piercing', '?')}) | "
+                        f"{' '.join(w.get('special_rules', []))}"
+                    )
+
+            if army_unit["options"]:
+                st.markdown("**Options sélectionnées :**")
+                for group_name, option in army_unit["options"].items():
+                    st.write(f"- **{group_name} :** {option['name']} ({option.get('cost', 0)} pts)")
+                    if "special_rules" in option:
+                        st.write(f"  - Règles spéciales : {', '.join(option['special_rules'])}")
+
+        col1, col2 = st.columns([4, 1])
         with col2:
-            if st.button(f"❌", key=f"delete_{i}"):
+            if st.button(f"❌ Supprimer", key=f"delete_{i}"):
                 st.session_state.army_total_cost -= army_unit["cost"]
                 st.session_state.army_list.pop(i-1)
                 st.rerun()
