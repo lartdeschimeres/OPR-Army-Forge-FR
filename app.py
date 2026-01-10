@@ -148,19 +148,14 @@ for w in unit.get("weapons", []):
         f"{' '.join(w.get('special_rules', []))}"
     )
 
-# Séparateur pour les options
-st.divider()
-st.subheader("Options disponibles")
-
 # -------------------------------------------------
-# OPTIONS PAR GROUPE (Rôle, Montures, etc.)
+# SÉLECTEURS D'OPTIONS
 # -------------------------------------------------
 for group in unit.get("upgrade_groups", []):
-    st.subheader(f"🔹 {group['group']}")
     key = f"{unit['name']}_{group['group']}"
     options = ["— Aucun —"] + [opt["name"] for opt in group["options"]]
     choice = st.selectbox(
-        f"Choisir une {group['group'].lower()}",
+        f"{group['group']}",
         options,
         key=key
     )
@@ -175,31 +170,12 @@ for group in unit.get("upgrade_groups", []):
             final_weapons = [opt["weapon"]]
 
 # -------------------------------------------------
-# PROFIL FINAL DE L'UNITÉ
+# PROFIL FINAL DE L'UNITÉ (sans règles spéciales et armes)
 # -------------------------------------------------
 st.divider()
 st.subheader("Profil final de l'unité")
 
 st.markdown(f"### 💰 Coût total : **{total_cost} pts**")
-
-st.markdown("### 🛡️ Règles spéciales")
-if final_rules:
-    for r in sorted(set(final_rules)):
-        st.write(f"- {r}")
-else:
-    st.write("—")
-
-st.markdown("### ⚔️ Armes")
-if final_weapons:
-    for w in final_weapons:
-        st.write(
-            f"- **{w.get('name','Arme')}** | "
-            f"A{w.get('attacks','?')} | "
-            f"PA({w.get('armor_piercing','?')}) | "
-            f"{' '.join(w.get('special_rules', []))}"
-        )
-else:
-    st.write("—")
 
 # -------------------------------------------------
 # BOUTON POUR AJOUTER L'UNITÉ À L'ARMÉE
@@ -216,7 +192,7 @@ if st.button("➕ Ajouter à l'armée"):
     st.success(f"Unité {unit['name']} ajoutée à l'armée !")
 
 # -------------------------------------------------
-# AFFICHAGE DE LA LISTE D'ARMÉE
+# AFFICHAGE DE LA LISTE D'ARMÉE (avec détails)
 # -------------------------------------------------
 st.divider()
 st.subheader("Liste de l'armée")
@@ -225,30 +201,30 @@ if not st.session_state.army_list:
     st.write("Aucune unité ajoutée pour le moment.")
 else:
     for i, army_unit in enumerate(st.session_state.army_list, 1):
-        with st.expander(f"{i}. {army_unit['name']} ({army_unit['cost']} pts)"):
-            st.markdown(f"**Coût :** {army_unit['cost']} pts")
-
+        with st.expander(f"{i}. **{army_unit['name']}** ({army_unit['cost']} pts)"):
             if army_unit["rules"]:
-                st.markdown("**Règles spéciales :**")
-                for rule in sorted(set(army_unit["rules"])):
+                st.markdown("#### 🛡️ **Règles spéciales**")
+                unique_rules = sorted(set(army_unit["rules"]))
+                for rule in unique_rules:
                     st.write(f"- {rule}")
 
             if army_unit["weapons"]:
-                st.markdown("**Armes :**")
+                st.markdown("#### ⚔️ **Armes**")
                 for w in army_unit["weapons"]:
                     st.write(
                         f"- **{w.get('name', 'Arme')}** | "
                         f"A{w.get('attacks', '?')} | "
-                        f"PA({w.get('armor_piercing', '?')}) | "
-                        f"{' '.join(w.get('special_rules', []))}"
+                        f"PA({w.get('armor_piercing', '?')})"
                     )
+                    if w.get("special_rules"):
+                        st.write(f"  - *Règles spéciales* : {', '.join(w.get('special_rules', []))}")
 
             if army_unit["options"]:
-                st.markdown("**Options sélectionnées :**")
+                st.markdown("#### 🔧 **Options sélectionnées**")
                 for group_name, option in army_unit["options"].items():
-                    st.write(f"- **{group_name} :** {option['name']} ({option.get('cost', 0)} pts)")
+                    st.write(f"- **{group_name}** : {option['name']} (+{option.get('cost', 0)} pts)")
                     if "special_rules" in option:
-                        st.write(f"  - Règles spéciales : {', '.join(option['special_rules'])}")
+                        st.write(f"  - *Règles spéciales* : {', '.join(option['special_rules'])}")
 
         col1, col2 = st.columns([4, 1])
         with col2:
