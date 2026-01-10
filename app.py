@@ -107,7 +107,7 @@ if "army_total_cost" not in st.session_state:
     st.session_state.army_total_cost = 0
 
 # -------------------------------------------------
-# SÉLECTEUR D'UNITÉ
+# SÉLECTEUR D’UNITÉ
 # -------------------------------------------------
 st.divider()
 st.subheader("Configurer une unité")
@@ -135,7 +135,7 @@ unit = next(u for u in units if u["name"] == selected_name)
 # -------------------------------------------------
 total_cost = unit.get("base_cost", 0)
 final_rules = list(unit.get("special_rules", []))
-final_weapons = list(unit.get("weapons", []))
+current_weapon = unit.get("weapons", [{"name": "Arme non définie"}])[0]
 selected_options = {}
 
 # Affichage des armes de base
@@ -166,7 +166,7 @@ for group in unit.get("upgrade_groups", []):
         if "special_rules" in opt:
             final_rules.extend(opt["special_rules"])
         if "weapon" in opt:
-            final_weapons = [opt["weapon"]]
+            current_weapon = opt["weapon"]
 
 # -------------------------------------------------
 # PROFIL FINAL DE L'UNITÉ
@@ -180,9 +180,6 @@ st.markdown(f"### 💰 Coût total : **{total_cost} pts**")
 # BOUTON POUR AJOUTER L'UNITÉ À L'ARMÉE
 # -------------------------------------------------
 if st.button("➕ Ajouter à l'armée"):
-    # Déterminer l'arme actuelle (de base ou remplacée)
-    current_weapon = final_weapons[0] if final_weapons else unit.get("weapons", [{"name": "Arme non définie"}])[0]
-
     st.session_state.army_list.append({
         "name": unit["name"],
         "cost": total_cost,
@@ -210,7 +207,7 @@ else:
                 for rule in sorted(set(army_unit["base_rules"])):
                     st.write(f"- {rule}")
 
-            # Arme actuelle (avec séparation claire)
+            # Arme actuelle
             weapon = army_unit["current_weapon"]
             st.markdown("#### ⚔️ **Arme équipée**")
             st.write(
