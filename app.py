@@ -12,17 +12,19 @@ BASE_DIR = Path(__file__).resolve().parent
 FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 
 # -------------------------------------------------
-# CHARGEMENT DES FACTIONS
+# CHARGEMENT DES FACTIONS ET EXTRACTION DES JEUX
 # -------------------------------------------------
 if not FACTIONS_DIR.exists():
     st.error(f"Dossier factions introuvable : {FACTIONS_DIR}")
     st.stop()
 
 faction_files = sorted(FACTIONS_DIR.glob("*.json"))
+
 if not faction_files:
     st.error("Aucun fichier faction trouvé")
     st.stop()
 
+# Extraire les jeux uniques depuis les fichiers
 games = set()
 faction_map = {}
 
@@ -31,204 +33,264 @@ for fp in faction_files:
         with open(fp, encoding="utf-8") as f:
             data = json.load(f)
             game = data.get("game", "Inconnu")
-            faction = data.get("faction", fp.stem)
             games.add(game)
-            faction_map[faction] = {"file": fp, "game": game}
+            name = data.get("faction", fp.stem)
+            faction_map[name] = {"file": fp, "game": game}
     except Exception as e:
-        st.warning(f"Erreur lecture {fp.name} : {e}")
+        st.warning(f"Impossible de lire {fp.name} : {e}")
 
-# -------------------------------------------------
-# SÉLECTEURS JEU / FACTION
-# -------------------------------------------------
-selected_game = st.selectbox("Sélectionner le jeu", sorted(games))
+if not games:
+    st.error("Aucun jeu trouvé dans les fichiers")
+    st.stop()
 
+# Sélecteur de jeu
+selected_game = st.selectbox(
+    "Sélectionner le jeu",
+    sorted(games)
+)
+
+# Filtrer les factions pour le jeu sélectionné
 game_factions = {
     name: info for name, info in faction_map.items()
     if info["game"] == selected_game
 }
 
+if not game_factions:
+    st.error(f"Aucune faction trouvée pour le jeu {selected_game}")
+    st.stop()
+
+# Sélecteur de faction
 selected_faction = st.selectbox(
     "Sélectionner la faction",
     sorted(game_factions.keys())
 )
 
 # -------------------------------------------------
-# OBJECTIF D'ARMÉE
+# CHAMP POUR LE COÛT TOTAL SOUHAITÉ DE L'ARMÉE
 # -------------------------------------------------
 army_target_cost = st.number_input(
-    "Coût total souhaité de l’armée (pts)",
+    "Coût total souhaité pour l'armée (en points) :",
     min_value=0,
     value=1000,
     step=50
 )
 
 # -------------------------------------------------
-# CHARGEMENT FACTION
+# CHARGEMENT DE LA FACTION
 # -------------------------------------------------
-with open(game_factions[selected_faction]["file"], encoding="utf-8") as f:
-    faction = json.load(f)
+FACTION_PATH = game_factions[selected_faction]["file"]
 
-st.subheader(f"Faction : {faction.get('faction')}")
-st.caption(f"Jeu : {faction.get('game')}")
-
-units = faction.get("units", [])
-if not units:
-    st.warning("Aucune unité dans cette faction.")
+try:
+    with open(FACTION_PATH, encoding="utf-8") as f:
+        faction = json.load(f)
+except Exception as e:
+    st.error(f"Erreur lors de la lecture du fichier {FACTION_PATH}: {e}")
     st.stop()
 
 # -------------------------------------------------
-# SESSION STATE
+# AFFICHAGE FACTION
 # -------------------------------------------------
-st.session_state.setdefault("army_list", [])
-st.session_state.setdefault("army_total_cost", 0)
+st.subheader(f"Faction : {faction.get('faction', 'Inconnue')}")
+st.caption(f"Jeu : {faction.get('game', selected_game)}")
+
+units = faction.get("units", [])
+if not units:
+    st.warning("Aucune unité disponible pour cette faction.")
+    st.stop()
 
 # -------------------------------------------------
-# SÉLECTEUR D’UNITÉ
+# SESSION STATE POUR LA LISTE D'ARMÉE
+# -------------------------------------------------
+if "army_list" not in st.session_state:
+    st.session_state.army_list = []
+if "army_total_cost" not in st.session_state:
+    st.session_state.army_total_cost = 0
+
+# -------------------------------------------------
+# SÉLECTEUR D'UNITÉ
 # -------------------------------------------------
 st.divider()
 st.subheader("Configurer une unité")
 
-unit_names = [u["name"] for u in units]
+if "selected_unit" not in st.session_state:
+    st.session_state.selected_unit = units[0]["name"]
 
 def unit_label(u):
     return f"{u['name']} ({u['base_cost']} pts | Q{u['quality']}+ / D{u['defense']}+)"
 
+unit_names = [u["name"] for u in units]
+
 selected_name = st.selectbox(
     "Choisir une unité",
     unit_names,
+    index=unit_names.index(st.session_state.selected_unit),
     format_func=lambda n: unit_label(next(u for u in units if u["name"] == n))
 )
 
+st.session_state.selected_unit = selected_name
 unit = next(u for u in units if u["name"] == selected_name)
 
 # -------------------------------------------------
-# INIT PROFIL
+# OPTIONS & CALCUL
 # -------------------------------------------------
 total_cost = unit.get("base_cost", 0)
 final_rules = list(unit.get("special_rules", []))
-
-base_tough = unit.get("tough", 0)
-mount_tough = 0
-mount_def_bonus = 0
-selected_mount = None
-
-current_weapon = unit.get("weapons", [{
-    "name": "Arme non définie",
-    "attacks": "?",
-    "armor_piercing": "?"
-}])[0]
-
+current_weapon = unit.get("weapons", [{"name": "Arme non définie", "attacks": "?", "armor_piercing": "?"}])[0]
 selected_options = {}
 
-# -------------------------------------------------
-# ARMES DE BASE
-# -------------------------------------------------
+# Affichage des armes de base
 st.subheader("Armes de base")
 for w in unit.get("weapons", []):
-    st.write(f"- **{w['name']}** | A{w['attacks']} | PA({w.get('armor_piercing', 0)})")
+    st.write(
+        f"- **{w.get('name', 'Arme non définie')}** | "
+        f"A{w.get('attacks', '?')} | "
+        f"PA({w.get('armor_piercing', '?')})"
+    )
 
 # -------------------------------------------------
-# OPTIONS
+# SÉLECTEURS D'OPTIONS
 # -------------------------------------------------
-st.subheader("Options")
-
 for group in unit.get("upgrade_groups", []):
     key = f"{unit['name']}_{group['group']}"
-    choices = ["— Aucun —"] + [o["name"] for o in group["options"]]
-
-    choice = st.selectbox(group["group"], choices, key=key)
+    options = ["— Aucun —"] + [opt["name"] for opt in group["options"]]
+    choice = st.selectbox(
+        f"{group['group']}",
+        options,
+        key=key
+    )
 
     if choice != "— Aucun —":
         opt = next(o for o in group["options"] if o["name"] == choice)
         total_cost += opt.get("cost", 0)
-
-        if opt.get("type") == "mount":
-            selected_mount = opt
-            mount_tough += opt.get("tough_bonus", 0)
-            mount_def_bonus += opt.get("defense_bonus", 0)
-            final_rules.extend(opt.get("special_rules", []))
-        else:
-            selected_options[group["group"]] = opt
-            final_rules.extend(opt.get("special_rules", []))
-
+        selected_options[group["group"]] = opt
+        if "special_rules" in opt:
+            final_rules.extend(opt["special_rules"])
         if "weapon" in opt:
             current_weapon = opt["weapon"]
             current_weapon["name"] = opt["name"]
 
 # -------------------------------------------------
-# CALCUL FINAL
-# -------------------------------------------------
-final_defense = unit.get("defense", "?")
-if isinstance(final_defense, int):
-    final_defense += mount_def_bonus
-
-final_tough = base_tough + mount_tough
-
-# -------------------------------------------------
-# PROFIL FINAL
+# PROFIL FINAL DE L'UNITÉ
 # -------------------------------------------------
 st.divider()
-st.subheader("Profil final")
-st.markdown(f"### 💰 **Coût total : {total_cost} pts**")
-st.write(
-    f"**Qualité :** {unit['quality']}+ | "
-    f"**Défense :** {final_defense}+"
-    f"{f' | Coriace ({final_tough})' if final_tough > 0 else ''}"
-)
+st.subheader("Profil final de l'unité")
+
+st.markdown(f"### 💰 Coût total : **{total_cost} pts**")
 
 # -------------------------------------------------
-# AJOUT À L’ARMÉE
+# BOUTON POUR AJOUTER L'UNITÉ À L'ARMÉE
 # -------------------------------------------------
-if st.button("➕ Ajouter à l’armée"):
+if st.button("➕ Ajouter à l'armée"):
     st.session_state.army_list.append({
         "name": unit["name"],
         "cost": total_cost,
-        "quality": unit["quality"],
-        "defense": final_defense,
-        "tough": final_tough,
-        "rules": sorted(set(final_rules)),
+        "base_rules": [rule for rule in final_rules if rule not in sum([opt.get("special_rules", []) for opt in selected_options.values()], [])],
         "options": selected_options,
-        "mount": selected_mount,
-        "weapon": current_weapon
+        "current_weapon": current_weapon,
+        "quality": unit.get("quality", "?"),
+        "defense": unit.get("defense", "?")
     })
     st.session_state.army_total_cost += total_cost
-    st.success("Unité ajoutée à l’armée")
+    st.success(f"Unité {unit['name']} ajoutée à l'armée !")
 
 # -------------------------------------------------
-# AFFICHAGE ARMÉE
+# AFFICHAGE DE LA LISTE D'ARMÉE
 # -------------------------------------------------
 st.divider()
-st.subheader("Liste de l’armée")
+st.subheader("Liste de l'armée")
 
-for i, u in enumerate(st.session_state.army_list, 1):
-    st.markdown(f"""
-    <div style="border:1px solid #ccc;padding:10px;border-radius:8px;margin-bottom:10px">
-    <strong>{u['name']} [{i}]</strong> – {u['cost']} pts<br>
-    Qualité {u['quality']}+ | Défense {u['defense']}+
-    {" | Coriace (" + str(u['tough']) + ")" if u['tough'] > 0 else ""}
-    <br><br>
-    <strong>Arme :</strong> {u['weapon']['name']} – A{u['weapon']['attacks']} PA({u['weapon'].get('armor_piercing',0)})
-    <br><br>
-    <strong>Options :</strong>
-    {", ".join([f"{k}: {v['name']}" for k, v in u['options'].items()]) or "Aucune"}
-    """, unsafe_allow_html=True)
+if not st.session_state.army_list:
+    st.write("Aucune unité ajoutée pour le moment.")
+else:
+    for i, army_unit in enumerate(st.session_state.army_list, 1):
+        with st.container():
+            st.markdown(f"""
+            <style>
+            .army-card {{
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 15px;
+                background-color: #f9f9f9;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }}
+            .army-card-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }}
+            .army-card-title {{
+                font-size: 1.2em;
+                font-weight: bold;
+            }}
+            .army-card-cost {{
+                font-size: 1.1em;
+                color: #666;
+            }}
+            .army-card-stats {{
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+            }}
+            .stat-badge {{
+                background-color: #4a89dc;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 15px;
+                font-size: 0.9em;
+            }}
+            .army-card-section {{
+                margin-bottom: 10px;
+            }}
+            .army-card-section-title {{
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: #4a89dc;
+            }}
+            </style>
+            <div class="army-card">
+                <div class="army-card-header">
+                    <div class="army-card-title">{army_unit['name']} [{i}] - {army_unit['cost']}pts</div>
+                </div>
+                <div class="army-card-stats">
+                    <div class="stat-badge">Quality {army_unit['quality']}+</div>
+                    <div class="stat-badge">Defense {army_unit['defense']}+</div>
+                </div>
+                <div class="army-card-section">
+                    <div class="army-card-section-title">Règles spéciales</div>
+                    <div>{', '.join(sorted(set(army_unit['base_rules']))) or 'Aucune'}</div>
+                </div>
+                <div class="army-card-section">
+                    <div class="army-card-section-title">Arme équipée</div>
+                    <div>
+                        <strong>{army_unit['current_weapon'].get('name', 'Arme non définie')}</strong> |
+                        A{army_unit['current_weapon'].get('attacks', '?')} |
+                        PA({army_unit['current_weapon'].get('armor_piercing', '?')})
+                        {f" | {', '.join(army_unit['current_weapon'].get('special_rules', []))}" if army_unit['current_weapon'].get('special_rules') else ''}
+                    </div>
+                </div>
+                <div class="army-card-section">
+                    <div class="army-card-section-title">Options sélectionnées</div>
+                    <div>
+                        {', '.join([f"{group}: {opt['name']}" for group, opt in army_unit['options'].items()]) or 'Aucune'}
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    if u.get("mount"):
-        m = u["mount"]
-        st.markdown(
-            f"<div style='color:#4a89dc'><strong>Monture :</strong> {m['name']} "
-            f"(+{m.get('tough_bonus',0)} Coriace"
-            f"{f', Défense +{m.get('defense_bonus')}' if m.get('defense_bonus') else ''}"
-            f"{f', {', '.join(m.get('special_rules',[]))}' if m.get('special_rules') else ''})</div>",
-            unsafe_allow_html=True
-        )
+        col1, col2 = st.columns([4, 1])
+        with col2:
+            if st.button(f"❌ Supprimer", key=f"delete_{i}"):
+                st.session_state.army_total_cost -= army_unit["cost"]
+                st.session_state.army_list.pop(i-1)
+                st.rerun()
 
-    if st.button("❌ Supprimer", key=f"del_{i}"):
-        st.session_state.army_total_cost -= u["cost"]
-        st.session_state.army_list.pop(i - 1)
-        st.rerun()
+    st.markdown(f"### 💰 **Coût total de l'armée : {st.session_state.army_total_cost} pts**")
 
-st.markdown(f"### 💰 Coût total de l’armée : {st.session_state.army_total_cost} pts")
-st.progress(
-    min(st.session_state.army_total_cost / army_target_cost, 1.0)
-)
+# -------------------------------------------------
+# INDICATEUR DE PROGRÈS
+# -------------------------------------------------
+progress = st.session_state.army_total_cost / army_target_cost if army_target_cost > 0 else 0.0
+st.progress(progress)
+st.write(f"Progression : {st.session_state.army_total_cost}/{army_target_cost} pts")
