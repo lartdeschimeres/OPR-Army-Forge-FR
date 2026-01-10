@@ -36,12 +36,12 @@
           "type": "upgrade",
           "options": [
             { "name": "Conquérant (Aura d’Éclaireur)", "cost": 20, "special_rules": ["Aura d’Éclaireur"] },
-            { "name": "Marauder", "cost": 30, "special_rules": ["Aura de combattant imprévisible"] },
-            { "name": "Porteur de la bannière de l’armée", "cost": 30, "special_rules": ["Effrayant (3)"] },
-            { "name": "Mage", "cost": 35, "special_rules": ["Aura de Voile fluctuant"] },
-            { "name": "Seigneur de Guerre", "cost": 35, "special_rules": ["Aura de Boost de Né pour la guerre"] },
-            { "name": "Sorcier", "cost": 40, "special_rules": ["Lanceur de sorts (2)"] },
-            { "name": "Maître Sorcier", "cost": 60, "special_rules": ["Lanceur de sorts (3)"] }
+            { "name": "Marauder (Aura de combattant imprévisible)", "cost": 30, "special_rules": ["Aura de combattant imprévisible"] },
+            { "name": "Porteur de la bannière de l’armée (Effrayant (+3))", "cost": 30, "special_rules": ["Effrayant (+3)"] },
+            { "name": "Mage (Aura de Voile fluctuant)", "cost": 35, "special_rules": ["Aura de Voile fluctuant"] },
+            { "name": "Seigneur de Guerre (Aura de Boost de Né pour la guerre)", "cost": 35, "special_rules": ["Aura de Boost de Né pour la guerre"] },
+            { "name": "Sorcier (Lanceur de sorts (2))", "cost": 40, "special_rules": ["Lanceur de sorts (2)"] },
+            { "name": "Maître Sorcier (Lanceur de sorts (3))", "cost": 60, "special_rules": ["Lanceur de sorts (3)"] }
           ]
         },
 
@@ -55,7 +55,7 @@
               "weapon": { "range": "-", "attacks": 3, "armor_piercing": 1, "special_rules": ["Perforant"] }
             },
             {
-              "name": "Paire d’armes lourdes",
+              "name": "Paire d’armes à une main lourdes",
               "cost": 10,
               "weapon": { "range": "-", "attacks": 4, "armor_piercing": 1, "special_rules": [] }
             },
