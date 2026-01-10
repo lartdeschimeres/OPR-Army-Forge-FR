@@ -174,34 +174,60 @@ if st.button("➕ Ajouter à l'armée"):
 st.divider()
 st.subheader("Liste de l'armée")
 
-for i, u in enumerate(st.session_state.army_list, 1):
-    st.markdown(f"""
-    <div style="border:1px solid #ccc;border-radius:8px;padding:15px;margin-bottom:15px;background:#f9f9f9">
-        <strong>{u['name']} [{i}]</strong> — {u['cost']} pts<br>
-        <span style="background:#4a89dc;color:white;padding:4px 8px;border-radius:12px">
-            Q{u['quality']}+ / D{u['defense']}+
-        </span><br><br>
+if not st.session_state.army_list:
+    st.write("Aucune unité ajoutée.")
+else:
+    for i, u in enumerate(st.session_state.army_list, 1):
+        col_card, col_btn = st.columns([5, 1])
 
-        <strong>Règles spéciales :</strong><br>
-        {', '.join(sorted(set(u['rules']))) or 'Aucune'}<br><br>
+        with col_card:
+            st.markdown(f"""
+<div style="border:1px solid #ccc;
+            border-radius:8px;
+            padding:15px;
+            margin-bottom:15px;
+            background:#f9f9f9">
 
-        <strong>Arme :</strong><br>
-        {u['weapon']['name']} | A{u['weapon']['attacks']} | PA({u['weapon']['armor_piercing']})
-        {f" | {', '.join(u['weapon'].get('special_rules', []))}" if u['weapon'].get('special_rules') else ''}<br><br>
+<strong>{u['name']} [{i}]</strong> — {u['cost']} pts<br><br>
 
-        <strong>Options sélectionnées :</strong><br>
-        {', '.join(
-            o['name'] + (f" ({', '.join(o.get('special_rules', []))})" if o.get('special_rules') else "")
-            for o in u['options'].values()
-        ) or 'Aucune'}
-        <br><br>
+<span style="background:#4a89dc;
+             color:white;
+             padding:4px 10px;
+             border-radius:14px;
+             font-size:0.9em">
+Q{u['quality']}+ / D{u['defense']}+
+</span><br><br>
 
-        {f"""
-        <strong style='color:#4a89dc'>Monture :</strong><br>
-        {u['mount']['name']} ({', '.join(u['mount'].get('special_rules', []))})
-        """ if u.get("mount") else ""}
-    </div>
-    """, unsafe_allow_html=True)
+<strong>Règles spéciales :</strong><br>
+{', '.join(sorted(set(u['rules']))) or 'Aucune'}<br><br>
+
+<strong>Arme :</strong><br>
+{u['weapon']['name']} |
+A{u['weapon']['attacks']} |
+PA({u['weapon']['armor_piercing']})
+{f" | {', '.join(u['weapon'].get('special_rules', []))}" if u['weapon'].get('special_rules') else ''}
+<br><br>
+
+<strong>Options sélectionnées :</strong><br>
+{', '.join(
+    o['name'] + (f" ({', '.join(o.get('special_rules', []))})" if o.get('special_rules') else "")
+    for o in u['options'].values()
+) or 'Aucune'}
+<br><br>
+
+{f"""
+<strong style="color:#4a89dc">Monture :</strong><br>
+{u['mount']['name']} ({', '.join(u['mount'].get('special_rules', []))})
+""" if u.get("mount") else ""}
+
+</div>
+""", unsafe_allow_html=True)
+
+        with col_btn:
+            if st.button("❌", key=f"delete_{i}"):
+                st.session_state.army_total_cost -= u["cost"]
+                st.session_state.army_list.pop(i - 1)
+                st.rerun()
 
 # -------------------------------------------------
 # TOTAL & PROGRESSION
