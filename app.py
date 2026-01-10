@@ -107,7 +107,7 @@ if "army_total_cost" not in st.session_state:
     st.session_state.army_total_cost = 0
 
 # -------------------------------------------------
-# SÉLECTEUR D’UNITÉ
+# SÉLECTEUR D'UNITÉ
 # -------------------------------------------------
 st.divider()
 st.subheader("Configurer une unité")
@@ -135,7 +135,7 @@ unit = next(u for u in units if u["name"] == selected_name)
 # -------------------------------------------------
 total_cost = unit.get("base_cost", 0)
 final_rules = list(unit.get("special_rules", []))
-current_weapon = unit.get("weapons", [{"name": "Arme non définie"}])[0]
+current_weapon = unit.get("weapons", [{"name": "Arme non définie", "attacks": "?", "armor_piercing": "?"}])[0]
 selected_options = {}
 
 # Affichage des armes de base
@@ -167,6 +167,7 @@ for group in unit.get("upgrade_groups", []):
             final_rules.extend(opt["special_rules"])
         if "weapon" in opt:
             current_weapon = opt["weapon"]
+            current_weapon["name"] = opt["name"]  # Assure que le nom de l'option est utilisé comme nom de l'arme
 
 # -------------------------------------------------
 # PROFIL FINAL DE L'UNITÉ
