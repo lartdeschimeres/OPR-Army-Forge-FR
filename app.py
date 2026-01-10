@@ -189,7 +189,7 @@ if st.button("➕ Ajouter à l'armée"):
     coriace_value = 0
     base_coriace = next((rule for rule in final_rules if "Coriace" in rule), None)
     if base_coriace:
-        match = re.search(r'Coriace \(([\d+]+)\)', base_coriace)
+        match = re.search(r'Coriace \((\d+)\)', base_coriace)
         if match:
             coriace_value = int(match.group(1))
 
@@ -214,6 +214,7 @@ if st.button("➕ Ajouter à l'armée"):
         "name": unit["name"],
         "cost": total_cost,
         "base_rules": base_rules,
+        "all_rules": final_rules,
         "options": {k: v for k, v in selected_options.items() if k != "Monture"},
         "current_weapon": current_weapon,
         "quality": unit.get("quality", "?"),
@@ -283,6 +284,9 @@ else:
                 font-weight: bold;
                 margin-top: 10px;
             }}
+            .rules-list {{
+                margin-left: 15px;
+            }}
             </style>
             <div class="army-card">
                 <div class="army-card-header">
@@ -294,7 +298,9 @@ else:
                 </div>
                 <div class="army-card-section">
                     <div class="army-card-section-title">Règles spéciales</div>
-                    <div>{', '.join(sorted(army_unit['base_rules'])) or 'Aucune'}</div>
+                    <div class="rules-list">
+                        {chr(8226).join(f' {rule}<br>' for rule in sorted(army_unit["all_rules"]))}
+                    </div>
                 </div>
                 <div class="army-card-section">
                     <div class="army-card-section-title">Arme équipée</div>
