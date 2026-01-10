@@ -299,7 +299,7 @@ else:
                 <div class="army-card-section">
                     <div class="army-card-section-title">Règles spéciales</div>
                     <div class="rules-list">
-                        {chr(8226).join(f' {rule}<br>' for rule in sorted(army_unit["all_rules"]))}
+                        {', '.join(army_unit['base_rules'])}
                     </div>
                 </div>
                 <div class="army-card-section">
