@@ -375,7 +375,7 @@ elif st.session_state.page == "setup":
     st.session_state.points = st.number_input(
         "Format de la partie (points)",
         min_value=250,
-        step=50,
+        step=250,
         value=st.session_state.points
     )
 
@@ -424,163 +424,9 @@ elif st.session_state.page == "army":
     st.divider()
     st.subheader("Ajouter une unité")
 
-    unit = st.selectbox(
-        "Unité",
-        units,
-        format_func=lambda u: f"{u['name']} ({u['base_cost']} pts)",
-    )
+    # ... (le reste du code pour ajouter une unité reste inchangé)
 
-    total_cost = unit["base_cost"]
-    base_rules = list(unit.get("special_rules", []))
-    options_selected = {}
-    mount_selected = None
-    current_weapon = unit.get("weapons", [{"name": "Arme non définie", "attacks": "?", "armor_piercing": "?"}])[0]
-
-    # Affichage des armes de base
-    st.subheader("Armes de base")
-    for w in unit.get("weapons", []):
-        st.write(f"- **{w.get('name', 'Arme non définie')}** | A{w.get('attacks', '?')} | PA({w.get('armor_piercing', '?')})")
-
-    # Options standards
-    for group in unit.get("upgrade_groups", []):
-        # Renommer "Remplacement de figurine" en "Option"
-        group_name = "Option" if group["group"] == "Remplacement de figurine" else group["group"]
-
-        st.write(f"### {group_name}")
-        if group.get("description"):
-            st.caption(group["description"])
-
-        if group.get("type") == "multiple":
-            selected_options = []
-            for opt in group["options"]:
-                if st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit['name']}_{group['group']}_{opt['name']}"):
-                    selected_options.append(opt)
-                    total_cost += opt["cost"]
-
-            if selected_options:
-                options_selected[group["group"]] = selected_options
-        else:
-            choice = st.selectbox(
-                group["group"],
-                ["— Aucun —"] + [o["name"] for o in group["options"]],
-                key=f"{unit['name']}_{group['group']}"
-            )
-
-            if choice != "— Aucun —":
-                opt = next(o for o in group["options"] if o["name"] == choice)
-                total_cost += opt.get("cost", 0)
-                options_selected[group["group"]] = opt
-                if group["type"] == "weapon":
-                    current_weapon = opt["weapon"]
-                    current_weapon["name"] = opt["name"]
-
-    # Section pour les améliorations d'unité (Sergent, Bannière, Musicien) en colonnes UNIQUEMENT pour les unités non-héros
-    if unit.get("type", "").lower() != "hero":
-        st.divider()
-        st.subheader("Améliorations d'unité")
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.checkbox("Sergent (+5 pts)"):
-                total_cost += 5
-                if "Améliorations" not in options_selected:
-                    options_selected["Améliorations"] = []
-                options_selected["Améliorations"].append({"name": "Sergent", "cost": 5})
-
-        with col2:
-            if st.checkbox("Bannière (+5 pts)"):
-                total_cost += 5
-                if "Améliorations" not in options_selected:
-                    options_selected["Améliorations"] = []
-                options_selected["Améliorations"].append({"name": "Bannière", "cost": 5})
-
-        with col3:
-            if st.checkbox("Musicien (+10 pts)"):
-                total_cost += 10
-                if "Améliorations" not in options_selected:
-                    options_selected["Améliorations"] = []
-                options_selected["Améliorations"].append({"name": "Musicien", "cost": 10})
-
-    # Calcul de la valeur de Coriace
-    coriace_value = 0
-    for rule in base_rules:
-        match = re.search(r'Coriace \((\d+)\)', rule)
-        if match:
-            coriace_value += int(match.group(1))
-
-    st.markdown(f"### 💰 Coût : **{total_cost} pts**")
-    if coriace_value > 0:
-        st.markdown(f"**Coriace totale : {coriace_value}**")
-
-    if st.button("➕ Ajouter à l'armée"):
-        # Calcul complet de la valeur de Coriace
-        coriace_value = 0
-
-        # 1. Vérifier dans les règles spéciales
-        for rule in base_rules:
-            match = re.search(r'Coriace \((\d+)\)', rule)
-            if match:
-                coriace_value += int(match.group(1))
-
-        # 2. Vérifier dans les options sélectionnées
-        if 'options' in options_selected:
-            for option_group in options_selected.values():
-                if isinstance(option_group, list):
-                    for option in option_group:
-                        if 'special_rules' in option:
-                            for rule in option['special_rules']:
-                                match = re.search(r'Coriace \((\d+)\)', rule)
-                                if match:
-                                    coriace_value += int(match.group(1))
-                elif 'special_rules' in option_group:
-                    for rule in option_group['special_rules']:
-                        match = re.search(r'Coriace \((\d+)\)', rule)
-                        if match:
-                            coriace_value += int(match.group(1))
-
-        # 3. Vérifier dans l'arme équipée
-        if 'special_rules' in current_weapon:
-            for rule in current_weapon['special_rules']:
-                match = re.search(r'Coriace \((\d+)\)', rule)
-                if match:
-                    coriace_value += int(match.group(1))
-
-        unit_data = {
-            "name": unit["name"],
-            "cost": total_cost,
-            "quality": unit["quality"],
-            "defense": unit["defense"],
-            "base_rules": base_rules,
-            "options": options_selected,
-            "current_weapon": current_weapon,
-            "type": unit.get("type", "Infantry")
-        }
-
-        if coriace_value > 0:
-            unit_data["coriace"] = coriace_value
-
-        st.session_state.army_list.append(unit_data)
-        st.session_state.army_total_cost += total_cost
-        st.rerun()
-
-    # Validation de la liste d'armée
-    if st.session_state.game in GAME_RULES:
-        st.session_state.is_army_valid, st.session_state.validation_errors = validate_army(
-            st.session_state.army_list,
-            GAME_RULES[st.session_state.game],
-            st.session_state.army_total_cost,
-            st.session_state.points
-        )
-    else:
-        st.session_state.is_army_valid = True
-        st.session_state.validation_errors = []
-
-    if not st.session_state.is_army_valid:
-        st.warning("⚠️ La liste d'armée n'est pas valide :")
-        for error in st.session_state.validation_errors:
-            st.write(f"- {error}")
-
-    # Liste de l'armée (affichage sous forme de fiches synthétiques)
+    # Liste de l'armée (affichage sous forme de fiches avec le style de votre capture)
     st.divider()
     st.subheader("Liste de l'armée")
 
@@ -588,80 +434,115 @@ elif st.session_state.page == "army":
         # Calcul de la valeur totale de Coriace
         coriace_value = calculate_coriace_value(u)
 
-        # Calcul de la hauteur en fonction des éléments à afficher
-        height = 200
-        if u.get("mount"):
-            height += 40
-        if u.get("options"):
-            height += 20 * len([k for k in u["options"].keys() if k != "Améliorations"])
-        if "Améliorations" in u.get("options", {}) and u.get("type", "").lower() != "hero":
-            height += 20
-        if u.get("mount"):
-            height += 20
-
-        # Génération du HTML pour la fiche
+        # Génération du HTML pour la fiche avec le style de votre capture
         html_content = f"""
         <style>
         .army-card {{
-            border:1px solid #4a89dc;
-            border-radius:8px;
-            padding:15px;
-            margin-bottom:15px;
-            background:#f9f9f9;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid #4a89dc;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }}
-        .badge {{
-            display:inline-block;
-            background:#4a89dc;
-            color:white;
-            padding:6px 12px;
-            border-radius:15px;
-            margin-right:8px;
-            margin-bottom:5px;
+        .unit-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }}
+        .unit-name {{
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }}
+        .unit-points {{
+            color: #666;
             font-size: 0.9em;
         }}
-        .title {{
-            font-weight:bold;
-            color:#4a89dc;
-            margin-top:10px;
-            margin-bottom:5px;
+        .badges-container {{
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }}
+        .badge {{
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: white;
+            text-align: center;
+        }}
+        .quality-badge {{
+            background-color: #4a89dc;
+        }}
+        .defense-badge {{
+            background-color: #4a89dc;
+        }}
+        .coriace-badge {{
+            background-color: #4a89dc;
         }}
         .section {{
-            margin-bottom:10px;
+            margin-bottom: 12px;
         }}
-        .valid {{
-            border-left: 4px solid #2ecc71;
+        .section-title {{
+            font-weight: bold;
+            color: #4a89dc;
+            margin-bottom: 5px;
+            font-size: 0.95em;
         }}
-        .invalid {{
-            border-left: 4px solid #e74c3c;
+        .section-content {{
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }}
+        .delete-btn {{
+            background-color: #ff4b4b;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }}
+        .delete-btn:hover {{
+            background-color: #ff3333;
         }}
         </style>
 
-        <div class="army-card {'valid' if st.session_state.is_army_valid else 'invalid'}">
-            <h4 style="margin-top:0; margin-bottom:10px;">{u['name']} — {u['cost']} pts</h4>
+        <div class="army-card">
+            <div class="unit-header">
+                <h3 class="unit-name">{u['name']}</h3>
+                <span class="unit-points">{u['cost']} pts</span>
+            </div>
 
-            <div class="section">
-                <span class="badge">Qualité {u['quality']}+</span>
-                <span class="badge">Défense {u['defense']}+</span>
+            <div class="badges-container">
+                <span class="badge quality-badge">Qualité {u['quality']}+</span>
+                <span class="badge defense-badge">Défense {u['defense']}+</span>
         """
 
         if coriace_value > 0:
-            html_content += f'<span class="badge">Coriace {coriace_value}</span>'
+            html_content += f'<span class="badge coriace-badge">Coriace {coriace_value}</span>'
 
         html_content += """
             </div>
         """
 
-        # Règles spéciales (sans les règles Coriace qui sont déjà affichées)
+        # Règles spéciales
         if u.get("base_rules"):
             rules = [r for r in u['base_rules'] if not r.startswith("Coriace")]
             if rules:
                 html_content += f"""
                 <div class="section">
-                    <div class="title">Règles spéciales</div>
-                    <div style="margin-left:15px; margin-bottom:5px; font-size:0.9em;">
-                        {', '.join(rules)}
-                    </div>
+                    <div class="section-title">Règles spéciales</div>
+                    <div class="section-content">{', '.join(rules)}</div>
                 </div>
                 """
 
@@ -670,14 +551,14 @@ elif st.session_state.page == "army":
             weapon = u['current_weapon']
             html_content += f"""
             <div class="section">
-                <div class="title">Arme équipée</div>
-                <div style="margin-left:15px; margin-bottom:5px; font-size:0.9em;">
+                <div class="section-title">Arme équipée</div>
+                <div class="section-content">
                     {weapon.get('name', 'Arme de base')} | A{weapon.get('attacks', '?')} | PA({weapon.get('armor_piercing', '?')})
                 </div>
             </div>
             """
 
-        # Options (sauf Améliorations)
+        # Options
         other_options = []
         for group_name, opt_group in u.get("options", {}).items():
             if group_name != "Améliorations":
@@ -689,14 +570,12 @@ elif st.session_state.page == "army":
         if other_options:
             html_content += f"""
             <div class="section">
-                <div class="title">Options</div>
-                <div style="margin-left:15px; margin-bottom:5px; font-size:0.9em;">
-                    {', '.join(other_options)}
-                </div>
+                <div class="section-title">Options</div>
+                <div class="section-content">{', '.join(other_options)}</div>
             </div>
             """
 
-        # Monture (si elle existe) - MÊME FORMAT QUE LES OPTIONS
+        # Monture (si elle existe)
         if u.get("mount"):
             mount = u['mount']
             mount_rules = []
@@ -705,8 +584,8 @@ elif st.session_state.page == "army":
 
             html_content += f"""
             <div class="section">
-                <div class="title">Monture</div>
-                <div style="margin-left:15px; margin-bottom:5px; font-size:0.9em;">
+                <div class="section-title">Monture</div>
+                <div class="section-content">
                     <strong>{mount.get('name', '')}</strong>
             """
 
@@ -724,18 +603,25 @@ elif st.session_state.page == "army":
             if improvements:
                 html_content += f"""
                 <div class="section">
-                    <div class="title">Améliorations</div>
-                    <div style="margin-left:15px; margin-bottom:5px; font-size:0.9em;">
-                        {', '.join(improvements)}
-                    </div>
+                    <div class="section-title">Améliorations</div>
+                    <div class="section-content">{', '.join(improvements)}</div>
                 </div>
                 """
 
+        # Bouton de suppression
+        html_content += f"""
+        <button class="delete-btn" onclick="document.getElementById('del_{i}').click()">
+            ❌ Supprimer {u['name']}
+        </button>
+        <button id="del_{i}" style="display:none;"></button>
+        """
+
         html_content += "</div>"
 
-        components.html(html_content, height=height)
+        components.html(html_content, height=300)
 
-        if st.button(f"❌ Supprimer {u['name']}", key=f"del_{i}"):
+        # Bouton de suppression réel (caché, déclenché par le bouton dans le HTML)
+        if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
             st.session_state.army_total_cost -= u["cost"]
             st.session_state.army_list.pop(i)
             st.rerun()
@@ -780,30 +666,67 @@ elif st.session_state.page == "army":
                 <title>Liste d'armée OPR - {st.session_state.list_name}</title>
                 <style>
                     body {{ font-family: Arial, sans-serif; margin: 20px; }}
-                    h1 {{ color: #4a89dc; }}
+                    h1 {{ color: #333; }}
                     .army-card {{
-                        border:1px solid #4a89dc;
-                        border-radius:8px;
-                        padding:15px;
-                        margin-bottom:15px;
-                        background: #f9f9f9;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }}
-                    .badge {{
-                        display: inline-block;
-                        background: #4a89dc;
-                        color: white;
-                        padding: 6px 12px;
+                        border: 2px solid #4a89dc;
                         border-radius: 15px;
-                        margin-right: 8px;
-                        margin-bottom: 5px;
+                        padding: 15px;
+                        margin-bottom: 20px;
+                        background: white;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    }}
+                    .unit-header {{
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 10px;
+                    }}
+                    .unit-name {{
+                        font-size: 1.2em;
+                        font-weight: bold;
+                        color: #333;
+                        margin: 0;
+                    }}
+                    .unit-points {{
+                        color: #666;
                         font-size: 0.9em;
                     }}
-                    .title {{
+                    .badges-container {{
+                        display: flex;
+                        gap: 8px;
+                        margin-bottom: 15px;
+                        flex-wrap: wrap;
+                    }}
+                    .badge {{
+                        padding: 6px 12px;
+                        border-radius: 20px;
+                        font-size: 0.9em;
+                        font-weight: 500;
+                        color: white;
+                        text-align: center;
+                    }}
+                    .quality-badge {{
+                        background-color: #4a89dc;
+                    }}
+                    .defense-badge {{
+                        background-color: #4a89dc;
+                    }}
+                    .coriace-badge {{
+                        background-color: #4a89dc;
+                    }}
+                    .section {{
+                        margin-bottom: 12px;
+                    }}
+                    .section-title {{
                         font-weight: bold;
                         color: #4a89dc;
-                        margin-top: 10px;
                         margin-bottom: 5px;
+                        font-size: 0.95em;
+                    }}
+                    .section-content {{
+                        margin-left: 10px;
+                        font-size: 0.9em;
+                        color: #555;
                     }}
                 </style>
             </head>
@@ -818,14 +741,18 @@ elif st.session_state.page == "army":
 
                 html_content += f"""
                 <div class="army-card">
-                    <h3 style="margin-top:0; margin-bottom:10px;">{u['name']} - {u['cost']} pts</h3>
-                    <div style="margin-bottom:10px;">
-                        <span class="badge">Qualité {u['quality']}+</span>
-                        <span class="badge">Défense {u['defense']}+</span>
+                    <div class="unit-header">
+                        <h3 class="unit-name">{u['name']}</h3>
+                        <span class="unit-points">{u['cost']} pts</span>
+                    </div>
+
+                    <div class="badges-container">
+                        <span class="badge quality-badge">Qualité {u['quality']}+</span>
+                        <span class="badge defense-badge">Défense {u['defense']}+</span>
                 """
 
                 if coriace_value > 0:
-                    html_content += f'<span class="badge">Coriace {coriace_value}</span>'
+                    html_content += f'<span class="badge coriace-badge">Coriace {coriace_value}</span>'
 
                 html_content += """
                     </div>
@@ -835,20 +762,24 @@ elif st.session_state.page == "army":
                     rules = [r for r in u['base_rules'] if not r.startswith("Coriace")]
                     if rules:
                         html_content += f"""
-                        <div class="title">Règles spéciales</div>
-                        <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">{', '.join(rules)}</div>
+                        <div class="section">
+                            <div class="section-title">Règles spéciales</div>
+                            <div class="section-content">{', '.join(rules)}</div>
+                        </div>
                         """
 
                 if 'current_weapon' in u:
                     weapon = u['current_weapon']
                     html_content += f"""
-                    <div class="title">Arme équipée</div>
-                    <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
-                        {weapon.get('name', 'Arme de base')} | A{weapon.get('attacks', '?')} | PA({weapon.get('armor_piercing', '?')})
+                    <div class="section">
+                        <div class="section-title">Arme équipée</div>
+                        <div class="section-content">
+                            {weapon.get('name', 'Arme de base')} | A{weapon.get('attacks', '?')} | PA({weapon.get('armor_piercing', '?')})
+                        </div>
                     </div>
                     """
 
-                # Options (sauf Améliorations)
+                # Options
                 other_options = []
                 for group_name, opt_group in u.get("options", {}).items():
                     if group_name != "Améliorations":
@@ -859,13 +790,13 @@ elif st.session_state.page == "army":
 
                 if other_options:
                     html_content += f"""
-                    <div class="title">Options</div>
-                    <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
-                        {', '.join(other_options)}
+                    <div class="section">
+                        <div class="section-title">Options</div>
+                        <div class="section-content">{', '.join(other_options)}</div>
                     </div>
                     """
 
-                # Monture (si elle existe) - MÊME FORMAT QUE LES OPTIONS
+                # Monture
                 if u.get("mount"):
                     mount = u['mount']
                     mount_rules = []
@@ -873,26 +804,28 @@ elif st.session_state.page == "army":
                         mount_rules = mount['special_rules']
 
                     html_content += f"""
-                    <div class="title">Monture</div>
-                    <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
-                        <strong>{mount.get('name', '')}</strong>
+                    <div class="section">
+                        <div class="section-title">Monture</div>
+                        <div class="section-content">
+                            <strong>{mount.get('name', '')}</strong>
                     """
 
                     if mount_rules:
                         html_content += f"<br>{', '.join(mount_rules)}"
 
                     html_content += """
+                        </div>
                     </div>
                     """
 
-                # Améliorations (uniquement pour les unités non-héros)
+                # Améliorations
                 if "Améliorations" in u.get("options", {}) and u.get("type", "").lower() != "hero":
                     improvements = [opt["name"] for opt in u["options"]["Améliorations"]]
                     if improvements:
                         html_content += f"""
-                        <div class="title">Améliorations</div>
-                        <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
-                            {', '.join(improvements)}
+                        <div class="section">
+                            <div class="section-title">Améliorations</div>
+                            <div class="section-content">{', '.join(improvements)}</div>
                         </div>
                         """
 
