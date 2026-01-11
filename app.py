@@ -424,7 +424,165 @@ elif st.session_state.page == "army":
     st.divider()
     st.subheader("Ajouter une unité")
 
-    # ... (le reste du code pour ajouter une unité reste inchangé)
+    unit = st.selectbox(
+        "Unité",
+        units,
+        format_func=lambda u: f"{u['name']} ({u['base_cost']} pts)",
+    )
+
+    total_cost = unit["base_cost"]
+    base_rules = list(unit.get("special_rules", []))
+    options_selected = {}
+    mount_selected = None
+    current_weapon = unit.get("weapons", [{"name": "Arme non définie", "attacks": "?", "armor_piercing": "?"}])[0]
+
+    # Affichage des armes de base
+    st.subheader("Armes de base")
+    for w in unit.get("weapons", []):
+        st.write(f"- **{w.get('name', 'Arme non définie')}** | A{w.get('attacks', '?')} | PA({w.get('armor_piercing', '?')})")
+
+    # Options standards
+    for group in unit.get("upgrade_groups", []):
+        # Renommer "Remplacement de figurine" en "Option"
+        group_name = "Option" if group["group"] == "Remplacement de figurine" else group["group"]
+
+        st.write(f"### {group_name}")
+        if group.get("description"):
+            st.caption(group["description"])
+
+        if group.get("type") == "multiple":
+            selected_options = []
+            for opt in group["options"]:
+                if st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit['name']}_{group['group']}_{opt['name']}"):
+                    selected_options.append(opt)
+                    total_cost += opt["cost"]
+
+            if selected_options:
+                options_selected[group["group"]] = selected_options
+        else:
+            choice = st.selectbox(
+                group["group"],
+                ["— Aucun —"] + [o["name"] for o in group["options"]],
+                key=f"{unit['name']}_{group['group']}"
+            )
+
+            if choice != "— Aucun —":
+                opt = next(o for o in group["options"] if o["name"] == choice)
+                total_cost += opt.get("cost", 0)
+                options_selected[group["group"]] = opt
+                if group["type"] == "weapon":
+                    current_weapon = opt["weapon"]
+                    current_weapon["name"] = opt["name"]
+
+    # Section pour les améliorations d'unité (Sergent, Bannière, Musicien) en colonnes UNIQUEMENT pour les unités non-héros
+    if unit.get("type", "").lower() != "hero":
+        st.divider()
+        st.subheader("Améliorations d'unité")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.checkbox("Sergent (+5 pts)"):
+                total_cost += 5
+                if "Améliorations" not in options_selected:
+                    options_selected["Améliorations"] = []
+                options_selected["Améliorations"].append({"name": "Sergent", "cost": 5})
+
+        with col2:
+            if st.checkbox("Bannière (+5 pts)"):
+                total_cost += 5
+                if "Améliorations" not in options_selected:
+                    options_selected["Améliorations"] = []
+                options_selected["Améliorations"].append({"name": "Bannière", "cost": 5})
+
+        with col3:
+            if st.checkbox("Musicien (+10 pts)"):
+                total_cost += 10
+                if "Améliorations" not in options_selected:
+                    options_selected["Améliorations"] = []
+                options_selected["Améliorations"].append({"name": "Musicien", "cost": 10})
+
+    # Calcul de la valeur de Coriace
+    coriace_value = 0
+    for rule in base_rules:
+        match = re.search(r'Coriace \((\d+)\)', rule)
+        if match:
+            coriace_value += int(match.group(1))
+
+    st.markdown(f"### 💰 Coût : **{total_cost} pts**")
+    if coriace_value > 0:
+        st.markdown(f"**Coriace totale : {coriace_value}**")
+
+    if st.button("➕ Ajouter à l'armée"):
+        # Calcul complet de la valeur de Coriace
+        coriace_value = 0
+
+        # 1. Vérifier dans les règles spéciales
+        for rule in base_rules:
+            match = re.search(r'Coriace \((\d+)\)', rule)
+            if match:
+                coriace_value += int(match.group(1))
+
+        # 2. Vérifier dans les options sélectionnées
+        if 'options' in options_selected:
+            for option_group in options_selected.values():
+                if isinstance(option_group, list):
+                    for option in option_group:
+                        if 'special_rules' in option:
+                            for rule in option['special_rules']:
+                                match = re.search(r'Coriace \((\d+)\)', rule)
+                                if match:
+                                    coriace_value += int(match.group(1))
+                elif 'special_rules' in option_group:
+                    for rule in option_group['special_rules']:
+                        match = re.search(r'Coriace \((\d+)\)', rule)
+                        if match:
+                            coriace_value += int(match.group(1))
+
+        # 3. Vérifier dans l'arme équipée
+        if 'special_rules' in current_weapon:
+            for rule in current_weapon['special_rules']:
+                match = re.search(r'Coriace \((\d+)\)', rule)
+                if match:
+                    coriace_value += int(match.group(1))
+
+        unit_data = {
+            "name": unit["name"],
+            "cost": total_cost,
+            "quality": unit["quality"],
+            "defense": unit["defense"],
+            "base_rules": base_rules,
+            "options": options_selected,
+            "current_weapon": current_weapon,
+            "type": unit.get("type", "Infantry")
+        }
+
+        if coriace_value > 0:
+            unit_data["coriace"] = coriace_value
+
+        # Ajouter la monture si elle existe dans l'unité originale
+        if "mount" in unit:
+            unit_data["mount"] = unit["mount"]
+
+        st.session_state.army_list.append(unit_data)
+        st.session_state.army_total_cost += total_cost
+        st.rerun()
+
+    # Validation de la liste d'armée
+    if st.session_state.game in GAME_RULES:
+        st.session_state.is_army_valid, st.session_state.validation_errors = validate_army(
+            st.session_state.army_list,
+            GAME_RULES[st.session_state.game],
+            st.session_state.army_total_cost,
+            st.session_state.points
+        )
+    else:
+        st.session_state.is_army_valid = True
+        st.session_state.validation_errors = []
+
+    if not st.session_state.is_army_valid:
+        st.warning("⚠️ La liste d'armée n'est pas valide :")
+        for error in st.session_state.validation_errors:
+            st.write(f"- {error}")
 
     # Liste de l'armée (affichage sous forme de fiches avec le style de votre capture)
     st.divider()
