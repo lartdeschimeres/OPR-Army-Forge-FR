@@ -50,7 +50,6 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# Chargement des factions (PLACÉ ICI AVANT LES PAGES)
 @st.cache_data
 def load_factions():
     faction_files = list(FACTIONS_DIR.glob("*.json"))
@@ -75,11 +74,9 @@ factions, games = load_factions()
 
 # Fonctions pour la gestion des comptes joueurs
 def hash_password(password):
-    """Hache un mot de passe pour le stockage"""
     return hashlib.sha256(password.encode()).hexdigest()
 
 def create_player(username, password):
-    """Crée un nouveau compte joueur"""
     player_file = PLAYERS_DIR / f"{username}.json"
     if player_file.exists():
         return False, "Ce nom d'utilisateur existe déjà"
@@ -96,7 +93,6 @@ def create_player(username, password):
     return True, "Compte créé avec succès"
 
 def verify_player(username, password):
-    """Vérifie les identifiants d'un joueur"""
     player_file = PLAYERS_DIR / f"{username}.json"
     if not player_file.exists():
         return False, "Nom d'utilisateur ou mot de passe incorrect"
@@ -110,7 +106,6 @@ def verify_player(username, password):
     return True, "Connexion réussie"
 
 def load_player_army_lists(username):
-    """Charge les listes d'armée d'un joueur"""
     player_file = PLAYERS_DIR / f"{username}.json"
     if not player_file.exists():
         return []
@@ -121,7 +116,6 @@ def load_player_army_lists(username):
     return player_data.get("army_lists", [])
 
 def save_player_army_list(username, army_list_data):
-    """Sauvegarde une liste d'armée pour un joueur"""
     player_file = PLAYERS_DIR / f"{username}.json"
     if not player_file.exists():
         return False
@@ -129,7 +123,6 @@ def save_player_army_list(username, army_list_data):
     with open(player_file, encoding="utf-8") as f:
         player_data = json.load(f)
 
-    # Ajouter la nouvelle liste
     player_data["army_lists"].append(army_list_data)
 
     with open(player_file, "w", encoding="utf-8") as f:
@@ -137,7 +130,6 @@ def save_player_army_list(username, army_list_data):
 
     return True
 
-# Fonction pour valider la liste d'armée
 def validate_army(army_list, game_rules, total_cost, total_points):
     errors = []
 
@@ -146,13 +138,11 @@ def validate_army(army_list, game_rules, total_cost, total_points):
         return False, errors
 
     if game_rules == GAME_RULES["Age of Fantasy"]:
-        # 1 héros par tranche de 375 pts (en comptant les héros indépendants)
         independent_heroes = sum(1 for u in army_list if u.get("type", "").lower() in ["hero", "héro"] and "attached_hero" not in u)
         max_heroes = max(1, total_points // game_rules["hero_per_points"])
         if independent_heroes > max_heroes:
             errors.append(f"Trop de héros indépendants (max: {max_heroes} pour {total_points} pts)")
 
-        # 1+X copies de la même unité (X=1 pour 750 pts)
         unit_counts = defaultdict(int)
         for unit in army_list:
             unit_counts[unit["name"]] += 1
@@ -162,13 +152,11 @@ def validate_army(army_list, game_rules, total_cost, total_points):
             if count > max_copies:
                 errors.append(f"Trop de copies de '{unit_name}' (max: {max_copies})")
 
-        # Aucune unité ne peut valoir plus de 35% du total des points de l'armée
         for unit in army_list:
             percentage = (unit["cost"] / total_points) * 100
             if percentage > game_rules["max_unit_percentage"]:
                 errors.append(f"'{unit['name']}' ({unit['cost']} pts) dépasse {game_rules['max_unit_percentage']}% du total ({total_points} pts)")
 
-        # 1 unité max par tranche de 150 pts
         max_units = total_points // game_rules["unit_per_points"]
         if len(army_list) > max_units:
             errors.append(f"Trop d'unités (max: {max_units} pour {total_points} pts)")
@@ -201,7 +189,6 @@ def export_to_html():
     """
 
     for unit in st.session_state.army_list:
-        # Séparation des règles spéciales
         base_rules = unit.get("base_rules", [])
         weapon_rules = []
         option_rules = []
@@ -212,11 +199,11 @@ def export_to_html():
             weapon_rules = unit['current_weapon']['special_rules']
 
         for opt_group in unit.get("options", {}).values():
-            if isinstance(opt_group, list):  # Pour les options multiples
+            if isinstance(opt_group, list):
                 for opt in opt_group:
                     if 'special_rules' in opt:
                         option_rules.extend(opt['special_rules'])
-            elif 'special_rules' in opt_group:  # Pour les options simples
+            elif 'special_rules' in opt_group:
                 option_rules.extend(opt_group['special_rules'])
 
         if 'attached_hero' in unit and 'special_rules' in unit['attached_hero']:
@@ -231,7 +218,7 @@ def export_to_html():
             <div>
                 <span class="badge">Qualité {unit['quality']}+</span>
                 <span class="badge">Défense {unit['defense']}+</span>
-                {'<span class="badge">Coriace {unit["coriace"]}</span>' if unit.get('coriace', 0) > 0 else ''}
+                {'<span class="badge">Coriace {}</span>'.format(unit.get('coriace', 0)) if unit.get('coriace', 0) > 0 else ''}
             </div>
         """
 
@@ -288,12 +275,10 @@ def export_to_html():
     </html>
     """
 
-    # Sauvegarde du HTML
     filename = f"{st.session_state.list_name or 'army_list'}.html"
     with open(filename, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    # Téléchargement
     with open(filename, "r", encoding="utf-8") as f:
         st.download_button(
             label="Télécharger le fichier HTML",
@@ -302,7 +287,6 @@ def export_to_html():
             mime="text/html"
         )
 
-    # Affichage dans l'interface
     components.html(html_content, height=600, scrolling=True)
 
 # PAGE 1 — Connexion/Inscription
@@ -347,13 +331,11 @@ if st.session_state.page == "setup":
     st.title("OPR Army Builder 🇫🇷")
     st.subheader(f"Bienvenue, {st.session_state.current_player}!")
 
-    # Bouton de déconnexion
     if st.button("🚪 Déconnexion"):
         st.session_state.current_player = None
         st.session_state.page = "login"
         st.rerun()
 
-    # Affichage des listes sauvegardées
     st.subheader("Mes listes d'armées sauvegardées")
     if st.session_state.player_army_lists:
         for i, army_list in enumerate(st.session_state.player_army_lists):
@@ -380,17 +362,13 @@ if st.session_state.page == "setup":
         index=games.index(st.session_state.game) if st.session_state.game else 0
     )
 
-    available_factions = [
-        f for f in factions if f["game"] == st.session_state.game
-    ]
-
+    available_factions = [f for f in factions if f["game"] == st.session_state.game]
     faction_names = [f["name"] for f in available_factions]
 
     st.session_state.faction = st.selectbox(
         "Faction",
         faction_names,
-        index=faction_names.index(st.session_state.faction)
-        if st.session_state.faction in faction_names else 0
+        index=faction_names.index(st.session_state.faction) if st.session_state.faction in faction_names else 0
     )
 
     st.session_state.points = st.number_input(
@@ -413,7 +391,6 @@ if st.session_state.page == "setup":
 
     with col2:
         if st.button("➡️ Ma liste"):
-            # Charger les unités pour la faction sélectionnée
             faction_file = next(f["file"] for f in factions if f["name"] == st.session_state.faction)
             with open(faction_file, encoding="utf-8") as f:
                 faction_data = json.load(f)
@@ -426,7 +403,6 @@ if st.session_state.page == "army":
     st.title(st.session_state.list_name or "Ma liste d'armée")
     st.caption(f"{st.session_state.game} — {st.session_state.faction} — {st.session_state.army_total_cost}/{st.session_state.points} pts")
 
-    # Bouton de retour et de déconnexion
     col1, col2 = st.columns(2)
     with col1:
         if st.button("⬅️ Retour configuration"):
@@ -438,7 +414,6 @@ if st.session_state.page == "army":
             st.session_state.page = "login"
             st.rerun()
 
-    # Charger les unités
     units = st.session_state.units
 
     # Section pour ajouter une unité normale
@@ -465,12 +440,11 @@ if st.session_state.page == "army":
     # Options
     for group in unit.get("upgrade_groups", []):
         if group.get("type") == "multiple":
-            # Pour les options multiples (comme bannière, sergent, musicien)
-            selected_options = []
             st.write(f"### {group['group']}")
             if group.get("description"):
                 st.caption(group["description"])
 
+            selected_options = []
             for opt in group["options"]:
                 if st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit['name']}_{group['group']}_{opt['name']}"):
                     selected_options.append(opt)
@@ -479,7 +453,6 @@ if st.session_state.page == "army":
             if selected_options:
                 options_selected[group["group"]] = selected_options
         else:
-            # Pour les options simples (comme les armes)
             choice = st.selectbox(
                 group["group"],
                 ["— Aucun —"] + [o["name"] for o in group["options"]],
@@ -520,15 +493,17 @@ if st.session_state.page == "army":
         if coriace_value > 0:
             unit_data["coriace"] = coriace_value
 
+        if unit.get("can_attach_hero", False):
+            unit_data["can_attach_hero"] = True
+
         st.session_state.army_list.append(unit_data)
         st.session_state.army_total_cost += total_cost
         st.rerun()
 
-    # NOUVELLE SECTION POUR RATTACHER UN HÉROS À UNE UNITÉ EXISTANTE
+    # Section pour rattacher un héros à une unité existante
     st.divider()
     st.subheader("Rattacher un héros à une unité existante")
 
-    # Sélection du héros
     available_heroes = [u for u in units if u.get("type", "").lower() in ["hero", "héro"]]
     selected_hero_name = st.selectbox(
         "Sélectionner un héros",
@@ -539,7 +514,6 @@ if st.session_state.page == "army":
     if selected_hero_name != "— Aucun —":
         hero = next(h for h in available_heroes if h["name"] == selected_hero_name)
 
-        # Sélection de l'unité cible
         compatible_units = [u for u in st.session_state.army_list if u.get("can_attach_hero", False)]
         if compatible_units:
             target_unit_name = st.selectbox(
@@ -551,13 +525,10 @@ if st.session_state.page == "army":
             if target_unit_name:
                 target_unit = next(u for u in compatible_units if u["name"] == target_unit_name)
 
-                # Bouton pour rattacher
                 if st.button("Rattacher le héros à cette unité"):
-                    # Vérifier que l'unité n'a pas déjà un héros rattaché
                     if "attached_hero" in target_unit:
                         st.error("Cette unité a déjà un héros rattaché")
                     else:
-                        # Ajouter le héros à l'unité
                         target_unit["attached_hero"] = {
                             "name": hero["name"],
                             "cost": hero["base_cost"],
@@ -567,9 +538,7 @@ if st.session_state.page == "army":
                             "weapons": hero.get("weapons", [])
                         }
 
-                        # Mettre à jour le coût total
                         st.session_state.army_total_cost += hero["base_cost"]
-
                         st.success(f"Héros {hero['name']} rattaché à l'unité {target_unit['name']}!")
                         st.rerun()
         else:
@@ -587,7 +556,6 @@ if st.session_state.page == "army":
         st.session_state.is_army_valid = True
         st.session_state.validation_errors = []
 
-    # Affichage des erreurs de validation
     if not st.session_state.is_army_valid:
         st.warning("⚠️ La liste d'armée n'est pas valide :")
         for error in st.session_state.validation_errors:
@@ -606,7 +574,6 @@ if st.session_state.page == "army":
         if u.get("attached_hero"):
             height += 60
 
-        # Séparation des règles spéciales
         base_rules = u.get("base_rules", [])
         weapon_rules = []
         option_rules = []
@@ -617,11 +584,11 @@ if st.session_state.page == "army":
             weapon_rules = u['current_weapon']['special_rules']
 
         for opt_group in u.get("options", {}).values():
-            if isinstance(opt_group, list):  # Pour les options multiples
+            if isinstance(opt_group, list):
                 for opt in opt_group:
                     if 'special_rules' in opt:
                         option_rules.extend(opt['special_rules'])
-            elif 'special_rules' in opt_group:  # Pour les options simples
+            elif 'special_rules' in opt_group:
                 option_rules.extend(opt_group['special_rules'])
 
         if 'attached_hero' in u and 'special_rules' in u['attached_hero']:
@@ -667,12 +634,14 @@ if st.session_state.page == "army":
             <div style="margin-bottom: 10px;">
                 <span class="badge">Qualité {u['quality']}+</span>
                 <span class="badge">Défense {u['defense']}+</span>
-                {'<span class="badge">Coriace {u["coriace"]}</span>' if u.get('coriace', 0) > 0 else ''}
+                {'<span class="badge">Coriace {}</span>'.format(u.get('coriace', 0)) if u.get('coriace', 0) > 0 else ''}
             </div>
 
             {f'''
             <div class="title">Règles spéciales de base</div>
-            <div style="margin-left: 15px; margin-bottom: 10px;">{", ".join(base_rules) if base_rules else "Aucune"}</div>
+            <div style="margin-left: 15px; margin-bottom: 10px;">
+                {', '.join(base_rules) if base_rules else "Aucune"}
+            </div>
             ''' if base_rules else ''}
 
             {f'''
@@ -726,7 +695,6 @@ if st.session_state.page == "army":
     st.progress(progress)
     st.markdown(f"**{st.session_state.army_total_cost} / {st.session_state.points} pts**")
 
-    # Boutons de sauvegarde et d'export
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("💾 Sauvegarder la liste"):
@@ -762,7 +730,6 @@ if st.session_state.page == "army":
             st.session_state.army_total_cost = 0
             st.rerun()
 
-    # Affichage des règles spécifiques au jeu
     if st.session_state.game in GAME_RULES:
         st.divider()
         st.subheader("Règles spécifiques à " + st.session_state.game)
