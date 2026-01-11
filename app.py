@@ -530,11 +530,13 @@ def main():
         options_selected = {}
         current_weapon = unit.get("weapons", [{"name": "Arme non définie", "attacks": "?", "armor_piercing": "?"}])[0]
         mount_selected = None
+        weapon_replaced = False  # Variable pour suivre si une arme a été remplacée
 
-        # Affichage des armes de base
-        st.subheader("Armes de base")
-        for w in unit.get("weapons", []):
-            st.write(f"- **{w.get('name', 'Arme non définie')}** | A{w.get('attacks', '?')} | PA({w.get('armor_piercing', '?')})")
+        # Affichage des armes de base (uniquement si aucune arme n'a été remplacée)
+        if not weapon_replaced:
+            st.subheader("Armes de base")
+            for w in unit.get("weapons", []):
+                st.write(f"- **{w.get('name', 'Arme non définie')}** | A{w.get('attacks', '?')} | PA({w.get('armor_piercing', '?')})")
 
         # Options standards
         for group in unit.get("upgrade_groups", []):
@@ -544,7 +546,21 @@ def main():
             if group.get("description"):
                 st.caption(group["description"])
 
-            if group.get("type") == "multiple":
+            if group.get("type") == "weapon":
+                choice = st.selectbox(
+                    group["group"],
+                    ["— Aucun —"] + [o["name"] for o in group["options"]],
+                    key=f"{unit['name']}_{group['group']}"
+                )
+
+                if choice != "— Aucun —":
+                    opt = next(o for o in group["options"] if o["name"] == choice)
+                    total_cost += opt.get("cost", 0)
+                    options_selected[group["group"]] = opt
+                    current_weapon = opt["weapon"]
+                    current_weapon["name"] = opt["name"]
+                    weapon_replaced = True  # Marquer qu'une arme a été remplacée
+            elif group.get("type") == "multiple":
                 selected_options = []
                 for opt in group["options"]:
                     if st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit['name']}_{group['group']}_{opt['name']}"):
@@ -564,10 +580,7 @@ def main():
                     opt = next(o for o in group["options"] if o["name"] == choice)
                     total_cost += opt.get("cost", 0)
                     options_selected[group["group"]] = opt
-                    if group["type"] == "weapon":
-                        current_weapon = opt["weapon"]
-                        current_weapon["name"] = opt["name"]
-                    elif group["type"] == "mount":
+                    if group["type"] == "mount":
                         mount_selected = opt.get("mount")
                         if mount_selected:
                             total_cost += mount_selected.get("cost", 0)
@@ -621,7 +634,8 @@ def main():
                 "options": options_selected,
                 "current_weapon": current_weapon,
                 "type": unit.get("type", "Infantry"),
-                "combined": combined_unit  # Ajout de l'information sur l'unité combinée
+                "combined": combined_unit,
+                "weapon_replaced": weapon_replaced  # Ajout de l'information sur le remplacement d'arme
             }
 
             # Ajouter la monture si elle existe
@@ -768,7 +782,7 @@ def main():
                     </div>
                     """
 
-            # Arme équipée
+            # Arme équipée (uniquement l'arme actuelle)
             if 'current_weapon' in u:
                 weapon = u['current_weapon']
                 html_content += f"""
