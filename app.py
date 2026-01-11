@@ -17,8 +17,8 @@ SAVE_DIR = BASE_DIR / "saves"
 PLAYERS_DIR = BASE_DIR / "players"
 
 # Créer les dossiers s'ils n'existent pas
-SAVE_DIR.mkdir(exist_ok=True)
-PLAYERS_DIR.mkdir(exist_ok=True)
+SAVE_DIR.mkdir(exist_ok=True, parents=True)
+PLAYERS_DIR.mkdir(exist_ok=True, parents=True)
 
 # Règles spécifiques par jeu
 GAME_RULES = {
@@ -49,6 +49,29 @@ for key, default in {
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+
+# Chargement des factions (PLACÉ ICI AVANT LES PAGES)
+@st.cache_data
+def load_factions():
+    faction_files = list(FACTIONS_DIR.glob("*.json"))
+    factions = []
+
+    for fp in faction_files:
+        try:
+            with open(fp, encoding="utf-8") as f:
+                data = json.load(f)
+                factions.append({
+                    "name": data["faction"],
+                    "game": data["game"],
+                    "file": fp
+                })
+        except Exception as e:
+            st.warning(f"Impossible de lire {fp.name} : {e}")
+
+    games = sorted(set(f["game"] for f in factions))
+    return factions, games
+
+factions, games = load_factions()
 
 # Fonctions pour la gestion des comptes joueurs
 def hash_password(password):
@@ -188,9 +211,13 @@ def export_to_html():
         if 'current_weapon' in unit and 'special_rules' in unit['current_weapon']:
             weapon_rules = unit['current_weapon']['special_rules']
 
-        for opt in unit.get("options", {}).values():
-            if 'special_rules' in opt:
-                option_rules.extend(opt['special_rules'])
+        for opt_group in unit.get("options", {}).values():
+            if isinstance(opt_group, list):  # Pour les options multiples
+                for opt in opt_group:
+                    if 'special_rules' in opt:
+                        option_rules.extend(opt['special_rules'])
+            elif 'special_rules' in opt_group:  # Pour les options simples
+                option_rules.extend(opt_group['special_rules'])
 
         if 'attached_hero' in unit and 'special_rules' in unit['attached_hero']:
             hero_rules = unit['attached_hero']['special_rules']
@@ -228,7 +255,7 @@ def export_to_html():
             html_content += f"""
             <div class="title">Options sélectionnées</div>
             <div>
-                {', '.join(o['name'] for o in unit['options'].values())}
+                {', '.join([opt['name'] for opt_group in unit['options'].values() for opt in (opt_group if isinstance(opt_group, list) else [opt_group])])}
                 {f" | {', '.join(option_rules)}" if option_rules else ''}
             </div>
             """
@@ -440,6 +467,10 @@ if st.session_state.page == "army":
         if group.get("type") == "multiple":
             # Pour les options multiples (comme bannière, sergent, musicien)
             selected_options = []
+            st.write(f"### {group['group']}")
+            if group.get("description"):
+                st.caption(group["description"])
+
             for opt in group["options"]:
                 if st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit['name']}_{group['group']}_{opt['name']}"):
                     selected_options.append(opt)
@@ -509,20 +540,23 @@ if st.session_state.page == "army":
         hero = next(h for h in available_heroes if h["name"] == selected_hero_name)
 
         # Sélection de l'unité cible
-        if st.session_state.army_list:
+        compatible_units = [u for u in st.session_state.army_list if u.get("can_attach_hero", False)]
+        if compatible_units:
             target_unit_name = st.selectbox(
                 "Sélectionner l'unité cible",
-                [u["name"] for u in st.session_state.army_list if u.get("can_attach_hero", False)],
+                [u["name"] for u in compatible_units],
                 key="attach_target_unit"
             )
 
             if target_unit_name:
-                target_unit = next(u for u in st.session_state.army_list if u["name"] == target_unit_name)
+                target_unit = next(u for u in compatible_units if u["name"] == target_unit_name)
 
                 # Bouton pour rattacher
                 if st.button("Rattacher le héros à cette unité"):
-                    # Vérifier que l'unité peut recevoir un héros
-                    if target_unit.get("can_attach_hero", False):
+                    # Vérifier que l'unité n'a pas déjà un héros rattaché
+                    if "attached_hero" in target_unit:
+                        st.error("Cette unité a déjà un héros rattaché")
+                    else:
                         # Ajouter le héros à l'unité
                         target_unit["attached_hero"] = {
                             "name": hero["name"],
@@ -538,8 +572,6 @@ if st.session_state.page == "army":
 
                         st.success(f"Héros {hero['name']} rattaché à l'unité {target_unit['name']}!")
                         st.rerun()
-                    else:
-                        st.error("Cette unité ne peut pas recevoir de héros rattaché")
         else:
             st.warning("Aucune unité compatible dans votre armée pour rattacher le héros")
 
@@ -741,21 +773,3 @@ if st.session_state.page == "army":
         - **Unité max** : {rules['max_unit_percentage']}% du total des points de l'armée
         - **Nombre d'unités** : 1 par tranche de {rules['unit_per_points']} pts
         """)
-
-# Chargement des factions (à placer avant les pages)
-faction_files = list(FACTIONS_DIR.glob("*.json"))
-factions = []
-
-for fp in faction_files:
-    try:
-        with open(fp, encoding="utf-8") as f:
-            data = json.load(f)
-            factions.append({
-                "name": data["faction"],
-                "game": data["game"],
-                "file": fp
-            })
-    except Exception as e:
-        st.warning(f"Impossible de lire {fp.name} : {e}")
-
-games = sorted(set(f["game"] for f in factions))
