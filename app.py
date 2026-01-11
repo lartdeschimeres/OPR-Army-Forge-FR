@@ -190,7 +190,7 @@ else:
 <strong>Options sélectionnées :</strong><br>
 {', '.join(o['name'] for o in u['options'].values()) or 'Aucune'}<br><br>
 
-{f"<strong style='color:#4a89dc'>Monture :</strong><br>{u['mount']['name']} — {', '.join(u['mount']['special_rules'])}" if u.get("mount") else ""}
+{f"<strong>Monture :</strong><br>{u['mount']['name']} — {', '.join(u['mount']['special_rules'])}" if u.get("mount") else ""}
 
 </div>
 """, unsafe_allow_html=True)
