@@ -414,28 +414,95 @@ if st.session_state.page == "army":
         for error in st.session_state.validation_errors:
             st.write(f"- {error}")
 
-    # Liste de l'armée
+    # Liste de l'armée (affichage sous forme de fiches synthétiques)
     st.divider()
     st.subheader("Liste de l'armée")
 
     for i, u in enumerate(st.session_state.army_list):
-        st.markdown(f"### {u['name']} — {u['cost']} pts")
-        st.markdown(f"- Qualité: {u['quality']}+, Défense: {u['defense']}+")
+        # Calcul de la hauteur en fonction des éléments à afficher
+        height = 200
+        if u.get("mount"):
+            height += 40
+        if u.get("options"):
+            height += 20 * len(u["options"])
+        if "Améliorations" in u.get("options", {}):
+            height += 20
+
+        # Génération du HTML pour la fiche
+        html_content = f"""
+        <style>
+        .army-card {{
+            border:1px solid #ccc;
+            border-radius:8px;
+            padding:15px;
+            margin-bottom:15px;
+            background:#f9f9f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        .badge {{
+            display:inline-block;
+            background:#4a89dc;
+            color:white;
+            padding:6px 12px;
+            border-radius:15px;
+            margin-right:8px;
+            margin-bottom:5px;
+            font-size: 0.9em;
+        }}
+        .title {{
+            font-weight:bold;
+            color:#4a89dc;
+            margin-top:10px;
+            margin-bottom:5px;
+        }}
+        .valid {{
+            border-left: 4px solid #2ecc71;
+        }}
+        .invalid {{
+            border-left: 4px solid #e74c3c;
+        }}
+        </style>
+
+        <div class="army-card {'valid' if st.session_state.is_army_valid else 'invalid'}">
+            <h4 style="margin-top:0; margin-bottom:10px;">{u['name']} — {u['cost']} pts</h4>
+
+            <div style="margin-bottom:10px;">
+                <span class="badge">Qualité {u['quality']}+</span>
+                <span class="badge">Défense {u['defense']}+</span>
+        """
+
         if u.get('coriace', 0) > 0:
-            st.markdown(f"- Coriace: {u['coriace']}")
+            html_content += f'<span class="badge">Coriace {u["coriace"]}</span>'
+
+        html_content += """
+            </div>
+        """
 
         if u.get("base_rules"):
-            st.markdown(f"- **Règles spéciales**: {', '.join(u['base_rules'])}")
+            html_content += f"""
+            <div class="title">Règles spéciales</div>
+            <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">{', '.join(u['base_rules'])}</div>
+            """
 
         if 'current_weapon' in u:
             weapon = u['current_weapon']
-            st.markdown(f"- **Arme**: {weapon.get('name', 'Arme de base')} (A{weapon.get('attacks', '?')}, PA{weapon.get('armor_piercing', '?')})")
+            html_content += f"""
+            <div class="title">Arme équipée</div>
+            <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
+                {weapon.get('name', 'Arme de base')} | A{weapon.get('attacks', '?')} | PA({weapon.get('armor_piercing', '?')})
+            </div>
+            """
 
         # Affichage des améliorations (Sergent, Bannière, Musicien)
         if "Améliorations" in u.get("options", {}):
             improvements = [opt["name"] for opt in u["options"]["Améliorations"]]
             if improvements:
-                st.markdown(f"- **Améliorations**: {', '.join(improvements)}")
+                html_content += f"""
+                <div class="title">Améliorations</div>
+                <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
+                    {', '.join(improvements)}
+                </div>
+                """
 
         # Affichage des autres options
         other_options = []
@@ -447,7 +514,16 @@ if st.session_state.page == "army":
                     other_options.append(opt_group["name"])
 
         if other_options:
-            st.markdown(f"- **Options**: {', '.join(other_options)}")
+            html_content += f"""
+            <div class="title">Options</div>
+            <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
+                {', '.join(other_options)}
+            </div>
+            """
+
+        html_content += "</div>"
+
+        components.html(html_content, height=height)
 
         if st.button(f"❌ Supprimer {u['name']}", key=f"del_{i}"):
             st.session_state.army_total_cost -= u["cost"]
@@ -495,9 +571,9 @@ if st.session_state.page == "army":
                 <style>
                     body {{ font-family: Arial, sans-serif; margin: 20px; }}
                     h1 {{ color: #4a89dc; }}
-                    .army-card {{ border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f9f9f9; }}
-                    .badge {{ display: inline-block; background: #4a89dc; color: white; padding: 6px 12px; border-radius: 15px; margin-right: 8px; margin-bottom: 5px; }}
-                    .title {{ font-weight: bold; color: #4a89dc; margin-top: 10px; }}
+                    .army-card {{ border:1px solid #ccc; border-radius:8px; padding:15px; margin-bottom:15px; background: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+                    .badge {{ display: inline-block; background: #4a89dc; color: white; padding: 6px 12px; border-radius: 15px; margin-right: 8px; margin-bottom: 5px; font-size: 0.9em; }}
+                    .title {{ font-weight: bold; color: #4a89dc; margin-top: 10px; margin-bottom: 5px; }}
                 </style>
             </head>
             <body>
@@ -508,8 +584,8 @@ if st.session_state.page == "army":
             for u in st.session_state.army_list:
                 html_content += f"""
                 <div class="army-card">
-                    <h3>{u['name']} - {u['cost']} pts</h3>
-                    <div>
+                    <h3 style="margin-top:0; margin-bottom:10px;">{u['name']} - {u['cost']} pts</h3>
+                    <div style="margin-bottom:10px;">
                         <span class="badge">Qualité {u['quality']}+</span>
                         <span class="badge">Défense {u['defense']}+</span>
                 """
@@ -524,14 +600,14 @@ if st.session_state.page == "army":
                 if u.get("base_rules"):
                     html_content += f"""
                     <div class="title">Règles spéciales</div>
-                    <div>{', '.join(u['base_rules'])}</div>
+                    <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">{', '.join(u['base_rules'])}</div>
                     """
 
                 if 'current_weapon' in u:
                     weapon = u['current_weapon']
                     html_content += f"""
                     <div class="title">Arme équipée</div>
-                    <div>
+                    <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
                         {weapon.get('name', 'Arme de base')} | A{weapon.get('attacks', '?')} | PA({weapon.get('armor_piercing', '?')})
                     </div>
                     """
@@ -542,7 +618,9 @@ if st.session_state.page == "army":
                     if improvements:
                         html_content += f"""
                         <div class="title">Améliorations</div>
-                        <div>{', '.join(improvements)}</div>
+                        <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
+                            {', '.join(improvements)}
+                        </div>
                         """
 
                 # Affichage des autres options
@@ -557,7 +635,9 @@ if st.session_state.page == "army":
                 if other_options:
                     html_content += f"""
                     <div class="title">Options</div>
-                    <div>{', '.join(other_options)}</div>
+                    <div style="margin-left:15px; margin-bottom:10px; font-size:0.9em;">
+                        {', '.join(other_options)}
+                    </div>
                     """
 
                 html_content += "</div>"
