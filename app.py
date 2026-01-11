@@ -238,26 +238,21 @@ if st.session_state.page == "setup":
                     st.write(f"Créée le: {army_list['date'][:10]}")
                     if st.button(f"Charger cette liste", key=f"load_{i}"):
                         try:
-                            # Vérification des données de base
                             required_keys = ["game", "faction", "points", "army_list", "total_cost", "name"]
                             if not all(key in army_list for key in required_keys):
                                 st.error("Données de liste incomplètes")
                                 continue
 
-                            # Charger les données de base
                             st.session_state.game = army_list['game']
                             st.session_state.faction = army_list['faction']
                             st.session_state.points = army_list['points']
                             st.session_state.list_name = army_list['name']
                             st.session_state.army_total_cost = army_list['total_cost']
 
-                            # Vérifier et charger les unités
                             valid_army_list = []
                             for unit in army_list['army_list']:
-                                # Propriétés minimales requises pour une unité
                                 unit_required_keys = ["name", "cost", "quality", "defense", "type"]
                                 if all(key in unit for key in unit_required_keys):
-                                    # Vérifier que base_cost existe, sinon utiliser cost
                                     if "base_cost" not in unit:
                                         unit["base_cost"] = unit.get("cost", 0)
                                     valid_army_list.append(unit)
@@ -266,7 +261,6 @@ if st.session_state.page == "setup":
 
                             st.session_state.army_list = valid_army_list
 
-                            # Charger les unités de la faction
                             try:
                                 faction_file = next(f["file"] for f in factions if f["name"] == st.session_state.faction)
                                 with open(faction_file, encoding="utf-8") as f:
@@ -378,11 +372,14 @@ if st.session_state.page == "army":
 
     # Options standards
     for group in unit.get("upgrade_groups", []):
-        if group.get("type") == "multiple":
-            st.write(f"### {group['group']}")
-            if group.get("description"):
-                st.caption(group["description"])
+        # Renommer "Remplacement de figurine" en "Option"
+        group_name = "Option" if group["group"] == "Remplacement de figurine" else group["group"]
 
+        st.write(f"### {group_name}")
+        if group.get("description"):
+            st.caption(group["description"])
+
+        if group.get("type") == "multiple":
             selected_options = []
             for opt in group["options"]:
                 if st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit['name']}_{group['group']}_{opt['name']}"):
@@ -406,11 +403,13 @@ if st.session_state.page == "army":
                     current_weapon = opt["weapon"]
                     current_weapon["name"] = opt["name"]
 
-    # Section pour les améliorations d'unité (Sergent, Bannière, Musicien)
+    # Section pour les améliorations d'unité (Sergent, Bannière, Musicien) en colonnes
     st.divider()
     st.subheader("Améliorations d'unité")
 
+    # Créer 3 colonnes pour les checkbox
     col1, col2, col3 = st.columns(3)
+
     with col1:
         if st.checkbox("Sergent (+5 pts)"):
             total_cost += 5
@@ -572,7 +571,7 @@ if st.session_state.page == "army":
         # Affichage des autres options
         other_options = []
         for group_name, opt_group in u.get("options", {}).items():
-            if group_name != "Améliorations":
+            if group_name != "Améliorations" and group_name != "Remplacement de figurine":
                 if isinstance(opt_group, list):
                     other_options.extend([opt["name"] for opt in opt_group])
                 else:
@@ -691,7 +690,7 @@ if st.session_state.page == "army":
                 # Affichage des autres options
                 other_options = []
                 for group_name, opt_group in u.get("options", {}).items():
-                    if group_name != "Améliorations":
+                    if group_name != "Améliorations" and group_name != "Remplacement de figurine":
                         if isinstance(opt_group, list):
                             other_options.extend([opt["name"] for opt in opt_group])
                         else:
