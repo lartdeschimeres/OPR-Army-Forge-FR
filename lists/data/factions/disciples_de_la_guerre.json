@@ -118,6 +118,7 @@
   "base_cost": 100,
   "quality": 3,
   "defense": 4,
+  "can_attach_hero": true,
   "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
 
   "weapons": [
