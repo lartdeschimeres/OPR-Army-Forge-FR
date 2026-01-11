@@ -1,8 +1,8 @@
 import json
+import re
 from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
-import re
 
 # -------------------------------------------------
 # CONFIG
@@ -163,7 +163,7 @@ if st.session_state.page == "army":
 
     if mount_selected:
         for rule in mount_selected.get("special_rules", []):
-            match = re.search(r'Coriace \(\+(\d+)\)', rule)
+            match = re.search(r'Coriace \(\+?(\d+)\)', rule)
             if match:
                 coriace_value += int(match.group(1))
 
@@ -191,6 +191,13 @@ if st.session_state.page == "army":
     st.subheader("Liste de l'armée")
 
     for i, u in enumerate(st.session_state.army_list):
+        # Calculer la hauteur dynamique en fonction du contenu
+        height = 260
+        if u.get("mount"):
+            height += 40
+        if u.get("options"):
+            height += 20 * len(u["options"])
+
         components.html(f"""
         <style>
         .card {{
@@ -207,6 +214,7 @@ if st.session_state.page == "army":
             padding:6px 12px;
             border-radius:15px;
             margin-right:8px;
+            margin-bottom: 5px;
         }}
         .title {{
             font-weight:bold;
@@ -218,30 +226,41 @@ if st.session_state.page == "army":
         <div class="card">
             <h4>{u['name']} — {u['cost']} pts</h4>
 
-            <div>
+            <div style="margin-bottom: 10px;">
                 <span class="badge">Qualité {u['quality']}+</span>
                 <span class="badge">Défense {u['defense']}+</span>
                 <span class="badge">Coriace {u['coriace']}</span>
             </div>
 
             <div class="title">Règles spéciales</div>
-            <div>{", ".join(u["base_rules"])}</div>
+            <div style="margin-left: 15px; margin-bottom: 10px;">{", ".join(u["base_rules"])}</div>
 
-            {(
-                "<div class='title'>Options sélectionnées</div><div>" +
-                ", ".join(o["name"] for o in u["options"].values()) +
-                "</div>"
-            ) if u["options"] else ""}
+            {f"""
+            <div class="title">Arme équipée</div>
+            <div style="margin-left: 15px; margin-bottom: 10px;">
+                {u['current_weapon'].get('name', 'Arme de base')} |
+                A{u['current_weapon'].get('attacks', '?')} |
+                PA({u['current_weapon'].get('armor_piercing', '?')})
+                {f" | {', '.join(u['current_weapon'].get('special_rules', []))}" if u['current_weapon'].get('special_rules') else ''}
+            </div>
+            """ if 'current_weapon' in u else ''}
 
-            {(
-                "<div class='title'>Monture</div><div><strong>" +
-                u["mount"]["name"] +
-                "</strong><br>" +
-                ", ".join(u["mount"].get("special_rules", [])) +
-                "</div>"
-            ) if u["mount"] else ""}
+            {f"""
+            <div class="title">Options sélectionnées</div>
+            <div style="margin-left: 15px; margin-bottom: 10px;">
+                {', '.join(o['name'] for o in u['options'].values())}
+            </div>
+            """ if u.get("options") else ''}
+
+            {f"""
+            <div class="title">Monture</div>
+            <div style="margin-left: 15px; margin-bottom: 10px;">
+                <strong>{u['mount']['name']}</strong> (+{u['mount'].get('cost', 0)} pts)<br>
+                {', '.join(u['mount'].get('special_rules', []))}
+            </div>
+            """ if u.get("mount") else ''}
         </div>
-        """, height=260)
+        """, height=height)
 
         if st.button("❌ Supprimer", key=f"del_{i}"):
             st.session_state.army_total_cost -= u["cost"]
