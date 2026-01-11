@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
+from collections import defaultdict
 
 # -------------------------------------------------
 # CONFIG
@@ -10,6 +11,18 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="OPR Army Builder FR", layout="centered")
 BASE_DIR = Path(__file__).resolve().parent
 FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
+
+# -------------------------------------------------
+# Règles spécifiques par jeu
+GAME_RULES = {
+    "Age of Fantasy": {
+        "hero_per_points": 375,  # 1 héros par tranche de 375 pts
+        "unit_copies": {750: 1},  # 1+X copies où X=1 pour 750 pts
+        "max_unit_percentage": 35,  # Aucune unité ne peut valoir plus de 35% du total
+        "unit_per_points": 150,  # 1 unité max par tranche de 150 pts
+    },
+    # Ajoute d'autres jeux ici avec leurs règles spécifiques
+}
 
 # -------------------------------------------------
 # SESSION STATE INIT
@@ -23,7 +36,9 @@ for key, default in {
     "points": 1000,
     "list_name": "",
     "army_list": [],
-    "army_total_cost": 0
+    "army_total_cost": 0,
+    "is_army_valid": True,
+    "validation_errors": []
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -74,7 +89,7 @@ if st.session_state.page == "setup":
     st.session_state.points = st.number_input(
         "Format de la partie (points)",
         min_value=250,
-        step=50,
+        step=250,
         value=st.session_state.points
     )
 
@@ -93,6 +108,45 @@ if st.session_state.page == "setup":
         if st.button("➡️ Ma liste"):
             st.session_state.page = "army"
             st.rerun()
+
+# Fonction pour valider la liste d'armée selon les règles du jeu sélectionné
+def validate_army(army_list, game_rules, total_cost, total_points):
+    errors = []
+
+    # Règles générales
+    if not army_list:
+        errors.append("Aucune unité dans l'armée")
+        return False, errors
+
+    # Règles spécifiques à Age of Fantasy
+    if game_rules == GAME_RULES["Age of Fantasy"]:
+        # 1 héros par tranche de 375 pts
+        heroes = sum(1 for u in army_list if u.get("type", "").lower() in ["hero", "héro"])
+        max_heroes = total_points // game_rules["hero_per_points"]
+        if heroes > max_heroes:
+            errors.append(f"Trop de héros (max: {max_heroes} pour {total_points} pts)")
+
+        # 1+X copies de la même unité (X=1 pour 750 pts)
+        unit_counts = defaultdict(int)
+        for unit in army_list:
+            unit_counts[unit["name"]] += 1
+
+        max_copies = 1 + (total_points // 750)
+        for unit_name, count in unit_counts.items():
+            if count > max_copies:
+                errors.append(f"Trop de copies de '{unit_name}' (max: {max_copies})")
+
+        # Aucune unité ne peut valoir plus de 35% du total
+        for unit in army_list:
+            if (unit["cost"] / total_cost) * 100 > game_rules["max_unit_percentage"]:
+                errors.append(f"'{unit['name']}' dépasse 35% du total des points")
+
+        # 1 unité max par tranche de 150 pts
+        max_units = total_points // game_rules["unit_per_points"]
+        if len(army_list) > max_units:
+            errors.append(f"Trop d'unités (max: {max_units} pour {total_points} pts)")
+
+    return len(errors) == 0, errors
 
 # =================================================
 # PAGE 2 — COMPOSITION DE L’ARMÉE
@@ -179,10 +233,29 @@ if st.session_state.page == "army":
             "coriace": coriace_value,
             "base_rules": base_rules,
             "options": options_selected,
-            "mount": mount_selected
+            "mount": mount_selected,
+            "type": unit.get("type", "Infantry")
         })
         st.session_state.army_total_cost += total_cost
         st.rerun()
+
+    # Validation de la liste d'armée
+    if st.session_state.game in GAME_RULES:
+        st.session_state.is_army_valid, st.session_state.validation_errors = validate_army(
+            st.session_state.army_list,
+            GAME_RULES[st.session_state.game],
+            st.session_state.army_total_cost,
+            st.session_state.points
+        )
+    else:
+        st.session_state.is_army_valid = True
+        st.session_state.validation_errors = []
+
+    # Affichage des erreurs de validation
+    if not st.session_state.is_army_valid:
+        st.warning("⚠️ La liste d'armée n'est pas valide :")
+        for error in st.session_state.validation_errors:
+            st.write(f"- {error}")
 
     # ---------------------------------------------
     # LISTE DE L’ARMÉE
@@ -221,9 +294,15 @@ if st.session_state.page == "army":
             color:#4a89dc;
             margin-top:10px;
         }}
+        .valid {{
+            border-left: 4px solid #2ecc71;
+        }}
+        .invalid {{
+            border-left: 4px solid #e74c3c;
+        }}
         </style>
 
-        <div class="card">
+        <div class="card {'valid' if st.session_state.is_army_valid else 'invalid'}">
             <h4>{u['name']} — {u['cost']} pts</h4>
 
             <div style="margin-bottom: 10px;">
@@ -238,10 +317,9 @@ if st.session_state.page == "army":
             {f"""
             <div class="title">Arme équipée</div>
             <div style="margin-left: 15px; margin-bottom: 10px;">
-                {u['current_weapon'].get('name', 'Arme de base')} |
-                A{u['current_weapon'].get('attacks', '?')} |
-                PA({u['current_weapon'].get('armor_piercing', '?')})
-                {f" | {', '.join(u['current_weapon'].get('special_rules', []))}" if u['current_weapon'].get('special_rules') else ''}
+                {u.get('current_weapon', {}).get('name', 'Arme de base')} |
+                A{u.get('current_weapon', {}).get('attacks', '?')} |
+                PA({u.get('current_weapon', {}).get('armor_piercing', '?')})
             </div>
             """ if 'current_weapon' in u else ''}
 
@@ -271,3 +349,15 @@ if st.session_state.page == "army":
         st.session_state.army_total_cost / st.session_state.points
         if st.session_state.points else 0
     )
+
+    # Affichage des règles spécifiques au jeu
+    if st.session_state.game in GAME_RULES:
+        st.divider()
+        st.subheader("Règles spécifiques à " + st.session_state.game)
+        rules = GAME_RULES[st.session_state.game]
+        st.markdown(f"""
+        - **Héros** : 1 par tranche de {rules['hero_per_points']} pts
+        - **Copies d'unités** : 1+X (X=1 pour {list(rules['unit_copies'].keys())[0]} pts)
+        - **Unité max** : {rules['max_unit_percentage']}% du total des points
+        - **Nombre d'unités** : 1 par tranche de {rules['unit_per_points']} pts
+        """)
