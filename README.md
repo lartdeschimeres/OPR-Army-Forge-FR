@@ -26,25 +26,14 @@
 
 ## 🚀 Installation et lancement
 
-Clonez ce dépôt :
-bash
-Copier
-
+1. Clonez ce dépôt :
 git clone https://github.com/votre-utilisateur/opr-army-forge-fr.git
 cd opr-army-forge-fr
 
-
-Installez les dépendances :
-bash
-Copier
-
+2. Installez les dépendances :
 pip install -r requirements.txt
 
-
-Lancez l'application :
-bash
-Copier
-
+3. Lancez l'application :
 streamlit run app.py
 
 ---
