@@ -112,7 +112,7 @@
               "cost": 65,
               "mount": {
                 "name": "Grande bête",
-                "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (+3)", "Impact (2)", "Rapide"]
+                "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Impact (2)", "Rapide"]
               }
             },
             {
@@ -120,7 +120,7 @@
               "cost": 75,
               "mount": {
                 "name": "Monture démoniaque",
-                "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (+3)", "Impact (2)", "Effrayant (1)", "Rapide"]
+                "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Impact (2)", "Effrayant (1)", "Rapide"]
               }
             },
             {
@@ -128,7 +128,7 @@
               "cost": 120,
               "mount": {
                 "name": "Char",
-                "special_rules": ["Sabots (A2)", "Coriace (+6)", "Impact (4)", "Rapide"]
+                "special_rules": ["Sabots (A2)", "Coriace (6)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -136,7 +136,7 @@
               "cost": 135,
               "mount": {
                 "name": "Char bestial",
-                "special_rules": ["Griffes lourdes (A2, PA(1))", "Coriace (+6)", "Effrayant (1)", "Impact (4)", "Rapide"]
+                "special_rules": ["Griffes lourdes (A2, PA(1))", "Coriace (6)", "Effrayant (1)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -144,7 +144,7 @@
               "cost": 155,
               "mount": {
                 "name": "Manticore",
-                "special_rules": ["Griffes perforantes (A6, Perforant)", "Coriace (+6)", "Effrayant (1)", "Vol"]
+                "special_rules": ["Griffes perforantes (A6, Perforant)", "Coriace (6)", "Effrayant (1)", "Vol"]
               }
             },
             {
@@ -152,7 +152,7 @@
               "cost": 320,
               "mount": {
                 "name": "Dragon du Ravage",
-                "special_rules": ["Griffes lourdes (A6, PA(1))", "Piétinement (A4, PA(1))", "Attaque de souffle", "Coriace (+12)", "Effrayant (2)", "Vol"]
+                "special_rules": ["Griffes lourdes (A6, PA(1))", "Piétinement (A4, PA(1))", "Attaque de souffle", "Coriace (12)", "Effrayant (2)", "Vol"]
               }
             }
           ]
