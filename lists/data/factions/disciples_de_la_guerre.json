@@ -139,7 +139,7 @@
             },
             {
               "name": "Dragon du Ravage",
-              "cost": 155,
+              "cost": 320,
               "mount": {
                 "name": "Dragon du Ravage",
                 "special_rules": ["Griffes lourdes (A6, PA(1))", "Piétinement (A4, PA(1))", "Attaque de souffle", "Coriace (12)", "Effrayant (2)", "Volant"]
