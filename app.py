@@ -93,15 +93,28 @@ def main():
             factions = {}
             games = set()
 
+            # Vérification du dossier
+            if not FACTIONS_DIR.exists():
+                st.error(f"Le dossier {FACTIONS_DIR} n'existe pas!")
+                FACTIONS_DIR.mkdir(parents=True, exist_ok=True)
+                return {}, []
+
             # Charger les factions depuis les fichiers
             faction_files = list(FACTIONS_DIR.glob("*.json"))
             if not faction_files:
                 st.warning(f"Aucun fichier JSON trouvé dans {FACTIONS_DIR}")
+                return {}, []
 
             for fp in faction_files:
                 try:
                     with open(fp, encoding="utf-8") as f:
                         data = json.load(f)
+
+                        # Vérification des champs obligatoires
+                        if "game" not in data or "faction" not in data:
+                            st.warning(f"Fichier {fp.name} invalide: champs 'game' ou 'faction' manquants")
+                            continue
+
                         game = data["game"]
                         faction_name = data["faction"]
 
@@ -109,12 +122,19 @@ def main():
                             factions[game] = {}
                         factions[game][faction_name] = data
                         games.add(game)
+
+                except json.JSONDecodeError:
+                    st.warning(f"Fichier JSON invalide: {fp.name}")
                 except Exception as e:
-                    st.warning(f"Impossible de lire {fp.name} : {e}")
+                    st.warning(f"Erreur avec {fp.name}: {str(e)}")
+
+            # Vérification spécifique pour Age of Fantasy
+            if "Age of Fantasy" not in games:
+                st.warning("Le jeu 'Age of Fantasy' n'a pas été trouvé dans les fichiers chargés.")
 
             return factions, sorted(games)
         except Exception as e:
-            st.error(f"Erreur lors du chargement des factions: {str(e)}")
+            st.error(f"Erreur critique lors du chargement: {str(e)}")
             return {}, []
 
     def calculate_coriace_value(unit_data):
@@ -314,6 +334,14 @@ def main():
     if not st.session_state["factions"] or not st.session_state["games"]:
         st.session_state["factions"], st.session_state["games"] = load_factions()
 
+        # Vérification après chargement
+        if not st.session_state["games"]:
+            st.error("Aucun jeu n'a pu être chargé. Vérifiez vos fichiers JSON.")
+        else:
+            st.write(f"Jeux disponibles: {', '.join(st.session_state['games'])}")
+            if "Age of Fantasy" in st.session_state["factions"]:
+                st.write(f"Factions pour Age of Fantasy: {list(st.session_state['factions']['Age of Fantasy'].keys())}")
+
     # PAGE 1 — Connexion/Inscription
     if st.session_state.page == "login":
         st.title("OPR Army Builder 🇫🇷")
@@ -361,6 +389,18 @@ def main():
             st.session_state.page = "login"
             st.rerun()
 
+        # Bouton pour recharger les factions
+        if st.button("Recharger les factions"):
+            st.session_state["factions"], st.session_state["games"] = load_factions()
+            st.rerun()
+
+        # Vérification des jeux disponibles
+        if not st.session_state["games"]:
+            st.error("Aucun jeu trouvé. Vérifiez que vos fichiers JSON sont dans le bon dossier.")
+            st.write("Chemin attendu:", FACTIONS_DIR.absolute())
+            st.write("Fichiers présents:", [f.name for f in FACTIONS_DIR.glob("*") if f.is_file()])
+            st.stop()
+
         st.subheader("Mes listes d'armées sauvegardées")
 
         if st.session_state.player_army_lists:
@@ -405,53 +445,67 @@ def main():
         st.divider()
         st.subheader("Créer une nouvelle liste")
 
-        if not st.session_state["games"]:
-            st.error("Aucun jeu disponible. Vérifiez que vos fichiers JSON sont dans le bon dossier.")
-        else:
-            st.session_state.game = st.selectbox(
-                "Jeu",
-                st.session_state["games"],
-                index=0 if st.session_state["games"] else None
-            )
+        # Sélection du jeu avec vérification
+        game_options = st.session_state["games"]
+        if "Age of Fantasy" not in game_options:
+            game_options = ["Age of Fantasy"] + game_options  # Forcer l'affichage
 
-            if st.session_state.game:
+        st.session_state.game = st.selectbox(
+            "Jeu",
+            game_options,
+            index=0 if game_options else None,
+            format_func=lambda x: "Age of Fantasy" if x == "Age of Fantasy" else x
+        )
+
+        if st.session_state.game:
+            # Vérification des factions disponibles
+            if st.session_state.game in st.session_state["factions"]:
                 available_factions = list(st.session_state["factions"][st.session_state.game].keys())
                 if not available_factions:
                     st.warning(f"Aucune faction disponible pour {st.session_state.game}")
                 else:
+                    # Vérification spécifique pour Disciples de la Guerre
+                    has_disciples = "Disciples de la Guerre" in available_factions
+                    if not has_disciples:
+                        st.warning("La faction 'Disciples de la Guerre' n'est pas disponible pour ce jeu.")
+
                     st.session_state.faction = st.selectbox(
                         "Faction",
                         available_factions,
                         index=0 if available_factions else None
                     )
+            else:
+                st.error(f"Aucune faction trouvée pour le jeu {st.session_state.game}")
+                st.session_state.faction = None
 
-                    st.session_state.points = st.number_input(
-                        "Format de la partie (points)",
-                        min_value=250,
-                        step=250,
-                        value=1000
-                    )
+            if st.session_state.faction:
+                st.session_state.points = st.number_input(
+                    "Format de la partie (points)",
+                    min_value=250,
+                    step=250,
+                    value=1000
+                )
 
-                    st.session_state.list_name = st.text_input(
-                        "Nom de la liste",
-                        value="Ma liste d'armée"
-                    )
+                st.session_state.list_name = st.text_input(
+                    "Nom de la liste",
+                    value="Ma liste d'armée"
+                )
 
-                    col1, col2 = st.columns(2)
+                col1, col2 = st.columns(2)
 
-                    with col1:
-                        if st.button("💾 Sauvegarder la configuration"):
-                            st.success("Configuration sauvegardée")
+                with col1:
+                    if st.button("💾 Sauvegarder la configuration"):
+                        st.success("Configuration sauvegardée")
 
-                    with col2:
-                        if st.button("➡️ Ma liste"):
-                            if st.session_state.game and st.session_state.faction:
-                                faction_data = st.session_state["factions"][st.session_state.game][st.session_state.faction]
-                                st.session_state.units = faction_data["units"]
-                                st.session_state.page = "army"
-                                st.rerun()
-                            else:
-                                st.error("Veuillez sélectionner un jeu et une faction")
+                with col2:
+                    if st.button("➡️ Ma liste"):
+                        if st.session_state.game and st.session_state.faction:
+                            faction_data = st.session_state["factions"][st.session_state.game][st.session_state.faction]
+                            st.session_state.units = faction_data["units"]
+                            st.session_state.page = "army"
+                            st.rerun()
+                        else:
+                            st.error("Veuillez sélectionner un jeu et une faction")
 
     # PAGE 3 — Composition de l'armée
     elif st.session_state.page == "army":
