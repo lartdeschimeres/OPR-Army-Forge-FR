@@ -146,9 +146,42 @@ def main():
 
         return coriace_value
 
-    # Charger les factions au démarrage
-    if not st.session_state["factions"] or not st.session_state["games"]:
-        st.session_state["factions"], st.session_state["games"] = load_factions()
+    def validate_army(army_list, game_rules, total_cost, total_points):
+        errors = []
+
+        if not army_list:
+            errors.append("Aucune unité dans l'armée")
+            return False, errors
+
+        # Vérification du dépassement de points
+        if total_cost > total_points:
+            errors.append(f"Dépassement de {total_cost - total_points} pts (max: {total_points} pts)")
+
+        if game_rules == GAME_RULES["Age of Fantasy"]:
+            heroes = sum(1 for u in army_list if u.get("type", "").lower() == "hero")
+            max_heroes = max(1, total_points // game_rules["hero_per_points"])
+            if heroes > max_heroes:
+                errors.append(f"Trop de héros (max: {max_heroes} pour {total_points} pts)")
+
+            unit_counts = defaultdict(int)
+            for unit in army_list:
+                unit_counts[unit["name"]] += 1
+
+            max_copies = 1 + (total_points // 750)
+            for unit_name, count in unit_counts.items():
+                if count > max_copies:
+                    errors.append(f"Trop de copies de '{unit_name}' (max: {max_copies})")
+
+            for unit in army_list:
+                percentage = (unit["cost"] / total_points) * 100
+                if percentage > game_rules["max_unit_percentage"]:
+                    errors.append(f"'{unit['name']}' ({unit['cost']} pts) dépasse {game_rules['max_unit_percentage']}% du total ({total_points} pts)")
+
+            max_units = total_points // game_rules["unit_per_points"]
+            if len(army_list) > max_units:
+                errors.append(f"Trop d'unités (max: {max_units} pour {total_points} pts)")
+
+        return len(errors) == 0, errors
 
     # Fonctions pour la gestion des comptes joueurs
     def hash_password(password):
@@ -242,38 +275,9 @@ def main():
             st.error(f"Erreur lors de la suppression: {str(e)}")
             return False
 
-    def validate_army(army_list, game_rules, total_cost, total_points):
-        errors = []
-
-        if not army_list:
-            errors.append("Aucune unité dans l'armée")
-            return False, errors
-
-        if game_rules == GAME_RULES["Age of Fantasy"]:
-            heroes = sum(1 for u in army_list if u.get("type", "").lower() == "hero")
-            max_heroes = max(1, total_points // game_rules["hero_per_points"])
-            if heroes > max_heroes:
-                errors.append(f"Trop de héros (max: {max_heroes} pour {total_points} pts)")
-
-            unit_counts = defaultdict(int)
-            for unit in army_list:
-                unit_counts[unit["name"]] += 1
-
-            max_copies = 1 + (total_points // 750)
-            for unit_name, count in unit_counts.items():
-                if count > max_copies:
-                    errors.append(f"Trop de copies de '{unit_name}' (max: {max_copies})")
-
-            for unit in army_list:
-                percentage = (unit["cost"] / total_points) * 100
-                if percentage > game_rules["max_unit_percentage"]:
-                    errors.append(f"'{unit['name']}' ({unit['cost']} pts) dépasse {game_rules['max_unit_percentage']}% du total ({total_points} pts)")
-
-            max_units = total_points // game_rules["unit_per_points"]
-            if len(army_list) > max_units:
-                errors.append(f"Trop d'unités (max: {max_units} pour {total_points} pts)")
-
-        return len(errors) == 0, errors
+    # Charger les factions au démarrage
+    if not st.session_state["factions"] or not st.session_state["games"]:
+        st.session_state["factions"], st.session_state["games"] = load_factions()
 
     # PAGE 1 — Connexion/Inscription
     if st.session_state.page == "login":
@@ -609,8 +613,19 @@ def main():
                 st.session_state.points
             )
         else:
-            st.session_state.is_army_valid = True
-            st.session_state.validation_errors = []
+            st.session_state.is_army_valid = False if st.session_state.army_total_cost > st.session_state.points else True
+            st.session_state.validation_errors = [f"Dépassement de {st.session_state.army_total_cost - st.session_state.points} pts"] if st.session_state.army_total_cost > st.session_state.points else []
+
+        # Barre de progression et boutons
+        st.divider()
+        progress = min(1.0, st.session_state.army_total_cost / st.session_state.points) if st.session_state.points else 0
+        st.progress(progress)
+        st.markdown(f"**{st.session_state.army_total_cost} / {st.session_state.points} pts**")
+
+        # Avertissement si dépassement
+        if st.session_state.army_total_cost > st.session_state.points:
+            excess = st.session_state.army_total_cost - st.session_state.points
+            st.warning(f"⚠️ Votre armée dépasse de {excess} pts la limite de {st.session_state.points} pts")
 
         if not st.session_state.is_army_valid:
             st.warning("⚠️ La liste d'armée n'est pas valide :")
@@ -815,12 +830,6 @@ def main():
                 st.session_state.army_total_cost -= u["cost"]
                 st.session_state.army_list.pop(i)
                 st.rerun()
-
-        # Barre de progression et boutons
-        st.divider()
-        progress = st.session_state.army_total_cost / st.session_state.points if st.session_state.points else 0
-        st.progress(progress)
-        st.markdown(f"**{st.session_state.army_total_cost} / {st.session_state.points} pts**")
 
         col1, col2, col3 = st.columns(3)
         with col1:
