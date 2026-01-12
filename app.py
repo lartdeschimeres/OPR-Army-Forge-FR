@@ -594,8 +594,11 @@ def main():
                 "type": unit.get("type", "Infantry"),
                 "combined": combined_unit,
                 "weapon_replaced": weapon_replaced,
-                "base_weapon": default_weapon,
-                "selected_weapon": current_weapon if weapon_replaced else None
+                "weapon_info": {
+                    "is_replaced": weapon_replaced,
+                    "original_name": default_weapon.get("name", ""),
+                    "current_name": current_weapon.get("name", "")
+                }
             }
 
             # Ajouter la monture si elle existe
@@ -771,19 +774,22 @@ def main():
                 </div>
                 """
 
-            # Options (sans les armes, qu'elles soient de base ou de remplacement)
+            # Options (sans les armes)
             other_options = []
             for group_name, opt_group in u.get("options", {}).items():
-                # Exclure complètement les groupes d'armes (base ou remplacement)
+                # Exclure complètement les groupes d'armes
                 if group_name == "Remplacement d'arme":
                     continue
 
-                if group_name not in ["Améliorations", "Montures"]:
-                    if isinstance(opt_group, list):
-                        for opt in opt_group:
-                            other_options.append(opt["name"])
-                    else:
-                        other_options.append(opt_group["name"])
+                # Exclure aussi les améliorations d'unité si on veut les afficher séparément
+                if group_name == "Améliorations d'unité":
+                    continue
+
+                if isinstance(opt_group, list):
+                    for opt in opt_group:
+                        other_options.append(opt["name"])
+                else:
+                    other_options.append(opt_group["name"])
 
             if other_options:
                 html_content += f"""
@@ -815,7 +821,7 @@ def main():
                 </div>
                 """
 
-            # Améliorations (uniquement celles sélectionnées)
+            # Améliorations (affichées séparément)
             if "Améliorations" in u.get("options", {}):
                 improvements = []
                 if isinstance(u["options"]["Améliorations"], list):
@@ -826,7 +832,7 @@ def main():
                 if improvements:
                     html_content += f"""
                     <div class="section">
-                        <div class="section-title">Améliorations</div>
+                        <div class="section-title">Améliorations d'unité</div>
                         <div class="section-content">{', '.join(improvements)}</div>
                     </div>
                     """
@@ -1007,16 +1013,19 @@ def main():
 
                     other_options = []
                     for group_name, opt_group in u.get("options", {}).items():
-                        # Exclure complètement les groupes d'armes (base ou remplacement)
+                        # Exclure complètement les groupes d'armes
                         if group_name == "Remplacement d'arme":
                             continue
 
-                        if group_name not in ["Améliorations", "Montures"]:
-                            if isinstance(opt_group, list):
-                                for opt in opt_group:
-                                    other_options.append(opt["name"])
-                            else:
-                                other_options.append(opt_group["name"])
+                        # Exclure aussi les améliorations d'unité si on veut les afficher séparément
+                        if group_name == "Améliorations d'unité":
+                            continue
+
+                        if isinstance(opt_group, list):
+                            for opt in opt_group:
+                                other_options.append(opt["name"])
+                        else:
+                            other_options.append(opt_group["name"])
 
                     if other_options:
                         html_content += f"""
@@ -1057,7 +1066,7 @@ def main():
                         if improvements:
                             html_content += f"""
                             <div class="section">
-                                <div class="section-title">Améliorations</div>
+                                <div class="section-title">Améliorations d'unité</div>
                                 <div class="section-content">{', '.join(improvements)}</div>
                             </div>
                             """
