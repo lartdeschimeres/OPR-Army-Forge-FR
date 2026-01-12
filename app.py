@@ -777,7 +777,7 @@ def main():
             # Options (toutes les options SAUF les armes)
             other_options = []
             for group_name, opt_group in u.get("options", {}).items():
-                # Exclure les groupes liés aux armes
+                # Exclure uniquement les groupes d'armes
                 if "arme" in group_name.lower() or "weapon" in group_name.lower():
                     continue
 
@@ -786,6 +786,10 @@ def main():
                         other_options.append(opt["name"])
                 elif isinstance(opt_group, dict):
                     other_options.append(opt_group["name"])
+
+            # Ajouter les montures aux options si elles existent
+            if u.get("mount"):
+                other_options.append(u["mount"].get("name", "Monture"))
 
             if other_options:
                 html_content += f"""
@@ -811,7 +815,7 @@ def main():
                     </div>
                     """
 
-            # Monture (si elle existe)
+            # Monture (si elle existe, affichée séparément)
             if u.get("mount"):
                 mount = u['mount']
                 mount_rules = []
@@ -1009,7 +1013,7 @@ def main():
 
                     other_options = []
                     for group_name, opt_group in u.get("options", {}).items():
-                        # Exclure les groupes liés aux armes
+                        # Exclure uniquement les groupes d'armes
                         if "arme" in group_name.lower() or "weapon" in group_name.lower():
                             continue
 
@@ -1018,6 +1022,10 @@ def main():
                                 other_options.append(opt["name"])
                         elif isinstance(opt_group, dict):
                             other_options.append(opt_group["name"])
+
+                    # Ajouter les montures aux options si elles existent
+                    if u.get("mount"):
+                        other_options.append(u["mount"].get("name", "Monture"))
 
                     if other_options:
                         html_content += f"""
