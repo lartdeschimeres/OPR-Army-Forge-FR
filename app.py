@@ -158,11 +158,13 @@ def main():
             errors.append(f"Dépassement de {total_cost - total_points} pts (max: {total_points} pts)")
 
         if game_rules == GAME_RULES["Age of Fantasy"]:
+            # 1. Vérification du nombre de héros
             heroes = sum(1 for u in army_list if u.get("type", "").lower() == "hero")
             max_heroes = max(1, total_points // game_rules["hero_per_points"])
             if heroes > max_heroes:
-                errors.append(f"Trop de héros (max: {max_heroes} pour {total_points} pts)")
+                errors.append(f"Trop de héros ({heroes}/{max_heroes} max pour {total_points} pts)")
 
+            # 2. Vérification du nombre de copies d'une même unité
             unit_counts = defaultdict(int)
             for unit in army_list:
                 unit_counts[unit["name"]] += 1
@@ -170,16 +172,18 @@ def main():
             max_copies = 1 + (total_points // 750)
             for unit_name, count in unit_counts.items():
                 if count > max_copies:
-                    errors.append(f"Trop de copies de '{unit_name}' (max: {max_copies})")
+                    errors.append(f"Trop de copies de '{unit_name}' ({count}/{max_copies} max)")
 
+            # 3. Vérification du pourcentage maximum par unité
             for unit in army_list:
                 percentage = (unit["cost"] / total_points) * 100
                 if percentage > game_rules["max_unit_percentage"]:
                     errors.append(f"'{unit['name']}' ({unit['cost']} pts) dépasse {game_rules['max_unit_percentage']}% du total ({total_points} pts)")
 
+            # 4. Vérification du nombre maximum d'unités
             max_units = total_points // game_rules["unit_per_points"]
             if len(army_list) > max_units:
-                errors.append(f"Trop d'unités (max: {max_units} pour {total_points} pts)")
+                errors.append(f"Trop d'unités ({len(army_list)}/{max_units} max pour {total_points} pts)")
 
         return len(errors) == 0, errors
 
