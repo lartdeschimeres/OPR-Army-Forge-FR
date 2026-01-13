@@ -6,32 +6,21 @@ from copy import deepcopy
 
 st.set_page_config(page_title="OPR Army Forge FR", layout="wide")
 
-# ==================================================
-# PATHS
-# ==================================================
-
 BASE_DIR = Path(__file__).resolve().parent
 FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 
 # ==================================================
-# SESSION STATE
+# SESSION
 # ==================================================
 
 if "page" not in st.session_state:
     st.session_state.page = "setup"
-
 if "army" not in st.session_state:
     st.session_state.army = []
-
-if "faction_data" not in st.session_state:
-    st.session_state.faction_data = None
-
-if "list_name" not in st.session_state:
-    st.session_state.list_name = ""
-
-if "points_limit" not in st.session_state:
-    st.session_state.points_limit = 2000
-
+if "faction" not in st.session_state:
+    st.session_state.faction = None
+if "points" not in st.session_state:
+    st.session_state.points = 2000
 
 # ==================================================
 # UTILITAIRES
@@ -45,158 +34,155 @@ def extract_coriace(rules):
             total += int(m.group(1))
     return total
 
-
 def load_factions():
-    factions = []
+    data = []
     for fp in FACTIONS_DIR.glob("*.json"):
         with open(fp, encoding="utf-8") as f:
-            factions.append(json.load(f))
-    return factions
-
+            data.append(json.load(f))
+    return data
 
 # ==================================================
-# PAGE 1 – CONFIGURATION
+# PAGE SETUP
 # ==================================================
 
 if st.session_state.page == "setup":
     st.title("⚙️ Création de la liste")
 
-    if not FACTIONS_DIR.exists():
-        st.error(f"Dossier introuvable : {FACTIONS_DIR}")
-        st.stop()
-
     factions = load_factions()
-
     games = sorted(set(f["game"] for f in factions))
-    selected_game = st.selectbox("Jeu", games)
 
-    available_factions = [f for f in factions if f["game"] == selected_game]
-    faction_names = [f["faction"] for f in available_factions]
+    game = st.selectbox("Jeu", games)
+    game_factions = [f for f in factions if f["game"] == game]
 
-    selected_faction_name = st.selectbox("Faction", faction_names)
-    selected_faction = next(f for f in available_factions if f["faction"] == selected_faction_name)
+    faction_name = st.selectbox("Faction", [f["faction"] for f in game_factions])
+    faction = next(f for f in game_factions if f["faction"] == faction_name)
 
-    st.session_state.list_name = st.text_input("Nom de la liste", st.session_state.list_name)
-    st.session_state.points_limit = st.number_input(
-        "Limite de points",
-        min_value=250,
-        step=250,
-        value=st.session_state.points_limit
-    )
+    st.session_state.points = st.number_input("Limite de points", 250, 5000, st.session_state.points, 250)
 
-    if st.button("➡️ Créer / Continuer"):
-        st.session_state.faction_data = selected_faction
+    if st.button("➡️ Composer l’armée"):
+        st.session_state.faction = faction
         st.session_state.page = "army"
         st.rerun()
 
-
 # ==================================================
-# PAGE 2 – MA LISTE
+# PAGE ARMY
 # ==================================================
 
 if st.session_state.page == "army":
-    faction = st.session_state.faction_data
+    faction = st.session_state.faction
     units = faction["units"]
 
-    st.title(f"📜 {st.session_state.list_name or 'Ma liste'}")
-    st.caption(
-        f"{faction['game']} | {faction['faction']} | "
-        f"{st.session_state.points_limit} pts"
-    )
+    st.title(f"📜 {faction['faction']} – {st.session_state.points} pts")
 
-    if st.button("⬅️ Retour configuration"):
-        st.session_state.page = "setup"
-        st.rerun()
+    col_add, col_list = st.columns([1, 2])
 
-    col_left, col_right = st.columns([1, 2])
+    # ==================================================
+    # AJOUT UNITÉ
+    # ==================================================
 
-    # --------------------------------------------------
-    # AJOUT D’UNITÉ
-    # --------------------------------------------------
-
-    with col_left:
+    with col_add:
         st.header("Ajouter une unité")
 
-        unit_names = [u["name"] for u in units]
-        selected_name = st.selectbox("Unité", unit_names)
-        base_unit = next(u for u in units if u["name"] == selected_name)
-        unit = deepcopy(base_unit)
+        unit_name = st.selectbox("Unité", [u["name"] for u in units])
+        base = next(u for u in units if u["name"] == unit_name)
+        unit = deepcopy(base)
 
-        total_cost = unit["base_cost"]
-        final_rules = list(unit.get("special_rules", []))
-        selected_options = {}
+        cost = unit["base_cost"]
+        rules = list(unit.get("special_rules", []))
+        weapons = list(unit.get("weapons", []))
+
+        selected_weapons = []
+        selected_upgrades = []
         selected_mount = None
 
-        st.subheader("Options")
+        # -------------------------
+        # OPTIONS ESCQUADE
+        # -------------------------
+        st.subheader("Options d’escouade")
+        sergent = st.checkbox("Sergent")
+        banner = st.checkbox("Bannière")
+        musician = st.checkbox("Musicien")
 
+        if sergent:
+            selected_upgrades.append("Sergent")
+            cost += 10
+        if banner:
+            selected_upgrades.append("Bannière")
+            cost += 10
+        if musician:
+            selected_upgrades.append("Musicien")
+            cost += 10
+
+        # -------------------------
+        # GROUPES
+        # -------------------------
         for group in unit.get("upgrade_groups", []):
-            options = ["Aucune"] + [o["name"] for o in group["options"]]
-            choice = st.selectbox(group["group"], options, key=f"{unit['name']}_{group['group']}")
+            st.subheader(group["group"])
 
-            if choice != "Aucune":
-                opt = next(o for o in group["options"] if o["name"] == choice)
-                total_cost += opt.get("cost", 0)
+            for opt in group["options"]:
+                checked = st.checkbox(f"{opt['name']} (+{opt['cost']} pts)", key=f"{unit_name}_{opt['name']}")
 
-                if group["type"] == "mount":
-                    selected_mount = opt
-                else:
-                    selected_options[group["group"]] = opt
+                if checked:
+                    cost += opt["cost"]
 
-                if "special_rules" in opt:
-                    final_rules.extend(opt["special_rules"])
+                    if group["type"] == "weapon":
+                        selected_weapons = [opt["weapon"]]
+                    elif group["type"] == "mount":
+                        selected_mount = opt
+                        rules.extend(opt.get("special_rules", []))
+                    else:
+                        selected_upgrades.append(opt["name"])
+                        rules.extend(opt.get("special_rules", []))
 
-        if st.button("➕ Ajouter à l'armée"):
+        if st.button("➕ Ajouter à l’armée"):
             st.session_state.army.append({
-                "profile": unit,
-                "rules": final_rules,
-                "options": selected_options,
+                "unit": unit,
+                "weapons": selected_weapons or weapons,
+                "rules": rules,
+                "options": selected_upgrades,
                 "mount": selected_mount,
-                "cost": total_cost
+                "cost": cost
             })
             st.rerun()
 
-    # --------------------------------------------------
-    # LISTE DE L’ARMÉE
-    # --------------------------------------------------
+    # ==================================================
+    # LISTE
+    # ==================================================
 
-    with col_right:
-        st.header("Unités")
+    with col_list:
+        st.header("Armée")
 
-        if not st.session_state.army:
-            st.info("Aucune unité ajoutée.")
-        else:
-            for i, u in enumerate(st.session_state.army):
-                profile = u["profile"]
+        for i, u in enumerate(st.session_state.army):
+            unit = u["unit"]
 
-                with st.container(border=True):
-                    cols = st.columns([3, 1])
+            with st.container(border=True):
+                st.subheader(unit["name"])
 
-                    with cols[0]:
-                        st.subheader(profile["name"])
+                q, d, c = st.columns(3)
+                q.metric("Qualité", f"{unit['quality']}+")
+                d.metric("Défense", f"{unit['defense']}+")
+                c.metric("Coriace total", extract_coriace(u["rules"]))
 
-                        q, d, c = st.columns(3)
-                        q.metric("Qualité", f"{profile['quality']}+")
-                        d.metric("Défense", f"{profile['defense']}+")
+                st.markdown("**Armes**")
+                for w in u["weapons"]:
+                    st.caption(f"{w['name']} – A{w['attacks']} PA({w['armor_piercing']})")
 
-                        coriace_total = extract_coriace(u["rules"])
-                        c.metric("Coriace total", coriace_total)
+                st.markdown("**Règles spéciales**")
+                st.caption(", ".join(sorted(set(u["rules"]))))
 
-                        st.markdown("**Règles spéciales**")
-                        st.caption(", ".join(sorted(set(u["rules"]))))
+                if u["options"]:
+                    st.markdown("**Options sélectionnées**")
+                    st.caption(", ".join(u["options"]))
 
-                        if u["options"]:
-                            st.markdown("**Options sélectionnées**")
-                            st.caption(", ".join(opt["name"] for opt in u["options"].values()))
+                if u["mount"]:
+                    m = u["mount"]
+                    st.markdown("**Monture**")
+                    st.caption(
+                        f"{m['name']} – "
+                        + ", ".join(m.get("special_rules", []))
+                    )
 
-                        if u["mount"]:
-                            st.markdown("**Monture**")
-                            st.caption(
-                                f"{u['mount']['name']} — "
-                                + ", ".join(u['mount'].get("special_rules", []))
-                            )
-
-                    with cols[1]:
-                        st.metric("Coût", u["cost"])
-                        if st.button("🗑 Supprimer", key=f"del_{i}"):
-                            st.session_state.army.pop(i)
-                            st.rerun()
+                st.metric("Coût", u["cost"])
+                if st.button("🗑 Supprimer", key=f"del_{i}"):
+                    st.session_state.army.pop(i)
+                    st.rerun()
