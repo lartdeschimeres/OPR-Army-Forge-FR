@@ -6,59 +6,99 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
 import os
+import hashlib
 
 # ======================
-# Gestion du LocalStorage
+# Gestion du LocalStorage (version corrigée pour Simon)
 # ======================
+
+def generate_unique_key(base_key):
+    """Génère une clé unique basée sur un hash."""
+    return f"{base_key}_{hashlib.md5(str(datetime.now().timestamp()).encode()).hexdigest()[:8]}"
 
 def localstorage_get(key):
-    """Récupère une valeur du LocalStorage."""
+    """Récupère une valeur du LocalStorage avec clé unique."""
     try:
+        unique_key = generate_unique_key(f"localstorage_value_{key}")
         get_js = f"""
         <script>
         const value = localStorage.getItem('{key}');
         const input = document.createElement('input');
         input.style.display = 'none';
-        input.id = 'localstorage_value_{key}';
+        input.id = '{unique_key}';
         input.value = value || 'null';
         document.body.appendChild(input);
         </script>
         """
         components.html(get_js, height=0)
-        value = st.text_input(f"localstorage_value_{key}", key=f"localstorage_value_{key}", label_visibility="collapsed")
+
+        value = st.text_input(
+            f"localstorage_value_{key}",
+            key=unique_key,
+            label_visibility="collapsed"
+        )
         return None if value == "null" else value
     except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
+        st.error(f"Erreur LocalStorage (lecture): {e}")
         return None
 
 def localstorage_set(key, value):
-    """Stocke une valeur dans le LocalStorage."""
+    """Stocke une valeur dans le LocalStorage avec échappement."""
     try:
+        if not isinstance(value, str):
+            value_str = json.dumps(value)
+        else:
+            value_str = value
+
+        # Échapper les caractères spéciaux
+        escaped_value = value_str.replace("'", "\\'").replace('"', '\\"').replace("`", "\\`")
+
         set_js = f"""
         <script>
-        localStorage.setItem('{key}', JSON.stringify({json.dumps(value)}));
+        localStorage.setItem('{key}', `{escaped_value}`);
         </script>
         """
         components.html(set_js, height=0)
     except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
+        st.error(f"Erreur LocalStorage (écriture): {e}")
 
-def load_army_lists(player_name="default"):
-    """Charge les listes d'armées."""
+def load_army_lists(player_name="Simon"):
+    """Charge les listes d'armées avec gestion des erreurs."""
     try:
         data = localstorage_get(f"army_lists_{player_name}")
-        return json.loads(data) if data else []
+        if data:
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                st.error("Données corrompues dans le LocalStorage. Réinitialisation...")
+                localstorage_set(f"army_lists_{player_name}", [])
+                return []
+        return []
     except Exception as e:
         st.error(f"Erreur chargement listes: {e}")
         return []
 
-def save_army_list(army_list_data, player_name="default"):
-    """Sauvegarde une liste d'armée."""
+def save_army_list(army_list_data, player_name="Simon"):
+    """Sauvegarde une liste d'armée avec gestion des doublons."""
     try:
-        current_lists = load_army_lists(player_name)
-        current_lists.append(army_list_data)
-        localstorage_set(f"army_lists_{player_name}", current_lists)
-        return True
+        current_lists = load_army_lists(player_name) or []
+
+        # Vérifier les doublons par nom et contenu
+        list_exists = any(
+            lst['name'] == army_list_data['name'] and
+            lst['game'] == army_list_data['game'] and
+            lst['faction'] == army_list_data['faction'] and
+            abs(lst['total_cost'] - army_list_data['total_cost']) < 1  # Tolérance pour les arrondis
+            for lst in current_lists
+        )
+
+        if not list_exists:
+            current_lists.append(army_list_data)
+            localstorage_set(f"army_lists_{player_name}", current_lists)
+            return True
+        else:
+            st.warning("Cette liste existe déjà et n'a pas été dupliquée.")
+            return False
     except Exception as e:
         st.error(f"Erreur sauvegarde: {e}")
         return False
@@ -80,17 +120,30 @@ def delete_army_list(player_name, list_index):
 # Génération de fichiers
 # ======================
 
+def format_special_rule(rule):
+    """Formate une règle spéciale avec parenthèses si nécessaire."""
+    if not isinstance(rule, str):
+        return str(rule)
+
+    if "(" in rule and ")" in rule:
+        return rule
+
+    match = re.search(r"(\D+)(\d+)", rule)
+    if match:
+        return f"{match.group(1)}({match.group(2)})"
+    return rule
+
 def generate_html(army_data):
-    """Génère le HTML pour une liste d'armée."""
+    """Génère le HTML pour une liste d'armée (version optimisée pour Simon)."""
     html_content = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <title>Liste OPR - {army_data['name']}</title>
         <style>
-            body {{ font-family: Arial, sans-serif; margin: 20px; color: #333; }}
-            .army-title {{ color: #2c3e50; margin-bottom: 5px; }}
-            .army-subtitle {{ color: #7f8c8d; margin-bottom: 20px; }}
+            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; color: #333; line-height: 1.5; }}
+            .army-title {{ color: #2c3e50; margin-bottom: 5px; font-size: 1.8em; }}
+            .army-subtitle {{ color: #7f8c8d; margin-bottom: 20px; font-size: 1.1em; }}
             .unit-card {{
                 border: 1px solid #ddd; border-radius: 8px;
                 padding: 15px; margin-bottom: 20px; background: #f9f9f9;
@@ -116,7 +169,7 @@ def generate_html(army_data):
             .section-title {{
                 font-weight: bold; color: #3498db;
                 margin: 12px 0 8px; border-bottom: 1px dashed #ddd;
-                padding-bottom: 3px;
+                padding-bottom: 3px; font-size: 1.1em;
             }}
             .weapons-table {{
                 width: 100%; border-collapse: collapse;
@@ -128,7 +181,7 @@ def generate_html(army_data):
             }}
             .weapons-table th {{ background-color: #f2f2f2; }}
             .weapons-table td:first-child {{ text-align: left; }}
-            .rules-list {{ margin-left: 20px; color: #555; }}
+            .rules-list {{ margin-left: 20px; color: #555; font-style: italic; }}
             .upgrade-item {{
                 display: flex; justify-content: space-between;
                 margin-bottom: 3px; padding: 3px 0;
@@ -196,11 +249,9 @@ def generate_html(army_data):
                 rules.append(format_special_rule(rule))
 
             if rules:
-                html_content += """
+                html_content += f"""
                 <div class="section-title">Règles spéciales</div>
-                <div class="rules-list">
-                """ + ", ".join(rules) + """
-                </div>
+                <div class="rules-list">{', '.join(rules)}</div>
                 """
 
         # Armes
@@ -212,7 +263,7 @@ def generate_html(army_data):
             weapon_ap = weapon.get('armor_piercing', '?')
             weapon_special = ', '.join(weapon.get('special_rules', [])) or '-'
 
-            html_content += """
+            html_content += f"""
             <div class="section-title">Armes</div>
             <table class="weapons-table">
                 <thead>
@@ -226,11 +277,11 @@ def generate_html(army_data):
                 </thead>
                 <tbody>
                     <tr>
-                        <td>""" + weapon_name + """</td>
-                        <td>""" + weapon_range + """</td>
-                        <td>""" + str(weapon_attacks) + """</td>
-                        <td>""" + str(weapon_ap) + """</td>
-                        <td>""" + weapon_special + """</td>
+                        <td>{weapon_name}</td>
+                        <td>{weapon_range}</td>
+                        <td>{weapon_attacks}</td>
+                        <td>{weapon_ap}</td>
+                        <td>{weapon_special}</td>
                     </tr>
                 </tbody>
             </table>
@@ -302,7 +353,7 @@ def auto_export(army_data, filename_prefix):
             "total_cost": army_data['total_cost'],
             "date": datetime.now().isoformat()
         }
-        json_filename = f"{filename_prefix}_{datetime.now().strftime('%Y%m%d')}.json"
+        json_filename = f"{filename_prefix}_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
         json_str = json.dumps(json_data, indent=2, ensure_ascii=False)
 
         # Boutons de téléchargement
@@ -328,21 +379,6 @@ def auto_export(army_data, filename_prefix):
 # ======================
 # Calculs et validations
 # ======================
-
-def format_special_rule(rule):
-    """Formate une règle spéciale avec parenthèses si nécessaire."""
-    if not isinstance(rule, str):
-        return str(rule)
-
-    # Si la règle contient déjà des parenthèses, on la retourne telle quelle
-    if "(" in rule and ")" in rule:
-        return rule
-
-    # Sinon, on cherche un nombre et on ajoute des parenthèses
-    match = re.search(r"(\D+)(\d+)", rule)
-    if match:
-        return f"{match.group(1)}({match.group(2)})"
-    return rule
 
 def extract_coriace(rules):
     """Extrait la valeur de Coriace (ignore Coriace(0))."""
@@ -395,7 +431,7 @@ def validate_army(army_list, game_rules, total_cost, total_points):
         return False, errors
 
     if total_cost > total_points:
-        errors.append(f"Dépassement de {total_cost - total_points} pts")
+        errors.append(f"Dépassement de {total_cost - total_points} pts (max: {total_points} pts)")
 
     if game_rules:
         heroes = sum(1 for u in army_list if u.get('type', '').lower() == 'hero')
@@ -427,7 +463,8 @@ def main():
 
     st.set_page_config(
         page_title="OPR Army Builder FR - Simon Joinville Fouquet",
-        layout="wide"
+        layout="wide",
+        initial_sidebar_state="collapsed"
     )
 
     # Chemins des données
@@ -514,7 +551,7 @@ def main():
                         "army_lists": all_lists,
                         "date": datetime.now().isoformat()
                     }
-                    filename = f"OPR_All_Lists_{st.session_state.current_player}.json"
+                    filename = f"OPR_All_Lists_{st.session_state.current_player}_{datetime.now().strftime('%Y%m%d')}.json"
                     st.download_button(
                         label="Télécharger JSON",
                         data=json.dumps(data, indent=2, ensure_ascii=False),
@@ -771,6 +808,8 @@ def main():
 
                 # En-tête de l'unité
                 st.markdown(f"### {unit['name']} [{len(unit.get('models', ['10']))}] [{unit['cost']} pts]")
+                if unit.get('combined'):
+                    st.markdown('**<span style="background: #27ae60; color: white; padding: 2px 6px; border-radius: 4px;">Unité combinée</span>**', unsafe_allow_html=True)
 
                 # Stats
                 stats_col1, stats_col2, stats_col3 = st.columns(3)
