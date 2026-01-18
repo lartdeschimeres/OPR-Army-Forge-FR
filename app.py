@@ -5,7 +5,6 @@ from datetime import datetime
 import streamlit.components.v1 as components
 import hashlib
 import re
-from io import StringIO
 
 # ======================================================
 # CONFIGURATION POUR SIMON
@@ -22,10 +21,10 @@ FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 FACTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ======================================================
-# FONCTIONS UTILITAIRES (définies en premier)
+# FONCTIONS DE CALCUL DE CORIACE (version finale corrigée)
 # ======================================================
 def format_special_rule(rule):
-    """Formate les règles spéciales avec parenthèses si nécessaire"""
+    """Formate les règles spéciales avec parenthèses"""
     if not isinstance(rule, str):
         return str(rule)
     if "(" in rule and ")" in rule:
@@ -46,121 +45,63 @@ def extract_coriace_value(rule):
 
 def calculate_coriace_from_rules(rules):
     """Calcule la Coriace depuis une liste de règles"""
-    if not isinstance(rules, list):
+    if not rules or not isinstance(rules, list):
         return 0
     total = 0
     for rule in rules:
         total += extract_coriace_value(rule)
     return total
 
-def calculate_total_coriace(unit_data, combined=False):
-    """
-    Calcule la Coriace TOTALE d'une unité en prenant en compte:
-    - Règles de base
-    - Monture (spécialement important pour les héros)
-    - Améliorations
-    - Armes
-    - Unités combinées (si applicable)
-    """
-    total = 0
+def get_coriace_sources(unit_data, combined=False):
+    """Retourne les sources de Coriace avec leurs valeurs"""
+    sources = {}
 
-    # 1. Règles de base de l'unité
+    # 1. Règles de base
+    base_coriace = 0
     if 'special_rules' in unit_data:
-        total += calculate_coriace_from_rules(unit_data['special_rules'])
+        base_coriace = calculate_coriace_from_rules(unit_data['special_rules'])
+        sources['Règles de base'] = base_coriace
 
-    # 2. Monture (spécialement important pour les héros)
+    # 2. Monture
+    mount_coriace = 0
     if 'mount' in unit_data and unit_data['mount']:
         if 'special_rules' in unit_data['mount']:
-            total += calculate_coriace_from_rules(unit_data['mount']['special_rules'])
+            mount_coriace = calculate_coriace_from_rules(unit_data['mount']['special_rules'])
+            sources['Monture'] = mount_coriace
 
     # 3. Améliorations
+    options_coriace = 0
     if 'options' in unit_data:
         for opts in unit_data['options'].values():
             if isinstance(opts, list):
                 for opt in opts:
                     if 'special_rules' in opt:
-                        total += calculate_coriace_from_rules(opt['special_rules'])
+                        options_coriace += calculate_coriace_from_rules(opt['special_rules'])
             elif isinstance(opts, dict) and 'special_rules' in opts:
-                total += calculate_coriace_from_rules(opts['special_rules'])
+                options_coriace += calculate_coriace_from_rules(opts['special_rules'])
+        if options_coriace > 0:
+            sources['Améliorations'] = options_coriace
 
     # 4. Armes
+    weapon_coriace = 0
     if 'weapon' in unit_data and 'special_rules' in unit_data['weapon']:
-        total += calculate_coriace_from_rules(unit_data['weapon']['special_rules'])
+        weapon_coriace = calculate_coriace_from_rules(unit_data['weapon']['special_rules'])
+        if weapon_coriace > 0:
+            sources['Armes'] = weapon_coriace
 
-    # 5. Pour les unités combinées (mais PAS pour les héros)
+    # 5. Unité combinée
+    combined_coriace = 0
     if combined and unit_data.get('type', '').lower() != 'hero':
-        base_coriace = calculate_coriace_from_rules(unit_data.get('special_rules', []))
-        total += base_coriace  # On ajoute la base une deuxième fois
+        combined_coriace = base_coriace
+        sources['Unité combinée'] = combined_coriace
 
+    total = sum(sources.values())
+    return sources, total
+
+def calculate_total_coriace(unit_data, combined=False):
+    """Calcule la Coriace TOTALE d'une unité"""
+    sources, total = get_coriace_sources(unit_data, combined)
     return total if total > 0 else None
-
-def generate_html(army_data):
-    """Génère le HTML pour export"""
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Liste OPR - {army_data['name']}</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 20px; }}
-            .unit {{ border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }}
-            .stats {{ display: flex; gap: 20px; margin: 10px 0; }}
-            .stat {{ text-align: center; flex: 1; }}
-            table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
-            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
-        </style>
-    </head>
-    <body>
-        <h1>Liste d'armée OPR - {army_data['name']}</h1>
-        <h2>{army_data['game']} • {army_data['faction']} • {army_data['total_cost']}/{army_data['points']} pts</h2>
-    """
-
-    for unit in army_data['army_list']:
-        coriace = unit.get('coriace')
-        html += f"""
-        <div class="unit">
-            <h3>{unit['name']} [{unit['cost']} pts]</h3>
-            <div class="stats">
-                <div class="stat"><strong>Qua:</strong> {unit['quality']}+</div>
-                <div class="stat"><strong>Déf:</strong> {unit['defense']}+</div>
-                {'<div class="stat"><strong>Coriace:</strong> ' + str(coriace) + '</div>' if coriace else ''}
-            </div>
-        """
-
-        if unit.get('rules'):
-            html += f"<p><strong>Règles spéciales:</strong> {', '.join(unit['rules'])}</p>"
-
-        if 'weapon' in unit:
-            html += f"""
-            <p><strong>Armes:</strong></p>
-            <table>
-                <tr><th>Nom</th><th>ATK</th><th>AP</th><th>Règles spéciales</th></tr>
-                <tr>
-                    <td>{unit['weapon'].get('name', '-')}</td>
-                    <td>{unit['weapon'].get('attacks', '-')}</td>
-                    <td>{unit['weapon'].get('armor_piercing', '-')}</td>
-                    <td>{', '.join(unit['weapon'].get('special_rules', [])) or '-'}</td>
-                </tr>
-            </table>
-            """
-
-        if unit.get('options'):
-            html += "<p><strong>Améliorations:</strong></p><ul>"
-            for opts in unit['options'].values():
-                if isinstance(opts, list):
-                    for opt in opts:
-                        html += f"<li>{format_special_rule(opt.get('name', ''))}</li>"
-            html += "</ul>"
-
-        if unit.get('mount'):
-            html += f"<p><strong>Monture:</strong> {unit['mount']['name']}</p>"
-            if 'special_rules' in unit['mount']:
-                html += f"<p>Règles: {', '.join(unit['mount']['special_rules'])}</p>"
-
-        html += "</div>"
-
-    html += "</body></html>"
-    return html
 
 # ======================================================
 # LOCAL STORAGE
@@ -389,57 +330,38 @@ elif st.session_state.page == "army":
                 selected_options[group["group"]].append(opt)
                 cost += opt["cost"] * (2 if combined else 1)
 
-    # Calcul de la Coriace TOTALE
-    total_coriace = calculate_total_coriace({
+    # Préparation des données pour le calcul de Coriace
+    unit_data_for_calc = {
         'special_rules': unit.get('special_rules', []),
         'mount': mount,
         'options': selected_options,
-        'weapon': weapon
-    }, combined)
+        'weapon': weapon,
+        'type': unit.get('type', '')
+    }
 
-    # Affichage des détails
+    # Calcul de la Coriace TOTALE
+    total_coriace = calculate_total_coriace(unit_data_for_calc, combined)
+
+    # Affichage des détails du calcul
     st.markdown(f"**Coût total: {cost} pts**")
-    if total_coriace:
+    if total_coriace is not None:
         st.markdown(f"**Coriace totale: {total_coriace}**")
 
         # Détail du calcul pour vérification
         with st.expander("Voir le détail du calcul de Coriace"):
-            st.write("**Sources de Coriace:**")
+            sources, _ = get_coriace_sources(unit_data_for_calc, combined)
 
-            # Coriace de base
-            base_coriace = calculate_coriace_from_rules(unit.get('special_rules', []))
-            st.write(f"- Règles de base: {base_coriace}")
+            if not sources:
+                st.warning("Aucune source de Coriace trouvée")
+            else:
+                for source, value in sources.items():
+                    st.write(f"- {source}: {value}")
 
-            # Coriace de la monture
-            mount_coriace = 0
-            if mount and 'special_rules' in mount:
-                mount_coriace = calculate_coriace_from_rules(mount['special_rules'])
-                st.write(f"- Monture: {mount_coriace}")
+                st.write(f"**Total calculé: {sum(sources.values())}**")
 
-            # Coriace des améliorations
-            options_coriace = 0
-            if selected_options:
-                for opts in selected_options.values():
-                    if isinstance(opts, list):
-                        for opt in opts:
-                            if 'special_rules' in opt:
-                                options_coriace += calculate_coriace_from_rules(opt['special_rules'])
-                    elif isinstance(opts, dict) and 'special_rules' in opts:
-                        options_coriace += calculate_coriace_from_rules(opts['special_rules'])
-                st.write(f"- Améliorations: {options_coriace}")
-
-            # Coriace des armes
-            weapon_coriace = 0
-            if 'special_rules' in weapon:
-                weapon_coriace = calculate_coriace_from_rules(weapon['special_rules'])
-                st.write(f"- Armes: {weapon_coriace}")
-
-            # Vérification du total
-            calculated_total = base_coriace + mount_coriace + options_coriace + weapon_coriace
-            if combined and unit.get('type', '').lower() != 'hero':
-                calculated_total += base_coriace
-                st.write(f"- Bonus unité combinée: +{base_coriace} (doublage de la base)")
-            st.write(f"**Total calculé: {calculated_total}**")
+                # Vérification de la monture
+                if 'Monture' not in sources and mount:
+                    st.warning("⚠️ La monture ne contribue pas à la Coriace (vérifiez ses règles spéciales)")
 
     if st.button("Ajouter à l'armée"):
         unit_data = {
