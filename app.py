@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 import streamlit.components.v1 as components
 import hashlib
+import re  # Ajout de l'import manquant
 
 # ======================================================
 # CONFIGURATION
@@ -17,19 +18,19 @@ st.set_page_config(
 # Chemins des fichiers
 BASE_DIR = Path(__file__).resolve().parent
 FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
-FACTIONS_DIR.mkdir(parents=True, exist_ok=True)  # Crée le dossier s'il n'existe pas
+FACTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ======================================================
-# LOCAL STORAGE (version améliorée pour GitHub)
+# LOCAL STORAGE (version robuste pour GitHub)
 # ======================================================
 def generate_unique_key(base_key):
-    """Génère une clé unique pour éviter les conflits dans le LocalStorage"""
+    """Génère une clé unique pour éviter les conflits"""
     return f"{base_key}_{hashlib.md5(str(datetime.now().timestamp()).encode()).hexdigest()[:8]}"
 
 def ls_get(key):
     """Récupère une valeur du LocalStorage avec gestion d'erreur"""
     try:
-        unique_key = generate_unique_key(key)
+        unique_key = generate_unique_key(f"localstorage_{key}")
         components.html(
             f"""
             <script>
@@ -54,9 +55,7 @@ def ls_set(key, value):
         if not isinstance(value, str):
             value = json.dumps(value)
 
-        # Échappement des caractères spéciaux
         escaped_value = value.replace("'", "\\'").replace('"', '\\"').replace("`", "\\`")
-
         components.html(
             f"""
             <script>
@@ -69,11 +68,11 @@ def ls_set(key, value):
         st.error(f"Erreur d'écriture LocalStorage: {e}")
 
 # ======================================================
-# GESTION DES FACTIONS (optimisé pour GitHub)
+# GESTION DES FACTIONS
 # ======================================================
 @st.cache_data
 def load_factions():
-    """Charge les factions depuis les fichiers JSON dans lists/data/factions/"""
+    """Charge les factions depuis les fichiers JSON"""
     factions = {}
     games = set()
 
@@ -119,7 +118,7 @@ def calculate_coriace(rules):
     total = 0
     for rule in rules:
         if isinstance(rule, str):
-            match = re.search(r"Coriace\s*\(?(\d+)\)?", rule)
+            match = re.search(r"Coriace\s*$?(\d+)$?", rule)
             if match:
                 total += int(match.group(1))
     return total
@@ -131,7 +130,7 @@ if "page" not in st.session_state:
     st.session_state.page = "setup"
     st.session_state.army_list = []
     st.session_state.army_cost = 0
-    st.session_state.current_player = "Simon"  # Nom par défaut pour Simon
+    st.session_state.current_player = "Simon"  # Nom par défaut
 
 # ======================================================
 # PAGE 1 – CONFIGURATION
@@ -268,129 +267,4 @@ elif st.session_state.page == "army":
                     key=f"{unit['name']}_{group['group']}"
                 )
 
-                if selected_option != "Aucune amélioration":
-                    opt_name = selected_option.split(" (+")[0]
-                    opt = next(o for o in options if o["name"] == opt_name)
-                    if group["group"] not in selected_options:
-                        selected_options[group["group"]] = []
-                    selected_options[group["group"]].append(opt)
-                    cost += opt["cost"]
-
-    # -------- UNITÉ COMBINÉE --------
-    if unit.get("type", "").lower() != "hero":
-        combined = st.checkbox("Unité combinée (+100% coût)", value=False)
-        if combined:
-            cost *= 2
-
-    st.markdown(f"### 💰 Coût total : {cost} pts")
-
-    # -------- AJOUT À L'ARMÉE --------
-    if st.button("➕ Ajouter à l'armée"):
-        # Calcul de la Coriace totale
-        total_coriace = 0
-        if "special_rules" in unit:
-            total_coriace += calculate_coriace(unit["special_rules"])
-
-        if mount and "special_rules" in mount:
-            total_coriace += calculate_coriace(mount["special_rules"])
-
-        for opts in selected_options.values():
-            if isinstance(opts, list):
-                for opt in opts:
-                    if "special_rules" in opt:
-                        total_coriace += calculate_coriace(opt["special_rules"])
-
-        st.session_state.army_list.append({
-            "name": unit["name"],
-            "cost": cost,
-            "quality": unit["quality"],
-            "defense": unit["defense"],
-            "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
-            "weapon": weapon,
-            "options": selected_options,
-            "mount": mount,
-            "coriace": total_coriace if total_coriace > 0 else None,
-            "combined": combined if unit.get("type", "").lower() != "hero" else False
-        })
-        st.session_state.army_cost += cost
-        st.rerun()
-
-    # -------- LISTE DE L'ARMÉE --------
-    st.divider()
-    st.subheader("Liste de l'armée")
-
-    if not st.session_state.army_list:
-        st.info("Ajoutez des unités pour commencer")
-
-    for i, u in enumerate(st.session_state.army_list):
-        with st.container():
-            st.markdown(f"### {u['name']} – {u['cost']} pts")
-            if u.get("combined"):
-                st.markdown("**Unité combinée** (x2 effectif)")
-
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Qualité", f"{u['quality']}+")
-            c2.metric("Défense", f"{u['defense']}+")
-            if u.get("coriace"):
-                c3.metric("Coriace", u["coriace"])
-
-            if u["rules"]:
-                st.markdown("**Règles spéciales**")
-                st.caption(", ".join(u["rules"]))
-
-            st.markdown("**Armes**")
-            st.caption(
-                f"{u['weapon'].get('name','-')} | "
-                f"A{u['weapon'].get('attacks','?')} "
-                f"PA({u['weapon'].get('armor_piercing','?')})"
-            )
-
-            if u["options"]:
-                st.markdown("**Améliorations sélectionnées**")
-                for group, opts in u["options"].items():
-                    if isinstance(opts, list):
-                        for o in opts:
-                            st.caption(f"• {format_special_rule(o['name'])}")
-
-            if u["mount"]:
-                st.markdown("**Monture**")
-                st.caption(u["mount"]["name"])
-                if "special_rules" in u["mount"]:
-                    st.caption(", ".join(u["mount"]["special_rules"]))
-
-            if st.button("❌ Supprimer", key=f"del_{i}"):
-                st.session_state.army_cost -= u["cost"]
-                st.session_state.army_list.pop(i)
-                st.rerun()
-
-    # -------- SAUVEGARDE / EXPORT --------
-    st.divider()
-    col1, col2, col3 = st.columns(3)
-
-    army_data = {
-        "name": st.session_state.list_name,
-        "game": st.session_state.game,
-        "faction": st.session_state.faction,
-        "points": st.session_state.points,
-        "total_cost": st.session_state.army_cost,
-        "army_list": st.session_state.army_list
-    }
-
-    with col1:
-        if st.button("💾 Sauvegarder"):
-            ls_set("opr_last_list", army_data)
-            st.success("Liste sauvegardée dans le navigateur")
-
-    with col2:
-        st.download_button(
-            "📁 Export JSON",
-            json.dumps(army_data, indent=2, ensure_ascii=False),
-            file_name=f"{st.session_state.list_name}.json",
-            mime="application/json"
-        )
-
-    with col3:
-        if st.button("♻ Réinitialiser"):
-            st.session_state.army_list = []
-            st.session_state.army_cost = 0
-            st.rerun()
+                if select
