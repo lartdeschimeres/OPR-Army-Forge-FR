@@ -94,7 +94,7 @@
               "cost": 15,
               "mount": {
                 "name": "Cheval",
-                "special_rules": ["Impact (1)", "Rapide"]
+                "rules": ["Impact (1)", "Rapide"]
               }
             },
             {
@@ -102,7 +102,7 @@
               "cost": 65,
               "mount": {
                 "name": "Grande bête",
-                "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Impact (2)", "Rapide"]
+                "rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Impact (2)", "Rapide"]
               }
             },
             {
@@ -110,7 +110,7 @@
               "cost": 75,
               "mount": {
                 "name": "Monture démoniaque",
-                "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Effrayant (1)", "Impact (2)", "Rapide"]
+                "rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Effrayant (1)", "Impact (2)", "Rapide"]
               }
             },
             {
@@ -118,7 +118,7 @@
               "cost": 120,
               "mount": {
                 "name": "Char",
-                "special_rules": ["Sabots (A2)", "Coriace (6)", "Impact (4)", "Rapide"]
+                "rules": ["Sabots (A2)", "Coriace (6)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -126,7 +126,7 @@
               "cost": 135,
               "mount": {
                 "name": "Char bestial",
-                "special_rules": ["Griffes lourdes (A2, PA(1))", "Coriace (6)", "Effrayant (1)", "Impact (4)", "Rapide"]
+                "rules": ["Griffes lourdes (A2, PA(1))", "Coriace (6)", "Effrayant (1)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -134,7 +134,7 @@
               "cost": 155,
               "mount": {
                 "name": "Manticore",
-                "special_rules": ["Griffes perforantes (A6, Perforant)", "Coriace (6)", "Effrayant (1)", "Volant"]
+                "rules": ["Griffes perforantes (A6, Perforant)", "Coriace (6)", "Effrayant (1)", "Volant"]
               }
             },
             {
@@ -142,7 +142,7 @@
               "cost": 320,
               "mount": {
                 "name": "Dragon du Ravage",
-                "special_rules": ["Griffes lourdes (A6, PA(1))", "Piétinement (A4, PA(1))", "Attaque de souffle", "Coriace (12)", "Effrayant (2)", "Volant"]
+                "rules": ["Griffes lourdes (A6, PA(1))", "Piétinement (A4, PA(1))", "Attaque de souffle", "Coriace (12)", "Effrayant (2)", "Volant"]
               }
             }
           ]
@@ -153,8 +153,8 @@
       "name": "Barbares de la Guerre [10]",
       "type": "Infantry",
       "base_cost": 100,
-      "quality": 3,
-      "defense": 4,
+      "quality": 5,
+      "defense": 5,
       "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
       "weapons": [
         {
