@@ -138,6 +138,11 @@ def format_mount_details(mount):
     if 'special_rules' in mount_data and mount_data['special_rules']:
         details += " | " + ", ".join(mount_data['special_rules'])
 
+    # Ajouter les attaques de la monture si disponibles
+    if 'weapons' in mount_data and mount_data['weapons']:
+        for weapon in mount_data['weapons']:
+            details += " | " + format_weapon_details(weapon)
+
     return details
 
 def format_unit_option(u):
@@ -398,7 +403,7 @@ elif st.session_state.page == "army":
                     weapon_cost = opt["cost"]
 
         elif group["type"] == "mount":
-            # Formatage des options de monture
+            # Formatage des options de monture avec leurs caractéristiques complètes
             mount_options = ["Aucune monture"]
             for o in group["options"]:
                 mount_details = format_mount_details(o)
@@ -407,7 +412,8 @@ elif st.session_state.page == "army":
 
             selected_mount = st.radio("Monture", mount_options, key=f"{unit['name']}_mount")
             if selected_mount != "Aucune monture":
-                opt_name = selected_mount.split(" (+")[0]
+                # Extraire le nom de la monture avant le premier " ("
+                opt_name = selected_mount.split(" (")[0]
                 opt = find_option_by_name(group["options"], opt_name)
                 if opt:
                     mount = opt
@@ -456,19 +462,6 @@ elif st.session_state.page == "army":
     }, combined)
 
     st.markdown(f"**Coût total: {cost} pts**")
-
-    # Affichage du détail du calcul
-    with st.expander("Voir le détail du calcul"):
-        st.write(f"- Coût de base: {base_cost} pts")
-        if weapon_cost > 0:
-            st.write(f"- Arme: +{weapon_cost} pts")
-        if mount_cost > 0:
-            st.write(f"- Monture: +{mount_cost} pts")
-        if upgrades_cost > 0:
-            st.write(f"- Améliorations: +{upgrades_cost} pts")
-        if combined and unit.get('type', '').lower() != 'hero':
-            st.write(f"- Unité combinée: ×2 sur (base + arme)")
-        st.write(f"**Total: {cost} pts**")
 
     if st.button("Ajouter à l'armée"):
         unit_data = {
