@@ -53,14 +53,7 @@ def calculate_coriace_from_rules(rules):
     return total
 
 def calculate_total_coriace(unit_data, combined=False):
-    """
-    Calcule la Coriace TOTALE d'une unité en prenant en compte:
-    - Règles de base
-    - Monture
-    - Améliorations
-    - Armes
-    - Unités combinées (si applicable)
-    """
+    """Calcule la Coriace TOTALE d'une unité"""
     total = 0
 
     # 1. Règles de base de l'unité
@@ -320,7 +313,7 @@ elif st.session_state.page == "army":
                 selected_options[group["group"]].append(opt)
                 cost += opt["cost"] * (2 if combined else 1)
 
-    # Calcul de la Coriace TOTALE (mais on ne l'affiche plus)
+    # Calcul de la Coriace TOTALE
     total_coriace = calculate_total_coriace({
         'special_rules': unit.get('special_rules', []),
         'mount': mount,
@@ -328,7 +321,6 @@ elif st.session_state.page == "army":
         'weapon': weapon
     }, combined)
 
-    # On ne montre plus la Coriace totale ni le détail du calcul
     st.markdown(f"**Coût total: {cost} pts**")
 
     if st.button("Ajouter à l'armée"):
@@ -341,7 +333,7 @@ elif st.session_state.page == "army":
             "weapon": weapon,
             "options": selected_options,
             "mount": mount,
-            "coriace": total_coriace,  # On stocke quand même la valeur pour l'affichage dans la liste
+            "coriace": total_coriace,
             "combined": combined if unit.get("type", "").lower() != "hero" else False,
             "type": unit.get("type", "")
         }
@@ -353,7 +345,7 @@ elif st.session_state.page == "army":
     st.divider()
     st.subheader("Liste de l'armée")
 
-    # Calcul de la Coriace TOTALE de l'armée (somme de toutes les unités)
+    # Calcul de la Coriace TOTALE de l'armée
     total_army_coriace = 0
     for u in st.session_state.army_list:
         if u.get("coriace"):
@@ -436,6 +428,7 @@ elif st.session_state.page == "army":
         )
 
     with col3:
+        # Génération HTML
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -448,7 +441,7 @@ elif st.session_state.page == "army":
                 .stat {{ text-align: center; flex: 1; }}
                 table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
                 th, td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
-                .total-coriace {{ font-size: 1.2em; font-weight: bold; margin: 15px 0; }}
+                .total-coriace {{ font-size: 1.2em; font-weight: bold; margin: 15px 0; color: #d63031; }}
             </style>
         </head>
         <body>
@@ -501,7 +494,7 @@ elif st.session_state.page == "army":
 
             html += "</div>"
 
-        html += "</body></html>"
+        html_content += "</body></html>"
 
         st.download_button(
             "Export HTML",
