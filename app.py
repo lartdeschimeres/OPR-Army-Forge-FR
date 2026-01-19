@@ -57,11 +57,9 @@ def get_mount_coriace(mount):
     if not mount:
         return 0
 
-    # Vérifie uniquement dans special_rules comme demandé
     if 'special_rules' in mount and isinstance(mount['special_rules'], list):
         return get_coriace_from_rules(mount['special_rules'])
 
-    # Puis dans un objet monture imbriqué
     elif 'mount' in mount and isinstance(mount['mount'], dict):
         mount_data = mount['mount']
         if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
@@ -70,25 +68,15 @@ def get_mount_coriace(mount):
     return 0
 
 def calculate_total_coriace(unit_data, combined=False):
-    """
-    Calcule la Coriace TOTALE d'une unité en prenant en compte:
-    - Règles de base (spécialement important pour les héros)
-    - Monture (toujours ajoutée pour les héros)
-    - Améliorations
-    - Armes
-    - Unités combinées (si applicable, mais pas pour les héros)
-    """
+    """Calcule la Coriace TOTALE d'une unité"""
     total = 0
 
-    # 1. Règles de base de l'unité
     if 'special_rules' in unit_data:
         total += get_coriace_from_rules(unit_data['special_rules'])
 
-    # 2. Monture (toujours ajoutée, spécialement importante pour les héros)
     if 'mount' in unit_data:
         total += get_mount_coriace(unit_data['mount'])
 
-    # 3. Améliorations
     if 'options' in unit_data:
         for opts in unit_data['options'].values():
             if isinstance(opts, list):
@@ -98,11 +86,9 @@ def calculate_total_coriace(unit_data, combined=False):
             elif isinstance(opts, dict) and 'special_rules' in opts:
                 total += get_coriace_from_rules(opts['special_rules'])
 
-    # 4. Armes
     if 'weapon' in unit_data and 'special_rules' in unit_data['weapon']:
         total += get_coriace_from_rules(unit_data['weapon']['special_rules'])
 
-    # 5. Pour les unités combinées (mais PAS pour les héros)
     if combined and unit_data.get('type', '').lower() != 'hero':
         base_coriace = get_coriace_from_rules(unit_data.get('special_rules', []))
         total += base_coriace
@@ -324,17 +310,16 @@ elif st.session_state.page == "army":
     )
 
     # Initialisation
-    cost = unit["base_cost"]
+    base_cost = unit["base_cost"]
     weapon = unit.get("weapons", [{}])[0]
     selected_options = {}
     mount = None
     combined = False
+    weapon_cost = 0
 
     # Unité combinée (pas pour les héros)
     if unit.get("type", "").lower() != "hero":
-        combined = st.checkbox("Unité combinée (+100% coût)", value=False)
-        if combined:
-            cost *= 2
+        combined = st.checkbox("Unité combinée", value=False)
 
     # Options de l'unité
     for group in unit.get("upgrade_groups", []):
@@ -345,31 +330,29 @@ elif st.session_state.page == "army":
             weapon_options = ["Arme de base"]
             for o in group["options"]:
                 weapon_details = format_weapon_details(o["weapon"])
-                cost_diff = o["cost"] * (2 if combined else 1)
-                weapon_options.append(f"{o['name']} ({weapon_details}) (+{cost_diff} pts)")
+                weapon_options.append(f"{o['name']} ({weapon_details}) (+{o['cost']} pts)")
 
             selected = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
             if selected != "Arme de base":
                 opt_name = selected.split(" (")[0]
                 opt = next(o for o in group["options"] if o["name"] == opt_name)
                 weapon = opt["weapon"]
-                cost += opt["cost"] * (2 if combined else 1)
+                weapon_cost = opt["cost"]
 
         elif group["type"] == "mount":
             mount_options = ["Aucune monture"] + [
-                f"{o['name']} (+{o['cost'] * (2 if combined else 1)} pts)" for o in group["options"]
+                f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
             ]
             selected = st.radio("Monture", mount_options, key=f"{unit['name']}_mount")
             if selected != "Aucune monture":
                 opt_name = selected.split(" (+")[0]
                 opt = next(o for o in group["options"] if o["name"] == opt_name)
                 mount = opt
-                cost += opt["cost"] * (2 if combined else 1)
 
         else:  # Améliorations de rôle
             if group["group"] == "Améliorations de rôle":
                 option_names = ["Aucune"] + [
-                    f"{o['name']} (+{o['cost'] * (2 if combined else 1)} pts)" for o in group["options"]
+                    f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
                 ]
                 selected = st.radio(group["group"], option_names, key=f"{unit['name']}_{group['group']}")
                 if selected != "Aucune":
@@ -378,19 +361,27 @@ elif st.session_state.page == "army":
                     if group["group"] not in selected_options:
                         selected_options[group["group"]] = []
                     selected_options[group["group"]].append(opt)
-                    cost += opt["cost"] * (2 if combined else 1)
-            else:
-                option_names = ["Aucune"] + [
-                    f"{o['name']} (+{o['cost'] * (2 if combined else 1)} pts)" for o in group["options"]
-                ]
-                selected = st.radio(group["group"], option_names, key=f"{unit['name']}_{group['group']}")
-                if selected != "Aucune":
-                    opt_name = selected.split(" (+")[0]
-                    opt = next(o for o in group["options"] if o["name"] == opt_name)
-                    if group["group"] not in selected_options:
-                        selected_options[group["group"]] = []
-                    selected_options[group["group"]].append(opt)
-                    cost += opt["cost"] * (2 if combined else 1)
+
+    # Calcul du coût selon la nouvelle règle pour les unités combinées
+    cost = base_cost + weapon_cost
+    if combined:
+        cost = (base_cost + weapon_cost) * 2
+
+    # Ajout des améliorations (non doublées même pour les unités combinées)
+    if 'options' in selected_options:
+        for opts in selected_options.values():
+            if isinstance(opts, list):
+                for opt in opts:
+                    cost += opt.get('cost', 0)
+
+    # Calcul de la Coriace TOTALE
+    total_coriace = calculate_total_coriace({
+        'special_rules': unit.get('special_rules', []),
+        'mount': mount,
+        'options': selected_options,
+        'weapon': weapon,
+        'type': unit.get('type', '')
+    }, combined)
 
     st.markdown(f"**Coût total: {cost} pts**")
 
@@ -404,13 +395,7 @@ elif st.session_state.page == "army":
             "weapon": weapon,
             "options": selected_options,
             "mount": mount,
-            "coriace": calculate_total_coriace({
-                'special_rules': unit.get('special_rules', []),
-                'mount': mount,
-                'options': selected_options,
-                'weapon': weapon,
-                'type': unit.get('type', '')
-            }, combined),
+            "coriace": total_coriace,
             "combined": combined if unit.get("type", "").lower() != "hero" else False,
             "type": unit.get("type", "")
         }
