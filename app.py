@@ -316,6 +316,7 @@ elif st.session_state.page == "army":
     mount = None
     combined = False
     weapon_cost = 0
+    upgrades_cost = 0
 
     # Unité combinée (pas pour les héros)
     if unit.get("type", "").lower() != "hero":
@@ -349,7 +350,7 @@ elif st.session_state.page == "army":
                 opt = next(o for o in group["options"] if o["name"] == opt_name)
                 mount = opt
 
-        else:  # Améliorations de rôle
+        else:  # Améliorations d'unité (checkbox multiples)
             if group["group"] == "Améliorations de rôle":
                 option_names = ["Aucune"] + [
                     f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
@@ -361,6 +362,19 @@ elif st.session_state.page == "army":
                     if group["group"] not in selected_options:
                         selected_options[group["group"]] = []
                     selected_options[group["group"]].append(opt)
+            else:
+                # Utilisation de checkbox pour les améliorations d'unité
+                st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
+                selected_upgrades = []
+                for o in group["options"]:
+                    if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
+                        selected_upgrades.append(o)
+                        upgrades_cost += o["cost"]
+
+                if selected_upgrades:
+                    if group["group"] not in selected_options:
+                        selected_options[group["group"]] = []
+                    selected_options[group["group"]].extend(selected_upgrades)
 
     # Calcul du coût selon la nouvelle règle pour les unités combinées
     cost = base_cost + weapon_cost
@@ -368,11 +382,7 @@ elif st.session_state.page == "army":
         cost = (base_cost + weapon_cost) * 2
 
     # Ajout des améliorations (non doublées même pour les unités combinées)
-    if 'options' in selected_options:
-        for opts in selected_options.values():
-            if isinstance(opts, list):
-                for opt in opts:
-                    cost += opt.get('cost', 0)
+    cost += upgrades_cost
 
     # Calcul de la Coriace TOTALE
     total_coriace = calculate_total_coriace({
