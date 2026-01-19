@@ -57,7 +57,7 @@ def get_mount_coriace(mount):
     if not mount:
         return 0
 
-    # Vérifie d'abord dans special_rules (comme demandé)
+    # Vérifie uniquement dans special_rules comme demandé
     if 'special_rules' in mount and isinstance(mount['special_rules'], list):
         return get_coriace_from_rules(mount['special_rules'])
 
@@ -347,15 +347,6 @@ elif st.session_state.page == "army":
 
     st.markdown(f"**Coût total: {cost} pts**")
 
-    # Affichage du détail du calcul de Coriace
-    with st.expander("Voir le détail du calcul de Coriace"):
-        if mount:
-            mount_coriace = get_mount_coriace(mount)
-            base_coriace = get_coriace_from_rules(unit.get('special_rules', []))
-            st.write(f"- Coriace de base: {base_coriace}")
-            st.write(f"- Coriace de la monture ({mount['name']}): {mount_coriace}")
-            st.write(f"**Total Coriace: {total_coriace}**")
-
     if st.button("Ajouter à l'armée"):
         unit_data = {
             "name": unit["name"],
@@ -377,15 +368,6 @@ elif st.session_state.page == "army":
     # Liste de l'armée
     st.divider()
     st.subheader("Liste de l'armée")
-
-    # Calcul de la Coriace TOTALE de l'armée
-    total_army_coriace = 0
-    for u in st.session_state.army_list:
-        if u.get("coriace"):
-            total_army_coriace += u["coriace"]
-
-    # Affichage de la Coriace totale de l'armée
-    st.markdown(f"**Coriace totale de l'armée: {total_army_coriace}**")
 
     if not st.session_state.army_list:
         st.info("Ajoutez des unités pour commencer")
@@ -474,13 +456,11 @@ elif st.session_state.page == "army":
                 .stat {{ text-align: center; flex: 1; }}
                 table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
                 th, td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
-                .total-coriace {{ font-size: 1.2em; font-weight: bold; margin: 15px 0; color: #d63031; }}
             </style>
         </head>
         <body>
             <h1>Liste d'armée OPR - {army_data['name']}</h1>
             <h2>{army_data['game']} • {army_data['faction']} • {army_data['total_cost']}/{army_data['points']} pts</h2>
-            <div class="total-coriace">Coriace totale de l'armée: {total_army_coriace}</div>
         """
 
         for unit in army_data['army_list']:
