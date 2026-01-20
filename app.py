@@ -22,9 +22,7 @@ FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 # UTILITAIRES
 # ======================================================
 def format_special_rule(rule):
-    if not isinstance(rule, str):
-        return str(rule)
-    return rule
+    return rule if isinstance(rule, str) else str(rule)
 
 def extract_coriace_value(rule):
     if not isinstance(rule, str):
@@ -65,9 +63,6 @@ def format_weapon_details(w):
 
 def format_unit_option(u):
     return f"{u['name']} | Q{u['quality']}+ D{u['defense']}+ | {u['base_cost']} pts"
-
-def find_option_by_name(options, name):
-    return next((o for o in options if o["name"] == name), None)
 
 # ======================================================
 # FACTIONS
@@ -122,7 +117,10 @@ if st.session_state.page == "setup":
 # ======================================================
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
-    st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
+    st.caption(
+        f"{st.session_state.game} • {st.session_state.faction} • "
+        f"{st.session_state.army_cost}/{st.session_state.points} pts"
+    )
 
     if st.button("⬅ Retour"):
         st.session_state.page = "setup"
@@ -164,7 +162,7 @@ elif st.session_state.page == "army":
                 weapon = opt["weapon"]
                 weapon_cost = opt["cost"]
 
-        # MONTURE ✅ CORRECTION UNIQUE
+        # MONTURES
         elif group["type"] == "mount":
             labels = ["Aucune monture"]
             mount_map = {}
@@ -179,10 +177,11 @@ elif st.session_state.page == "army":
                 mount = mount_map[sel]
                 mount_cost = mount["cost"]
 
-        # OPTIONS
+        # AMÉLIORATIONS → CHECKBOX (HÉROS COMPRIS)
         else:
             for o in group["options"]:
-                if st.checkbox(f"{o['name']} (+{o['cost']} pts)"):
+                key = f"{unit['name']}_{group['group']}_{o['name']}"
+                if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=key):
                     selected_options.setdefault(group["group"], []).append(o)
                     upgrades_cost += o["cost"]
 
@@ -224,7 +223,10 @@ elif st.session_state.page == "army":
             st.markdown("**Règles spéciales :** " + ", ".join(u["rules"]))
 
         if u.get("weapon"):
-            st.markdown(f"**Arme :** {u['weapon']['name']} ({format_weapon_details(u['weapon'])})")
+            st.markdown(
+                f"**Arme :** {u['weapon']['name']} "
+                f"({format_weapon_details(u['weapon'])})"
+            )
 
         if u.get("options"):
             for g, opts in u["options"].items():
@@ -241,4 +243,45 @@ elif st.session_state.page == "army":
         if st.button("Supprimer", key=f"del_{i}"):
             st.session_state.army_cost -= u["cost"]
             st.session_state.army_list.pop(i)
+            st.rerun()
+
+    # ==================================================
+    # EXPORT / RESET
+    # ==================================================
+    st.divider()
+    col1, col2, col3 = st.columns(3)
+
+    army_data = {
+        "name": st.session_state.list_name,
+        "game": st.session_state.game,
+        "faction": st.session_state.faction,
+        "points": st.session_state.points,
+        "total_cost": st.session_state.army_cost,
+        "army_list": st.session_state.army_list,
+        "date": datetime.now().isoformat()
+    }
+
+    with col1:
+        st.download_button(
+            "📄 Export JSON",
+            json.dumps(army_data, indent=2, ensure_ascii=False),
+            file_name=f"{st.session_state.list_name}.json",
+            mime="application/json"
+        )
+
+    with col2:
+        html = "<h1>Liste d'armée</h1>"
+        for u in st.session_state.army_list:
+            html += f"<h2>{u['name']} ({u['cost']} pts)</h2>"
+        st.download_button(
+            "🌐 Export HTML",
+            html,
+            file_name=f"{st.session_state.list_name}.html",
+            mime="text/html"
+        )
+
+    with col3:
+        if st.button("🗑 Réinitialiser"):
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
             st.rerun()
