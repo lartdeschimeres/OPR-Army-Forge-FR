@@ -273,34 +273,7 @@ if "page" not in st.session_state:
 # PAGE 1 – CONFIGURATION
 # ======================================================
 if st.session_state.page == "setup":
-    st.title("OPR Army Builder 🇫🇷")
-
-    # Listes sauvegardées
-    st.subheader("Mes listes sauvegardées")
-    saved_lists = ls_get("opr_saved_lists")
-    if saved_lists:
-        try:
-            saved_lists = json.loads(saved_lists)
-            if isinstance(saved_lists, list):
-                for i, saved_list in enumerate(saved_lists):
-                    col1, col2 = st.columns([3, 1])
-                    with col1:
-                        with st.expander(f"{saved_list.get('name', 'Liste sans nom')} ({saved_list.get('total_cost', 0)}/{saved_list.get('points', 0)} pts)"):
-                            st.write(f"**Jeu**: {saved_list.get('game', 'Inconnu')}")
-                            st.write(f"**Faction**: {saved_list.get('faction', 'Inconnue')}")
-                    with col2:
-                        if st.button(f"Charger", key=f"load_{i}"):
-                            st.session_state.game = saved_list["game"]
-                            st.session_state.faction = saved_list["faction"]
-                            st.session_state.points = saved_list["points"]
-                            st.session_state.list_name = saved_list["name"]
-                            st.session_state.army_list = saved_list["army_list"]
-                            st.session_state.army_cost = saved_list["total_cost"]
-                            st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
-                            st.session_state.page = "army"
-                            st.rerun()
-        except Exception as e:
-            st.error(f"Erreur chargement listes: {e}")
+    st.title("OPR Army Builder FR")
 
     if not games:
         st.error("Aucune faction trouvée")
@@ -452,15 +425,6 @@ elif st.session_state.page == "army":
         # Pour les unités combinées (non héros), on double (base + arme) et on ajoute les améliorations
         cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
 
-    # Calcul de la Coriace TOTALE
-    total_coriace = calculate_total_coriace({
-        'special_rules': unit.get('special_rules', []),
-        'mount': mount,
-        'options': selected_options,
-        'weapon': weapon,
-        'type': unit.get('type', '')
-    }, combined)
-
     st.markdown(f"**Coût total: {cost} pts**")
 
     if st.button("Ajouter à l'armée"):
@@ -473,7 +437,13 @@ elif st.session_state.page == "army":
             "weapon": weapon,
             "options": selected_options,
             "mount": mount,
-            "coriace": total_coriace,
+            "coriace": calculate_total_coriace({
+                'special_rules': unit.get('special_rules', []),
+                'mount': mount,
+                'options': selected_options,
+                'weapon': weapon,
+                'type': unit.get('type', '')
+            }, combined),
             "combined": combined if unit.get("type", "").lower() != "hero" else False,
             "type": unit.get("type", "")
         }
