@@ -387,13 +387,28 @@ elif st.session_state.page == "army":
                 cost_diff = o["cost"]
                 mount_options.append(f"{mount_details} (+{cost_diff} pts)")
 
-            selected_mount = st.radio("Monture", mount_options, key=f"{unit['name']}_mount")
+            mount_labels = ["Aucune monture"]
+            mount_map = {}
+
+            for o in group["options"]:
+                label = f"{o['name']} (+{o['cost']} pts)"
+                mount_labels.append(label)
+                mount_map[label] = o
+
+            selected_mount = st.radio("Monture", mount_labels, key=f"{unit['name']}_mount")
+            
             if selected_mount != "Aucune monture":
-                opt_name = selected_mount.split(" (")[0]
-                opt = find_option_by_name(group["options"], opt_name)
-                if opt:
-                    mount = opt
-                    mount_cost = opt["cost"]
+                opt = mount_map[selected_mount]
+                mount = opt
+                mount_cost = opt["cost"]
+                
+                selected_mount = st.radio("Monture", mount_options, key=f"{unit['name']}_mount")
+                        if selected_mount != "Aucune monture":
+                            opt_name = selected_mount.split(" (")[0]
+                            opt = find_option_by_name(group["options"], opt_name)
+                            if opt:
+                                mount = opt
+                                mount_cost = opt["cost"]
 
         else:  # Améliorations d'unité (checkbox multiples)
             if group["group"] == "Améliorations de rôle":
