@@ -57,9 +57,11 @@ def get_mount_coriace(mount):
     if not mount:
         return 0
 
+    # Vérifie les règles spéciales dans la monture
     if 'special_rules' in mount and isinstance(mount['special_rules'], list):
         return get_coriace_from_rules(mount['special_rules'])
 
+    # Puis dans un objet monture imbriqué
     elif 'mount' in mount and isinstance(mount['mount'], dict):
         mount_data = mount['mount']
         if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
@@ -68,15 +70,25 @@ def get_mount_coriace(mount):
     return 0
 
 def calculate_total_coriace(unit_data, combined=False):
-    """Calcule la Coriace TOTALE d'une unité"""
+    """
+    Calcule la Coriace TOTALE d'une unité en prenant en compte:
+    - Règles de base (spécialement important pour les héros)
+    - Monture (toujours ajoutée pour les héros)
+    - Améliorations
+    - Armes
+    - Unités combinées (si applicable, mais pas pour les héros)
+    """
     total = 0
 
+    # 1. Règles de base de l'unité
     if 'special_rules' in unit_data:
         total += get_coriace_from_rules(unit_data['special_rules'])
 
+    # 2. Monture (toujours ajoutée, spécialement importante pour les héros)
     if 'mount' in unit_data:
         total += get_mount_coriace(unit_data['mount'])
 
+    # 3. Améliorations
     if 'options' in unit_data:
         for opts in unit_data['options'].values():
             if isinstance(opts, list):
@@ -86,9 +98,11 @@ def calculate_total_coriace(unit_data, combined=False):
             elif isinstance(opts, dict) and 'special_rules' in opts:
                 total += get_coriace_from_rules(opts['special_rules'])
 
+    # 4. Armes
     if 'weapon' in unit_data and 'special_rules' in unit_data['weapon']:
         total += get_coriace_from_rules(unit_data['weapon']['special_rules'])
 
+    # 5. Pour les unités combinées (mais PAS pour les héros)
     if combined and unit_data.get('type', '').lower() != 'hero':
         base_coriace = get_coriace_from_rules(unit_data.get('special_rules', []))
         total += base_coriace
@@ -421,9 +435,20 @@ elif st.session_state.page == "army":
     # Calcul du coût CORRIGÉ pour les héros et unités combinées
     cost = base_cost + weapon_cost + mount_cost + upgrades_cost
 
-    if combined and unit.get('type', '').lower() != 'hero':
-        # Pour les unités combinées (non héros), on double (base + arme) et on ajoute les améliorations
-        cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
+    # Affichage de la coriace calculée pour vérification
+    total_coriace = calculate_total_coriace({
+        'special_rules': unit.get('special_rules', []),
+        'mount': mount,
+        'options': selected_options,
+        'weapon': weapon,
+        'type': unit.get('type', '')
+    }, combined)
+
+    # Affichage des informations de vérification pour les héros avec monture
+    if unit.get('type', '').lower() == 'hero' and mount:
+        hero_coriace = get_coriace_from_rules(unit.get('special_rules', []))
+        mount_coriace = get_mount_coriace(mount)
+        st.markdown(f"**Vérification Coriace:** Héros: {hero_coriace}, Monture: {mount_coriace}, Total: {total_coriace}")
 
     st.markdown(f"**Coût total: {cost} pts**")
 
@@ -437,13 +462,7 @@ elif st.session_state.page == "army":
             "weapon": weapon,
             "options": selected_options,
             "mount": mount,
-            "coriace": calculate_total_coriace({
-                'special_rules': unit.get('special_rules', []),
-                'mount': mount,
-                'options': selected_options,
-                'weapon': weapon,
-                'type': unit.get('type', '')
-            }, combined),
+            "coriace": total_coriace,
             "combined": combined if unit.get("type", "").lower() != "hero" else False,
             "type": unit.get("type", "")
         }
@@ -490,6 +509,10 @@ elif st.session_state.page == "army":
             if u.get("mount"):
                 mount_details = format_mount_details(u["mount"])
                 st.markdown(f"**Monture:** {mount_details}")
+
+            # Affichage de la Coriace
+            if u.get("coriace"):
+                st.markdown(f"**Coriace:** {u['coriace']}")
 
             if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
                 st.session_state.army_cost -= u["cost"]
@@ -546,6 +569,7 @@ elif st.session_state.page == "army":
                 table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
                 th, td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
                 .cost {{ float: right; color: #666; }}
+                .coriace {{ color: #d63031; font-weight: bold; }}
             </style>
         </head>
         <body>
@@ -584,6 +608,9 @@ elif st.session_state.page == "army":
             if unit.get('mount'):
                 mount_details = format_mount_details(unit["mount"])
                 html_content += f'<div class="mount"><strong>Monture:</strong> {mount_details}</div>'
+
+            if unit.get('coriace'):
+                html_content += f'<div class="coriace"><strong>Coriace:</strong> {unit["coriace"]}</div>'
 
             html_content += "</div>"
 
