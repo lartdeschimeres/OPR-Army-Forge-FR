@@ -52,31 +52,28 @@ def get_coriace_from_rules(rules):
         total += extract_coriace_value(rule)
     return total
 
-def get_mount_coriace(mount):
-    """Calcule spécifiquement la Coriace de la monture"""
+def get_mount_details(mount):
+    """Récupère les détails d'une monture"""
     if not mount:
-        return 0
+        return None, 0
 
-    # Vérifie les règles spéciales dans la monture
-    if 'special_rules' in mount and isinstance(mount['special_rules'], list):
-        return get_coriace_from_rules(mount['special_rules'])
-
-    # Puis dans un objet monture imbriqué
-    elif 'mount' in mount and isinstance(mount['mount'], dict):
+    mount_data = mount
+    if 'mount' in mount:
         mount_data = mount['mount']
-        if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
-            return get_coriace_from_rules(mount_data['special_rules'])
 
-    return 0
+    # Récupérer les règles spéciales
+    special_rules = []
+    if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
+        special_rules = mount_data['special_rules']
+
+    # Calculer la coriace de la monture
+    coriace = get_coriace_from_rules(special_rules)
+
+    return special_rules, coriace
 
 def calculate_total_coriace(unit_data, combined=False):
     """
-    Calcule la Coriace TOTALE d'une unité en prenant en compte:
-    - Règles de base (spécialement important pour les héros)
-    - Monture (toujours ajoutée pour les héros)
-    - Améliorations
-    - Armes
-    - Unités combinées (si applicable, mais pas pour les héros)
+    Calcule la Coriace TOTALE d'une unité
     """
     total = 0
 
@@ -84,9 +81,10 @@ def calculate_total_coriace(unit_data, combined=False):
     if 'special_rules' in unit_data:
         total += get_coriace_from_rules(unit_data['special_rules'])
 
-    # 2. Monture (toujours ajoutée, spécialement importante pour les héros)
-    if 'mount' in unit_data:
-        total += get_mount_coriace(unit_data['mount'])
+    # 2. Monture
+    if 'mount' in unit_data and unit_data['mount']:
+        special_rules, mount_coriace = get_mount_details(unit_data['mount'])
+        total += mount_coriace
 
     # 3. Améliorations
     if 'options' in unit_data:
@@ -161,13 +159,9 @@ def format_mount_details(mount):
 
 def format_unit_option(u):
     """Formate l'affichage des unités dans la liste déroulante"""
-    # Nom [1]
     name_part = f"{u['name']} [1]"
-
-    # QuaX+ DefY+
     qua_def = f"Qua {u['quality']}+ Def {u['defense']}+"
 
-    # Liste des armes
     weapons_part = ""
     if 'weapons' in u and u['weapons']:
         weapons = []
@@ -177,12 +171,10 @@ def format_unit_option(u):
             weapons.append(f"{weapon_name} ({weapon_details})")
         weapons_part = " | ".join(weapons)
 
-    # Règles spéciales
     rules_part = ""
     if 'special_rules' in u and u['special_rules']:
         rules_part = ", ".join(u['special_rules'])
 
-    # Construction du format final
     result = f"{name_part} - {qua_def}"
 
     if weapons_part:
@@ -191,9 +183,7 @@ def format_unit_option(u):
     if rules_part:
         result += f" - {rules_part}"
 
-    # Ajout du coût à droite
     result += f" {u['base_cost']}pts"
-
     return result
 
 def find_option_by_name(options, name):
@@ -390,7 +380,7 @@ elif st.session_state.page == "army":
                     weapon_cost = opt["cost"]
 
         elif group["type"] == "mount":
-            # Formatage des options de monture avec leurs caractéristiques complètes
+            # Formatage des options de monture
             mount_options = ["Aucune monture"]
             for o in group["options"]:
                 mount_details = format_mount_details(o)
@@ -399,7 +389,6 @@ elif st.session_state.page == "army":
 
             selected_mount = st.radio("Monture", mount_options, key=f"{unit['name']}_mount")
             if selected_mount != "Aucune monture":
-                # Extraire le nom de la monture avant le premier " ("
                 opt_name = selected_mount.split(" (")[0]
                 opt = find_option_by_name(group["options"], opt_name)
                 if opt:
@@ -427,30 +416,32 @@ elif st.session_state.page == "army":
                     if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
                         if group["group"] not in selected_options:
                             selected_options[group["group"]] = []
-                        # Vérifier si l'option n'est pas déjà sélectionnée
                         if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
                             selected_options[group["group"]].append(o)
                             upgrades_cost += o["cost"]
 
-    # Calcul du coût CORRIGÉ pour les héros et unités combinées
+    # Calcul du coût CORRIGÉ pour tous les types d'unités
     cost = base_cost + weapon_cost + mount_cost + upgrades_cost
 
-    # Affichage de la coriace calculée pour vérification
+    # Calcul de la Coriace TOTALE
     total_coriace = calculate_total_coriace({
         'special_rules': unit.get('special_rules', []),
         'mount': mount,
         'options': selected_options,
         'weapon': weapon,
         'type': unit.get('type', '')
-    }, combined)
+    })
 
-    # Affichage des informations de vérification pour les héros avec monture
+    # Affichage des informations de vérification
+    st.markdown(f"**Coût total: {cost} pts**")
+
+    # Vérification spécifique pour les héros avec monture
     if unit.get('type', '').lower() == 'hero' and mount:
         hero_coriace = get_coriace_from_rules(unit.get('special_rules', []))
-        mount_coriace = get_mount_coriace(mount)
-        st.markdown(f"**Vérification Coriace:** Héros: {hero_coriace}, Monture: {mount_coriace}, Total: {total_coriace}")
-
-    st.markdown(f"**Coût total: {cost} pts**")
+        mount_special_rules, mount_coriace = get_mount_details(mount)
+        st.markdown(f"**Vérification:**")
+        st.markdown(f"- Coût: {base_cost} (base) + {weapon_cost} (arme) + {mount_cost} (monture) + {upgrades_cost} (améliorations) = {cost}")
+        st.markdown(f"- Coriace: {hero_coriace} (héros) + {mount_coriace} (monture) = {total_coriace}")
 
     if st.button("Ajouter à l'armée"):
         unit_data = {
@@ -479,25 +470,20 @@ elif st.session_state.page == "army":
 
     for i, u in enumerate(st.session_state.army_list):
         with st.container():
-            # Affichage amélioré du nom de l'unité avec ses caractéristiques
             unit_header = f"### {u['name']} ({u['cost']} pts)"
             if 'quality' in u and 'defense' in u:
                 unit_header += f" | Qua {u['quality']}+ / Déf {u['defense']}+"
-
             st.markdown(unit_header)
 
-            # Affichage des règles spéciales
             if u.get("rules"):
                 rules_text = ", ".join(u["rules"])
                 st.markdown(f"**Règles spéciales:** {rules_text}")
 
-            # Affichage des armes avec leurs caractéristiques
             if 'weapon' in u and u['weapon']:
                 weapon_name = u['weapon'].get('name', 'Arme non nommée')
                 weapon_details = format_weapon_details(u['weapon'])
                 st.markdown(f"**Arme:** {weapon_name} ({weapon_details})")
 
-            # Affichage des améliorations
             if u.get("options"):
                 for group_name, opts in u["options"].items():
                     if isinstance(opts, list) and opts:
@@ -505,12 +491,10 @@ elif st.session_state.page == "army":
                         for opt in opts:
                             st.markdown(f"• {opt.get('name', '')}")
 
-            # Affichage de la monture avec ses détails
             if u.get("mount"):
                 mount_details = format_mount_details(u["mount"])
                 st.markdown(f"**Monture:** {mount_details}")
 
-            # Affichage de la Coriace
             if u.get("coriace"):
                 st.markdown(f"**Coriace:** {u['coriace']}")
 
@@ -552,7 +536,6 @@ elif st.session_state.page == "army":
         )
 
     with col3:
-        # Génération HTML
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -562,13 +545,6 @@ elif st.session_state.page == "army":
                 body {{ font-family: Arial, sans-serif; margin: 20px; }}
                 .unit {{ border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }}
                 .unit-header {{ font-size: 1.2em; font-weight: bold; margin-bottom: 5px; }}
-                .stats {{ display: flex; gap: 20px; margin: 10px 0; }}
-                .stat {{ text-align: center; flex: 1; }}
-                .rules {{ font-style: italic; color: #555; margin: 5px 0; }}
-                .weapon {{ margin: 10px 0; }}
-                table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
-                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
-                .cost {{ float: right; color: #666; }}
                 .coriace {{ color: #d63031; font-weight: bold; }}
             </style>
         </head>
@@ -582,32 +558,29 @@ elif st.session_state.page == "army":
             html_content += f"""
             <div class="unit">
                 <div class="unit-header">
-                    {unit['name']} <span class="cost">({unit['cost']} pts)</span>
-                </div>
-                <div class="stats">
-                    Qua {unit['quality']}+ / Def {unit['defense']}+
+                    {unit['name']} ({unit['cost']} pts)
                 </div>
             """
 
             if unit.get('rules'):
-                html_content += f'<div class="rules">{", ".join(unit["rules"])}</div>'
+                html_content += f'<div><strong>Règles spéciales:</strong> {", ".join(unit["rules"])}</div>'
 
             if 'weapon' in unit:
                 weapon_name = unit['weapon'].get('name', 'Arme non nommée')
                 weapon_details = format_weapon_details(unit['weapon'])
-                html_content += f'<div class="weapon"><strong>Arme:</strong> {weapon_name} ({weapon_details})</div>'
+                html_content += f'<div><strong>Arme:</strong> {weapon_name} ({weapon_details})</div>'
 
             if unit.get('options'):
                 for group_name, opts in unit['options'].items():
                     if isinstance(opts, list) and opts:
-                        html_content += f'<div class="options"><strong>{group_name}:</strong>'
+                        html_content += f'<div><strong>{group_name}:</strong>'
                         for opt in opts:
                             html_content += f'<div>• {opt.get("name", "")}</div>'
                         html_content += '</div>'
 
             if unit.get('mount'):
                 mount_details = format_mount_details(unit["mount"])
-                html_content += f'<div class="mount"><strong>Monture:</strong> {mount_details}</div>'
+                html_content += f'<div><strong>Monture:</strong> {mount_details}</div>'
 
             if unit.get('coriace'):
                 html_content += f'<div class="coriace"><strong>Coriace:</strong> {unit["coriace"]}</div>'
