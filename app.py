@@ -160,7 +160,19 @@ def format_mount_details(mount):
 def format_unit_option(u):
     """Formate l'affichage des unités dans la liste déroulante"""
     name_part = f"{u['name']} [1]"
-    qua_def = f"Qua {u['quality']}+ Def {u['defense']}+"
+    qua_def = f"Qua {u['quality']}+"
+
+    # Calcul de la Coriace
+    coriace = get_coriace_from_rules(u.get('special_rules', []))
+    if 'mount' in u and u['mount']:
+        _, mount_coriace = get_mount_details(u['mount'])
+        coriace += mount_coriace
+
+    # Ajout de la Défense et Coriace
+    defense = u.get('defense', '?')
+    qua_def_coriace = f"Qua {u['quality']}+ / Déf {defense}"
+    if coriace > 0:
+        qua_def_coriace += f" / Coriace {coriace}"
 
     weapons_part = ""
     if 'weapons' in u and u['weapons']:
@@ -175,7 +187,7 @@ def format_unit_option(u):
     if 'special_rules' in u and u['special_rules']:
         rules_part = ", ".join(u['special_rules'])
 
-    result = f"{name_part} - {qua_def}"
+    result = f"{name_part} - {qua_def_coriace}"
 
     if weapons_part:
         result += f" - {weapons_part}"
@@ -425,6 +437,15 @@ elif st.session_state.page == "army":
     # Calcul du coût CORRIGÉ pour tous les types d'unités
     cost = base_cost + weapon_cost + mount_cost + upgrades_cost
 
+    # Calcul de la Coriace TOTALE
+    total_coriace = calculate_total_coriace({
+        'special_rules': unit.get('special_rules', []),
+        'mount': mount,
+        'options': selected_options,
+        'weapon': weapon,
+        'type': unit.get('type', '')
+    })
+
     st.markdown(f"**Coût total: {cost} pts**")
 
     if st.button("Ajouter à l'armée"):
@@ -437,13 +458,7 @@ elif st.session_state.page == "army":
             "weapon": weapon,
             "options": selected_options,
             "mount": mount,
-            "coriace": calculate_total_coriace({
-                'special_rules': unit.get('special_rules', []),
-                'mount': mount,
-                'options': selected_options,
-                'weapon': weapon,
-                'type': unit.get('type', '')
-            }),
+            "coriace": total_coriace,
             "combined": combined if unit.get("type", "").lower() != "hero" else False,
             "type": unit.get("type", "")
         }
@@ -460,20 +475,26 @@ elif st.session_state.page == "army":
 
     for i, u in enumerate(st.session_state.army_list):
         with st.container():
-            unit_header = f"### {u['name']} ({u['cost']} pts)"
-            if 'quality' in u and 'defense' in u:
-                unit_header += f" | Qua {u['quality']}+ / Déf {u['defense']}+"
+            # Affichage du nom et des stats avec Coriace intégrée
+            qua_def_coriace = f"Qua {u['quality']}+ / Déf {u['defense']}+"
+            if u.get("coriace"):
+                qua_def_coriace += f" / Coriace {u['coriace']}"
+
+            unit_header = f"### {u['name']} ({u['cost']} pts) | {qua_def_coriace}"
             st.markdown(unit_header)
 
+            # Affichage des règles spéciales
             if u.get("rules"):
                 rules_text = ", ".join(u["rules"])
                 st.markdown(f"**Règles spéciales:** {rules_text}")
 
+            # Affichage des armes avec leurs caractéristiques
             if 'weapon' in u and u['weapon']:
                 weapon_name = u['weapon'].get('name', 'Arme non nommée')
                 weapon_details = format_weapon_details(u['weapon'])
                 st.markdown(f"**Arme:** {weapon_name} ({weapon_details})")
 
+            # Affichage des améliorations
             if u.get("options"):
                 for group_name, opts in u["options"].items():
                     if isinstance(opts, list) and opts:
@@ -481,12 +502,10 @@ elif st.session_state.page == "army":
                         for opt in opts:
                             st.markdown(f"• {opt.get('name', '')}")
 
+            # Affichage de la monture avec ses détails
             if u.get("mount"):
                 mount_details = format_mount_details(u["mount"])
                 st.markdown(f"**Monture:** {mount_details}")
-
-            if u.get("coriace"):
-                st.markdown(f"**Coriace:** {u['coriace']}")
 
             if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
                 st.session_state.army_cost -= u["cost"]
@@ -546,10 +565,14 @@ elif st.session_state.page == "army":
 
         for unit in army_data['army_list']:
             coriace = unit.get('coriace')
+            qua_def_coriace = f"Qua {unit['quality']}+ / Déf {unit['defense']}+"
+            if coriace:
+                qua_def_coriace += f" / Coriace {coriace}"
+
             html_content_standard += f"""
             <div class="unit">
                 <div class="unit-header">
-                    {unit['name']} ({unit['cost']} pts)
+                    {unit['name']} ({unit['cost']} pts) | {qua_def_coriace}
                 </div>
             """
 
@@ -572,9 +595,6 @@ elif st.session_state.page == "army":
             if unit.get('mount'):
                 mount_details = format_mount_details(unit["mount"])
                 html_content_standard += f'<div><strong>Monture:</strong> {mount_details}</div>'
-
-            if unit.get('coriace'):
-                html_content_standard += f'<div class="coriace"><strong>Coriace:</strong> {unit["coriace"]}</div>'
 
             html_content_standard += "</div>"
 
@@ -763,7 +783,7 @@ elif st.session_state.page == "army":
                 <div class="unit-stats">
             """
 
-            # Ajout des stats Quality et Defense
+            # Ajout des stats Quality, Defense et Coriace
             html_content_fiche += f"""
                     <div class="stat-badge">
                         <div class="stat-label">Quality</div>
@@ -772,8 +792,8 @@ elif st.session_state.page == "army":
                     <div class="stat-badge">
                         <div class="stat-label">Defense</div>
                         <div class="stat-value">{defense}+</div>
+                    </div>
             """
-            # Ajout de Tough si Coriace existe
             if coriace:
                 html_content_fiche += f"""
                     <div class="stat-badge">
