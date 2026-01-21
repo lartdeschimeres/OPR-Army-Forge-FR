@@ -4,10 +4,7 @@ from pathlib import Path
 from datetime import datetime
 import hashlib
 import re
-from weasyprint import HTML
 import base64
-import tempfile
-import os
 
 # ======================================================
 # CONFIGURATION
@@ -123,30 +120,203 @@ def load_factions():
 
     return factions, sorted(games) if games else ["Age of Fantasy"]
 
-def generate_pdf(html_content, filename):
-    """Génère un PDF à partir de contenu HTML"""
-    try:
-        # Créer un fichier temporaire HTML
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as temp_html:
-            temp_html.write(html_content)
-            temp_html_path = temp_html.name
+def generate_html_content(army_data):
+    """Génère le contenu HTML pour l'export"""
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Liste OPR - {army_data['name']}</title>
+        <meta charset="UTF-8">
+        <style>
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 20px;
+                color: #333;
+            }}
+            .army-title {{
+                text-align: center;
+                margin-bottom: 20px;
+                color: #2c3e50;
+            }}
+            .army-info {{
+                text-align: center;
+                margin-bottom: 30px;
+                color: #666;
+            }}
+            .unit-container {{
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+                padding: 20px;
+                page-break-inside: avoid;
+            }}
+            .unit-header {{
+                font-size: 1.5em;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #2c3e50;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            }}
+            .unit-stats {{
+                display: flex;
+                margin-bottom: 15px;
+            }}
+            .stat-badge {{
+                background-color: #3498db;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                margin-right: 10px;
+                font-weight: bold;
+                text-align: center;
+                min-width: 80px;
+            }}
+            .stat-value {{
+                font-size: 1.2em;
+            }}
+            .stat-label {{
+                font-size: 0.8em;
+                display: block;
+                margin-bottom: 3px;
+            }}
+            .section-title {{
+                font-weight: bold;
+                margin: 15px 0 10px 0;
+                color: #2c3e50;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 5px;
+            }}
+            .weapon-table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+            }}
+            .weapon-table th {{
+                background-color: #f8f9fa;
+                text-align: left;
+                padding: 8px;
+                border-bottom: 1px solid #ddd;
+            }}
+            .weapon-table td {{
+                padding: 8px;
+                border-bottom: 1px solid #eee;
+            }}
+            .rules-list {{
+                margin: 10px 0;
+            }}
+            .special-rules {{
+                font-style: italic;
+                color: #555;
+                margin-bottom: 15px;
+            }}
+            .unit-cost {{
+                float: right;
+                background-color: #3498db;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-weight: bold;
+            }}
+            @media print {{
+                .unit-container {{
+                    page-break-inside: avoid;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
+        <div class="army-info">
+            <strong>Jeu:</strong> {army_data['game']} |
+            <strong>Faction:</strong> {army_data['faction']} |
+            <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']}
+        </div>
+    """
 
-        # Générer le PDF
-        HTML(temp_html_path).write_pdf(filename)
+    for unit in army_data['army_list']:
+        # Règles spéciales
+        rules = unit.get('rules', [])
+        special_rules = ", ".join(rules) if rules else "Aucune"
 
-        # Lire le fichier PDF généré
-        with open(filename, "rb") as f:
-            pdf_bytes = f.read()
+        # Armes
+        weapon_info = unit.get('weapon', {})
+        if not isinstance(weapon_info, dict):
+            weapon_info = {
+                "name": "Arme non spécifiée",
+                "attacks": "?",
+                "ap": "?",
+                "special": []
+            }
 
-        # Supprimer les fichiers temporaires
-        os.unlink(temp_html_path)
-        os.unlink(filename)
+        html_content += f"""
+        <div class="unit-container">
+            <div class="unit-header">
+                {unit['name']}
+                <span class="unit-cost">{unit['cost']} pts</span>
+            </div>
 
-        return pdf_bytes
+            <div class="unit-stats">
+                <div class="stat-badge">
+                    <div class="stat-label">Qualité</div>
+                    <div class="stat-value">{unit['quality']}+</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="stat-label">Défense</div>
+                    <div class="stat-value">{unit['defense']}+</div>
+                </div>
+        """
 
-    except Exception as e:
-        st.error(f"Erreur lors de la génération du PDF: {e}")
-        return None
+        if unit.get('coriace'):
+            html_content += f"""
+                <div class="stat-badge">
+                    <div class="stat-label">Coriace</div>
+                    <div class="stat-value">{unit['coriace']}</div>
+                </div>
+            """
+
+        html_content += """
+            </div>
+        """
+
+        # Règles spéciales
+        if rules:
+            html_content += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules}</div>'
+
+        # Armes
+        html_content += """
+            <div class="section-title">Arme</div>
+            <table class="weapon-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>PORT</th>
+                        <th>ATK</th>
+                        <th>PA</th>
+                        <th>SPE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{weapon_info['name']}</td>
+                        <td>-</td>
+                        <td>{weapon_info['attacks']}</td>
+                        <td>{weapon_info['ap']}</td>
+                        <td>{', '.join(weapon_info['special']) if weapon_info['special'] else '-'}</td>
+                    </tr>
+                </tbody>
+            </table>
+        """
+
+        html_content += "</div>"
+
+    html_content += """
+    </body>
+    </html>
+    """
+    return html_content
 
 # ======================================================
 # INITIALISATION
@@ -277,201 +447,63 @@ elif st.session_state.page == "army":
         )
 
     with col2:
-        # Génération du HTML pour export
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Liste OPR - {army_data['name']}</title>
-            <meta charset="UTF-8">
-            <style>
-                body {{
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    margin: 20px;
-                    color: #333;
-                }}
-                .army-title {{
-                    text-align: center;
-                    margin-bottom: 20px;
-                    color: #2c3e50;
-                }}
-                .army-info {{
-                    text-align: center;
-                    margin-bottom: 30px;
-                    color: #666;
-                }}
-                .unit-container {{
-                    background-color: white;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    margin-bottom: 20px;
-                    padding: 20px;
-                }}
-                .unit-header {{
-                    font-size: 1.5em;
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                    color: #2c3e50;
-                    border-bottom: 1px solid #eee;
-                    padding-bottom: 10px;
-                }}
-                .unit-stats {{
-                    display: flex;
-                    margin-bottom: 15px;
-                }}
-                .stat-badge {{
-                    background-color: #3498db;
-                    color: white;
-                    padding: 8px 12px;
-                    border-radius: 4px;
-                    margin-right: 10px;
-                    font-weight: bold;
-                    text-align: center;
-                    min-width: 80px;
-                }}
-                .stat-value {{
-                    font-size: 1.2em;
-                }}
-                .stat-label {{
-                    font-size: 0.8em;
-                    display: block;
-                    margin-bottom: 3px;
-                }}
-                .section-title {{
-                    font-weight: bold;
-                    margin: 15px 0 10px 0;
-                    color: #2c3e50;
-                    border-bottom: 1px solid #eee;
-                    padding-bottom: 5px;
-                }}
-                .weapon-table {{
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 15px;
-                }}
-                .weapon-table th {{
-                    background-color: #f8f9fa;
-                    text-align: left;
-                    padding: 8px;
-                    border-bottom: 1px solid #ddd;
-                }}
-                .weapon-table td {{
-                    padding: 8px;
-                    border-bottom: 1px solid #eee;
-                }}
-                .rules-list {{
-                    margin: 10px 0;
-                }}
-                .special-rules {{
-                    font-style: italic;
-                    color: #555;
-                    margin-bottom: 15px;
-                }}
-                .unit-cost {{
-                    float: right;
-                    background-color: #3498db;
-                    color: white;
-                    padding: 5px 10px;
-                    border-radius: 4px;
-                    font-weight: bold;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
-            <div class="army-info">
-                <strong>Jeu:</strong> {army_data['game']} |
-                <strong>Faction:</strong> {army_data['faction']} |
-                <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']}
-            </div>
-        """
-
-        for unit in army_data['army_list']:
-            # Règles spéciales
-            rules = unit.get('rules', [])
-            special_rules = ", ".join(rules) if rules else "Aucune"
-
-            # Armes
-            weapon_info = unit.get('weapon', {})
-            if not isinstance(weapon_info, dict):
-                weapon_info = {
-                    "name": "Arme non spécifiée",
-                    "attacks": "?",
-                    "ap": "?",
-                    "special": []
-                }
-
-            html_content += f"""
-            <div class="unit-container">
-                <div class="unit-header">
-                    {unit['name']}
-                    <span class="unit-cost">{unit['cost']} pts</span>
-                </div>
-
-                <div class="unit-stats">
-                    <div class="stat-badge">
-                        <div class="stat-label">Qualité</div>
-                        <div class="stat-value">{unit['quality']}+</div>
-                    </div>
-                    <div class="stat-badge">
-                        <div class="stat-label">Défense</div>
-                        <div class="stat-value">{unit['defense']}+</div>
-                    </div>
-                </div>
-            """
-
-            # Règles spéciales
-            if rules:
-                html_content += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules}</div>'
-
-            # Armes
-            html_content += """
-                <div class="section-title">Arme</div>
-                <table class="weapon-table">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>PORT</th>
-                            <th>ATK</th>
-                            <th>PA</th>
-                            <th>SPE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{weapon_info['name']}</td>
-                            <td>-</td>
-                            <td>{weapon_info['attacks']}</td>
-                            <td>{weapon_info['ap']}</td>
-                            <td>{', '.join(weapon_info['special']) if weapon_info['special'] else '-'}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            """
-
-            html_content += "</div>"
-
-        html_content += "</body></html>"
-
-        # Bouton pour exporter en PDF
-        if st.button("Exporter en PDF"):
-            with st.spinner("Génération du PDF en cours..."):
-                # Créer un fichier temporaire pour le PDF
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-                    pdf_bytes = generate_pdf(html_content, tmp.name)
-                    if pdf_bytes:
-                        st.success("PDF généré avec succès!")
-                        st.download_button(
-                            label="Télécharger le PDF",
-                            data=pdf_bytes,
-                            file_name=f"{st.session_state.list_name}.pdf",
-                            mime="application/pdf"
-                        )
-                    else:
-                        st.error("Échec de la génération du PDF")
+        st.download_button(
+            "Exporter en HTML",
+            generate_html_content(army_data),
+            file_name=f"{st.session_state.list_name}.html",
+            mime="text/html"
+        )
 
     with col3:
-        if st.button("Réinitialiser"):
-            st.session_state.army_list = []
-            st.session_state.army_cost = 0
-            st.rerun()
+        if st.button("Exporter en PDF"):
+            html_content = generate_html_content(army_data)
+
+            # Créer un lien de téléchargement pour le HTML
+            # (car on ne peut pas générer de PDF directement dans Streamlit Cloud)
+            b64 = base64.b64encode(html_content.encode()).decode()
+            href = f'<a href="data:file/html;base64,{b64}" download="{st.session_state.list_name}.html">Télécharger le HTML (pour conversion en PDF)</a>'
+            st.markdown(f"""
+            **Instructions pour obtenir un PDF:**
+
+            1. Téléchargez le fichier HTML ci-dessous
+            2. Ouvrez-le dans votre navigateur
+            3. Utilisez la fonction "Imprimer" (Ctrl+P)
+            4. Choisissez "Enregistrer au format PDF" comme destination
+
+            {href}
+            """, unsafe_allow_html=True)
+
+    with st.expander("⚙️ Options avancées"):
+        st.info("""
+        **Pour convertir automatiquement en PDF depuis GitHub:**
+
+        1. Téléchargez le fichier HTML depuis l'application
+        2. Ajoutez-le à votre dépôt GitHub
+        3. Utilisez GitHub Actions avec une action comme `puppeteer-webperf/action` pour convertir le HTML en PDF
+        4. Voici un exemple de workflow GitHub Actions:
+
+        ```yaml
+        name: Convert HTML to PDF
+
+        on:
+          push:
+            paths:
+              - '*.html'
+
+        jobs:
+          convert:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v2
+              - name: Convert HTML to PDF
+                uses: puppeteer-webperf/action@v1
+                with:
+                  url: 'file://\${{ github.workspace }}/votre_fichier.html'
+                  output: 'votre_fichier.pdf'
+              - name: Upload PDF
+                uses: actions/upload-artifact@v2
+                with:
+                  name: pdf-output
+                  path: votre_fichier.pdf
+        ```
+        """)
