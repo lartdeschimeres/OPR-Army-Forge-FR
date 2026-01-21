@@ -5,6 +5,7 @@ from datetime import datetime
 import hashlib
 import re
 import base64
+import math
 
 # ======================================================
 # CONFIGURATION POUR SIMON
@@ -21,7 +22,115 @@ FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 FACTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ======================================================
-# FONCTIONS UTILITAIRES
+# CONFIGURATION DES JEUX ET LEURS LIMITATIONS (INTÉGRÉ DANS LE CODE)
+# ======================================================
+GAME_CONFIG = {
+    "Age of Fantasy": {
+        "display_name": "Age of Fantasy",
+        "max_points": 10000,
+        "min_points": 250,
+        "default_points": 1000,
+        "point_step": 250,
+        "unit_types": ["infantry", "cavalry", "hero", "monster", "war_machine"],
+        
+        "description": "Jeu de bataille rangée dans un univers fantasy médiéval",
+        # Règles spécifiques à Age of Fantasy
+        "hero_limit": 375,  # 1 Héros par tranche de 375 pts
+        "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
+        "unit_max_cost_ratio": 0.35,  # Aucune unité ne peut valoir plus de 35% du total
+        "unit_per_points": 150  # 1 unité max par tranche de 150 pts
+    },
+    "Grimdark Future": {
+        "display_name": "Grimdark Future",
+        "max_points": 10000,
+        "min_points": 250,
+        "default_points": 1000,
+        "point_step": 250,
+        "unit_types": ["infantry", "vehicle", "walker", "hero", "battle_suit"],
+        "description": "Jeu de bataille futuriste avec unités mécanisées"
+        # Règles spécifiques à Age of Fantasy
+        "hero_limit": 375,  # 1 Héros par tranche de 375 pts
+        "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
+        "unit_max_cost_ratio": 0.35,  # Aucune unité ne peut valoir plus de 35% du total
+        "unit_per_points": 150  # 1 unité max par tranche de 150 pts
+    }
+}
+
+# ======================================================
+# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES À AGE OF FANTASY
+# ======================================================
+def check_hero_limit(army_list, total_points, game_config):
+    """Vérifie la limite de héros pour Age of Fantasy"""
+    if game_config.get("hero_limit"):
+        max_heroes = math.floor(total_points / game_config["hero_limit"])
+        hero_count = sum(1 for unit in army_list if unit.get("type", "").lower() == "hero")
+
+        if hero_count > max_heroes:
+            st.error(f"Limite de héros dépassée! Maximum autorisé: {max_heroes} (1 héros par {game_config['hero_limit']} pts)")
+            return False
+    return True
+
+def check_unit_copy_rule(army_list, total_points, game_config):
+    """Vérifie la règle des copies d'unités pour Age of Fantasy"""
+    if game_config.get("unit_copy_rule"):
+        x_value = math.floor(total_points / game_config["unit_copy_rule"])
+        max_copies = 1 + x_value
+
+        # Compter les copies de chaque unité (les unités combinées comptent comme 1)
+        unit_counts = {}
+        for unit in army_list:
+            unit_name = unit["name"]
+            is_combined = unit.get("combined", False)
+            count_key = f"{unit_name}_{'combined' if is_combined else 'single'}"
+
+            if count_key in unit_counts:
+                unit_counts[count_key] += 1
+            else:
+                unit_counts[count_key] = 1
+
+        # Vérifier les limites
+        for unit_name, count in unit_counts.items():
+            if count > max_copies:
+                st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
+                return False
+    return True
+
+def check_unit_max_cost(army_list, total_points, game_config):
+    """Vérifie qu'aucune unité ne dépasse 35% du total des points"""
+    if game_config.get("unit_max_cost_ratio"):
+        max_cost = total_points * game_config["unit_max_cost_ratio"]
+
+        for unit in army_list:
+            if unit["cost"] > max_cost:
+                st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts (35% du total)")
+                return False
+    return True
+
+def check_unit_per_points(army_list, total_points, game_config):
+    """Vérifie le nombre maximum d'unités par tranche de points"""
+    if game_config.get("unit_per_points"):
+        max_units = math.floor(total_points / game_config["unit_per_points"])
+
+        if len(army_list) > max_units:
+            st.error(f"Trop d'unités! Maximum autorisé: {max_units} (1 unité par {game_config['unit_per_points']} pts)")
+            return False
+    return True
+
+def validate_army_rules(army_list, total_points, game):
+    """Valide toutes les règles spécifiques au jeu"""
+    game_config = GAME_CONFIG.get(game, {})
+
+    # Vérification des règles spécifiques à Age of Fantasy
+    if game == "Age of Fantasy":
+        return (check_hero_limit(army_list, total_points, game_config) and
+                check_unit_copy_rule(army_list, total_points, game_config) and
+                check_unit_max_cost(army_list, total_points, game_config) and
+                check_unit_per_points(army_list, total_points, game_config))
+
+    return True  # Pas de règles spécifiques pour les autres jeux
+
+# ======================================================
+# FONCTIONS UTILITAIRES (inchangées)
 # ======================================================
 def format_special_rule(rule):
     """Formate les règles spéciales avec parenthèses"""
@@ -61,30 +170,24 @@ def get_mount_details(mount):
     if 'mount' in mount:
         mount_data = mount['mount']
 
-    # Récupérer les règles spéciales
     special_rules = []
     if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
         special_rules = mount_data['special_rules']
 
-    # Calculer la coriace de la monture
     coriace = get_coriace_from_rules(special_rules)
-
     return special_rules, coriace
 
 def calculate_total_coriace(unit_data, combined=False):
     """Calcule la Coriace totale d'une unité"""
     total = 0
 
-    # Règles de base de l'unité
     if 'special_rules' in unit_data:
         total += get_coriace_from_rules(unit_data['special_rules'])
 
-    # Monture
     if 'mount' in unit_data and unit_data['mount']:
-        special_rules, mount_coriace = get_mount_details(unit_data['mount'])
+        _, mount_coriace = get_mount_details(unit_data['mount'])
         total += mount_coriace
 
-    # Améliorations
     if 'options' in unit_data:
         for opts in unit_data['options'].values():
             if isinstance(opts, list):
@@ -94,11 +197,9 @@ def calculate_total_coriace(unit_data, combined=False):
             elif isinstance(opts, dict) and 'special_rules' in opts:
                 total += get_coriace_from_rules(opts['special_rules'])
 
-    # Armes
     if 'weapon' in unit_data and 'special_rules' in unit_data['weapon']:
         total += get_coriace_from_rules(unit_data['weapon']['special_rules'])
 
-    # Pour les unités combinées (mais PAS pour les héros)
     if combined and unit_data.get('type', '').lower() != 'hero':
         base_coriace = get_coriace_from_rules(unit_data.get('special_rules', []))
         total += base_coriace
@@ -127,15 +228,12 @@ def format_mount_details(mount):
         return "Aucune monture"
 
     mount_name = mount.get('name', 'Monture non nommée')
-
-    # Vérifier si c'est un objet mount imbriqué
     mount_data = mount
     if 'mount' in mount:
         mount_data = mount['mount']
 
     details = mount_name
 
-    # Ajouter les caractéristiques de la monture si disponibles
     if 'quality' in mount_data or 'defense' in mount_data:
         details += " ("
         if 'quality' in mount_data:
@@ -144,11 +242,9 @@ def format_mount_details(mount):
             details += f" Déf{mount_data['defense']}+"
         details += ")"
 
-    # Ajouter les règles spéciales
     if 'special_rules' in mount_data and mount_data['special_rules']:
         details += " | " + ", ".join(mount_data['special_rules'])
 
-    # Ajouter les attaques de la monture si disponibles
     if 'weapons' in mount_data and mount_data['weapons']:
         for weapon in mount_data['weapons']:
             weapon_details = format_weapon_details(weapon)
@@ -164,13 +260,11 @@ def format_unit_option(u):
     name_part = f"{u['name']} [1]"
     qua_def = f"Qua {u['quality']}+"
 
-    # Calcul de la Coriace
     coriace = get_coriace_from_rules(u.get('special_rules', []))
     if 'mount' in u and u['mount']:
         _, mount_coriace = get_mount_details(u['mount'])
         coriace += mount_coriace
 
-    # Ajout de la Défense et Coriace
     defense = u.get('defense', '?')
     qua_def_coriace = f"Qua {u['quality']}+ / Déf {defense}"
     if coriace > 0:
@@ -207,7 +301,7 @@ def find_option_by_name(options, name):
         return None
 
 # ======================================================
-# LOCAL STORAGE
+# LOCAL STORAGE (inchangé)
 # ======================================================
 def ls_get(key):
     """Récupère une valeur du LocalStorage"""
@@ -249,7 +343,7 @@ def ls_set(key, value):
         st.error(f"Erreur LocalStorage: {e}")
 
 # ======================================================
-# CHARGEMENT DES FACTIONS
+# CHARGEMENT DES FACTIONS (inchangé)
 # ======================================================
 @st.cache_data
 def load_factions():
@@ -273,7 +367,7 @@ def load_factions():
         except Exception as e:
             st.warning(f"Erreur chargement {fp.name}: {e}")
 
-    return factions, sorted(games)
+    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 # ======================================================
 # INITIALISATION
@@ -291,6 +385,27 @@ if "page" not in st.session_state:
 # ======================================================
 if st.session_state.page == "setup":
     st.title("OPR Army Forge FR")
+
+    # Affichage des informations sur les jeux disponibles
+    st.subheader("Jeux disponibles")
+    for game_key, config in GAME_CONFIG.items():
+        with st.expander(f"📖 {config['display_name']}"):
+            st.markdown(f"""
+            **Description**: {config['description']}
+            - **Points**: {config['min_points']} à {config['max_points']} (défaut: {config['default_points']})
+            - **Types d'unités**: {', '.join(config['unit_types'])}
+            - **Unités max**: {config['max_units']}
+            """)
+
+            # Affichage des règles spécifiques à Age of Fantasy
+            if game_key == "Age of Fantasy":
+                st.markdown("""
+                **Règles spécifiques à Age of Fantasy:**
+                - 1 Héros par tranche de 375 pts d'armée
+                - 1+X copies de la même unité (X=1 pour 750 pts d'armée)
+                - Aucune unité ne peut valoir plus de 35% du total des points
+                - 1 unité maximum par tranche de 150 pts d'armée
+                """)
 
     # Section pour charger depuis GitHub
     with st.expander("Charger une liste depuis GitHub"):
@@ -333,10 +448,39 @@ if st.session_state.page == "setup":
         st.error("Aucun jeu trouvé")
         st.stop()
 
+    # Sélection du jeu avec application des limitations
     game = st.selectbox("Jeu", games)
-    faction = st.selectbox("Faction", factions_by_game[game].keys())
-    points = st.number_input("Points", 250, 5000, 1000, 250)
+
+    # Application des limitations du jeu sélectionné
+    game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
+
+    points = st.number_input(
+        "Points",
+        min_value=game_config["min_points"],
+        max_value=game_config["max_points"],
+        value=game_config["default_points"],
+        step=game_config["point_step"]
+    )
+
     list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
+
+    # Affichage des informations spécifiques au jeu sélectionné
+    st.markdown(f"""
+    **Configuration actuelle pour {game_config['display_name']}:**
+    - Points: {game_config['min_points']} à {game_config['max_points']}
+    - Types d'unités disponibles: {', '.join(game_config['unit_types'])}
+    - Unités max par armée: {game_config['max_units']}
+    """)
+
+    # Affichage des règles spécifiques à Age of Fantasy
+    if game == "Age of Fantasy":
+        st.markdown("""
+        **Règles spécifiques appliquées:**
+        - 1 Héros par tranche de 375 pts d'armée
+        - 1+X copies de la même unité (X=1 pour 750 pts d'armée)
+        - Aucune unité ne peut valoir plus de 35% du total des points
+        - 1 unité maximum par tranche de 150 pts d'armée
+        """)
 
     # Import JSON
     uploaded = st.file_uploader("Importer une liste JSON", type=["json"])
@@ -361,10 +505,11 @@ if st.session_state.page == "setup":
 
     if st.button("Créer une nouvelle liste"):
         st.session_state.game = game
-        st.session_state.faction = faction
+        st.session_state.faction = st.selectbox("Faction", factions_by_game[game].keys())
         st.session_state.points = points
         st.session_state.list_name = list_name
-        st.session_state.units = factions_by_game[game][faction]["units"]
+        st.session_state.max_units = game_config["max_units"]
+        st.session_state.units = factions_by_game[game][st.session_state.faction]["units"]
         st.session_state.army_list = []
         st.session_state.army_cost = 0
         st.session_state.page = "army"
@@ -376,6 +521,14 @@ if st.session_state.page == "setup":
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
     st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
+
+    # Vérification des règles spécifiques au jeu
+    game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
+
+    # Vérification des règles d'Age of Fantasy
+    if st.session_state.game == "Age of Fantasy":
+        if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
+            st.warning("⚠️ Certaines règles spécifiques à Age of Fantasy ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
     if st.button("⬅ Retour"):
         st.session_state.page = "setup"
@@ -393,6 +546,18 @@ elif st.session_state.page == "army":
         index=0,
         key="unit_select"
     )
+
+    # Vérification du type d'unité
+    if unit.get("type", "") not in game_config["unit_types"]:
+        st.error(f"Ce type d'unité ({unit.get('type', 'inconnu')}) n'est pas autorisé pour {game_config['display_name']}")
+        st.stop()
+
+    # Vérification du coût maximum (35% du total)
+    if st.session_state.game == "Age of Fantasy":
+        max_cost = st.session_state.points * game_config["unit_max_cost_ratio"]
+        if unit["base_cost"] > max_cost:
+            st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts (35% du total)")
+            st.stop()
 
     # Initialisation
     base_cost = unit["base_cost"]
@@ -413,7 +578,6 @@ elif st.session_state.page == "army":
         st.markdown(f"**{group['group']}**")
 
         if group["type"] == "weapon":
-            # Formatage des options d'armes
             weapon_options = ["Arme de base"]
             for o in group["options"]:
                 weapon_details = format_weapon_details(o["weapon"])
@@ -429,7 +593,6 @@ elif st.session_state.page == "army":
                     weapon_cost = opt["cost"]
 
         elif group["type"] == "mount":
-            # NOUVELLE IMPLEMENTATION POUR LES MONTURES
             mount_labels = ["Aucune monture"]
             mount_map = {}
 
@@ -446,7 +609,7 @@ elif st.session_state.page == "army":
                 mount = opt
                 mount_cost = opt["cost"]
 
-        else:  # Améliorations d'unité (checkbox multiples)
+        else:  # Améliorations d'unité
             if group["group"] == "Améliorations de rôle":
                 option_names = ["Aucune"] + [
                     f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
@@ -461,7 +624,6 @@ elif st.session_state.page == "army":
                         selected_options[group["group"]].append(opt)
                         upgrades_cost += opt["cost"]
             else:
-                # Utilisation de checkbox pour les améliorations d'unité
                 st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
                 for o in group["options"]:
                     if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
@@ -471,41 +633,38 @@ elif st.session_state.page == "army":
                             selected_options[group["group"]].append(o)
                             upgrades_cost += o["cost"]
 
-    # Calcul du coût CORRIGÉ pour tous les types d'unités
+    # Calcul du coût
     cost = base_cost + weapon_cost + mount_cost + upgrades_cost
+
+    # Vérification du coût total après améliorations
+    if st.session_state.game == "Age of Fantasy":
+        new_total = st.session_state.army_cost + cost
+        max_cost = new_total * game_config["unit_max_cost_ratio"]
+        if cost > max_cost:
+            st.error(f"Cette unité ({cost} pts) dépassera la limite de {int(max_cost)} pts (35% du total) après ajout")
+            st.stop()
 
     st.markdown(f"**Coût total: {cost} pts**")
 
     if st.button("Ajouter à l'armée"):
         try:
-            # Préparation des données de l'unité avec vérification complète
             weapon_data = format_weapon_details(weapon)
 
             # Calcul de la coriace
             total_coriace = 0
-
-            # Règles de base de l'unité
             if 'special_rules' in unit and isinstance(unit.get('special_rules'), list):
                 total_coriace += get_coriace_from_rules(unit['special_rules'])
-
-            # Monture
             if mount:
                 _, mount_coriace = get_mount_details(mount)
                 total_coriace += mount_coriace
-
-            # Améliorations
             if selected_options:
                 for opts in selected_options.values():
                     if isinstance(opts, list):
                         for opt in opts:
                             if 'special_rules' in opt and isinstance(opt.get('special_rules'), list):
                                 total_coriace += get_coriace_from_rules(opt['special_rules'])
-
-            # Armes
             if 'special_rules' in weapon and isinstance(weapon.get('special_rules'), list):
                 total_coriace += get_coriace_from_rules(weapon['special_rules'])
-
-            # Pour les unités combinées (mais PAS pour les héros)
             if combined and unit.get('type', '').lower() != 'hero':
                 if 'special_rules' in unit and isinstance(unit.get('special_rules'), list):
                     base_coriace = get_coriace_from_rules(unit['special_rules'])
@@ -527,13 +686,20 @@ elif st.session_state.page == "army":
                 "type": unit.get("type", "")
             }
 
-            st.session_state.army_list.append(unit_data)
-            st.session_state.army_cost += cost
-            st.rerun()
+            # Vérification des règles avant d'ajouter
+            test_army = st.session_state.army_list.copy()
+            test_army.append(unit_data)
+            test_total = st.session_state.army_cost + cost
+
+            if not validate_army_rules(test_army, test_total, st.session_state.game):
+                st.error("Cette unité ne peut pas être ajoutée car elle violerait les règles du jeu.")
+            else:
+                st.session_state.army_list.append(unit_data)
+                st.session_state.army_cost += cost
+                st.rerun()
 
         except Exception as e:
             st.error(f"Erreur lors de la création de l'unité: {str(e)}")
-            st.error("Veuillez vérifier les données de l'unité et réessayer.")
 
     # Liste de l'armée
     st.divider()
@@ -544,7 +710,6 @@ elif st.session_state.page == "army":
 
     for i, u in enumerate(st.session_state.army_list):
         with st.container():
-            # Affichage du nom et des stats avec Coriace intégrée
             qua_def_coriace = f"Qua {u['quality']}+ / Déf {u['defense']}+"
             if u.get("coriace"):
                 qua_def_coriace += f" / Coriace {u['coriace']}"
@@ -552,17 +717,14 @@ elif st.session_state.page == "army":
             unit_header = f"### {u['name']} ({u['cost']} pts) | {qua_def_coriace}"
             st.markdown(unit_header)
 
-            # Affichage des règles spéciales
             if u.get("rules"):
                 rules_text = ", ".join(u["rules"])
                 st.markdown(f"**Règles spéciales:** {rules_text}")
 
-            # Affichage des armes avec leurs caractéristiques
             if 'weapon' in u and u['weapon']:
                 weapon_details = format_weapon_details(u['weapon'])
                 st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
 
-            # Affichage des améliorations
             if u.get("options"):
                 for group_name, opts in u["options"].items():
                     if isinstance(opts, list) and opts:
@@ -570,7 +732,6 @@ elif st.session_state.page == "army":
                         for opt in opts:
                             st.markdown(f"• {opt.get('name', '')}")
 
-            # Affichage de la monture avec ses détails
             if u.get("mount"):
                 mount_details = format_mount_details(u["mount"])
                 st.markdown(f"**Monture:** {mount_details}")
@@ -613,7 +774,7 @@ elif st.session_state.page == "army":
         )
 
     with col3:
-        # EXPORT HTML (anciennement "fiches")
+        # EXPORT HTML
         html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -729,11 +890,9 @@ elif st.session_state.page == "army":
 """
 
         for unit in army_data['army_list']:
-            # Règles spéciales
             rules = unit.get('rules', [])
             special_rules = ", ".join(rules) if rules else "Aucune"
 
-            # Armes
             weapon_info = unit.get('weapon', {})
             if not isinstance(weapon_info, dict):
                 weapon_info = {
@@ -743,7 +902,6 @@ elif st.session_state.page == "army":
                     "special": []
                 }
 
-            # Échappement des caractères spéciaux
             unit_name = str(unit['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             weapon_name = str(weapon_info['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             weapon_attacks = str(weapon_info['attacks']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -781,11 +939,9 @@ elif st.session_state.page == "army":
             </div>
 """
 
-            # Règles spéciales
             if rules:
                 html_content += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</div>'
 
-            # Armes
             html_content += f"""
             <div class="section-title">Arme</div>
             <table class="weapon-table">
@@ -810,7 +966,6 @@ elif st.session_state.page == "army":
             </table>
 """
 
-            # Améliorations
             if 'options' in unit and unit['options']:
                 for group_name, opts in unit['options'].items():
                     if isinstance(opts, list) and opts:
@@ -820,7 +975,6 @@ elif st.session_state.page == "army":
                             opt_name = str(opt.get("name", "")).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
                             html_content += f'<div>• {opt_name}</div>'
 
-            # Monture
             if 'mount' in unit and unit['mount']:
                 mount_details = format_mount_details(unit["mount"])
                 mount_details_clean = str(mount_details).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
