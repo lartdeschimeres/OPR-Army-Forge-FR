@@ -52,8 +52,43 @@ GAME_CONFIG = {
 }
 
 # ======================================================
-# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES (corrigées)
+# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES
 # ======================================================
+def check_hero_limit(army_list, army_points, game_config):
+    """Vérifie la limite de héros"""
+    if game_config.get("hero_limit"):
+        max_heroes = math.floor(army_points / game_config["hero_limit"])
+        hero_count = sum(1 for unit in army_list if unit.get("type") == "hero")
+
+        if hero_count > max_heroes:
+            st.error(f"Limite de héros dépassée! Maximum autorisé: {max_heroes} (1 héros par {game_config['hero_limit']} pts)")
+            return False
+    return True
+
+def check_unit_copy_rule(army_list, army_points, game_config):
+    """Vérifie la règle des copies d'unités"""
+    if game_config.get("unit_copy_rule"):
+        x_value = math.floor(army_points / game_config["unit_copy_rule"])
+        max_copies = 1 + x_value
+
+        # Compter les copies de chaque unité
+        unit_counts = {}
+        for unit in army_list:
+            unit_name = unit["name"]
+            count_key = unit_name
+
+            if count_key in unit_counts:
+                unit_counts[count_key] += 1
+            else:
+                unit_counts[count_key] = 1
+
+        # Vérifier les limites
+        for unit_name, count in unit_counts.items():
+            if count > max_copies:
+                st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
+                return False
+    return True
+
 def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
     """Vérifie qu'aucune unité ne dépasse le ratio maximum de coût
     army_points = points totaux de l'armée (choisis en page 1)
@@ -74,6 +109,16 @@ def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None)
         st.error(f"Cette unité ({new_unit_cost} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
         return False
 
+    return True
+
+def check_unit_per_points(army_list, army_points, game_config):
+    """Vérifie le nombre maximum d'unités par tranche de points"""
+    if game_config.get("unit_per_points"):
+        max_units = math.floor(army_points / game_config["unit_per_points"])
+
+        if len(army_list) > max_units:
+            st.error(f"Trop d'unités! Maximum autorisé: {max_units} (1 unité par {game_config['unit_per_points']} pts)")
+            return False
     return True
 
 def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
@@ -445,6 +490,7 @@ if st.session_state.page == "setup":
     game = st.selectbox("Jeu", games)
     game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
 
+    # Stockage des points totaux choisis en page 1
     points = st.number_input(
         "Points",
         min_value=game_config["min_points"],
@@ -460,7 +506,7 @@ if st.session_state.page == "setup":
     **Règles pour {game_config['display_name']}:**
     - 1 Héros par tranche de {game_config['hero_limit']} pts
     - 1+X copies de la même unité (X=1 pour {game_config['unit_copy_rule']} pts)
-    - Aucune unité ne peut valoir plus de {int(game_config['unit_max_cost_ratio']*100)}% du total
+    - Aucune unité ne peut valoir plus de {int(game_config['unit_max_cost_ratio']*100)}% du total des points
     - 1 unité maximum par tranche de {game_config['unit_per_points']} pts
     """)
 
@@ -488,7 +534,7 @@ if st.session_state.page == "setup":
     if st.button("Créer une nouvelle liste"):
         st.session_state.game = game
         st.session_state.faction = st.selectbox("Faction", factions_by_game[game].keys())
-        st.session_state.points = points
+        st.session_state.points = points  # Stockage des points totaux
         st.session_state.list_name = list_name
         st.session_state.units = factions_by_game[game][st.session_state.faction]["units"]
         st.session_state.army_list = []
@@ -497,7 +543,7 @@ if st.session_state.page == "setup":
         st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (parties modifiées)
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE
 # ======================================================
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
@@ -510,7 +556,22 @@ elif st.session_state.page == "army":
     if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
         st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
-    # ... (code existant)
+    if st.button("⬅ Retour"):
+        st.session_state.page = "setup"
+        st.rerun()
+
+    # Ajout d'une unité
+    st.divider()
+    st.subheader("Ajouter une unité")
+
+    # Sélection de l'unité
+    unit = st.selectbox(
+        "Unité disponible",
+        st.session_state.units,
+        format_func=format_unit_option,
+        index=0,
+        key="unit_select"
+    )
 
     # Vérification du coût maximum AVANT les améliorations (utilisation de st.session_state.points)
     max_cost = st.session_state.points * game_config["unit_max_cost_ratio"]
@@ -518,15 +579,6 @@ elif st.session_state.page == "army":
         st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
         st.stop()
 
-    # ... (code existant pour les options)
-
-    # Calcul du coût final
-    cost = base_cost + weapon_cost + mount_cost + upgrades_cost
-
-    # Vérification finale du coût maximum (utilisation de st.session_state.points)
-    if not check_unit_max_cost(st.session_state.army_list, st.session_state.points, game_config, cost):
-        st.stop()
-        
     # Initialisation
     base_cost = unit["base_cost"]
     weapon = unit.get("weapons", [{}])[0]
@@ -604,7 +656,7 @@ elif st.session_state.page == "army":
     # Calcul du coût final
     cost = base_cost + weapon_cost + mount_cost + upgrades_cost
 
-    # Vérification finale du coût maximum
+    # Vérification finale du coût maximum (utilisation de st.session_state.points)
     if not check_unit_max_cost(st.session_state.army_list, st.session_state.points, game_config, cost):
         st.stop()
 
@@ -654,7 +706,7 @@ elif st.session_state.page == "army":
             test_army.append(unit_data)
             test_total = st.session_state.army_cost + cost
 
-            if not validate_army_rules(test_army, test_total, st.session_state.game, cost):
+            if not validate_army_rules(test_army, st.session_state.points, st.session_state.game, cost):
                 st.error("Cette unité ne peut pas être ajoutée car elle violerait les règles du jeu.")
             else:
                 st.session_state.army_list.append(unit_data)
