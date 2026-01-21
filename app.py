@@ -108,18 +108,18 @@ def calculate_total_coriace(unit_data, combined=False):
 def format_weapon_details(weapon):
     """Formate les détails d'une arme pour l'affichage"""
     if not weapon:
-        return "Arme non spécifiée"
+        return {"name": "Arme non spécifiée", "attacks": "?", "ap": "?", "special": []}
 
     attacks = weapon.get('attacks', '?')
     armor_piercing = weapon.get('armor_piercing', '?')
     special_rules = weapon.get('special_rules', [])
 
-    details = f"A{attacks}, PA({armor_piercing})"
-
-    if special_rules:
-        details += ", " + ", ".join(special_rules)
-
-    return details
+    return {
+        "name": weapon.get('name', 'Arme non nommée'),
+        "attacks": attacks,
+        "ap": armor_piercing,
+        "special": special_rules
+    }
 
 def format_mount_details(mount):
     """Formate les détails d'une monture pour l'affichage"""
@@ -151,7 +151,11 @@ def format_mount_details(mount):
     # Ajouter les attaques de la monture si disponibles
     if 'weapons' in mount_data and mount_data['weapons']:
         for weapon in mount_data['weapons']:
-            details += " | " + format_weapon_details(weapon)
+            weapon_details = format_weapon_details(weapon)
+            details += " | " + f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})"
+            if weapon_details['special']:
+                details += ", " + ", ".join(weapon_details['special'])
+            details += ")"
 
     return details
 
@@ -176,9 +180,8 @@ def format_unit_option(u):
     if 'weapons' in u and u['weapons']:
         weapons = []
         for weapon in u['weapons']:
-            weapon_name = weapon.get('name', '')
             weapon_details = format_weapon_details(weapon)
-            weapons.append(f"{weapon_name} ({weapon_details})")
+            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
         weapons_part = " | ".join(weapons)
 
     rules_part = ""
@@ -289,6 +292,29 @@ if "page" not in st.session_state:
 if st.session_state.page == "setup":
     st.title("OPR Army Forge FR")
 
+    # Chargement des listes sauvegardées depuis GitHub (simulé)
+    st.subheader("Charger une liste sauvegardée depuis GitHub")
+
+    # Pour Simon qui travaille sur GitHub, on simule le chargement depuis un dépôt
+    github_repo = st.text_input("URL du dépôt GitHub (ex: https://github.com/utilisateur/opr-listes)", "")
+    github_file = st.text_input("Chemin du fichier (ex: listes/mes_listes.json)", "")
+
+    if st.button("Charger depuis GitHub") and github_repo and github_file:
+        try:
+            # En environnement réel, vous utiliseriez l'API GitHub ici
+            # Pour cette démo, on simule avec un fichier local
+            st.warning("Fonctionnalité GitHub simulée. En environnement réel, cette fonction chargerait directement depuis GitHub.")
+            st.info("Pour l'instant, utilisez l'import JSON classique ci-dessous.")
+
+            # Dans une vraie implémentation, vous utiliseriez:
+            # import requests
+            # response = requests.get(f"https://raw.githubusercontent.com/{github_repo.split('/')[-2]}/{github_repo.split('/')[-1]}/main/{github_file}")
+            # data = response.json()
+        except Exception as e:
+            st.error(f"Erreur de chargement: {e}")
+
+    st.divider()
+
     if not games:
         st.error("Aucun jeu trouvé")
         st.stop()
@@ -376,10 +402,9 @@ elif st.session_state.page == "army":
             # Formatage des options d'armes
             weapon_options = ["Arme de base"]
             for o in group["options"]:
-                weapon_name = o["name"]
                 weapon_details = format_weapon_details(o["weapon"])
                 cost_diff = o["cost"]
-                weapon_options.append(f"{weapon_name} ({weapon_details}) (+{cost_diff} pts)")
+                weapon_options.append(f"{o['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''}) (+{cost_diff} pts)")
 
             selected_weapon = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
             if selected_weapon != "Arme de base":
@@ -485,9 +510,8 @@ elif st.session_state.page == "army":
 
             # Affichage des armes avec leurs caractéristiques
             if 'weapon' in u and u['weapon']:
-                weapon_name = u['weapon'].get('name', 'Arme non nommée')
                 weapon_details = format_weapon_details(u['weapon'])
-                st.markdown(f"**Arme:** {weapon_name} ({weapon_details})")
+                st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
 
             # Affichage des améliorations
             if u.get("options"):
@@ -533,7 +557,7 @@ elif st.session_state.page == "army":
 
     with col2:
         st.download_button(
-            "Export JSON",
+            "Exporter en JSON",
             json.dumps(army_data, indent=2, ensure_ascii=False),
             file_name=f"{st.session_state.list_name}.json",
             mime="application/json"
@@ -655,6 +679,13 @@ elif st.session_state.page == "army":
             if coriace:
                 qua_def_coriace += f" / Coriace {coriace}"
 
+            # Règles spéciales
+            rules = unit.get('rules', [])
+            special_rules = ", ".join(rules) if rules else "Aucune"
+
+            # Armes
+            weapon_info = format_weapon_details(unit.get('weapon', {}))
+
             html_content_standard += f"""
             <div class="unit-container">
                 <div class="unit-header">
@@ -663,10 +694,6 @@ elif st.session_state.page == "army":
                 </div>
 
                 <div class="unit-stats">
-            """
-
-            # Ajout des stats Quality, Defense et Coriace
-            html_content_standard += f"""
                     <div class="stat-badge">
                         <div class="stat-label">Qualité</div>
                         <div class="stat-value">{unit['quality']}+</div>
@@ -688,47 +715,45 @@ elif st.session_state.page == "army":
                 </div>
             """
 
-            if unit.get('rules'):
-                html_content_standard += f'<div class="special-rules"><strong>Règles spéciales:</strong> {", ".join(unit["rules"])}</div>'
+            # Règles spéciales
+            if rules:
+                html_content_standard += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules}</div>'
 
-            if 'weapon' in unit:
-                weapon_name = unit['weapon'].get('name', 'Arme non nommée')
-                weapon_attacks = unit['weapon'].get('attacks', '?')
-                weapon_ap = unit['weapon'].get('armor_piercing', '?')
-                weapon_special = unit['weapon'].get('special_rules', [])
+            # Armes
+            html_content_standard += """
+                <div class="section-title">Arme</div>
+                <table class="weapon-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>PORT</th>
+                            <th>ATK</th>
+                            <th>PA</th>
+                            <th>SPE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{weapon_info['name']}</td>
+                            <td>-</td>
+                            <td>{weapon_info['attacks']}</td>
+                            <td>{weapon_info['ap']}</td>
+                            <td>{', '.join(weapon_info['special']) if weapon_info['special'] else '-'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            """
 
-                html_content_standard += """
-                    <div class="section-title">Arme</div>
-                    <table class="weapon-table">
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>PORT</th>
-                                <th>ATK</th>
-                                <th>PA</th>
-                                <th>SPE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{weapon_name}</td>
-                                <td>-</td>
-                                <td>{weapon_attacks}</td>
-                                <td>{weapon_ap}</td>
-                                <td>{', '.join(weapon_special) if weapon_special else '-'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                """
-
-            if unit.get('options'):
+            # Améliorations
+            if 'options' in unit and unit['options']:
                 for group_name, opts in unit['options'].items():
                     if isinstance(opts, list) and opts:
                         html_content_standard += f'<div class="section-title">{group_name}:</div>'
                         for opt in opts:
                             html_content_standard += f'<div>• {opt.get("name", "")}</div>'
 
-            if unit.get('mount'):
+            # Monture
+            if 'mount' in unit and unit['mount']:
                 mount_details = format_mount_details(unit["mount"])
                 html_content_standard += f'<div class="section-title">Monture</div><p>{mount_details}</p>'
 
@@ -744,7 +769,7 @@ elif st.session_state.page == "army":
         )
 
     with col4:
-        # EXPORT HTML AU FORMAT FICHE FRANCISÉ
+        # EXPORT HTML AU FORMAT FICHE CORRIGÉ
         html_content_fiche = f"""
         <!DOCTYPE html>
         <html>
@@ -776,6 +801,7 @@ elif st.session_state.page == "army":
                     margin-bottom: 20px;
                     overflow: hidden;
                     width: 100%;
+                    page-break-inside: avoid;
                 }}
                 .unit-header {{
                     background-color: #2c3e50;
@@ -844,13 +870,17 @@ elif st.session_state.page == "army":
                     padding: 8px;
                     border-bottom: 1px solid #eee;
                 }}
-                .rules-list {{
-                    margin: 10px 0;
+                .rules-section {{
+                    margin-bottom: 15px;
                 }}
-                .special-rules {{
+                .rules-title {{
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 5px;
+                }}
+                .rules-content {{
                     font-style: italic;
                     color: #555;
-                    margin-bottom: 15px;
                 }}
                 @media print {{
                     .unit-card {{
@@ -882,15 +912,7 @@ elif st.session_state.page == "army":
             special_rules = ", ".join(rules) if rules else "Aucune"
 
             # Armes
-            weapon_name = "Arme de base"
-            weapon_attacks = "?"
-            weapon_ap = "?"
-            weapon_special = []
-            if 'weapon' in unit and unit['weapon']:
-                weapon_name = unit['weapon'].get('name', 'Arme non nommée')
-                weapon_attacks = unit['weapon'].get('attacks', '?')
-                weapon_ap = unit['weapon'].get('armor_piercing', '?')
-                weapon_special = unit['weapon'].get('special_rules', [])
+            weapon_info = format_weapon_details(unit.get('weapon', {}))
 
             # Monture
             mount_details = ""
@@ -914,10 +936,6 @@ elif st.session_state.page == "army":
                 </div>
 
                 <div class="unit-stats">
-            """
-
-            # Ajout des stats Qualité, Défense et Coriace
-            html_content_fiche += f"""
                     <div class="stat-badge">
                         <div class="stat-label">Qualité</div>
                         <div class="stat-value">{quality}+</div>
@@ -939,10 +957,18 @@ elif st.session_state.page == "army":
                 </div>
 
                 <div class="unit-details">
-                    <div class="special-rules">{special_rules}</div>
             """
 
-            # Section Armes
+            # Règles spéciales
+            if rules:
+                html_content_fiche += f"""
+                    <div class="rules-section">
+                        <div class="rules-title">Règles spéciales</div>
+                        <div class="rules-content">{special_rules}</div>
+                    </div>
+                """
+
+            # Armes
             html_content_fiche += """
                     <div class="section-title">Arme</div>
                     <table class="weapon-table">
@@ -957,17 +983,17 @@ elif st.session_state.page == "army":
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{weapon_name}</td>
+                                <td>{weapon_info['name']}</td>
                                 <td>-</td>
-                                <td>{weapon_attacks}</td>
-                                <td>{weapon_ap}</td>
-                                <td>{', '.join(weapon_special) if weapon_special else '-'}</td>
+                                <td>{weapon_info['attacks']}</td>
+                                <td>{weapon_info['ap']}</td>
+                                <td>{', '.join(weapon_info['special']) if weapon_info['special'] else '-'}</td>
                             </tr>
                         </tbody>
                     </table>
             """
 
-            # Section Améliorations si elles existent
+            # Améliorations
             if upgrades:
                 html_content_fiche += """
                     <div class="section-title">Améliorations</div>
@@ -992,7 +1018,7 @@ elif st.session_state.page == "army":
                     </table>
                 """
 
-            # Section Monture si elle existe
+            # Monture
             if mount_details and mount_details != "Aucune monture":
                 html_content_fiche += f"""
                     <div class="section-title">Monture</div>
