@@ -71,6 +71,49 @@ def get_mount_details(mount):
 
     return special_rules, coriace
 
+def calculate_total_coriace(unit_data):
+    """
+    Calcule la Coriace TOTALE d'une unité
+    Version corrigée qui prend directement les données de l'unité
+    """
+    total = 0
+
+    try:
+        # 1. Règles de base de l'unité
+        if 'special_rules' in unit_data and isinstance(unit_data['special_rules'], list):
+            total += get_coriace_from_rules(unit_data['special_rules'])
+
+        # 2. Monture
+        if 'mount' in unit_data and unit_data['mount']:
+            _, mount_coriace = get_mount_details(unit_data['mount'])
+            total += mount_coriace
+
+        # 3. Améliorations
+        if 'options' in unit_data and isinstance(unit_data['options'], dict):
+            for opts in unit_data['options'].values():
+                if isinstance(opts, list):
+                    for opt in opts:
+                        if 'special_rules' in opt and isinstance(opt['special_rules'], list):
+                            total += get_coriace_from_rules(opt['special_rules'])
+                elif isinstance(opts, dict) and 'special_rules' in opts:
+                    total += get_coriace_from_rules(opts['special_rules'])
+
+        # 4. Armes
+        if 'weapon' in unit_data and isinstance(unit_data['weapon'], dict) and 'special_rules' in unit_data['weapon']:
+            total += get_coriace_from_rules(unit_data['weapon']['special_rules'])
+
+        # 5. Pour les unités combinées (mais PAS pour les héros)
+        if unit_data.get('combined', False) and unit_data.get('type', '').lower() != 'hero':
+            if 'special_rules' in unit_data and isinstance(unit_data['special_rules'], list):
+                base_coriace = get_coriace_from_rules(unit_data['special_rules'])
+                total += base_coriace
+
+        return total if total > 0 else None
+
+    except Exception as e:
+        st.error(f"Erreur dans le calcul de la Coriace: {str(e)}")
+        return 0
+
 def format_weapon_details(weapon):
     """Formate les détails d'une arme pour l'affichage"""
     if not weapon:
@@ -81,14 +124,12 @@ def format_weapon_details(weapon):
             "special": []
         }
 
-    weapon_data = {
+    return {
         "name": weapon.get('name', 'Arme non nommée'),
         "attacks": weapon.get('attacks', '?'),
         "ap": weapon.get('armor_piercing', '?'),
         "special": weapon.get('special_rules', [])
     }
-
-    return weapon_data
 
 def format_mount_details(mount):
     """Formate les détails d'une monture pour l'affichage"""
@@ -133,7 +174,9 @@ def format_unit_option(u):
     name_part = f"{u['name']} [1]"
 
     # Calcul de la Coriace
-    coriace = get_coriace_from_rules(u.get('special_rules', []))
+    coriace = 0
+    if 'special_rules' in u:
+        coriace += get_coriace_from_rules(u.get('special_rules', []))
     if 'mount' in u and u['mount']:
         _, mount_coriace = get_mount_details(u['mount'])
         coriace += mount_coriace
@@ -446,31 +489,63 @@ elif st.session_state.page == "army":
     st.markdown(f"**Coût total: {cost} pts**")
 
     if st.button("Ajouter à l'armée"):
-        # Préparation des données de l'unité
-        unit_weapon = format_weapon_details(weapon)
+        try:
+            # Préparation des données de l'unité avec vérification complète
+            weapon_data = format_weapon_details(weapon)
 
-        unit_data = {
-            "name": unit["name"],
-            "cost": cost,
-            "quality": unit["quality"],
-            "defense": unit["defense"],
-            "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
-            "weapon": unit_weapon,  # On stocke les données formatées
-            "options": selected_options,
-            "mount": mount,
-            "coriace": calculate_total_coriace({
-                'special_rules': unit.get('special_rules', []),
-                'mount': mount,
-                'options': selected_options,
-                'weapon': weapon,
-                'type': unit.get('type', '')
-            }),
-            "combined": combined if unit.get("type", "").lower() != "hero" else False,
-            "type": unit.get("type", "")
-        }
-        st.session_state.army_list.append(unit_data)
-        st.session_state.army_cost += cost
-        st.rerun()
+            # Calcul de la coriace
+            total_coriace = 0
+
+            # Règles de base de l'unité
+            if 'special_rules' in unit and isinstance(unit.get('special_rules'), list):
+                total_coriace += get_coriace_from_rules(unit['special_rules'])
+
+            # Monture
+            if mount:
+                _, mount_coriace = get_mount_details(mount)
+                total_coriace += mount_coriace
+
+            # Améliorations
+            if selected_options:
+                for opts in selected_options.values():
+                    if isinstance(opts, list):
+                        for opt in opts:
+                            if 'special_rules' in opt and isinstance(opt.get('special_rules'), list):
+                                total_coriace += get_coriace_from_rules(opt['special_rules'])
+
+            # Armes
+            if 'special_rules' in weapon and isinstance(weapon.get('special_rules'), list):
+                total_coriace += get_coriace_from_rules(weapon['special_rules'])
+
+            # Pour les unités combinées (mais PAS pour les héros)
+            if combined and unit.get('type', '').lower() != 'hero':
+                if 'special_rules' in unit and isinstance(unit.get('special_rules'), list):
+                    base_coriace = get_coriace_from_rules(unit['special_rules'])
+                    total_coriace += base_coriace
+
+            total_coriace = total_coriace if total_coriace > 0 else None
+
+            unit_data = {
+                "name": unit["name"],
+                "cost": cost,
+                "quality": unit["quality"],
+                "defense": unit["defense"],
+                "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
+                "weapon": weapon_data,
+                "options": selected_options,
+                "mount": mount,
+                "coriace": total_coriace,
+                "combined": combined if unit.get("type", "").lower() != "hero" else False,
+                "type": unit.get("type", "")
+            }
+
+            st.session_state.army_list.append(unit_data)
+            st.session_state.army_cost += cost
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"Erreur lors de la création de l'unité: {str(e)}")
+            st.error("Veuillez vérifier les données de l'unité et réessayer.")
 
     # Liste de l'armée
     st.divider()
@@ -660,11 +735,6 @@ elif st.session_state.page == "army":
         """
 
         for unit in army_data['army_list']:
-            coriace = unit.get('coriace')
-            qua_def_coriace = f"Qua {unit['quality']}+ / Déf {unit['defense']}+"
-            if coriace:
-                qua_def_coriace += f" / Coriace {coriace}"
-
             # Règles spéciales
             rules = unit.get('rules', [])
             special_rules = ", ".join(rules) if rules else "Aucune"
@@ -696,11 +766,11 @@ elif st.session_state.page == "army":
                         <div class="stat-value">{unit['defense']}+</div>
                     </div>
             """
-            if coriace:
+            if unit.get('coriace'):
                 html_content_standard += f"""
                     <div class="stat-badge">
                         <div class="stat-label">Coriace</div>
-                        <div class="stat-value">{coriace}</div>
+                        <div class="stat-value">{unit['coriace']}</div>
                     </div>
                 """
 
@@ -893,13 +963,6 @@ elif st.session_state.page == "army":
         """
 
         for unit in army_data['army_list']:
-            # Récupérer les données de l'unité
-            unit_name = unit['name']
-            unit_cost = unit['cost']
-            quality = unit.get('quality', '?')
-            defense = unit.get('defense', '?')
-            coriace = unit.get('coriace', None)
-
             # Règles spéciales
             rules = unit.get('rules', [])
             special_rules = ", ".join(rules) if rules else "Aucune"
@@ -931,25 +994,25 @@ elif st.session_state.page == "army":
             html_content_fiche += f"""
             <div class="unit-card">
                 <div class="unit-header">
-                    <div class="unit-name">{unit_name}</div>
-                    <div class="unit-cost">{unit_cost} pts</div>
+                    <div class="unit-name">{unit['name']}</div>
+                    <div class="unit-cost">{unit['cost']} pts</div>
                 </div>
 
                 <div class="unit-stats">
                     <div class="stat-badge">
                         <div class="stat-label">Qualité</div>
-                        <div class="stat-value">{quality}+</div>
+                        <div class="stat-value">{unit['quality']}+</div>
                     </div>
                     <div class="stat-badge">
                         <div class="stat-label">Défense</div>
-                        <div class="stat-value">{defense}+</div>
+                        <div class="stat-value">{unit['defense']}+</div>
                     </div>
             """
-            if coriace:
+            if unit.get('coriace'):
                 html_content_fiche += f"""
                     <div class="stat-badge">
                         <div class="stat-label">Coriace</div>
-                        <div class="stat-value">{coriace}</div>
+                        <div class="stat-value">{unit['coriace']}</div>
                     </div>
                 """
 
