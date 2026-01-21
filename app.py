@@ -8,10 +8,10 @@ import base64
 import math
 
 # ======================================================
-# CONFIGURATION
+# CONFIGURATION POUR SIMON
 # ======================================================
 st.set_page_config(
-    page_title="OPR Army Forge FR",
+    page_title="OPR Army Forge FR - Simon Joinville Fouquet",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -22,7 +22,7 @@ FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 FACTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ======================================================
-# CONFIGURATION DES JEUX ET LEURS LIMITATIONS
+# CONFIGURATION DES JEUX ET LEURS LIMITATIONS (INTÉGRÉ DANS LE CODE)
 # ======================================================
 GAME_CONFIG = {
     "Age of Fantasy": {
@@ -32,26 +32,35 @@ GAME_CONFIG = {
         "default_points": 1000,
         "point_step": 250,
         "unit_types": ["infantry", "cavalry", "hero", "monster", "war_machine"],
+        "special_rules": ["Coriace", "Héros", "Attaque Versatile", "Volant", "Effrayant",
+                        "Magique", "Né pour la Guerre", "Aura de Commandement"],
+        "weapon_types": ["Épée", "Lance", "Hache", "Arc", "Arbalète", "Massue"],
+        "max_units": 50,
         "description": "Jeu de bataille rangée dans un univers fantasy médiéval",
         # Règles spécifiques à Age of Fantasy
         "hero_limit": 375,  # 1 Héros par tranche de 375 pts
         "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
         "unit_max_cost_ratio": 0.35,  # Aucune unité ne peut valoir plus de 35% du total
-        "unit_per_points": 150,  # 1 unité maximum par tranche de 150 pts
-    },  # <-- Virgule ajoutée ici
+        "unit_per_points": 150  # 1 unité maximum par tranche de 150 pts
+    },
     "Grimdark Future": {
         "display_name": "Grimdark Future",
         "max_points": 10000,
-        "min_points": 250,
-        "default_points": 1000,
-        "point_step": 250,
+        "min_points": 200,
+        "default_points": 800,
+        "point_step": 200,
         "unit_types": ["infantry", "vehicle", "walker", "hero", "battle_suit"],
-        "description": "Jeu de bataille futuriste avec unités mécanisées"
+        "special_rules": ["Blindage", "Tir Rapide", "Furtif", "Bouclier Énergie",
+                        "Arme Lourde", "Téléportation"],
+        "weapon_types": ["Fusil Laser", "Bolter", "Canon Plasma", "Lance-Missiles",
+                        "Arme Énergie", "Lame Puissance"],
+        "max_units": 40,
+        "description": "Jeu de bataille futuriste avec unités mécanisées",
         # Règles spécifiques à Grimdark Future
-        "hero_limit": 375,  # 1 Héros par tranche de 375 pts
-        "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
-        "unit_max_cost_ratio": 0.35,  # Aucune unité ne peut valoir plus de 35% du total
-        "unit_per_points": 150,  # 1 unité maximum par tranche de 150 pts
+        "hero_limit": 400,  # 1 Héros par tranche de 400 pts
+        "unit_copy_rule": 800,  # 1+X copies où X=1 pour 800 pts
+        "unit_max_cost_ratio": 0.40,  # Aucune unité ne peut valoir plus de 40% du total
+        "unit_per_points": 160  # 1 unité maximum par tranche de 160 pts
     }
 }
 
@@ -101,7 +110,7 @@ def check_unit_max_cost(army_list, total_points, game_config):
 
         for unit in army_list:
             if unit["cost"] > max_cost:
-                st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts (35% du total)")
+                st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
                 return False
     return True
 
@@ -120,7 +129,7 @@ def validate_army_rules(army_list, total_points, game):
     game_config = GAME_CONFIG.get(game, {})
 
     # Vérification des règles spécifiques à Age of Fantasy
-    if game == "Age of Fantasy":
+    if game in GAME_CONFIG:
         return (check_hero_limit(army_list, total_points, game_config) and
                 check_unit_copy_rule(army_list, total_points, game_config) and
                 check_unit_max_cost(army_list, total_points, game_config) and
@@ -129,7 +138,7 @@ def validate_army_rules(army_list, total_points, game):
     return True  # Pas de règles spécifiques pour les autres jeux
 
 # ======================================================
-# FONCTIONS UTILITAIRES (inchangées)
+# FONCTIONS UTILITAIRES
 # ======================================================
 def format_special_rule(rule):
     """Formate les règles spéciales avec parenthèses"""
@@ -300,7 +309,7 @@ def find_option_by_name(options, name):
         return None
 
 # ======================================================
-# LOCAL STORAGE (inchangé)
+# LOCAL STORAGE
 # ======================================================
 def ls_get(key):
     """Récupère une valeur du LocalStorage"""
@@ -342,7 +351,7 @@ def ls_set(key, value):
         st.error(f"Erreur LocalStorage: {e}")
 
 # ======================================================
-# CHARGEMENT DES FACTIONS (inchangé)
+# CHARGEMENT DES FACTIONS
 # ======================================================
 @st.cache_data
 def load_factions():
@@ -350,9 +359,30 @@ def load_factions():
     factions = {}
     games = set()
 
-    if not FACTIONS_DIR.exists():
-        st.error(f"Dossier {FACTIONS_DIR} introuvable!")
-        return {}, []
+    # Création d'un fichier de faction par défaut si le dossier est vide
+    if not list(FACTIONS_DIR.glob("*.json")):
+        default_faction = {
+            "game": "Age of Fantasy",
+            "faction": "Disciples de la Guerre",
+            "units": [
+                {
+                    "name": "Guerrier",
+                    "base_cost": 60,
+                    "quality": 3,
+                    "defense": 3,
+                    "type": "infantry",
+                    "special_rules": [],
+                    "weapons": [{
+                        "name": "Épée",
+                        "attacks": 1,
+                        "armor_piercing": 0,
+                        "special_rules": []
+                    }]
+                }
+            ]
+        }
+        with open(FACTIONS_DIR / "default.json", "w", encoding="utf-8") as f:
+            json.dump(default_faction, f, indent=2)
 
     for fp in FACTIONS_DIR.glob("*.json"):
         try:
@@ -396,7 +426,7 @@ if st.session_state.page == "setup":
             - **Unités max**: {config['max_units']}
             """)
 
-            # Affichage des règles spécifiques à Age of Fantasy
+            # Affichage des règles spécifiques
             if game_key == "Age of Fantasy":
                 st.markdown("""
                 **Règles spécifiques à Age of Fantasy:**
@@ -404,6 +434,14 @@ if st.session_state.page == "setup":
                 - 1+X copies de la même unité (X=1 pour 750 pts d'armée)
                 - Aucune unité ne peut valoir plus de 35% du total des points
                 - 1 unité maximum par tranche de 150 pts d'armée
+                """)
+            elif game_key == "Grimdark Future":
+                st.markdown("""
+                **Règles spécifiques à Grimdark Future:**
+                - 1 Héros par tranche de 400 pts d'armée
+                - 1+X copies de la même unité (X=1 pour 800 pts d'armée)
+                - Aucune unité ne peut valoir plus de 40% du total des points
+                - 1 unité maximum par tranche de 160 pts d'armée
                 """)
 
     # Section pour charger depuis GitHub
@@ -471,7 +509,7 @@ if st.session_state.page == "setup":
     - Unités max par armée: {game_config['max_units']}
     """)
 
-    # Affichage des règles spécifiques à Age of Fantasy
+    # Affichage des règles spécifiques
     if game == "Age of Fantasy":
         st.markdown("""
         **Règles spécifiques appliquées:**
@@ -479,6 +517,14 @@ if st.session_state.page == "setup":
         - 1+X copies de la même unité (X=1 pour 750 pts d'armée)
         - Aucune unité ne peut valoir plus de 35% du total des points
         - 1 unité maximum par tranche de 150 pts d'armée
+        """)
+    elif game == "Grimdark Future":
+        st.markdown("""
+        **Règles spécifiques appliquées:**
+        - 1 Héros par tranche de 400 pts d'armée
+        - 1+X copies de la même unité (X=1 pour 800 pts d'armée)
+        - Aucune unité ne peut valoir plus de 40% du total des points
+        - 1 unité maximum par tranche de 160 pts d'armée
         """)
 
     # Import JSON
@@ -524,10 +570,9 @@ elif st.session_state.page == "army":
     # Vérification des règles spécifiques au jeu
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
 
-    # Vérification des règles d'Age of Fantasy
-    if st.session_state.game == "Age of Fantasy":
-        if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
-            st.warning("⚠️ Certaines règles spécifiques à Age of Fantasy ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
+    # Vérification des règles
+    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
+        st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
     if st.button("⬅ Retour"):
         st.session_state.page = "setup"
@@ -551,12 +596,11 @@ elif st.session_state.page == "army":
         st.error(f"Ce type d'unité ({unit.get('type', 'inconnu')}) n'est pas autorisé pour {game_config['display_name']}")
         st.stop()
 
-    # Vérification du coût maximum (35% du total)
-    if st.session_state.game == "Age of Fantasy":
-        max_cost = st.session_state.points * game_config["unit_max_cost_ratio"]
-        if unit["base_cost"] > max_cost:
-            st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts (35% du total)")
-            st.stop()
+    # Vérification du coût maximum
+    max_cost = st.session_state.points * game_config["unit_max_cost_ratio"]
+    if unit["base_cost"] > max_cost:
+        st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
+        st.stop()
 
     # Initialisation
     base_cost = unit["base_cost"]
@@ -636,12 +680,11 @@ elif st.session_state.page == "army":
     cost = base_cost + weapon_cost + mount_cost + upgrades_cost
 
     # Vérification du coût total après améliorations
-    if st.session_state.game == "Age of Fantasy":
-        new_total = st.session_state.army_cost + cost
-        max_cost = new_total * game_config["unit_max_cost_ratio"]
-        if cost > max_cost:
-            st.error(f"Cette unité ({cost} pts) dépassera la limite de {int(max_cost)} pts (35% du total) après ajout")
-            st.stop()
+    new_total = st.session_state.army_cost + cost
+    max_cost = new_total * game_config["unit_max_cost_ratio"]
+    if cost > max_cost:
+        st.error(f"Cette unité ({cost} pts) dépassera la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total) après ajout")
+        st.stop()
 
     st.markdown(f"**Coût total: {cost} pts**")
 
