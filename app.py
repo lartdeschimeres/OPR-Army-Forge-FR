@@ -76,7 +76,7 @@ def check_unit_copy_rule(army_list, total_points, game_config):
         for unit in army_list:
             unit_name = unit["name"]
             is_combined = unit.get("combined", False)
-            count_key = f"{unit_name}_{'combined' if is_combined else 'single'}"
+            count_key = unit_name  # FIX LIMITES
 
             if count_key in unit_counts:
                 unit_counts[count_key] += 1
@@ -111,7 +111,11 @@ def check_unit_per_points(army_list, total_points, game_config):
             return False
     return True
 
-def validate_army_rules(army_list, total_points, game):
+def validate_army_rules(
+    st.session_state.army_list,
+    st.session_state.army_cost,  # FIX LIMITES
+    game
+):
     """Valide toutes les règles spécifiques au jeu"""
     game_config = GAME_CONFIG.get(game, {})
 
@@ -548,7 +552,11 @@ elif st.session_state.page == "army":
     # Vérification des règles spécifiques au jeu
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
 
-    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
+    if not validate_army_rules(
+    st.session_state.army_list,
+    st.session_state.army_cost,  # FIX LIMITES
+    game
+):
         st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
     if st.button("⬅ Retour"):
