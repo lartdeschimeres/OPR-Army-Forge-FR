@@ -11,7 +11,6 @@ import re
 # ======================================================
 st.set_page_config(
     page_title="OPR Army Forge FR - Simon Joinville Fouquet",
-    page_title="OPR Army Forge FR",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -271,6 +270,34 @@ if st.session_state.page == "setup":
             st.warning("Fonctionnalité GitHub simulée. En environnement réel, cette fonction chargerait directement depuis GitHub.")
             st.info("Pour l'instant, utilisez l'import JSON classique ci-dessous.")
 
+    # Liste des listes sauvegardées
+    st.subheader("Mes listes sauvegardées")
+
+    # Chargement des listes sauvegardées
+    saved_lists = ls_get("opr_saved_lists")
+    if saved_lists:
+        try:
+            saved_lists = json.loads(saved_lists)
+            if isinstance(saved_lists, list):
+                for i, saved_list in enumerate(saved_lists):
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"**{saved_list.get('name', 'Liste sans nom')}**")
+                        st.caption(f"{saved_list.get('game', 'Inconnu')} • {saved_list.get('faction', 'Inconnue')} • {saved_list.get('total_cost', 0)}/{saved_list.get('points', 0)} pts")
+                    with col2:
+                        if st.button(f"Charger", key=f"load_{i}"):
+                            st.session_state.game = saved_list["game"]
+                            st.session_state.faction = saved_list["faction"]
+                            st.session_state.points = saved_list["points"]
+                            st.session_state.list_name = saved_list["name"]
+                            st.session_state.army_list = saved_list["army_list"]
+                            st.session_state.army_cost = saved_list["total_cost"]
+                            st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
+                            st.session_state.page = "army"
+                            st.rerun()
+        except Exception as e:
+            st.error(f"Erreur chargement listes: {e}")
+
     if not games:
         st.error("Aucun jeu trouvé")
         st.stop()
@@ -469,7 +496,7 @@ elif st.session_state.page == "army":
 
             # Affichage des armes avec leurs caractéristiques
             if 'weapon' in u and u['weapon']:
-                weapon_info = u['weapon']  # On utilise directement les données formatées
+                weapon_info = u['weapon']
                 st.markdown(f"**Arme:** {weapon_info['name']} (A{weapon_info['attacks']}, PA({weapon_info['ap']}){', ' + ', '.join(weapon_info['special']) if weapon_info['special'] else ''})")
 
             # Affichage des améliorations
@@ -644,6 +671,13 @@ elif st.session_state.page == "army":
 
             # Armes
             weapon_info = unit.get('weapon', {})
+            if not isinstance(weapon_info, dict):
+                weapon_info = {
+                    "name": "Arme non spécifiée",
+                    "attacks": "?",
+                    "ap": "?",
+                    "special": []
+                }
 
             html_content_standard += f"""
             <div class="unit-container">
@@ -679,30 +713,29 @@ elif st.session_state.page == "army":
                 html_content_standard += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules}</div>'
 
             # Armes
-            if weapon_info:
-                html_content_standard += """
-                    <div class="section-title">Arme</div>
-                    <table class="weapon-table">
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>PORT</th>
-                                <th>ATK</th>
-                                <th>PA</th>
-                                <th>SPE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{weapon_info['name']}</td>
-                                <td>-</td>
-                                <td>{weapon_info['attacks']}</td>
-                                <td>{weapon_info['ap']}</td>
-                                <td>{', '.join(weapon_info['special']) if weapon_info['special'] else '-'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                """
+            html_content_standard += """
+                <div class="section-title">Arme</div>
+                <table class="weapon-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>PORT</th>
+                            <th>ATK</th>
+                            <th>PA</th>
+                            <th>SPE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{weapon_info['name']}</td>
+                            <td>-</td>
+                            <td>{weapon_info['attacks']}</td>
+                            <td>{weapon_info['ap']}</td>
+                            <td>{', '.join(weapon_info['special']) if weapon_info['special'] else '-'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            """
 
             # Améliorations
             if 'options' in unit and unit['options']:
@@ -873,7 +906,7 @@ elif st.session_state.page == "army":
 
             # Armes
             weapon_info = unit.get('weapon', {})
-            if not weapon_info or not isinstance(weapon_info, dict):
+            if not isinstance(weapon_info, dict):
                 weapon_info = {
                     "name": "Arme non spécifiée",
                     "attacks": "?",
