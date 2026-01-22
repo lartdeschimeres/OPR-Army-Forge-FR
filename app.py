@@ -648,7 +648,6 @@ elif st.session_state.page == "army":
     weapon = unit.get("weapons", [{}])[0]
     selected_options = {}
     mount = None
-    combined = False
     weapon_cost = 0
     mount_cost = 0
     upgrades_cost = 0
@@ -657,7 +656,7 @@ elif st.session_state.page == "army":
     if unit.get("type") != "hero":
         combined = st.checkbox("Unité combinée", value=False)
     else:
-        combined = False  # Forcer à False pour les héros
+        combined = False  # Forcer à False pour les héros et ne pas afficher la checkbox
 
     # Options de l'unité
     for group in unit.get("upgrade_groups", []):
@@ -1103,4 +1102,4 @@ elif st.session_state.page == "army":
             html_content,
             file_name=f"{st.session_state.list_name}.html",
             mime="text/html"
-        )
+       ")
