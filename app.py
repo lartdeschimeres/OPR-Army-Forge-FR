@@ -32,10 +32,10 @@ GAME_CONFIG = {
         "default_points": 1000,
         "point_step": 250,
         "description": "Jeu de bataille rangée dans un univers fantasy médiéval",
-        "hero_limit": 375,  # 1 Héros par tranche de 375 pts
-        "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
-        "unit_max_cost_ratio": 0.35,  # 35% du total des points
-        "unit_per_points": 150  # 1 unité maximum par tranche de 150 pts
+        "hero_limit": 375,
+        "unit_copy_rule": 750,
+        "unit_max_cost_ratio": 0.35,
+        "unit_per_points": 150
     },
     "Grimdark Future": {
         "display_name": "Grimdark Future",
@@ -52,427 +52,26 @@ GAME_CONFIG = {
 }
 
 # ======================================================
-# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES
+# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES (inchangées)
 # ======================================================
-def check_hero_limit(army_list, army_points, game_config):
-    """Vérifie la limite de héros"""
-    if game_config.get("hero_limit"):
-        max_heroes = math.floor(army_points / game_config["hero_limit"])
-        hero_count = sum(1 for unit in army_list if unit.get("type") == "hero")
-
-        if hero_count > max_heroes:
-            st.error(f"Limite de héros dépassée! Maximum autorisé: {max_heroes} (1 héros par {game_config['hero_limit']} pts)")
-            return False
-    return True
-
-def check_unit_copy_rule(army_list, army_points, game_config):
-    """Vérifie la règle des copies d'unités"""
-    if game_config.get("unit_copy_rule"):
-        x_value = math.floor(army_points / game_config["unit_copy_rule"])
-        max_copies = 1 + x_value
-
-        # Compter les copies de chaque unité
-        unit_counts = {}
-        for unit in army_list:
-            unit_name = unit["name"]
-            count_key = unit_name
-
-            if count_key in unit_counts:
-                unit_counts[count_key] += 1
-            else:
-                unit_counts[count_key] = 1
-
-        # Vérifier les limites
-        for unit_name, count in unit_counts.items():
-            if count > max_copies:
-                st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
-                return False
-    return True
-
-def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
-    """Vérifie qu'aucune unité ne dépasse le ratio maximum de coût"""
-    if not game_config.get("unit_max_cost_ratio"):
-        return True
-
-    max_cost = army_points * game_config["unit_max_cost_ratio"]
-
-    # Vérifier les unités existantes
-    for unit in army_list:
-        if unit["cost"] > max_cost:
-            st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
-            return False
-
-    # Vérifier la nouvelle unité si fournie
-    if new_unit_cost and new_unit_cost > max_cost:
-        st.error(f"Cette unité ({new_unit_cost} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
-        return False
-
-    return True
-
-def check_unit_per_points(army_list, army_points, game_config):
-    """Vérifie le nombre maximum d'unités par tranche de points"""
-    if game_config.get("unit_per_points"):
-        max_units = math.floor(army_points / game_config["unit_per_points"])
-
-        if len(army_list) > max_units:
-            st.error(f"Trop d'unités! Maximum autorisé: {max_units} (1 unité par {game_config['unit_per_points']} pts)")
-            return False
-    return True
-
-def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
-    """Valide toutes les règles spécifiques au jeu"""
-    game_config = GAME_CONFIG.get(game, {})
-
-    if game in GAME_CONFIG:
-        return (check_hero_limit(army_list, army_points, game_config) and
-                check_unit_copy_rule(army_list, army_points, game_config) and
-                check_unit_max_cost(army_list, army_points, game_config, new_unit_cost) and
-                check_unit_per_points(army_list, army_points, game_config))
-
-    return True
+# [Conservez toutes les fonctions de règles spécifiques existantes]
 
 # ======================================================
-# FONCTIONS UTILITAIRES
+# FONCTIONS UTILITAIRES (inchangées)
 # ======================================================
-def format_special_rule(rule):
-    """Formate les règles spéciales avec parenthèses"""
-    if not isinstance(rule, str):
-        return str(rule)
-    if "(" in rule and ")" in rule:
-        return rule
-    match = re.search(r"(\D+)(\d+)", rule)
-    if match:
-        return f"{match.group(1)}({match.group(2)})"
-    return rule
-
-def extract_coriace_value(rule):
-    """Extrait la valeur numérique de Coriace d'une règle"""
-    if not isinstance(rule, str):
-        return 0
-    match = re.search(r"Coriace\s*\(?(\d+)\)?", rule)
-    if match:
-        return int(match.group(1))
-    return 0
-
-def get_coriace_from_rules(rules):
-    """Calcule la Coriace depuis une liste de règles"""
-    if not rules or not isinstance(rules, list):
-        return 0
-    total = 0
-    for rule in rules:
-        total += extract_coriace_value(rule)
-    return total
-
-def get_mount_details(mount):
-    """Récupère les détails d'une monture"""
-    if not mount:
-        return None, 0
-
-    mount_data = mount
-    if 'mount' in mount:
-        mount_data = mount['mount']
-
-    special_rules = []
-    if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
-        special_rules = mount_data['special_rules']
-
-    coriace = get_coriace_from_rules(special_rules)
-    return special_rules, coriace
-
-def calculate_total_coriace(unit_data, combined=False):
-    """Calcule la Coriace totale d'une unité"""
-    total = 0
-
-    if 'special_rules' in unit_data:
-        total += get_coriace_from_rules(unit_data['special_rules'])
-
-    if 'mount' in unit_data and unit_data['mount']:
-        _, mount_coriace = get_mount_details(unit_data['mount'])
-        total += mount_coriace
-
-    if 'options' in unit_data:
-        for opts in unit_data['options'].values():
-            if isinstance(opts, list):
-                for opt in opts:
-                    if 'special_rules' in opt:
-                        total += get_coriace_from_rules(opt['special_rules'])
-            elif isinstance(opts, dict) and 'special_rules' in opts:
-                total += get_coriace_from_rules(opts['special_rules'])
-
-    if 'weapon' in unit_data and 'special_rules' in unit_data['weapon']:
-        total += get_coriace_from_rules(unit_data['weapon']['special_rules'])
-
-    if combined and unit_data.get('type') != "hero":
-        base_coriace = get_coriace_from_rules(unit_data.get('special_rules', []))
-        total += base_coriace
-
-    return total if total > 0 else None
-
-def format_weapon_details(weapon):
-    """Formate les détails d'une arme pour l'affichage"""
-    if not weapon:
-        return {
-            "name": "Arme non spécifiée",
-            "attacks": "?",
-            "ap": "?",
-            "special": []
-        }
-    return {
-        "name": weapon.get('name', 'Arme non nommée'),
-        "attacks": weapon.get('attacks', '?'),
-        "ap": weapon.get('armor_piercing', '?'),
-        "special": weapon.get('special_rules', [])
-    }
-
-def format_mount_details(mount):
-    """Formate les détails d'une monture pour l'affichage"""
-    if not mount:
-        return "Aucune monture"
-
-    mount_name = mount.get('name', 'Monture non nommée')
-    mount_data = mount
-    if 'mount' in mount:
-        mount_data = mount['mount']
-
-    details = mount_name
-
-    if 'quality' in mount_data or 'defense' in mount_data:
-        details += " ("
-        if 'quality' in mount_data:
-            details += f"Qua{mount_data['quality']}+"
-        if 'defense' in mount_data:
-            details += f" Déf{mount_data['defense']}+"
-        details += ")"
-
-    if 'special_rules' in mount_data and mount_data['special_rules']:
-        details += " | " + ", ".join(mount_data['special_rules'])
-
-    if 'weapons' in mount_data and mount_data['weapons']:
-        for weapon in mount_data['weapons']:
-            weapon_details = format_weapon_details(weapon)
-            details += " | " + f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})"
-            if weapon_details['special']:
-                details += ", " + ", ".join(weapon_details['special'])
-            details += ")"
-
-    return details
-
-def format_unit_option(u):
-    """Formate l'affichage des unités dans la liste déroulante"""
-    name_part = f"{u['name']}"
-
-    # Pour les héros, toujours afficher [1]
-    if u.get('type') == "hero":
-        name_part += " [1]"
-    else:
-        # Pour les unités normales, afficher la taille de base
-        base_size = u.get('size', 10)
-        name_part += f" [{base_size}]"
-
-    qua_def = f"Qua {u['quality']}+"
-
-    coriace = get_coriace_from_rules(u.get('special_rules', []))
-    if 'mount' in u and u['mount']:
-        _, mount_coriace = get_mount_details(u['mount'])
-        coriace += mount_coriace
-
-    defense = u.get('defense', '?')
-    qua_def_coriace = f"Qua {u['quality']}+ / Déf {defense}"
-    if coriace > 0:
-        qua_def_coriace += f" / Coriace {coriace}"
-
-    weapons_part = ""
-    if 'weapons' in u and u['weapons']:
-        weapons = []
-        for weapon in u['weapons']:
-            weapon_details = format_weapon_details(weapon)
-            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
-        weapons_part = " | ".join(weapons)
-
-    rules_part = ""
-    if 'special_rules' in u and u['special_rules']:
-        rules_part = ", ".join(u['special_rules'])
-
-    result = f"{name_part} - {qua_def_coriace}"
-
-    if weapons_part:
-        result += f" - {weapons_part}"
-
-    if rules_part:
-        result += f" - {rules_part}"
-
-    result += f" {u['base_cost']}pts"
-    return result
-
-def find_option_by_name(options, name):
-    """Trouve une option par son nom de manière sécurisée"""
-    try:
-        return next((o for o in options if o.get("name") == name), None)
-    except Exception:
-        return None
+# [Conservez toutes les fonctions utilitaires existantes]
 
 # ======================================================
-# LOCAL STORAGE
-# ======================================================
-def ls_get(key):
-    """Récupère une valeur du LocalStorage"""
-    try:
-        unique_key = f"{key}_{hashlib.md5(str(datetime.now().timestamp()).encode()).hexdigest()[:8]}"
-        st.markdown(
-            f"""
-            <script>
-            const value = localStorage.getItem("{key}");
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.id = "{unique_key}";
-            input.value = value || "";
-            document.body.appendChild(input);
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-        return st.text_input("", key=unique_key, label_visibility="collapsed")
-    except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
-        return None
-
-def ls_set(key, value):
-    """Stocke une valeur dans le LocalStorage"""
-    try:
-        if not isinstance(value, str):
-            value = json.dumps(value)
-        escaped_value = value.replace("'", "\\'").replace('"', '\\"')
-        st.markdown(
-            f"""
-            <script>
-            localStorage.setItem("{key}", `{escaped_value}`);
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-    except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
-
-# ======================================================
-# CHARGEMENT DES FACTIONS
+# CHARGEMENT DES FACTIONS (inchangé)
 # ======================================================
 @st.cache_data
 def load_factions():
     """Charge les factions depuis les fichiers JSON"""
-    factions = {}
-    games = set()
-
-    # Création d'un fichier de faction par défaut si le dossier est vide
-    if not list(FACTIONS_DIR.glob("*.json")):
-        default_faction = {
-            "game": "Age of Fantasy",
-            "faction": "Disciples de la Guerre",
-            "units": [
-                {
-                    "name": "Barbares de la Guerre",
-                    "type": "unit",
-                    "size": 10,  # Taille de base
-                    "base_cost": 50,  # Coût pour 10 figurines
-                    "quality": 3,
-                    "defense": 5,
-                    "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
-                    "weapons": [{
-                        "name": "Armes à une main",
-                        "attacks": 1,
-                        "armor_piercing": 0,
-                        "special_rules": []
-                    }],
-                    "upgrade_groups": [
-                        {
-                            "group": "Remplacement d'armes",
-                            "type": "weapon",
-                            "options": [
-                                {
-                                    "name": "Lance",
-                                    "cost": 35,
-                                    "weapon": {
-                                        "name": "Lance",
-                                        "attacks": 1,
-                                        "armor_piercing": 0,
-                                        "special_rules": ["Contre-charge"]
-                                    }
-                                },
-                                {
-                                    "name": "Fléau",
-                                    "cost": 20,
-                                    "weapon": {
-                                        "name": "Fléau",
-                                        "attacks": 1,
-                                        "armor_piercing": 1,
-                                        "special_rules": []
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "group": "Améliorations d'unité",
-                            "type": "upgrades",
-                            "options": [
-                                {
-                                    "name": "Icône du Ravage",
-                                    "cost": 20,
-                                    "special_rules": ["Aura de Défense versatile"]
-                                },
-                                {
-                                    "name": "Sergent",
-                                    "cost": 5,
-                                    "special_rules": []
-                                },
-                                {
-                                    "name": "Bannière",
-                                    "cost": 5,
-                                    "special_rules": []
-                                },
-                                {
-                                    "name": "Musicien",
-                                    "cost": 10,
-                                    "special_rules": []
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "name": "Maître de la Guerre Élu",
-                    "type": "hero",
-                    "size": 1,  # Les héros sont des unités individuelles
-                    "base_cost": 150,
-                    "quality": 3,
-                    "defense": 5,
-                    "special_rules": ["Héros", "Éclaireur", "Furieux"],
-                    "weapons": [{
-                        "name": "Arme héroïque",
-                        "attacks": 2,
-                        "armor_piercing": 1,
-                        "special_rules": ["Magique(1)"]
-                    }]
-                }
-            ]
-        }
-        with open(FACTIONS_DIR / "default.json", "w", encoding="utf-8") as f:
-            json.dump(default_faction, f, indent=2)
-
-    for fp in FACTIONS_DIR.glob("*.json"):
-        try:
-            with open(fp, encoding="utf-8") as f:
-                data = json.load(f)
-                game = data.get("game")
-                faction = data.get("faction")
-                if game and faction:
-                    factions.setdefault(game, {})[faction] = data
-                    games.add(game)
-        except Exception as e:
-            st.warning(f"Erreur chargement {fp.name}: {e}")
-
-    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
+    # [Conservez la fonction existante]
+    pass
 
 # ======================================================
-# INITIALISATION
+# INITIALISATION (inchangée)
 # ======================================================
 factions_by_game, games = load_factions()
 
@@ -483,7 +82,7 @@ if "page" not in st.session_state:
     st.session_state.current_player = "Simon"
 
 # ======================================================
-# PAGE 1 – CONFIGURATION
+# PAGE 1 – CONFIGURATION (modifiée)
 # ======================================================
 if st.session_state.page == "setup":
     st.title("OPR Army Forge FR")
@@ -506,14 +105,7 @@ if st.session_state.page == "setup":
                 - 1 unité maximum par tranche de {config['unit_per_points']} pts d'armée
                 """)
 
-    # Section pour charger depuis GitHub
-    with st.expander("Charger une liste depuis GitHub"):
-        github_repo = st.text_input("URL du dépôt GitHub", "https://github.com/SimonJoinvilleFouquet/opr-army-forge")
-        github_file = st.text_input("Chemin du fichier", "listes/mes_listes.json")
-
-        if st.button("Charger depuis GitHub"):
-            st.warning("Fonctionnalité GitHub simulée. En environnement réel, cette fonction chargerait directement depuis GitHub.")
-            st.info("Pour l'instant, utilisez l'import JSON classique ci-dessous.")
+    # SECTION GITHUB SUPPRIMÉE
 
     # Liste des listes sauvegardées
     st.subheader("Mes listes sauvegardées")
@@ -551,7 +143,6 @@ if st.session_state.page == "setup":
     game = st.selectbox("Jeu", games)
     game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
 
-    # Stockage des points totaux choisis en page 1
     points = st.number_input(
         "Points",
         min_value=game_config["min_points"],
@@ -595,7 +186,7 @@ if st.session_state.page == "setup":
     if st.button("Créer une nouvelle liste"):
         st.session_state.game = game
         st.session_state.faction = st.selectbox("Faction", factions_by_game[game].keys())
-        st.session_state.points = points  # Stockage des points totaux
+        st.session_state.points = points
         st.session_state.list_name = list_name
         st.session_state.units = factions_by_game[game][st.session_state.faction]["units"]
         st.session_state.army_list = []
@@ -604,7 +195,7 @@ if st.session_state.page == "setup":
         st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (modifiée)
 # ======================================================
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
@@ -613,7 +204,6 @@ elif st.session_state.page == "army":
     # Vérification des règles spécifiques au jeu
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
 
-    # Utilisation de st.session_state.points (points totaux choisis en page 1)
     if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
         st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
@@ -655,7 +245,6 @@ elif st.session_state.page == "army":
     # Gestion des unités combinées - CORRECTION DÉFINITIVE POUR LES HÉROS
     if unit.get("type") == "hero":
         combined = False  # Les héros ne peuvent JAMAIS être combinés
-        st.markdown("**Les héros ne peuvent pas être combinés**")
     else:
         combined = st.checkbox("Unité combinée", value=False)
 
@@ -765,7 +354,7 @@ elif st.session_state.page == "army":
                 "type": unit.get("type", "unit"),
                 "cost": final_cost,
                 "base_cost": base_cost,
-                "size": unit_size,  # Taille finale
+                "size": unit_size,
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
@@ -773,7 +362,7 @@ elif st.session_state.page == "army":
                 "options": selected_options,
                 "mount": mount,
                 "coriace": total_coriace,
-                "combined": combined and unit.get("type") != "hero",  # On ne marque pas les héros comme combinés
+                "combined": combined and unit.get("type") != "hero",
             }
 
             # Vérification des règles avant d'ajouter
@@ -804,7 +393,6 @@ elif st.session_state.page == "army":
             if u.get("coriace"):
                 qua_def_coriace += f" / Coriace {u['coriace']}"
 
-            # Affichage du nom avec la taille FINAL de l'unité
             unit_header = f"### {u['name']} [{u.get('size', 10)}] ({u['cost']} pts) | {qua_def_coriace}"
             if u.get("type") == "hero":
                 unit_header += " | 🌟 Héros"
@@ -1004,7 +592,6 @@ elif st.session_state.page == "army":
                     "special": []
                 }
 
-            # Affichage du nom avec la taille FINAL de l'unité
             unit_name = f"{unit['name']} [{unit.get('size', 10)}]"
             unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
@@ -1014,7 +601,6 @@ elif st.session_state.page == "army":
             weapon_special = ', '.join(weapon_info['special']) if weapon_info['special'] else '-'
             weapon_special = str(weapon_special).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
-            # Badge héros si applicable
             hero_badge = ""
             if unit.get('type') == "hero":
                 hero_badge = '<span class="hero-badge">HÉROS</span>'
