@@ -259,14 +259,15 @@ def format_mount_details(mount):
 
 def format_unit_option(u):
     """Formate l'affichage des unités dans la liste déroulante"""
-    # On commence par le nom de base
     name_part = f"{u['name']}"
 
-    # On récupère la taille de base de l'unité (par défaut 10 pour OPR)
-    base_size = u.get('size', 10)
-
-    # On ajoute la taille entre crochets
-    name_part += f" [{base_size}]"
+    # Pour les héros, toujours afficher [1]
+    if u.get('type') == "hero":
+        name_part += " [1]"
+    else:
+        # Pour les unités normales, afficher la taille de base
+        base_size = u.get('size', 10)
+        name_part += f" [{base_size}]"
 
     qua_def = f"Qua {u['quality']}+"
 
@@ -437,15 +438,15 @@ def load_factions():
                     ]
                 },
                 {
-                    "name": "Chevalier Héros",
+                    "name": "Maître de la Guerre Élu",
                     "type": "hero",
-                    "size": 1,  # Les héros sont généralement des unités individuelles
+                    "size": 1,  # Les héros sont des unités individuelles
                     "base_cost": 150,
                     "quality": 3,
-                    "defense": 4,
-                    "special_rules": ["Héros"],
+                    "defense": 5,
+                    "special_rules": ["Héros", "Éclaireur", "Furieux"],
                     "weapons": [{
-                        "name": "Épée Rune",
+                        "name": "Arme héroïque",
                         "attacks": 2,
                         "armor_piercing": 1,
                         "special_rules": ["Magique(1)"]
@@ -652,9 +653,11 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
-    # Unité combinée (pas pour les héros)
+    # Unité combinée (UNIQUEMENT pour les unités, PAS pour les héros)
     if unit.get("type") != "hero":
         combined = st.checkbox("Unité combinée", value=False)
+    else:
+        combined = False  # Forcer à False pour les héros
 
     # Options de l'unité
     for group in unit.get("upgrade_groups", []):
@@ -717,7 +720,7 @@ elif st.session_state.page == "army":
                             upgrades_cost += o["cost"]
 
     # Calcul du coût final
-    if combined:
+    if combined and unit.get("type") != "hero":
         # Pour les unités combinées, on double le coût de base + armes seulement
         final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
         unit_size = base_size * 2
@@ -762,7 +765,7 @@ elif st.session_state.page == "army":
                 "type": unit.get("type", "unit"),
                 "cost": final_cost,
                 "base_cost": base_cost,
-                "size": unit_size,
+                "size": unit_size,  # Taille finale
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
@@ -801,7 +804,7 @@ elif st.session_state.page == "army":
             if u.get("coriace"):
                 qua_def_coriace += f" / Coriace {u['coriace']}"
 
-            # Affichage du nom avec la taille de l'unité
+            # Affichage du nom avec la taille FINAL de l'unité
             unit_header = f"### {u['name']} [{u.get('size', 10)}] ({u['cost']} pts) | {qua_def_coriace}"
             if u.get("type") == "hero":
                 unit_header += " | 🌟 Héros"
@@ -1001,7 +1004,7 @@ elif st.session_state.page == "army":
                     "special": []
                 }
 
-            # Affichage du nom avec la taille de l'unité
+            # Affichage du nom avec la taille FINAL de l'unité
             unit_name = f"{unit['name']} [{unit.get('size', 10)}]"
             unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
