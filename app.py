@@ -90,9 +90,7 @@ def check_unit_copy_rule(army_list, army_points, game_config):
     return True
 
 def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
-    """Vérifie qu'aucune unité ne dépasse le ratio maximum de coût
-    army_points = points totaux de l'armée (choisis en page 1)
-    """
+    """Vérifie qu'aucune unité ne dépasse le ratio maximum de coût"""
     if not game_config.get("unit_max_cost_ratio"):
         return True
 
@@ -122,9 +120,7 @@ def check_unit_per_points(army_list, army_points, game_config):
     return True
 
 def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
-    """Valide toutes les règles spécifiques au jeu
-    army_points = points totaux de l'armée (choisis en page 1)
-    """
+    """Valide toutes les règles spécifiques au jeu"""
     game_config = GAME_CONFIG.get(game, {})
 
     if game in GAME_CONFIG:
@@ -263,7 +259,15 @@ def format_mount_details(mount):
 
 def format_unit_option(u):
     """Formate l'affichage des unités dans la liste déroulante"""
-    name_part = f"{u['name']} [1]"
+    # On commence par le nom de base
+    name_part = f"{u['name']}"
+
+    # On récupère la taille de base de l'unité (par défaut 10 pour OPR)
+    base_size = u.get('size', 10)
+
+    # On ajoute la taille entre crochets
+    name_part += f" [{base_size}]"
+
     qua_def = f"Qua {u['quality']}+"
 
     coriace = get_coriace_from_rules(u.get('special_rules', []))
@@ -364,22 +368,78 @@ def load_factions():
             "faction": "Disciples de la Guerre",
             "units": [
                 {
-                    "name": "Guerrier",
+                    "name": "Barbares de la Guerre",
                     "type": "unit",
-                    "base_cost": 60,
+                    "size": 10,  # Taille de base
+                    "base_cost": 50,  # Coût pour 10 figurines
                     "quality": 3,
-                    "defense": 3,
-                    "special_rules": [],
+                    "defense": 5,
+                    "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
                     "weapons": [{
-                        "name": "Épée",
+                        "name": "Armes à une main",
                         "attacks": 1,
                         "armor_piercing": 0,
                         "special_rules": []
-                    }]
+                    }],
+                    "upgrade_groups": [
+                        {
+                            "group": "Remplacement d'armes",
+                            "type": "weapon",
+                            "options": [
+                                {
+                                    "name": "Lance",
+                                    "cost": 35,
+                                    "weapon": {
+                                        "name": "Lance",
+                                        "attacks": 1,
+                                        "armor_piercing": 0,
+                                        "special_rules": ["Contre-charge"]
+                                    }
+                                },
+                                {
+                                    "name": "Fléau",
+                                    "cost": 20,
+                                    "weapon": {
+                                        "name": "Fléau",
+                                        "attacks": 1,
+                                        "armor_piercing": 1,
+                                        "special_rules": []
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "group": "Améliorations d'unité",
+                            "type": "upgrades",
+                            "options": [
+                                {
+                                    "name": "Icône du Ravage",
+                                    "cost": 20,
+                                    "special_rules": ["Aura de Défense versatile"]
+                                },
+                                {
+                                    "name": "Sergent",
+                                    "cost": 5,
+                                    "special_rules": []
+                                },
+                                {
+                                    "name": "Bannière",
+                                    "cost": 5,
+                                    "special_rules": []
+                                },
+                                {
+                                    "name": "Musicien",
+                                    "cost": 10,
+                                    "special_rules": []
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "name": "Chevalier Héros",
                     "type": "hero",
+                    "size": 1,  # Les héros sont généralement des unités individuelles
                     "base_cost": 150,
                     "quality": 3,
                     "defense": 4,
@@ -573,14 +633,17 @@ elif st.session_state.page == "army":
         key="unit_select"
     )
 
-    # Vérification du coût maximum AVANT les améliorations (utilisation de st.session_state.points)
+    # Récupération de la taille de base de l'unité
+    base_size = unit.get('size', 10)
+    base_cost = unit["base_cost"]
+
+    # Vérification du coût maximum AVANT les améliorations
     max_cost = st.session_state.points * game_config["unit_max_cost_ratio"]
     if unit["base_cost"] > max_cost:
         st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
         st.stop()
 
     # Initialisation
-    base_cost = unit["base_cost"]
     weapon = unit.get("weapons", [{}])[0]
     selected_options = {}
     mount = None
@@ -654,13 +717,20 @@ elif st.session_state.page == "army":
                             upgrades_cost += o["cost"]
 
     # Calcul du coût final
-    cost = base_cost + weapon_cost + mount_cost + upgrades_cost
+    if combined:
+        # Pour les unités combinées, on double le coût de base + armes seulement
+        final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
+        unit_size = base_size * 2
+    else:
+        final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
+        unit_size = base_size
 
-    # Vérification finale du coût maximum (utilisation de st.session_state.points)
-    if not check_unit_max_cost(st.session_state.army_list, st.session_state.points, game_config, cost):
+    # Vérification finale du coût maximum
+    if not check_unit_max_cost(st.session_state.army_list, st.session_state.points, game_config, final_cost):
         st.stop()
 
-    st.markdown(f"**Coût total: {cost} pts**")
+    st.markdown(f"**Coût total: {final_cost} pts**")
+    st.markdown(f"**Taille de l'unité: {unit_size} figurines**")
 
     if st.button("Ajouter à l'armée"):
         try:
@@ -690,7 +760,9 @@ elif st.session_state.page == "army":
             unit_data = {
                 "name": unit["name"],
                 "type": unit.get("type", "unit"),
-                "cost": cost,
+                "cost": final_cost,
+                "base_cost": base_cost,
+                "size": unit_size,
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
@@ -701,16 +773,16 @@ elif st.session_state.page == "army":
                 "combined": combined,
             }
 
-            # Vérification finale complète
+            # Vérification des règles avant d'ajouter
             test_army = st.session_state.army_list.copy()
             test_army.append(unit_data)
-            test_total = st.session_state.army_cost + cost
+            test_total = st.session_state.army_cost + final_cost
 
-            if not validate_army_rules(test_army, st.session_state.points, st.session_state.game, cost):
+            if not validate_army_rules(test_army, st.session_state.points, st.session_state.game, final_cost):
                 st.error("Cette unité ne peut pas être ajoutée car elle violerait les règles du jeu.")
             else:
                 st.session_state.army_list.append(unit_data)
-                st.session_state.army_cost += cost
+                st.session_state.army_cost += final_cost
                 st.rerun()
 
         except Exception as e:
@@ -729,7 +801,8 @@ elif st.session_state.page == "army":
             if u.get("coriace"):
                 qua_def_coriace += f" / Coriace {u['coriace']}"
 
-            unit_header = f"### {u['name']} ({u['cost']} pts) | {qua_def_coriace}"
+            # Affichage du nom avec la taille de l'unité
+            unit_header = f"### {u['name']} [{u.get('size', 10)}] ({u['cost']} pts) | {qua_def_coriace}"
             if u.get("type") == "hero":
                 unit_header += " | 🌟 Héros"
             st.markdown(unit_header)
@@ -928,7 +1001,10 @@ elif st.session_state.page == "army":
                     "special": []
                 }
 
-            unit_name = str(unit['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            # Affichage du nom avec la taille de l'unité
+            unit_name = f"{unit['name']} [{unit.get('size', 10)}]"
+            unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
             weapon_name = str(weapon_info['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             weapon_attacks = str(weapon_info['attacks']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             weapon_ap = str(weapon_info['ap']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
