@@ -1102,4 +1102,4 @@ elif st.session_state.page == "army":
             html_content,
             file_name=f"{st.session_state.list_name}.html",
             mime="text/html"
-       ")
+        )
