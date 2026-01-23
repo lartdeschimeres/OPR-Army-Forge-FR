@@ -69,8 +69,10 @@ def show_points_progress(current_points, max_points):
         color = "#4CAF50"  # Vert
     elif progress < 90:
         color = "#FFC107"  # Orange
-    else:
+    elif progress < 100:
         color = "#F44336"  # Rouge
+    else:
+        color = "#2E7D32"  # Vert foncé pour indiquer que c'est parfait
 
     st.markdown(
         f"""
@@ -86,6 +88,10 @@ def show_points_progress(current_points, max_points):
         """,
         unsafe_allow_html=True
     )
+
+    # Message de validation quand le total est exactement égal à la limite
+    if current_points == max_points:
+        st.success("✅ Liste valide! Vous avez atteint exactement votre limite de points.")
 
 # ======================================================
 # FONCTIONS POUR LES RÈGLES SPÉCIFIQUES
@@ -176,6 +182,7 @@ def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
         if new_unit_cost:
             total_cost += new_unit_cost
 
+        # On autorise maintenant le total égal à la limite
         if total_cost > army_points:
             st.error(f"Limite de points dépassée! Maximum autorisé: {army_points} pts. Total actuel: {total_cost} pts")
             return False
@@ -900,6 +907,7 @@ elif st.session_state.page == "army":
             test_army.append(unit_data)
             test_total = st.session_state.army_cost + final_cost
 
+            # On autorise maintenant le total égal à la limite
             if test_total > st.session_state.points:
                 st.error(f"Ajouter cette unité dépasserait votre limite de {st.session_state.points} pts. Il vous reste {st.session_state.points - st.session_state.army_cost} pts.")
                 st.stop()
@@ -1108,7 +1116,7 @@ elif st.session_state.page == "army":
     </div>
 
     <div class="progress-container">
-        <div class="progress-bar" style="width: {min(100, int((army_data['total_cost']/army_data['points'])*100))}%; background-color: {'#4CAF50' if (army_data['total_cost']/army_data['points']) < 0.7 else '#FFC107' if (army_data['total_cost']/army_data['points']) < 0.9 else '#F44336'}">
+        <div class="progress-bar" style="width: {min(100, int((army_data['total_cost']/army_data['points'])*100))}%; background-color: {'#4CAF50' if (army_data['total_cost']/army_data['points']) < 0.7 else '#FFC107' if (army_data['total_cost']/army_data['points']) < 0.9 else '#2E7D32'}">
             {min(100, int((army_data['total_cost']/army_data['points'])*100))}% ({army_data['total_cost']}/{army_data['points']} pts)
         </div>
     </div>
