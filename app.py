@@ -7,6 +7,7 @@ import re
 import base64
 import math
 import os
+import copy
 
 # ======================================================
 # CONFIGURATION POUR SIMON
@@ -184,7 +185,7 @@ def can_add_unit_with_rules(unit_cost, army_list, army_points, game):
     valid, msg = check_unit_max_cost(unit_cost, army_points, game_config)
     if not valid: errors.append(msg)
 
-    test_army = army_list.copy()
+    test_army = copy.deepcopy(army_list)
     test_army.append({"cost": unit_cost, "name": "test", "type": "unit"})
 
     valid, rule_errors = validate_army_rules(test_army, army_points, game)
@@ -375,7 +376,7 @@ def ls_set(key, value):
         pass
 
 # ======================================================
-# CHARGEMENT DES FACTIONS (version corrigée)
+# CHARGEMENT DES FACTIONS
 # ======================================================
 @st.cache_data
 def load_factions():
@@ -392,7 +393,11 @@ def load_factions():
                 "special_rules_descriptions": {
                     "Éclaireur": "Déplacement facilité en terrain difficile.",
                     "Furieux": "Relance les 1 en attaque.",
-                    "Héros": "Personnage inspirant."
+                    "Né pour la guerre": "Relance les 1 en test de moral.",
+                    "Héros": "Personnage inspirant.",
+                    "Coriace(1)": "Ignore 1 point de dégât par phase.",
+                    "Magique(1)": "Ignore 1 point de défense.",
+                    "Contre-charge": "+1 aux jets de dégât lors d'une charge."
                 },
                 "units": [
                     {
@@ -402,12 +407,76 @@ def load_factions():
                         "base_cost": 50,
                         "quality": 3,
                         "defense": 5,
-                        "special_rules": ["Éclaireur", "Furieux"],
+                        "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
                         "weapons": [{
                             "name": "Armes à une main",
                             "attacks": 1,
-                            "armor_piercing": 0
-                        }]
+                            "armor_piercing": 0,
+                            "special_rules": []
+                        }],
+                        "upgrade_groups": [
+                            {
+                                "group": "Remplacement d'armes",
+                                "type": "weapon",
+                                "options": [
+                                    {
+                                        "name": "Lance",
+                                        "cost": 5,
+                                        "weapon": {
+                                            "name": "Lance",
+                                            "attacks": 1,
+                                            "armor_piercing": 0,
+                                            "special_rules": ["Contre-charge"]
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "group": "Améliorations d'unité",
+                                "type": "upgrades",
+                                "options": [
+                                    {
+                                        "name": "Maître Sorcier",
+                                        "cost": 60,
+                                        "special_rules": ["Lanceur de sorts (3)"]
+                                    }
+                                ]
+                            },
+                            {
+                                "group": "Montures",
+                                "type": "mount",
+                                "options": [
+                                    {
+                                        "name": "Cheval",
+                                        "cost": 15,
+                                        "mount": {
+                                            "name": "Cheval",
+                                            "quality": 3,
+                                            "defense": 3,
+                                            "special_rules": []
+                                        }
+                                    },
+                                    {
+                                        "name": "Manticore",
+                                        "cost": 155,
+                                        "mount": {
+                                            "name": "Manticore",
+                                            "quality": 4,
+                                            "defense": 4,
+                                            "special_rules": ["Volant", "Effrayant(1)", "Coriace(6)"],
+                                            "weapons": [
+                                                {
+                                                    "name": "Griffes perforantes",
+                                                    "attacks": 6,
+                                                    "armor_piercing": 1,
+                                                    "special_rules": ["Perforant"]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }
@@ -464,6 +533,8 @@ if "page" not in st.session_state:
     st.session_state.army_list = []
     st.session_state.army_cost = 0
     st.session_state.current_player = "Simon"
+    st.session_state.history = []  # Historique pour l'annulation
+    st.session_state.undo_disabled = True  # Bouton Annuler désactivé au début
 
 # ======================================================
 # PAGE 1 – CONFIGURATION
@@ -500,6 +571,8 @@ if st.session_state.page == "setup":
                             st.session_state.army_cost = saved_list["total_cost"]
                             st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
                             st.session_state.page = "army"
+                            st.session_state.history = []  # Réinitialiser l'historique
+                            st.session_state.undo_disabled = True
                             st.rerun()
         except Exception as e:
             st.error(f"Erreur chargement listes: {e}")
@@ -549,6 +622,8 @@ if st.session_state.page == "setup":
             st.session_state.army_cost = total_cost
             st.session_state.units = factions_by_game[data["game"]][data["faction"]]["units"]
             st.session_state.page = "army"
+            st.session_state.history = []  # Réinitialiser l'historique
+            st.session_state.undo_disabled = True
             st.rerun()
         except Exception as e:
             st.error(f"Erreur d'import: {str(e)}")
@@ -561,6 +636,8 @@ if st.session_state.page == "setup":
         st.session_state.units = factions_by_game[game][faction]["units"]
         st.session_state.army_list = []
         st.session_state.army_cost = 0
+        st.session_state.history = []  # Réinitialiser l'historique
+        st.session_state.undo_disabled = True
         st.session_state.page = "army"
         st.rerun()
 
@@ -577,6 +654,28 @@ elif st.session_state.page == "army":
     # Charger les données de faction
     faction_data = factions_by_game[st.session_state.game][st.session_state.faction]
     rules_descriptions = faction_data.get('special_rules_descriptions', {})
+
+    # Boutons de contrôle
+    col_undo, col_reset, col_spacer = st.columns([1, 1, 2])
+    with col_undo:
+        if st.button("↩ Annuler la dernière action", disabled=st.session_state.undo_disabled):
+            if st.session_state.history:
+                previous_state = st.session_state.history.pop()
+                st.session_state.army_list = copy.deepcopy(previous_state["army_list"])
+                st.session_state.army_cost = previous_state["army_cost"]
+
+                if not st.session_state.history:
+                    st.session_state.undo_disabled = True
+
+                st.rerun()
+
+    with col_reset:
+        if st.button("🗑 Réinitialiser la liste", key="reset_list"):
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
+            st.session_state.history = []
+            st.session_state.undo_disabled = True
+            st.rerun()
 
     if st.button("⬅ Retour"):
         st.session_state.page = "setup"
@@ -616,7 +715,7 @@ elif st.session_state.page == "army":
     else:
         combined = st.checkbox("Unité combinée", value=False)
 
-    # Gestion des montures (corrigée)
+    # Gestion des améliorations
     for group in unit.get("upgrade_groups", []):
         st.markdown(f"**{group['group']}**")
 
@@ -624,7 +723,8 @@ elif st.session_state.page == "army":
             weapon_options = ["Arme de base"]
             for o in group["options"]:
                 weapon_details = format_weapon_details(o["weapon"])
-                weapon_options.append(f"{o['name']} (+{o['cost']} pts)")
+                cost_diff = o["cost"]
+                weapon_options.append(f"{o['name']} (+{cost_diff} pts)")
 
             selected_weapon = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
             if selected_weapon != "Arme de base":
@@ -642,11 +742,10 @@ elif st.session_state.page == "army":
                 mount_details = format_mount_details(o)
                 label = f"{mount_details} (+{o['cost']} pts)"
                 mount_labels.append(label)
-                mount_map[label] = o  # Utilisation du label complet comme clé
+                mount_map[label] = o
 
             selected_mount = st.radio("Monture", mount_labels, key=f"{unit['name']}_mount")
 
-            # Vérification que la sélection existe dans mount_map
             if selected_mount != "Aucune monture" and selected_mount in mount_map:
                 mount = mount_map[selected_mount]
                 mount_cost = mount["cost"]
@@ -654,15 +753,15 @@ elif st.session_state.page == "army":
                 mount = None
                 mount_cost = 0
 
-        else:
+        else:  # Améliorations d'unité
             st.write("Sélectionnez les améliorations:")
             for o in group["options"]:
                 if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
                     if group["group"] not in selected_options:
                         selected_options[group["group"]] = []
                     if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
-                        selected_options[group["group"]].append(o)
-                        upgrades_cost += o["cost"]
+                        selected_options[group["group"]] = [o]
+                        upgrades_cost = o["cost"]
 
     if combined and unit.get("type") != "hero":
         final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
@@ -688,6 +787,13 @@ elif st.session_state.page == "army":
 
     if st.button("Ajouter à l'armée"):
         try:
+            # Sauvegarder l'état actuel avant l'ajout
+            st.session_state.history.append({
+                "army_list": copy.deepcopy(st.session_state.army_list),
+                "army_cost": st.session_state.army_cost
+            })
+            st.session_state.undo_disabled = False
+
             weapon_data = format_weapon_details(weapon)
             total_coriace = calculate_total_coriace({
                 "special_rules": unit.get('special_rules', []),
@@ -710,7 +816,8 @@ elif st.session_state.page == "army":
                 "weapon": weapon_data,
                 "options": selected_options,
                 "mount": mount,
-                "coriace": total_coriace
+                "coriace": total_coriace,
+                "combined": combined and unit.get("type") != "hero",
             }
 
             st.session_state.army_list.append(unit_data)
@@ -746,10 +853,17 @@ elif st.session_state.page == "army":
                     st.markdown(f"**Arme:** {weapon.get('name', 'Arme non nommée')}")
                     st.markdown(f"ATK: {weapon.get('attacks', '?')}, PA: {weapon.get('armor_piercing', '?')}")
 
-        if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
-            st.session_state.army_cost -= u["cost"]
-            st.session_state.army_list.pop(i)
-            st.rerun()
+            if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
+                # Sauvegarder l'état avant suppression
+                st.session_state.history.append({
+                    "army_list": copy.deepcopy(st.session_state.army_list),
+                    "army_cost": st.session_state.army_cost
+                })
+                st.session_state.undo_disabled = False
+
+                st.session_state.army_cost -= u["cost"]
+                st.session_state.army_list.pop(i)
+                st.rerun()
 
     # Sauvegarde/Export
     st.divider()
@@ -811,10 +925,14 @@ elif st.session_state.page == "army":
 """
 
         for unit in army_data['army_list']:
+            rules = ", ".join(unit.get('rules', [])) if unit.get('rules') else "Aucune"
+            weapon_name = unit.get('weapon', {}).get('name', 'Arme non spécifiée') if 'weapon' in unit else 'Aucune'
+
             html_content += f"""
     <div class="unit">
         <h3>{unit['name']} [{unit.get('size', 10)}] ({unit['cost']} pts)</h3>
-        <p>Qualité: {unit['quality']}+ | Défense: {unit.get('defense', '?')}+</p>
+        <p>Qualité: {unit['quality']}+ | Défense: {unit.get('defense', '?')}+ | {rules}</p>
+        <p>Arme: {weapon_name}</p>
     </div>
 """
 
