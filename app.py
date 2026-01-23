@@ -40,7 +40,7 @@ GAME_CONFIG = {
 }
 
 # ======================================================
-# FONCTIONS UTILITAIRES
+# FONCTIONS UTILITAIRES (CORRIGÉES)
 # ======================================================
 def format_special_rule(rule):
     """Formate les règles spéciales avec parenthèses"""
@@ -54,19 +54,31 @@ def format_special_rule(rule):
     return rule
 
 def format_weapon_details(weapon):
-    """Formate les détails d'une arme avec gestion des valeurs manquantes"""
+    """Formate les détails d'une arme avec toutes ses caractéristiques"""
     if not weapon:
         return {
             "name": "Arme non spécifiée",
             "attacks": 1,
-            "ap": 0,  # PA par défaut
+            "ap": 0,
             "special": []
         }
+
+    # Formatage complet des caractéristiques de l'arme
+    details = weapon.get('name', 'Arme non nommée') + " ("
+    details += f"ATK: {weapon.get('attacks', 1)}, "
+    details += f"PA: {weapon.get('armor_piercing', 0)}"
+
+    if weapon.get('special_rules'):
+        details += ", " + ", ".join(weapon.get('special_rules'))
+
+    details += ")"
+
     return {
         "name": weapon.get('name', 'Arme non nommée'),
         "attacks": weapon.get('attacks', 1),
-        "ap": weapon.get('armor_piercing', 0),  # PA toujours défini
-        "special": weapon.get('special_rules', [])
+        "ap": weapon.get('armor_piercing', 0),
+        "special": weapon.get('special_rules', []),
+        "formatted": details
     }
 
 def format_mount_details(mount):
@@ -91,10 +103,7 @@ def format_mount_details(mount):
     if 'weapons' in mount_data and mount_data['weapons']:
         for weapon in mount_data['weapons']:
             weapon_details = format_weapon_details(weapon)
-            details += f" | {weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})"
-            if weapon_details['special']:
-                details += ", " + ", ".join(weapon_details['special'])
-            details += ")"
+            details += f" | {weapon_details['formatted']}"
 
     return details
 
@@ -103,26 +112,37 @@ def format_unit_option(u):
     name_part = f"{u['name']}"
     name_part += " [1]" if u.get('type') == "hero" else f" [{u.get('size', 10)}]"
 
-    qua_def = f"Qua {u['quality']}+ / Déf {u.get('defense', '?')}"
+    qua_def = f"Qualité: {u['quality']}+ | Défense: {u.get('defense', '?')}"
 
     # Règles spéciales
     rules_part = ""
     if 'special_rules' in u and u['special_rules']:
-        rules_part = " | " + ", ".join(u['special_rules'])
+        rules_part = "<br><strong>Règles spéciales:</strong> " + ", ".join(u['special_rules'])
 
-    # Arme
+    # Arme avec toutes ses caractéristiques
     weapons_part = ""
     if 'weapons' in u and u['weapons']:
         weapons = []
         for weapon in u['weapons']:
             weapon_details = format_weapon_details(weapon)
-            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})")
-        weapons_part = " | " + " | ".join(weapons)
+            weapons.append(weapon_details['formatted'])
+        weapons_part = "<br><strong>Arme:</strong> " + " | ".join(weapons)
 
-    # Coût de base
-    cost_part = f" {u.get('base_cost', '?')} pts"
-
-    return f"{name_part} - {qua_def}{rules_part}{weapons_part}{cost_part}"
+    return f"""
+    <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+        <div style="display: flex; justify-content: space-between;">
+            <h4 style="margin: 0;">{name_part}</h4>
+            <span style="background-color: #3498db; color: white; padding: 2px 6px; border-radius: 3px;">
+                {u.get('base_cost', '?')} pts
+            </span>
+        </div>
+        <div style="margin-top: 5px;">
+            <strong>{qua_def}</strong>
+            {rules_part}
+            {weapons_part}
+        </div>
+    </div>
+    """
 
 def format_unit_display(u):
     """Formate l'affichage des unités DÉJÀ AJOUTÉES"""
@@ -133,28 +153,42 @@ def format_unit_display(u):
     # Règles spéciales
     rules_part = ""
     if 'rules' in u and u['rules']:
-        rules_part = f"<div style='margin: 5px 0;'><strong>Règles spéciales:</strong> {', '.join(u['rules'])}</div>"
-
-    # Arme
-    weapon_part = ""
-    if 'weapon' in u and u['weapon']:
-        weapon = u['weapon']
-        weapon_details = format_weapon_details(weapon)
-        weapon_part = f"""
+        rules_part = f"""
         <div style='margin: 5px 0;'>
-            <strong>Arme:</strong> {weapon.get('name', 'Arme non nommée')}
-            (ATK: {weapon_details['attacks']}, PA: {weapon_details['ap']})
+            <strong>Règles spéciales:</strong> {', '.join(u['rules'])}
+        </div>
         """
 
-        if weapon_details['special']:
-            weapon_part += ", " + ", ".join(weapon_details['special'])
-        weapon_part += "</div>"
+    # Arme avec toutes ses caractéristiques
+    weapon_part = ""
+    if 'weapon' in u and u['weapon']:
+        weapon_details = format_weapon_details(u['weapon'])
+        weapon_part = f"""
+        <div style='margin: 5px 0;'>
+            <strong>Arme:</strong> {weapon_details['formatted']}
+        </div>
+        """
 
     # Monture
     mount_part = ""
     if 'mount' in u and u['mount']:
         mount_details = format_mount_details(u['mount'])
-        mount_part = f"<div style='margin: 5px 0;'><strong>Monture:</strong> {mount_details}</div>"
+        mount_part = f"""
+        <div style='margin: 5px 0;'>
+            <strong>Monture:</strong> {mount_details}
+        </div>
+        """
+
+    # Options
+    options_part = ""
+    if 'options' in u and u['options']:
+        for group_name, opts in u['options'].items():
+            if isinstance(opts, list) and opts:
+                options_part += f"""
+                <div style='margin: 5px 0;'>
+                    <strong>{group_name}:</strong> {', '.join(opt.get('name', '') for opt in opts)}
+                </div>
+                """
 
     # Coût
     cost_part = f"""
@@ -175,6 +209,7 @@ def format_unit_display(u):
             {rules_part}
             {weapon_part}
             {mount_part}
+            {options_part}
         </div>
     </div>
     """
@@ -285,7 +320,7 @@ def ls_set(key, value):
 # FONCTION POUR GÉNÉRER L'EXPORT HTML
 # ======================================================
 def generate_html_export(army_data, factions_by_game):
-    """Génère un export HTML avec PA correct et règles spéciales claires"""
+    """Génère un export HTML avec toutes les corrections demandées"""
     faction_data = factions_by_game[army_data['game']][army_data['faction']]
     rules_descriptions = faction_data.get('special_rules_descriptions', {})
 
@@ -322,6 +357,7 @@ def generate_html_export(army_data, factions_by_game):
     # Générer les unités
     units_html = ""
     for unit in army_data['army_list']:
+        # Règles spéciales
         rules_list = ""
         if 'rules' in unit and unit['rules']:
             rules_list = f"""
@@ -330,20 +366,17 @@ def generate_html_export(army_data, factions_by_game):
             </div>
             """
 
+        # Arme avec toutes ses caractéristiques
         weapon_html = ""
         if 'weapon' in unit and unit['weapon']:
-            weapon = unit['weapon']
-            weapon_details = format_weapon_details(weapon)
+            weapon_details = format_weapon_details(unit['weapon'])
             weapon_html = f"""
             <div style="margin: 5px 0;">
-                <strong>Arme:</strong> {weapon.get('name', 'Arme non nommée')}
-                (ATK: {weapon_details['attacks']}, PA: {weapon_details['ap']})
+                <strong>Arme:</strong> {weapon_details['formatted']}
+            </div>
             """
 
-            if weapon_details['special']:
-                weapon_html += ", " + ", ".join(weapon_details['special'])
-            weapon_html += "</div>"
-
+        # Monture
         mount_html = ""
         if 'mount' in unit and unit['mount']:
             mount_details = format_mount_details(unit['mount'])
@@ -353,6 +386,7 @@ def generate_html_export(army_data, factions_by_game):
             </div>
             """
 
+        # Options
         options_html = ""
         if 'options' in unit and unit['options']:
             for group_name, opts in unit['options'].items():
@@ -489,22 +523,24 @@ def load_factions():
                     "Magique(1)": "Ignore 1 point de défense.",
                     "Contre-charge": "+1 aux jets de dégât lors d'une charge.",
                     "Attaque venimeuse": "Les blessures infligées par cette unité ne peuvent pas être régénérées.",
-                    "Perforant": "Ignore 1 point de défense supplémentaire."
+                    "Perforant": "Ignore 1 point de défense supplémentaire.",
+                    "Volant": "Peut voler par-dessus les obstacles et les unités.",
+                    "Effrayant(1)": "Les unités ennemies à 6\" doivent passer un test de moral ou reculer de 3\"."
                 },
                 "units": [
                     {
-                        "name": "Maître de la Guerre Lié",
+                        "name": "Maître de la Guerre Élu",
                         "type": "hero",
                         "size": 1,
                         "base_cost": 150,
                         "quality": 3,
                         "defense": 5,
-                        "special_rules": ["Héros", "Éclaireur", "Attaque venimeuse"],
+                        "special_rules": ["Héros", "Éclaireur", "Furieux", "Né pour la guerre"],
                         "weapons": [{
                             "name": "Grande arme lourde",
-                            "attacks": 3,
-                            "armor_piercing": 2,  # PA correctement défini
-                            "special_rules": ["Perforant"]
+                            "attacks": 4,
+                            "armor_piercing": 0,
+                            "special_rules": []
                         }],
                         "upgrade_groups": [
                             {
@@ -512,19 +548,25 @@ def load_factions():
                                 "type": "mount",
                                 "options": [
                                     {
-                                        "name": "Manticore",
+                                        "name": "Dragon du Ravage",
                                         "cost": 155,
                                         "mount": {
-                                            "name": "Manticore",
+                                            "name": "Dragon du Ravage",
                                             "quality": 4,
                                             "defense": 4,
                                             "special_rules": ["Volant", "Effrayant(1)", "Coriace(6)"],
                                             "weapons": [
                                                 {
-                                                    "name": "Griffes perforantes",
+                                                    "name": "Griffes et crocs",
                                                     "attacks": 6,
-                                                    "armor_piercing": 1,  # PA correctement défini
+                                                    "armor_piercing": 1,
                                                     "special_rules": ["Perforant"]
+                                                },
+                                                {
+                                                    "name": "Souffle de feu",
+                                                    "attacks": 1,
+                                                    "armor_piercing": 0,
+                                                    "special_rules": ["Attaque de souffle"]
                                                 }
                                             ]
                                         }
@@ -697,7 +739,7 @@ elif st.session_state.page == "army":
     st.divider()
     st.subheader("Ajouter une unité")
 
-    # Utilisation de format_unit_option pour les unités disponibles
+    # Sélection de l'unité
     unit = st.selectbox(
         "Unité disponible",
         st.session_state.units,
@@ -717,20 +759,28 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
+    # Gestion spécifique pour les héros (pas d'unité combinée)
     if unit.get("type") == "hero":
+        st.markdown("**Les héros ne peuvent pas être combinés**")
         combined = False
     else:
         combined = st.checkbox("Unité combinée", value=False)
 
     # Gestion des améliorations
     for group in unit.get("upgrade_groups", []):
+        st.markdown(f"**{group['group']}**")
+
         if group["type"] == "weapon":
             weapon_options = ["Arme de base"]
             for o in group["options"]:
                 weapon_details = format_weapon_details(o["weapon"])
-                weapon_options.append(f"{o['name']} (ATK: {weapon_details['attacks']}, PA: {weapon_details['ap']}) (+{o['cost']} pts)")
+                weapon_options.append(f"{weapon_details['formatted']} (+{o['cost']} pts)")
 
-            selected_weapon = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
+            selected_weapon = st.radio(
+                "Arme",
+                weapon_options,
+                key=f"{unit['name']}_weapon"
+            )
             if selected_weapon != "Arme de base":
                 opt_name = selected_weapon.split(" (")[0]
                 opt = next((o for o in group["options"] if o["name"] == opt_name), None)
@@ -748,19 +798,32 @@ elif st.session_state.page == "army":
                 mount_labels.append(label)
                 mount_map[label] = o
 
-            selected_mount = st.radio("Monture", mount_labels, key=f"{unit['name']}_mount")
+            selected_mount = st.radio(
+                "Monture",
+                mount_labels,
+                key=f"{unit['name']}_mount"
+            )
             if selected_mount != "Aucune monture" and selected_mount in mount_map:
                 mount = mount_map[selected_mount]
                 mount_cost = mount["cost"]
 
-        else:  # Améliorations d'unité
-            for o in group["options"]:
-                if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
+        else:  # Améliorations d'unité (radio boutons pour un seul choix)
+            options = ["Aucune"] + [f"{o['name']} (+{o['cost']} pts)" for o in group["options"]]
+            selected_option = st.radio(
+                group["group"],
+                options,
+                key=f"{unit['name']}_{group['group']}"
+            )
+            if selected_option != "Aucune":
+                opt_name = selected_option.split(" (+")[0]
+                opt = next((o for o in group["options"] if o["name"] == opt_name), None)
+                if opt:
                     if group["group"] not in selected_options:
                         selected_options[group["group"]] = []
-                    selected_options[group["group"]] = [o]
-                    upgrades_cost = o["cost"]
+                    selected_options[group["group"]] = [opt]
+                    upgrades_cost = opt["cost"]
 
+    # Calcul du coût final
     if combined and unit.get("type") != "hero":
         final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
         unit_size = base_size * 2
