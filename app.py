@@ -53,15 +53,7 @@ GAME_CONFIG = {
 }
 
 # ======================================================
-# NOUVELLE FONCTION POUR VÉRIFIER LA LIMITE DE POINTS
-# ======================================================
-def check_army_points(army_list, army_points):
-    """Vérifie que le total des points ne dépasse pas la limite choisie"""
-    total = sum(unit["cost"] for unit in army_list)
-    return total <= army_points
-
-# ======================================================
-# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES (modifiées)
+# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES
 # ======================================================
 def check_hero_limit(army_list, army_points, game_config):
     """Vérifie la limite de héros"""
@@ -84,10 +76,12 @@ def check_unit_copy_rule(army_list, army_points, game_config):
         unit_counts = {}
         for unit in army_list:
             unit_name = unit["name"]
-            if unit_name in unit_counts:
-                unit_counts[unit_name] += 1
+            count_key = unit_name
+
+            if count_key in unit_counts:
+                unit_counts[count_key] += 1
             else:
-                unit_counts[unit_name] = 1
+                unit_counts[count_key] = 1
 
         # Vérifier les limites
         for unit_name, count in unit_counts.items():
@@ -120,6 +114,7 @@ def check_unit_per_points(army_list, army_points, game_config):
     """Vérifie le nombre maximum d'unités par tranche de points"""
     if game_config.get("unit_per_points"):
         max_units = math.floor(army_points / game_config["unit_per_points"])
+
         if len(army_list) > max_units:
             st.error(f"Trop d'unités! Maximum autorisé: {max_units} (1 unité par {game_config['unit_per_points']} pts)")
             return False
@@ -130,27 +125,24 @@ def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
     game_config = GAME_CONFIG.get(game, {})
 
     if game in GAME_CONFIG:
-        # Vérification de la limite de points TOTALE
-        if not check_army_points(army_list, army_points):
-            st.error(f"Limite de points dépassée! Maximum autorisé: {army_points} pts")
+        # Vérification de la limite de points totale
+        total_cost = sum(unit["cost"] for unit in army_list)
+        if new_unit_cost:
+            total_cost += new_unit_cost
+
+        if total_cost > army_points:
+            st.error(f"Limite de points dépassée! Maximum autorisé: {army_points} pts. Total actuel: {total_cost} pts")
             return False
 
-        if not check_hero_limit(army_list, army_points, game_config):
-            return False
-
-        if not check_unit_copy_rule(army_list, army_points, game_config):
-            return False
-
-        if not check_unit_max_cost(army_list, army_points, game_config, new_unit_cost):
-            return False
-
-        if not check_unit_per_points(army_list, army_points, game_config):
-            return False
+        return (check_hero_limit(army_list, army_points, game_config) and
+                check_unit_copy_rule(army_list, army_points, game_config) and
+                check_unit_max_cost(army_list, army_points, game_config, new_unit_cost) and
+                check_unit_per_points(army_list, army_points, game_config))
 
     return True
 
 # ======================================================
-# FONCTIONS UTILITAIRES (inchangées)
+# FONCTIONS UTILITAIRES
 # ======================================================
 def format_special_rule(rule):
     """Formate les règles spéciales avec parenthèses"""
@@ -372,6 +364,39 @@ def ls_set(key, value):
         st.error(f"Erreur LocalStorage: {e}")
 
 # ======================================================
+# FONCTION POUR AFFICHER LA BARRE DE PROGRESSION (corrigée)
+# ======================================================
+def show_points_progress(current_points, max_points):
+    """Affiche une barre de progression pour les points avec couleur dynamique"""
+    progress = min(100, (current_points / max_points) * 100)
+
+    # Déterminer la couleur en fonction du pourcentage
+    if progress < 70:
+        color = "#4CAF50"  # Vert
+    elif progress < 90:
+        color = "#FFC107"  # Orange
+    else:
+        color = "#F44336"  # Rouge
+
+    # Calcul des points restants
+    remaining_points = max_points - current_points
+
+    st.markdown(
+        f"""
+        <div style="width: 100%; margin: 10px 0;">
+            <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px; margin-bottom: 5px;">
+                <div style="width: {progress}%; background-color: {color}; border-radius: 4px; height: 100%; transition: width 0.3s;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9em;">
+                <span><strong>{current_points}/{max_points} pts</strong> ({int(progress)}%)</span>
+                <span><strong>Reste:</strong> {remaining_points} pts</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
 @st.cache_data
@@ -540,34 +565,6 @@ def show_unit_with_tabs(unit, rules_descriptions):
                             st.markdown(description)
 
 # ======================================================
-# FONCTION POUR AFFICHER LA BARRE DE PROGRESSION
-# ======================================================
-def show_points_progress(current_points, max_points):
-    """Affiche une barre de progression pour les points"""
-    progress = min(100, (current_points / max_points) * 100)
-
-    # Déterminer la couleur en fonction du pourcentage
-    if progress < 70:
-        color = "#4CAF50"  # Vert
-    elif progress < 90:
-        color = "#FFC107"  # Orange
-    else:
-        color = "#F44336"  # Rouge
-
-    st.markdown(f"""
-    <div style="width: 100%; margin-bottom: 10px;">
-        <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px;">
-            <div style="width: {progress}%; background-color: {color}; border-radius: 4px; height: 100%;">
-            </div>
-        </div>
-        <div style="display: flex; justify-content: space-between;">
-            <span>{current_points}/{max_points} pts ({int(progress)}%)</span>
-            <span>Reste: {max_points - current_points} pts</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ======================================================
 # INITIALISATION
 # ======================================================
 factions_by_game, games = load_factions()
@@ -583,6 +580,24 @@ if "page" not in st.session_state:
 # ======================================================
 if st.session_state.page == "setup":
     st.title("OPR Army Forge FR")
+
+    # Affichage des informations sur les jeux disponibles
+    st.subheader("Jeux disponibles")
+    for game_key, config in GAME_CONFIG.items():
+        with st.expander(f"📖 {config['display_name']}"):
+            st.markdown(f"""
+            **Description**: {config['description']}
+            - **Points**: {config['min_points']} à {config['max_points']} (défaut: {config['default_points']})
+            """)
+
+            if game_key == "Age of Fantasy":
+                st.markdown(f"""
+                **Règles spécifiques à Age of Fantasy:**
+                - 1 Héros par tranche de {config['hero_limit']} pts d'armée
+                - 1+X copies de la même unité (X=1 pour {config['unit_copy_rule']} pts d'armée
+                - Aucune unité ne peut valoir plus de {int(config['unit_max_cost_ratio']*100)}% du total des points
+                - 1 unité maximum par tranche de {config['unit_per_points']} pts d'armée
+                """)
 
     # Liste des listes sauvegardées
     st.subheader("Mes listes sauvegardées")
@@ -645,14 +660,8 @@ if st.session_state.page == "setup":
     if uploaded:
         try:
             data = json.load(uploaded)
-            if not all(key in data for key in ["game", "faction", "army_list", "points"]):
-                st.error("Format JSON invalide: les clés 'game', 'faction', 'army_list' et 'points' sont requises")
-                st.stop()
-
-            # Vérification que les points de la liste importée ne dépassent pas la limite
-            total_cost = data.get("total_cost", sum(u["cost"] for u in data["army_list"]))
-            if total_cost > data["points"]:
-                st.error(f"La liste importée dépasse sa limite de points ({data['points']} pts). Total actuel: {total_cost} pts")
+            if not all(key in data for key in ["game", "faction", "army_list"]):
+                st.error("Format JSON invalide")
                 st.stop()
 
             st.session_state.game = data["game"]
@@ -660,12 +669,12 @@ if st.session_state.page == "setup":
             st.session_state.points = data["points"]
             st.session_state.list_name = data["name"]
             st.session_state.army_list = data["army_list"]
-            st.session_state.army_cost = total_cost
+            st.session_state.army_cost = data["total_cost"]
             st.session_state.units = factions_by_game[data["game"]][data["faction"]]["units"]
             st.session_state.page = "army"
             st.rerun()
         except Exception as e:
-            st.error(f"Erreur d'import: {str(e)}")
+            st.error(f"Erreur d'import: {e}")
 
     if st.button("Créer une nouvelle liste"):
         st.session_state.game = game
@@ -685,7 +694,7 @@ elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
     st.caption(f"{st.session_state.game} • {st.session_state.faction}")
 
-    # Affichage de la barre de progression des points
+    # Affichage de la barre de progression des points (corrigée)
     show_points_progress(st.session_state.army_cost, st.session_state.points)
 
     # Charger les données de faction pour les descriptions des règles
