@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime
 import hashlib
 import re
-import base64
+import copy
 import math
 
 # ======================================================
@@ -22,7 +22,7 @@ FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
 FACTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ======================================================
-# CONFIGURATION DES JEUX ET LEURS LIMITATIONS
+# CONFIGURATION DES JEUX
 # ======================================================
 GAME_CONFIG = {
     "Age of Fantasy": {
@@ -36,96 +36,8 @@ GAME_CONFIG = {
         "unit_copy_rule": 750,
         "unit_max_cost_ratio": 0.35,
         "unit_per_points": 150
-    },
-    "Grimdark Future": {
-        "display_name": "Grimdark Future",
-        "max_points": 10000,
-        "min_points": 200,
-        "default_points": 800,
-        "point_step": 200,
-        "description": "Jeu de bataille futuriste",
-        "hero_limit": 375,
-        "unit_copy_rule": 750,
-        "unit_max_cost_ratio": 0.35,
-        "unit_per_points": 150
     }
 }
-
-# ======================================================
-# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES
-# ======================================================
-def check_hero_limit(army_list, army_points, game_config):
-    """Vérifie la limite de héros"""
-    if game_config.get("hero_limit"):
-        max_heroes = math.floor(army_points / game_config["hero_limit"])
-        hero_count = sum(1 for unit in army_list if unit.get("type") == "hero")
-
-        if hero_count > max_heroes:
-            st.error(f"Limite de héros dépassée! Maximum autorisé: {max_heroes} (1 héros par {game_config['hero_limit']} pts)")
-            return False
-    return True
-
-def check_unit_copy_rule(army_list, army_points, game_config):
-    """Vérifie la règle des copies d'unités"""
-    if game_config.get("unit_copy_rule"):
-        x_value = math.floor(army_points / game_config["unit_copy_rule"])
-        max_copies = 1 + x_value
-
-        unit_counts = {}
-        for unit in army_list:
-            unit_name = unit["name"]
-            count_key = unit_name
-
-            if count_key in unit_counts:
-                unit_counts[count_key] += 1
-            else:
-                unit_counts[count_key] = 1
-
-        for unit_name, count in unit_counts.items():
-            if count > max_copies:
-                st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
-                return False
-    return True
-
-def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
-    """Vérifie qu'aucune unité ne dépasse le ratio maximum de coût"""
-    if not game_config.get("unit_max_cost_ratio"):
-        return True
-
-    max_cost = army_points * game_config["unit_max_cost_ratio"]
-
-    for unit in army_list:
-        if unit["cost"] > max_cost:
-            st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
-            return False
-
-    if new_unit_cost and new_unit_cost > max_cost:
-        st.error(f"Cette unité ({new_unit_cost} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
-        return False
-
-    return True
-
-def check_unit_per_points(army_list, army_points, game_config):
-    """Vérifie le nombre maximum d'unités par tranche de points"""
-    if game_config.get("unit_per_points"):
-        max_units = math.floor(army_points / game_config["unit_per_points"])
-
-        if len(army_list) > max_units:
-            st.error(f"Trop d'unités! Maximum autorisé: {max_units} (1 unité par {game_config['unit_per_points']} pts)")
-            return False
-    return True
-
-def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
-    """Valide toutes les règles spécifiques au jeu"""
-    game_config = GAME_CONFIG.get(game, {})
-
-    if game in GAME_CONFIG:
-        return (check_hero_limit(army_list, army_points, game_config) and
-                check_unit_copy_rule(army_list, army_points, game_config) and
-                check_unit_max_cost(army_list, army_points, game_config, new_unit_cost) and
-                check_unit_per_points(army_list, army_points, game_config))
-
-    return True
 
 # ======================================================
 # FONCTIONS UTILITAIRES
@@ -141,67 +53,29 @@ def format_special_rule(rule):
         return f"{match.group(1)}({match.group(2)})"
     return rule
 
-def extract_coriace_value(rule):
-    """Extrait la valeur numérique de Coriace d'une règle"""
-    if not isinstance(rule, str):
-        return 0
-    match = re.search(r"Coriace\s*\(?(\d+)\)?", rule)
-    if match:
-        return int(match.group(1))
-    return 0
-
-def get_coriace_from_rules(rules):
-    """Calcule la Coriace depuis une liste de règles"""
-    if not rules or not isinstance(rules, list):
-        return 0
-    total = 0
-    for rule in rules:
-        total += extract_coriace_value(rule)
-    return total
-
-def get_mount_details(mount):
-    """Récupère les détails d'une monture"""
-    if not mount:
-        return None, 0
-
-    mount_data = mount
-    if 'mount' in mount:
-        mount_data = mount['mount']
-
-    special_rules = []
-    if 'special_rules' in mount_data and isinstance(mount_data['special_rules'], list):
-        special_rules = mount_data['special_rules']
-
-    coriace = get_coriace_from_rules(special_rules)
-    return special_rules, coriace
-
 def format_weapon_details(weapon):
-    """Formate les détails d'une arme pour l'affichage"""
+    """Formate les détails d'une arme avec gestion des valeurs manquantes"""
     if not weapon:
         return {
             "name": "Arme non spécifiée",
-            "attacks": "?",
-            "ap": "?",
+            "attacks": 1,
+            "ap": 0,  # PA par défaut
             "special": []
         }
     return {
         "name": weapon.get('name', 'Arme non nommée'),
-        "attacks": weapon.get('attacks', '?'),
-        "ap": weapon.get('armor_piercing', '?'),
+        "attacks": weapon.get('attacks', 1),
+        "ap": weapon.get('armor_piercing', 0),  # PA toujours défini
         "special": weapon.get('special_rules', [])
     }
 
 def format_mount_details(mount):
-    """Formate les détails d'une monture pour l'affichage"""
+    """Formate les détails d'une monture"""
     if not mount:
         return "Aucune monture"
 
-    mount_name = mount.get('name', 'Monture non nommée')
-    mount_data = mount
-    if 'mount' in mount:
-        mount_data = mount['mount']
-
-    details = mount_name
+    mount_data = mount['mount'] if 'mount' in mount else mount
+    details = mount_data.get('name', 'Monture non nommée')
 
     if 'quality' in mount_data or 'defense' in mount_data:
         details += " ("
@@ -217,7 +91,7 @@ def format_mount_details(mount):
     if 'weapons' in mount_data and mount_data['weapons']:
         for weapon in mount_data['weapons']:
             weapon_details = format_weapon_details(weapon)
-            details += " | " + f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})"
+            details += f" | {weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})"
             if weapon_details['special']:
                 details += ", " + ", ".join(weapon_details['special'])
             details += ")"
@@ -225,52 +99,146 @@ def format_mount_details(mount):
     return details
 
 def format_unit_option(u):
-    """Formate l'affichage des unités dans la liste déroulante"""
+    """Formate l'affichage des unités DISPONIBLES dans la liste déroulante"""
     name_part = f"{u['name']}"
-
-    # Gestion des effectifs
-    if u.get('type') == "hero":
-        name_part += " [1]"  # Les héros sont toujours [1]
-    else:
-        base_size = u.get('size', 10)
-        name_part += f" [{base_size}]"  # Unités normales affichent leur taille de base
+    name_part += " [1]" if u.get('type') == "hero" else f" [{u.get('size', 10)}]"
 
     qua_def = f"Qua {u['quality']}+ / Déf {u.get('defense', '?')}"
 
-    coriace = get_coriace_from_rules(u.get('special_rules', []))
-    if 'mount' in u and u['mount']:
-        _, mount_coriace = get_mount_details(u['mount'])
-        coriace += mount_coriace
+    # Règles spéciales
+    rules_part = ""
+    if 'special_rules' in u and u['special_rules']:
+        rules_part = " | " + ", ".join(u['special_rules'])
 
-    if coriace > 0:
-        qua_def += f" / Coriace {coriace}"
-
+    # Arme
     weapons_part = ""
     if 'weapons' in u and u['weapons']:
         weapons = []
         for weapon in u['weapons']:
             weapon_details = format_weapon_details(weapon)
-            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
-        weapons_part = " | ".join(weapons)
+            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']})")
+        weapons_part = " | " + " | ".join(weapons)
 
+    # Coût de base
+    cost_part = f" {u.get('base_cost', '?')} pts"
+
+    return f"{name_part} - {qua_def}{rules_part}{weapons_part}{cost_part}"
+
+def format_unit_display(u):
+    """Formate l'affichage des unités DÉJÀ AJOUTÉES"""
+    name_part = f"{u['name']} [{u.get('size', 10)}]"
+
+    qua_def = f"Qualité: {u['quality']}+ | Défense: {u.get('defense', '?')}+"
+
+    # Règles spéciales
     rules_part = ""
-    if 'special_rules' in u and u['special_rules']:
-        rules_part = ", ".join(u['special_rules'])
+    if 'rules' in u and u['rules']:
+        rules_part = f"<div style='margin: 5px 0;'><strong>Règles spéciales:</strong> {', '.join(u['rules'])}</div>"
 
-    result = f"{name_part} - {qua_def}"
-    if weapons_part:
-        result += f" - {weapons_part}"
-    if rules_part:
-        result += f" - {rules_part}"
-    result += f" {u['base_cost']}pts"
-    return result
+    # Arme
+    weapon_part = ""
+    if 'weapon' in u and u['weapon']:
+        weapon = u['weapon']
+        weapon_details = format_weapon_details(weapon)
+        weapon_part = f"""
+        <div style='margin: 5px 0;'>
+            <strong>Arme:</strong> {weapon.get('name', 'Arme non nommée')}
+            (ATK: {weapon_details['attacks']}, PA: {weapon_details['ap']})
+        """
 
-def find_option_by_name(options, name):
-    """Trouve une option par son nom de manière sécurisée"""
-    try:
-        return next((o for o in options if o.get("name") == name), None)
-    except Exception:
-        return None
+        if weapon_details['special']:
+            weapon_part += ", " + ", ".join(weapon_details['special'])
+        weapon_part += "</div>"
+
+    # Monture
+    mount_part = ""
+    if 'mount' in u and u['mount']:
+        mount_details = format_mount_details(u['mount'])
+        mount_part = f"<div style='margin: 5px 0;'><strong>Monture:</strong> {mount_details}</div>"
+
+    # Coût
+    cost_part = f"""
+    <div style='float:right; background-color: #3498db; color: white;
+                padding: 2px 6px; border-radius: 3px;'>
+        {u.get('cost', '?')} pts
+    </div>
+    """
+
+    return f"""
+    <div style='border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;'>
+        <div style='display: flex; justify-content: space-between;'>
+            <h4 style='margin: 0;'>{name_part}</h4>
+            {cost_part}
+        </div>
+        <div style='margin-top: 5px;'>
+            <strong>{qua_def}</strong>
+            {rules_part}
+            {weapon_part}
+            {mount_part}
+        </div>
+    </div>
+    """
+
+# ======================================================
+# FONCTION POUR AFFICHER LA BARRE DE PROGRESSION
+# ======================================================
+def show_points_progress(current_points, max_points):
+    """Affiche une barre de progression pour les points"""
+    if max_points <= 0:
+        progress = 0
+    else:
+        progress = min(100, (current_points / max_points) * 100)
+
+    remaining_points = max_points - current_points
+
+    if progress < 70:
+        color = "#4CAF50"
+    elif progress < 90:
+        color = "#FFC107"
+    elif progress < 100:
+        color = "#F44336"
+    else:
+        color = "#2E7D32"
+
+    st.markdown(
+        f"""
+        <div style="width: 100%; margin: 10px 0 20px 0;">
+            <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px; margin-bottom: 5px;">
+                <div style="width: {progress}%; background-color: {color}; border-radius: 4px; height: 100%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9em;">
+                <span><strong>{current_points}/{max_points} pts</strong> ({int(progress)}%)</span>
+                <span><strong>Reste:</strong> {remaining_points} pts</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if current_points == max_points:
+        st.success("✅ Liste valide! Vous avez atteint exactement votre limite de points.")
+
+# ======================================================
+# FONCTIONS POUR LES RÈGLES SPÉCIFIQUES
+# ======================================================
+def check_army_points(army_list, army_points):
+    """Vérifie que le total des points ne dépasse pas la limite"""
+    total = sum(unit["cost"] for unit in army_list)
+    if total > army_points:
+        return False, f"Limite de points dépassée! Maximum autorisé: {army_points} pts. Total actuel: {total} pts"
+    return True, ""
+
+def validate_army_rules(army_list, army_points, game):
+    """Valide toutes les règles spécifiques au jeu"""
+    game_config = GAME_CONFIG.get(game, {})
+    errors = []
+
+    if game in GAME_CONFIG:
+        total_cost = sum(unit["cost"] for unit in army_list)
+        if total_cost > army_points:
+            errors.append(f"Limite de points dépassée! Maximum autorisé: {army_points} pts. Total actuel: {total_cost} pts")
+
+    return len(errors) == 0, errors
 
 # ======================================================
 # LOCAL STORAGE
@@ -293,8 +261,7 @@ def ls_get(key):
             unsafe_allow_html=True
         )
         return st.text_input("", key=unique_key, label_visibility="collapsed")
-    except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
+    except Exception:
         return None
 
 def ls_set(key, value):
@@ -311,137 +278,315 @@ def ls_set(key, value):
             """,
             unsafe_allow_html=True
         )
-    except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
+    except Exception:
+        pass
+
+# ======================================================
+# FONCTION POUR GÉNÉRER L'EXPORT HTML
+# ======================================================
+def generate_html_export(army_data, factions_by_game):
+    """Génère un export HTML avec PA correct et règles spéciales claires"""
+    faction_data = factions_by_game[army_data['game']][army_data['faction']]
+    rules_descriptions = faction_data.get('special_rules_descriptions', {})
+
+    # Collecter toutes les règles spéciales utilisées
+    used_rules = set()
+    for unit in army_data['army_list']:
+        if 'rules' in unit:
+            used_rules.update(unit['rules'])
+        if 'weapon' in unit and 'special_rules' in unit['weapon']:
+            used_rules.update(unit['weapon']['special_rules'])
+        if 'mount' in unit and unit['mount']:
+            mount_data = unit['mount']['mount'] if 'mount' in unit['mount'] else unit['mount']
+            if 'special_rules' in mount_data:
+                used_rules.update(mount_data['special_rules'])
+
+    # Générer la légende des règles
+    rules_legend = ""
+    if used_rules:
+        rules_legend = """
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Légende des règles spéciales</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+        """
+        for rule in sorted(used_rules):
+            description = rules_descriptions.get(rule, "Description non disponible")
+            rules_legend += f"""
+            <tr>
+                <td style="padding: 5px; border-bottom: 1px solid #eee; width: 30%;"><strong>{rule}</strong></td>
+                <td style="padding: 5px; border-bottom: 1px solid #eee;">{description}</td>
+            </tr>
+            """
+        rules_legend += "</table></div>"
+
+    # Générer les unités
+    units_html = ""
+    for unit in army_data['army_list']:
+        rules_list = ""
+        if 'rules' in unit and unit['rules']:
+            rules_list = f"""
+            <div style="margin: 5px 0;">
+                <strong>Règles spéciales:</strong> {', '.join(unit['rules'])}
+            </div>
+            """
+
+        weapon_html = ""
+        if 'weapon' in unit and unit['weapon']:
+            weapon = unit['weapon']
+            weapon_details = format_weapon_details(weapon)
+            weapon_html = f"""
+            <div style="margin: 5px 0;">
+                <strong>Arme:</strong> {weapon.get('name', 'Arme non nommée')}
+                (ATK: {weapon_details['attacks']}, PA: {weapon_details['ap']})
+            """
+
+            if weapon_details['special']:
+                weapon_html += ", " + ", ".join(weapon_details['special'])
+            weapon_html += "</div>"
+
+        mount_html = ""
+        if 'mount' in unit and unit['mount']:
+            mount_details = format_mount_details(unit['mount'])
+            mount_html = f"""
+            <div style="margin: 5px 0;">
+                <strong>Monture:</strong> {mount_details}
+            </div>
+            """
+
+        options_html = ""
+        if 'options' in unit and unit['options']:
+            for group_name, opts in unit['options'].items():
+                if isinstance(opts, list) and opts:
+                    options_html += f"""
+                    <div style="margin: 5px 0;">
+                        <strong>{group_name}:</strong> {', '.join(opt.get('name', '') for opt in opts)}
+                    </div>
+                    """
+
+        units_html += f"""
+        <div style="background-color: white; border: 1px solid #ddd; border-radius: 6px;
+                    padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center;
+                        margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                <h3 style="margin: 0; color: #2c3e50;">{unit['name']} [{unit.get('size', 10)}]</h3>
+                <div style="background-color: #3498db; color: white; padding: 3px 8px;
+                            border-radius: 4px; font-weight: bold;">{unit['cost']} pts</div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                <div style="background-color: #f8f9fa; padding: 5px 10px; border-radius: 4px;">
+                    Qualité: {unit['quality']}+
+                </div>
+                <div style="background-color: #f8f9fa; padding: 5px 10px; border-radius: 4px;">
+                    Défense: {unit.get('defense', '?')}+
+                </div>
+            </div>
+
+            {rules_list}
+            {weapon_html}
+            {mount_html}
+            {options_html}
+        </div>
+        """
+
+    html_content = f"""
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste d'armée OPR - {army_data['name']}</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .army-header {{
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }}
+        .army-title {{
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }}
+        .army-info {{
+            color: #666;
+            font-size: 0.9em;
+        }}
+        .progress-container {{
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            height: 20px;
+        }}
+        .progress-bar {{
+            height: 100%;
+            border-radius: 4px;
+            text-align: right;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.8em;
+            line-height: 20px;
+        }}
+        @media print {{
+            .unit-container {{
+                page-break-inside: avoid;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="army-header">
+        <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
+        <div class="army-info">
+            {army_data['game']} • {army_data['faction']} • {army_data['total_cost']}/{army_data['points']} pts
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {min(100, (army_data['total_cost']/army_data['points'])*100)}%;
+                                              background-color: {'#2E7D32' if army_data['total_cost'] == army_data['points'] else '#4CAF50' if (army_data['total_cost']/army_data['points']) < 0.9 else '#FFC107' if (army_data['total_cost']/army_data['points']) < 1 else '#F44336'}">
+            {min(100, int((army_data['total_cost']/army_data['points'])*100))}% ({army_data['total_cost']}/{army_data['points']} pts)
+        </div>
+    </div>
+
+    {rules_legend}
+
+    <h2 style="color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 5px;">Composition de l'armée</h2>
+    {units_html}
+</body>
+</html>
+"""
+    return html_content
 
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
 @st.cache_data
 def load_factions():
-    """Charge les factions depuis les fichiers JSON"""
+    """Charge les factions avec des données corrigées"""
     factions = {}
     games = set()
 
-    # Création d'un fichier de faction par défaut si le dossier est vide
-    if not list(FACTIONS_DIR.glob("*.json")):
-        default_faction = {
-            "game": "Age of Fantasy",
-            "faction": "Disciples de la Guerre",
-            "units": [
-                {
-                    "name": "Barbares de la Guerre",
-                    "type": "unit",
-                    "size": 10,
-                    "base_cost": 50,
-                    "quality": 3,
-                    "defense": 5,
-                    "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
-                    "weapons": [{
-                        "name": "Armes à une main",
-                        "attacks": 1,
-                        "armor_piercing": 0,
-                        "special_rules": []
-                    }],
-                    "upgrade_groups": [
-                        {
-                            "group": "Remplacement d'armes",
-                            "type": "weapon",
-                            "options": [
-                                {
-                                    "name": "Lance",
-                                    "cost": 35,
-                                    "weapon": {
-                                        "name": "Lance",
-                                        "attacks": 1,
-                                        "armor_piercing": 0,
-                                        "special_rules": ["Contre-charge"]
-                                    }
-                                },
-                                {
-                                    "name": "Fléau",
-                                    "cost": 20,
-                                    "weapon": {
-                                        "name": "Fléau",
-                                        "attacks": 1,
-                                        "armor_piercing": 1,
-                                        "special_rules": []
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "group": "Améliorations d'unité",
-                            "type": "upgrades",
-                            "options": [
-                                {
-                                    "name": "Icône du Ravage",
-                                    "cost": 20,
-                                    "special_rules": ["Aura de Défense versatile"]
-                                },
-                                {
-                                    "name": "Sergent",
-                                    "cost": 5,
-                                    "special_rules": []
-                                },
-                                {
-                                    "name": "Bannière",
-                                    "cost": 5,
-                                    "special_rules": []
-                                },
-                                {
-                                    "name": "Musicien",
-                                    "cost": 10,
-                                    "special_rules": []
-                                }
-                            ]
-                        }
-                    ]
+    default_factions = {
+        "Age of Fantasy": {
+            "Disciples de la Guerre": {
+                "game": "Age of Fantasy",
+                "faction": "Disciples de la Guerre",
+                "special_rules_descriptions": {
+                    "Éclaireur": "Déplacement facilité en terrain difficile.",
+                    "Furieux": "Relance les 1 en attaque.",
+                    "Né pour la guerre": "Relance les 1 en test de moral.",
+                    "Héros": "Personnage inspirant.",
+                    "Coriace(1)": "Ignore 1 point de dégât par phase.",
+                    "Magique(1)": "Ignore 1 point de défense.",
+                    "Contre-charge": "+1 aux jets de dégât lors d'une charge.",
+                    "Attaque venimeuse": "Les blessures infligées par cette unité ne peuvent pas être régénérées.",
+                    "Perforant": "Ignore 1 point de défense supplémentaire."
                 },
-                {
-                    "name": "Maître de la Guerre Élu",
-                    "type": "hero",
-                    "size": 1,
-                    "base_cost": 150,
-                    "quality": 3,
-                    "defense": 5,
-                    "special_rules": ["Héros", "Éclaireur", "Furieux"],
-                    "weapons": [{
-                        "name": "Arme héroïque",
-                        "attacks": 2,
-                        "armor_piercing": 1,
-                        "special_rules": ["Magique(1)"]
-                    }]
-                }
-            ]
+                "units": [
+                    {
+                        "name": "Maître de la Guerre Lié",
+                        "type": "hero",
+                        "size": 1,
+                        "base_cost": 150,
+                        "quality": 3,
+                        "defense": 5,
+                        "special_rules": ["Héros", "Éclaireur", "Attaque venimeuse"],
+                        "weapons": [{
+                            "name": "Grande arme lourde",
+                            "attacks": 3,
+                            "armor_piercing": 2,  # PA correctement défini
+                            "special_rules": ["Perforant"]
+                        }],
+                        "upgrade_groups": [
+                            {
+                                "group": "Montures",
+                                "type": "mount",
+                                "options": [
+                                    {
+                                        "name": "Manticore",
+                                        "cost": 155,
+                                        "mount": {
+                                            "name": "Manticore",
+                                            "quality": 4,
+                                            "defense": 4,
+                                            "special_rules": ["Volant", "Effrayant(1)", "Coriace(6)"],
+                                            "weapons": [
+                                                {
+                                                    "name": "Griffes perforantes",
+                                                    "attacks": 6,
+                                                    "armor_piercing": 1,  # PA correctement défini
+                                                    "special_rules": ["Perforant"]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
         }
-        with open(FACTIONS_DIR / "default.json", "w", encoding="utf-8") as f:
-            json.dump(default_faction, f, indent=2)
+    }
 
-    for fp in FACTIONS_DIR.glob("*.json"):
-        try:
-            with open(fp, encoding="utf-8") as f:
-                data = json.load(f)
-                game = data.get("game")
-                faction = data.get("faction")
-                if game and faction:
-                    factions.setdefault(game, {})[faction] = data
-                    games.add(game)
-        except Exception as e:
-            st.warning(f"Erreur chargement {fp.name}: {e}")
+    files_loaded = 0
+    if FACTIONS_DIR.exists():
+        for fp in FACTIONS_DIR.glob("*.json"):
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    data = json.load(f)
+                    game = data.get("game")
+                    faction = data.get("faction")
 
-    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
+                    if game and faction:
+                        if game not in factions:
+                            factions[game] = {}
+                            games.add(game)
+
+                        factions[game][faction] = data
+                        files_loaded += 1
+                        st.info(f"Faction chargée: {faction} ({game}) depuis {fp.name}")
+
+            except Exception as e:
+                st.warning(f"Erreur chargement {fp.name}: {e}")
+
+    if files_loaded > 0:
+        st.info(f"Chargé {files_loaded} factions depuis les fichiers")
+    else:
+        st.warning("Aucun fichier de faction valide trouvé. Utilisation des factions par défaut.")
+        factions = default_factions
+        games = set(factions.keys())
+
+    if "Age of Fantasy" not in factions or not factions["Age of Fantasy"]:
+        if "Age of Fantasy" not in factions:
+            factions["Age of Fantasy"] = {}
+        factions["Age of Fantasy"].update(default_factions["Age of Fantasy"])
+        games.add("Age of Fantasy")
+
+    return factions, sorted(games) if games else ["Age of Fantasy"]
 
 # ======================================================
 # INITIALISATION
 # ======================================================
 factions_by_game, games = load_factions()
 
+# Initialisation de la session
 if "page" not in st.session_state:
     st.session_state.page = "setup"
     st.session_state.army_list = []
     st.session_state.army_cost = 0
     st.session_state.current_player = "Simon Joinville Fouquet"
+    st.session_state.history = []
+    st.session_state.undo_disabled = True
 
 # ======================================================
 # PAGE 1 – CONFIGURATION
@@ -449,28 +594,31 @@ if "page" not in st.session_state:
 if st.session_state.page == "setup":
     st.title("OPR Army Forge FR")
 
-    # Affichage des informations sur les jeux disponibles
-    st.subheader("Jeux disponibles")
-    for game_key, config in GAME_CONFIG.items():
-        with st.expander(f"📖 {config['display_name']}"):
-            st.markdown(f"""
-            **Description**: {config['description']}
-            - **Points**: {config['min_points']} à {config['max_points']} (défaut: {config['default_points']})
-            """)
+    # Sélection du jeu
+    game = st.selectbox("Jeu", games)
+    game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
 
-            if game_key == "Age of Fantasy":
-                st.markdown(f"""
-                **Règles spécifiques à Age of Fantasy:**
-                - 1 Héros par tranche de {config['hero_limit']} pts d'armée
-                - 1+X copies de la même unité (X=1 pour {config['unit_copy_rule']} pts d'armée)
-                - Aucune unité ne peut valoir plus de {int(config['unit_max_cost_ratio']*100)}% du total des points
-                - 1 unité maximum par tranche de {config['unit_per_points']} pts d'armée
-                """)
+    # Sélection de la faction
+    if game in factions_by_game and factions_by_game[game]:
+        available_factions = list(factions_by_game[game].keys())
+        faction = st.selectbox("Faction", available_factions)
+    else:
+        st.error(f"Aucune faction disponible pour {game}")
+        faction = None
 
-    # Liste des listes sauvegardées
-    st.subheader("Mes listes sauvegardées")
+    # Sélection des points
+    points = st.number_input(
+        "Points",
+        min_value=game_config["min_points"],
+        max_value=game_config["max_points"],
+        value=game_config["default_points"],
+        step=game_config["point_step"]
+    )
+
+    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
 
     # Chargement des listes sauvegardées
+    st.subheader("Mes listes sauvegardées")
     saved_lists = ls_get("opr_saved_lists")
     if saved_lists:
         try:
@@ -491,82 +639,55 @@ if st.session_state.page == "setup":
                             st.session_state.army_cost = saved_list["total_cost"]
                             st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
                             st.session_state.page = "army"
+                            st.session_state.history = []
+                            st.session_state.undo_disabled = True
                             st.rerun()
         except Exception as e:
             st.error(f"Erreur chargement listes: {e}")
 
-    if not games:
-        st.error("Aucun jeu trouvé")
-        st.stop()
-
-    # Sélection du jeu
-    game = st.selectbox("Jeu", games)
-    game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
-
-    # Stockage des points totaux choisis en page 1
-    points = st.number_input(
-        "Points",
-        min_value=game_config["min_points"],
-        max_value=game_config["max_points"],
-        value=game_config["default_points"],
-        step=game_config["point_step"]
-    )
-
-    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
-
-    # Affichage des règles spécifiques
-    st.markdown(f"""
-    **Règles pour {game_config['display_name']}:**
-    - 1 Héros par tranche de {game_config['hero_limit']} pts
-    - 1+X copies de la même unité (X=1 pour {game_config['unit_copy_rule']} pts)
-    - Aucune unité ne peut valoir plus de {int(game_config['unit_max_cost_ratio']*100)}% du total des points
-    - 1 unité maximum par tranche de {game_config['unit_per_points']} pts
-    """)
-
-    # Import JSON
-    uploaded = st.file_uploader("Importer une liste JSON", type=["json"])
-    if uploaded:
-        try:
-            data = json.load(uploaded)
-            if not all(key in data for key in ["game", "faction", "army_list"]):
-                st.error("Format JSON invalide")
-                st.stop()
-
-            st.session_state.game = data["game"]
-            st.session_state.faction = data["faction"]
-            st.session_state.points = data["points"]
-            st.session_state.list_name = data["name"]
-            st.session_state.army_list = data["army_list"]
-            st.session_state.army_cost = data["total_cost"]
-            st.session_state.units = factions_by_game[data["game"]][data["faction"]]["units"]
-            st.session_state.page = "army"
-            st.rerun()
-        except Exception as e:
-            st.error(f"Erreur d'import: {e}")
-
-    if st.button("Créer une nouvelle liste"):
+    if st.button("Créer une nouvelle liste") and faction:
         st.session_state.game = game
-        st.session_state.faction = st.selectbox("Faction", factions_by_game[game].keys())
+        st.session_state.faction = faction
         st.session_state.points = points
         st.session_state.list_name = list_name
-        st.session_state.units = factions_by_game[game][st.session_state.faction]["units"]
+        st.session_state.units = factions_by_game[game][faction]["units"]
         st.session_state.army_list = []
         st.session_state.army_cost = 0
+        st.session_state.history = []
+        st.session_state.undo_disabled = True
         st.session_state.page = "army"
         st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (CORRIGÉE)
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE
 # ======================================================
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
     st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
 
-    # Vérification des règles spécifiques au jeu
-    game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
+    # Affichage de la barre de progression
+    show_points_progress(st.session_state.army_cost, st.session_state.points)
 
-    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
-        st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
+    # Boutons de contrôle
+    col_undo, col_reset = st.columns([1, 1])
+    with col_undo:
+        if st.button("↩ Annuler la dernière action", disabled=st.session_state.undo_disabled):
+            if st.session_state.history:
+                previous_state = st.session_state.history.pop()
+                st.session_state.army_list = copy.deepcopy(previous_state["army_list"])
+                st.session_state.army_cost = previous_state["army_cost"]
+
+                if not st.session_state.history:
+                    st.session_state.undo_disabled = True
+                st.rerun()
+
+    with col_reset:
+        if st.button("🗑 Réinitialiser la liste"):
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
+            st.session_state.history = []
+            st.session_state.undo_disabled = True
+            st.rerun()
 
     if st.button("⬅ Retour"):
         st.session_state.page = "setup"
@@ -576,7 +697,7 @@ elif st.session_state.page == "army":
     st.divider()
     st.subheader("Ajouter une unité")
 
-    # Sélection de l'unité
+    # Utilisation de format_unit_option pour les unités disponibles
     unit = st.selectbox(
         "Unité disponible",
         st.session_state.units,
@@ -585,17 +706,10 @@ elif st.session_state.page == "army":
         key="unit_select"
     )
 
-    # Récupération de la taille de base de l'unité
     base_size = unit.get('size', 10)
     base_cost = unit["base_cost"]
 
-    # Vérification du coût maximum AVANT les améliorations
-    max_cost = st.session_state.points * game_config["unit_max_cost_ratio"]
-    if unit["base_cost"] > max_cost:
-        st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
-        st.stop()
-
-    # Initialisation
+    # Gestion des options
     weapon = unit.get("weapons", [{}])[0]
     selected_options = {}
     mount = None
@@ -603,23 +717,18 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
-    # Gestion des unités combinées - CORRECTION DÉFINITIVE POUR LES HÉROS
     if unit.get("type") == "hero":
-        combined = False  # Les héros ne peuvent JAMAIS être combinés
-        # On n'affiche RIEN pour les héros, pas même un message
+        combined = False
     else:
         combined = st.checkbox("Unité combinée", value=False)
 
-    # Options de l'unité
+    # Gestion des améliorations
     for group in unit.get("upgrade_groups", []):
-        st.markdown(f"**{group['group']}**")
-
         if group["type"] == "weapon":
             weapon_options = ["Arme de base"]
             for o in group["options"]:
                 weapon_details = format_weapon_details(o["weapon"])
-                cost_diff = o["cost"]
-                weapon_options.append(f"{o['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''}) (+{cost_diff} pts)")
+                weapon_options.append(f"{o['name']} (ATK: {weapon_details['attacks']}, PA: {weapon_details['ap']}) (+{o['cost']} pts)")
 
             selected_weapon = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
             if selected_weapon != "Arme de base":
@@ -640,37 +749,18 @@ elif st.session_state.page == "army":
                 mount_map[label] = o
 
             selected_mount = st.radio("Monture", mount_labels, key=f"{unit['name']}_mount")
-
-            if selected_mount != "Aucune monture":
-                opt = mount_map[selected_mount]
-                mount = opt
-                mount_cost = opt["cost"]
+            if selected_mount != "Aucune monture" and selected_mount in mount_map:
+                mount = mount_map[selected_mount]
+                mount_cost = mount["cost"]
 
         else:  # Améliorations d'unité
-            if group["group"] == "Améliorations de rôle":
-                option_names = ["Aucune"] + [
-                    f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
-                ]
-                selected = st.radio(group["group"], option_names, key=f"{unit['name']}_{group['group']}")
-                if selected != "Aucune":
-                    opt_name = selected.split(" (+")[0]
-                    opt = next((o for o in group["options"] if o["name"] == opt_name), None)
-                    if opt:
-                        if group["group"] not in selected_options:
-                            selected_options[group["group"]] = []
-                        selected_options[group["group"]].append(opt)
-                        upgrades_cost += opt["cost"]
-            else:
-                st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
-                for o in group["options"]:
-                    if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
-                        if group["group"] not in selected_options:
-                            selected_options[group["group"]] = []
-                        if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
-                            selected_options[group["group"]].append(o)
-                            upgrades_cost += o["cost"]
+            for o in group["options"]:
+                if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
+                    if group["group"] not in selected_options:
+                        selected_options[group["group"]] = []
+                    selected_options[group["group"]] = [o]
+                    upgrades_cost = o["cost"]
 
-    # Calcul du coût final et de la taille
     if combined and unit.get("type") != "hero":
         final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
         unit_size = base_size * 2
@@ -678,69 +768,50 @@ elif st.session_state.page == "army":
         final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
         unit_size = base_size
 
-    # Affichage de la taille finale de l'unité
-    if unit.get("type") == "hero":
-        st.markdown(f"**Taille finale: 1** (les héros sont toujours des unités individuelles)")
-    else:
-        st.markdown(f"**Taille finale: {unit_size}** {'(x2 combinée)' if combined else ''}")
-
     st.markdown(f"**Coût total: {final_cost} pts**")
+    st.markdown(f"**Taille de l'unité: {unit_size} figurines**")
 
     if st.button("Ajouter à l'armée"):
-        try:
-            weapon_data = format_weapon_details(weapon)
+        # Sauvegarder l'état actuel avant l'ajout
+        st.session_state.history.append({
+            "army_list": copy.deepcopy(st.session_state.army_list),
+            "army_cost": st.session_state.army_cost
+        })
+        st.session_state.undo_disabled = False
 
-            # Calcul de la coriace
-            total_coriace = 0
-            if 'special_rules' in unit and isinstance(unit.get('special_rules'), list):
-                total_coriace += get_coriace_from_rules(unit['special_rules'])
-            if mount:
-                _, mount_coriace = get_mount_details(mount)
-                total_coriace += mount_coriace
-            if selected_options:
-                for opts in selected_options.values():
-                    if isinstance(opts, list):
-                        for opt in opts:
-                            if 'special_rules' in opt and isinstance(opt.get('special_rules'), list):
-                                total_coriace += get_coriace_from_rules(opt['special_rules'])
-            if 'special_rules' in weapon and isinstance(weapon.get('special_rules'), list):
-                total_coriace += get_coriace_from_rules(weapon['special_rules'])
-            if combined and unit.get('type') != "hero":
-                base_coriace = get_coriace_from_rules(unit.get('special_rules', []))
-                total_coriace += base_coriace
+        weapon_data = format_weapon_details(weapon)
 
-            total_coriace = total_coriace if total_coriace > 0 else None
+        unit_data = {
+            "name": unit["name"],
+            "type": unit.get("type", "unit"),
+            "cost": final_cost,
+            "base_cost": base_cost,
+            "size": unit_size,
+            "quality": unit["quality"],
+            "defense": unit["defense"],
+            "rules": unit.get("special_rules", []),
+            "weapon": weapon_data,
+            "options": selected_options,
+            "mount": mount
+        }
 
-            unit_data = {
-                "name": unit["name"],
-                "type": unit.get("type", "unit"),
-                "cost": final_cost,
-                "base_cost": base_cost,
-                "size": unit_size,
-                "quality": unit["quality"],
-                "defense": unit["defense"],
-                "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
-                "weapon": weapon_data,
-                "options": selected_options,
-                "mount": mount,
-                "coriace": total_coriace,
-                "combined": combined and unit.get("type") != "hero",
-            }
+        # Ajouter temporairement l'unité pour vérifier les règles
+        test_army = copy.deepcopy(st.session_state.army_list)
+        test_army.append(unit_data)
+        test_cost = st.session_state.army_cost + final_cost
 
-            # Vérification des règles avant d'ajouter
-            test_army = st.session_state.army_list.copy()
-            test_army.append(unit_data)
-            test_total = st.session_state.army_cost + final_cost
+        # Vérifier les règles
+        valid, errors = validate_army_rules(test_army, st.session_state.points, st.session_state.game)
 
-            if not validate_army_rules(test_army, st.session_state.points, st.session_state.game, final_cost):
-                st.error("Cette unité ne peut pas être ajoutée car elle violerait les règles du jeu.")
-            else:
-                st.session_state.army_list.append(unit_data)
-                st.session_state.army_cost += final_cost
-                st.rerun()
+        if not valid:
+            for error in errors:
+                st.error(error)
+            st.stop()
 
-        except Exception as e:
-            st.error(f"Erreur lors de la création de l'unité: {str(e)}")
+        # Si tout est valide, ajouter l'unité
+        st.session_state.army_list.append(unit_data)
+        st.session_state.army_cost += final_cost
+        st.rerun()
 
     # Liste de l'armée
     st.divider()
@@ -750,40 +821,17 @@ elif st.session_state.page == "army":
         st.info("Ajoutez des unités pour commencer")
 
     for i, u in enumerate(st.session_state.army_list):
-        with st.container():
-            qua_def_coriace = f"Qua {u['quality']}+ / Déf {u['defense']}+"
-            if u.get("coriace"):
-                qua_def_coriace += f" / Coriace {u['coriace']}"
+        st.markdown(format_unit_display(u), unsafe_allow_html=True)
 
-            # Affichage du nom avec la taille FINAL de l'unité
-            unit_header = f"### {u['name']} [{u.get('size', 1)}] ({u['cost']} pts) | {qua_def_coriace}"
-            if u.get("type") == "hero":
-                unit_header += " | 🌟 Héros"
-            st.markdown(unit_header)
-
-            if u.get("rules"):
-                rules_text = ", ".join(u["rules"])
-                st.markdown(f"**Règles spéciales:** {rules_text}")
-
-            if 'weapon' in u and u['weapon']:
-                weapon_details = format_weapon_details(u['weapon'])
-                st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
-
-            if u.get("options"):
-                for group_name, opts in u["options"].items():
-                    if isinstance(opts, list) and opts:
-                        st.markdown(f"**{group_name}:**")
-                        for opt in opts:
-                            st.markdown(f"• {opt.get('name', '')}")
-
-            if u.get("mount"):
-                mount_details = format_mount_details(u["mount"])
-                st.markdown(f"**Monture:** {mount_details}")
-
-            if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
-                st.session_state.army_cost -= u["cost"]
-                st.session_state.army_list.pop(i)
-                st.rerun()
+        if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
+            st.session_state.history.append({
+                "army_list": copy.deepcopy(st.session_state.army_list),
+                "army_cost": st.session_state.army_cost
+            })
+            st.session_state.undo_disabled = False
+            st.session_state.army_cost -= u["cost"]
+            st.session_state.army_list.pop(i)
+            st.rerun()
 
     # Sauvegarde/Export
     st.divider()
@@ -801,12 +849,16 @@ elif st.session_state.page == "army":
 
     with col1:
         if st.button("Sauvegarder"):
-            saved_lists = ls_get("opr_saved_lists")
-            current_lists = json.loads(saved_lists) if saved_lists else []
-            if not isinstance(current_lists, list):
-                current_lists = []
-            current_lists.append(army_data)
-            ls_set("opr_saved_lists", current_lists)
+            saved_lists = []
+            try:
+                existing_lists = ls_get("opr_saved_lists")
+                if existing_lists:
+                    saved_lists = json.loads(existing_lists)
+            except:
+                pass
+
+            saved_lists.append(army_data)
+            ls_set("opr_saved_lists", saved_lists)
             st.success("Liste sauvegardée!")
 
     with col2:
@@ -818,237 +870,7 @@ elif st.session_state.page == "army":
         )
 
     with col3:
-        # EXPORT HTML
-        html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Liste OPR - {army_data['name']}</title>
-    <meta charset="UTF-8">
-    <style>
-        body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 20px;
-            color: #333;
-        }}
-        .army-title {{
-            text-align: center;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }}
-        .army-info {{
-            text-align: center;
-            margin-bottom: 30px;
-            color: #666;
-        }}
-        .unit-container {{
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            padding: 20px;
-            page-break-inside: avoid;
-        }}
-        .unit-header {{
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }}
-        .hero-badge {{
-            background-color: gold;
-            color: black;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 10px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }}
-        .unit-stats {{
-            display: flex;
-            margin-bottom: 15px;
-        }}
-        .stat-badge {{
-            background-color: #3498db;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            margin-right: 10px;
-            font-weight: bold;
-            text-align: center;
-            min-width: 80px;
-        }}
-        .stat-value {{
-            font-size: 1.2em;
-        }}
-        .stat-label {{
-            font-size: 0.8em;
-            display: block;
-            margin-bottom: 3px;
-        }}
-        .section-title {{
-            font-weight: bold;
-            margin: 15px 0 10px 0;
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }}
-        .weapon-table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }}
-        .weapon-table th {{
-            background-color: #f8f9fa;
-            text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }}
-        .weapon-table td {{
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }}
-        .rules-list {{
-            margin: 10px 0;
-        }}
-        .special-rules {{
-            font-style: italic;
-            color: #555;
-            margin-bottom: 15px;
-        }}
-        .unit-cost {{
-            float: right;
-            background-color: #3498db;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }}
-        @media print {{
-            .unit-container {{
-                page-break-inside: avoid;
-            }}
-        }}
-    </style>
-</head>
-<body>
-    <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
-    <div class="army-info">
-        <strong>Jeu:</strong> {army_data['game']} |
-        <strong>Faction:</strong> {army_data['faction']} |
-        <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']}
-    </div>
-"""
-
-        for unit in army_data['army_list']:
-            rules = unit.get('rules', [])
-            special_rules = ", ".join(rules) if rules else "Aucune"
-
-            weapon_info = unit.get('weapon', {})
-            if not isinstance(weapon_info, dict):
-                weapon_info = {
-                    "name": "Arme non spécifiée",
-                    "attacks": "?",
-                    "ap": "?",
-                    "special": []
-                }
-
-            # Affichage du nom avec la taille FINAL de l'unité
-            unit_name = f"{unit['name']} [{unit.get('size', 1)}]"
-            unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-
-            weapon_name = str(weapon_info['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            weapon_attacks = str(weapon_info['attacks']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            weapon_ap = str(weapon_info['ap']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            weapon_special = ', '.join(weapon_info['special']) if weapon_info['special'] else '-'
-            weapon_special = str(weapon_special).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-
-            # Badge héros si applicable
-            hero_badge = ""
-            if unit.get('type') == "hero":
-                hero_badge = '<span class="hero-badge">HÉROS</span>'
-
-            html_content += f"""
-        <div class="unit-container">
-            <div class="unit-header">
-                {unit_name}
-                {hero_badge}
-                <span class="unit-cost">{unit['cost']} pts</span>
-            </div>
-
-            <div class="unit-stats">
-                <div class="stat-badge">
-                    <div class="stat-label">Qualité</div>
-                    <div class="stat-value">{unit['quality']}+</div>
-                </div>
-                <div class="stat-badge">
-                    <div class="stat-label">Défense</div>
-                    <div class="stat-value">{unit.get('defense', '?')}+</div>
-                </div>
-"""
-
-            if unit.get('coriace'):
-                html_content += f"""
-                <div class="stat-badge">
-                    <div class="stat-label">Coriace</div>
-                    <div class="stat-value">{unit['coriace']}</div>
-                </div>
-"""
-
-            html_content += """
-            </div>
-"""
-
-            if rules:
-                html_content += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</div>'
-
-            html_content += f"""
-            <div class="section-title">Arme</div>
-            <table class="weapon-table">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>PORT</th>
-                        <th>ATK</th>
-                        <th>PA</th>
-                        <th>SPE</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{weapon_name}</td>
-                        <td>-</td>
-                        <td>{weapon_attacks}</td>
-                        <td>{weapon_ap}</td>
-                        <td>{weapon_special}</td>
-                    </tr>
-                </tbody>
-            </table>
-"""
-
-            if 'options' in unit and unit['options']:
-                for group_name, opts in unit['options'].items():
-                    if isinstance(opts, list) and opts:
-                        group_name_clean = str(group_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                        html_content += f'<div class="section-title">{group_name_clean}:</div>'
-                        for opt in opts:
-                            opt_name = str(opt.get("name", "")).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                            html_content += f'<div>• {opt_name}</div>'
-
-            if 'mount' in unit and unit['mount']:
-                mount_details = format_mount_details(unit["mount"])
-                mount_details_clean = str(mount_details).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                html_content += f'<div class="section-title">Monture</div><p>{mount_details_clean}</p>'
-
-            html_content += "</div>"
-
-        html_content += """
-    </body>
-</html>
-"""
-
+        html_content = generate_html_export(army_data, factions_by_game)
         st.download_button(
             "Exporter en HTML",
             html_content,
