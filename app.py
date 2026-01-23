@@ -92,16 +92,13 @@ def calculate_total_coriace(unit_data, combined=False):
     """Calcule la Coriace totale d'une unité"""
     total = 0
 
-    # Coriace de base de l'unité
     if 'special_rules' in unit_data:
         total += get_coriace_from_rules(unit_data['special_rules'])
 
-    # Coriace de la monture
     if 'mount' in unit_data and unit_data['mount']:
         _, mount_coriace = get_mount_details(unit_data['mount'])
         total += mount_coriace
 
-    # Coriace des options
     if 'options' in unit_data:
         for opts in unit_data['options'].values():
             if isinstance(opts, list):
@@ -111,11 +108,9 @@ def calculate_total_coriace(unit_data, combined=False):
             elif isinstance(opts, dict) and 'special_rules' in opts:
                 total += get_coriace_from_rules(opts['special_rules'])
 
-    # Coriace de l'arme
     if 'weapon' in unit_data and 'special_rules' in unit_data['weapon']:
         total += get_coriace_from_rules(unit_data['weapon']['special_rules'])
 
-    # Coriace supplémentaire pour les unités combinées
     if combined and unit_data.get('type') != "hero":
         total += get_coriace_from_rules(unit_data.get('special_rules', []))
 
@@ -491,6 +486,271 @@ def load_factions():
         games.add("Age of Fantasy")
 
     return factions, sorted(games) if games else ["Age of Fantasy"]
+
+# ======================================================
+# FONCTION POUR GÉNÉRER L'EXPORT HTML (AMÉLIORÉ)
+# ======================================================
+def generate_html_export(army_data, factions_by_game):
+    """Génère un export HTML similaire au fichier fourni"""
+    faction_data = factions_by_game[army_data['game']][army_data['faction']]
+    rules_descriptions = faction_data.get('special_rules_descriptions', {})
+
+    # Collecter toutes les règles spéciales utilisées
+    used_rules = set()
+    for unit in army_data['army_list']:
+        if 'rules' in unit:
+            used_rules.update(unit['rules'])
+        if 'weapon' in unit and 'special_rules' in unit['weapon']:
+            used_rules.update(unit['weapon']['special_rules'])
+        if 'mount' in unit and unit['mount']:
+            mount_data = unit['mount']['mount'] if 'mount' in unit['mount'] else unit['mount']
+            if 'special_rules' in mount_data:
+                used_rules.update(mount_data['special_rules'])
+
+    # Générer la légende des règles
+    rules_legend = ""
+    if used_rules:
+        rules_legend = "<div class='rules-legend'>\n<h3>Légende des règles spéciales</h3>\n<ul>"
+        for rule in sorted(used_rules):
+            description = rules_descriptions.get(rule, "Description non disponible")
+            rules_legend += f"<li><strong>{rule}:</strong> {description}</li>\n"
+        rules_legend += "</ul>\n</div>"
+
+    # Générer les unités
+    units_html = ""
+    for unit in army_data['army_list']:
+        # Formatage des règles spéciales
+        rules_list = ""
+        if 'rules' in unit and unit['rules']:
+            rules_list = "<div class='unit-rules'><strong>Règles spéciales:</strong> " + ", ".join(unit['rules']) + "</div>"
+
+        # Formatage de l'arme
+        weapon_html = ""
+        if 'weapon' in unit and unit['weapon']:
+            weapon = unit['weapon']
+            weapon_html = f"""
+            <div class='unit-weapon'>
+                <strong>Arme:</strong> {weapon.get('name', 'Arme non nommée')}
+                (ATK: {weapon.get('attacks', '?')}, PA: {weapon.get('armor_piercing', '?')})
+            """
+
+            if 'special' in weapon and weapon['special']:
+                weapon_html += ", " + ", ".join(weapon['special'])
+            weapon_html += "</div>"
+
+        # Formatage de la monture
+        mount_html = ""
+        if 'mount' in unit and unit['mount']:
+            mount_details = format_mount_details(unit['mount'])
+            mount_html = f"<div class='unit-mount'><strong>Monture:</strong> {mount_details}</div>"
+
+        # Formatage des options
+        options_html = ""
+        if 'options' in unit and unit['options']:
+            for group_name, opts in unit['options'].items():
+                if isinstance(opts, list) and opts:
+                    options_html += f"<div class='unit-options'><strong>{group_name}:</strong> "
+                    for opt in opts:
+                        options_html += f"{opt.get('name', '')}, "
+                    options_html = options_html.rstrip(", ") + "</div>"
+
+        units_html += f"""
+        <div class='unit-container'>
+            <div class='unit-header'>
+                <h3>{unit['name']} [{unit.get('size', 10)}]</h3>
+                <div class='unit-cost'>{unit['cost']} pts</div>
+            </div>
+            <div class='unit-stats'>
+                <div class='stat'>Qualité: {unit['quality']}+</div>
+                <div class='stat'>Défense: {unit.get('defense', '?')}+</div>
+                {rules_list}
+            </div>
+            {weapon_html}
+            {mount_html}
+            {options_html}
+        </div>
+        """
+
+    # Générer le HTML complet
+    html_content = f"""
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste d'armée OPR - {army_data['name']}</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .army-header {{
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }}
+        .army-title {{
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }}
+        .army-info {{
+            color: #666;
+            font-size: 0.9em;
+        }}
+        .progress-container {{
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            height: 20px;
+        }}
+        .progress-bar {{
+            height: 100%;
+            border-radius: 4px;
+            text-align: right;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.8em;
+            line-height: 20px;
+        }}
+        .unit-container {{
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        .unit-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }}
+        .unit-header h3 {{
+            margin: 0;
+            color: #2c3e50;
+        }}
+        .unit-cost {{
+            background-color: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }}
+        .unit-stats {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }}
+        .stat {{
+            background-color: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }}
+        .unit-rules {{
+            margin: 10px 0;
+            font-style: italic;
+            color: #555;
+        }}
+        .unit-weapon, .unit-mount, .unit-options {{
+            margin: 8px 0;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }}
+        .rules-legend {{
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 30px 0;
+        }}
+        .rules-legend h3 {{
+            color: #2c3e50;
+            margin-top: 0;
+        }}
+        .rules-legend ul {{
+            padding-left: 20px;
+        }}
+        @media print {{
+            .unit-container {{
+                page-break-inside: avoid;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="army-header">
+        <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
+        <div class="army-info">
+            {army_data['game']} • {army_data['faction']} • {army_data['total_cost']}/{army_data['points']} pts
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {min(100, (army_data['total_cost']/army_data['points'])*100)}%;
+                                              background-color: {'#2E7D32' if army_data['total_cost'] == army_data['points'] else '#4CAF50' if (army_data['total_cost']/army_data['points']) < 0.9 else '#FFC107' if (army_data['total_cost']/army_data['points']) < 1 else '#F44336'}">
+            {min(100, int((army_data['total_cost']/army_data['points'])*100))}% ({army_data['total_cost']}/{army_data['points']} pts)
+        </div>
+    </div>
+
+    {rules_legend}
+
+    {units_html}
+</body>
+</html>
+"""
+    return html_content
+
+# ======================================================
+# LOCAL STORAGE
+# ======================================================
+def ls_get(key):
+    """Récupère une valeur du LocalStorage"""
+    try:
+        unique_key = f"{key}_{hashlib.md5(str(datetime.now().timestamp()).encode()).hexdigest()[:8]}"
+        st.markdown(
+            f"""
+            <script>
+            const value = localStorage.getItem("{key}");
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.id = "{unique_key}";
+            input.value = value || "";
+            document.body.appendChild(input);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        return st.text_input("", key=unique_key, label_visibility="collapsed")
+    except Exception:
+        return None
+
+def ls_set(key, value):
+    """Stocke une valeur dans le LocalStorage"""
+    try:
+        if not isinstance(value, str):
+            value = json.dumps(value)
+        escaped_value = value.replace("'", "\\'").replace('"', '\\"')
+        st.markdown(
+            f"""
+            <script>
+            localStorage.setItem("{key}", `{escaped_value}`);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+    except Exception:
+        pass
 
 # ======================================================
 # INITIALISATION
@@ -870,45 +1130,7 @@ elif st.session_state.page == "army":
         )
 
     with col3:
-        html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Liste OPR - {army_data['name']}</title>
-    <meta charset="UTF-8">
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .unit {{ margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
-        .progress {{ width: 100%; background-color: #e0e0e0; border-radius: 4px; margin: 10px 0; }}
-        .progress-bar {{ height: 20px; border-radius: 4px; }}
-    </style>
-</head>
-<body>
-    <h1>Liste d'armée: {army_data['name']}</h1>
-    <p>{army_data['game']} • {army_data['faction']} • {army_data['total_cost']}/{army_data['points']} pts</p>
-
-    <div class="progress">
-        <div class="progress-bar" style="width: {min(100, int((army_data['total_cost']/army_data['points'])*100))}%; background-color: {'#4CAF50' if (army_data['total_cost']/army_data['points']) < 0.9 else '#2E7D32'}"></div>
-    </div>
-"""
-
-        for unit in army_data['army_list']:
-            rules = ", ".join(unit.get('rules', [])) if unit.get('rules') else "Aucune"
-            weapon_name = unit.get('weapon', {}).get('name', 'Arme non spécifiée') if 'weapon' in unit else 'Aucune'
-
-            html_content += f"""
-    <div class="unit">
-        <h3>{unit['name']} [{unit.get('size', 10)}] ({unit['cost']} pts)</h3>
-        <p>Qualité: {unit['quality']}+ | Défense: {unit.get('defense', '?')}+ | {rules}</p>
-        <p>Arme: {weapon_name}</p>
-    </div>
-"""
-
-        html_content += """
-</body>
-</html>
-"""
-
+        html_content = generate_html_export(army_data, factions_by_game)
         st.download_button(
             "Exporter en HTML",
             html_content,
