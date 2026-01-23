@@ -156,7 +156,7 @@ def extract_coriace_value(rule):
     """Extrait la valeur numérique de Coriace d'une règle"""
     if not isinstance(rule, str):
         return 0
-    match = re.search(r"Coriace\s*$?(\d+)$?", rule)
+    match = re.search(r"Coriace\s*\(?(\d+)\)?", rule)
     if match:
         return int(match.group(1))
     return 0
@@ -869,4 +869,347 @@ elif st.session_state.page == "army":
             st.session_state.army_cost += final_cost
             st.rerun()
 
-       
+        except Exception as e:
+            st.error(f"Erreur lors de la création de l'unité: {str(e)}")
+
+    # Liste de l'armée
+    st.divider()
+    st.subheader("Liste de l'armée")
+
+    if not st.session_state.army_list:
+        st.info("Ajoutez des unités pour commencer")
+
+    for i, u in enumerate(st.session_state.army_list):
+        show_unit_with_tabs(u, rules_descriptions)
+
+        if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
+            st.session_state.army_cost -= u["cost"]
+            st.session_state.army_list.pop(i)
+            st.rerun()
+
+    # Sauvegarde/Export
+    st.divider()
+    col1, col2, col3 = st.columns(3)
+
+    army_data = {
+        "name": st.session_state.list_name,
+        "game": st.session_state.game,
+        "faction": st.session_state.faction,
+        "points": st.session_state.points,
+        "total_cost": st.session_state.army_cost,
+        "army_list": st.session_state.army_list,
+        "date": datetime.now().isoformat()
+    }
+
+    with col1:
+        if st.button("Sauvegarder"):
+            saved_lists = []
+            try:
+                existing_lists = ls_get("opr_saved_lists")
+                if existing_lists:
+                    saved_lists = json.loads(existing_lists)
+            except:
+                pass
+
+            saved_lists.append(army_data)
+            try:
+                ls_set("opr_saved_lists", saved_lists)
+            except:
+                st.warning("La sauvegarde locale n'est pas disponible, mais vous pouvez exporter en JSON.")
+            st.success("Liste sauvegardée!")
+
+    with col2:
+        st.download_button(
+            "Exporter en JSON",
+            json.dumps(army_data, indent=2, ensure_ascii=False),
+            file_name=f"{st.session_state.list_name}.json",
+            mime="application/json"
+        )
+
+    with col3:
+        # EXPORT HTML
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste OPR - {army_data['name']}</title>
+    <meta charset="UTF-8">
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            color: #333;
+        }}
+        .army-title {{
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }}
+        .army-info {{
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+        }}
+        .unit-container {{
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            page-break-inside: avoid;
+        }}
+        .unit-header {{
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }}
+        .hero-badge {{
+            background-color: gold;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }}
+        .unit-stats {{
+            display: flex;
+            margin-bottom: 15px;
+        }}
+        .stat-badge {{
+            background-color: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }}
+        .stat-value {{
+            font-size: 1.2em;
+        }}
+        .stat-label {{
+            font-size: 0.8em;
+            display: block;
+            margin-bottom: 3px;
+        }}
+        .section-title {{
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }}
+        .weapon-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }}
+        .weapon-table th {{
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }}
+        .weapon-table td {{
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }}
+        .rules-list {{
+            margin: 10px 0;
+        }}
+        .special-rules {{
+            font-style: italic;
+            color: #555;
+            margin-bottom: 15px;
+        }}
+        .unit-cost {{
+            float: right;
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }}
+        .progress-container {{
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }}
+        .progress-bar {{
+            height: 20px;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }}
+        @media print {{
+            .unit-container {{
+                page-break-inside: avoid;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
+    <div class="army-info">
+        <strong>Jeu:</strong> {army_data['game']} |
+        <strong>Faction:</strong> {army_data['faction']} |
+        <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']} pts
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {min(100, int((army_data['total_cost']/army_data['points'])*100))}%; background-color: {'#4CAF50' if (army_data['total_cost']/army_data['points']) < 0.7 else '#FFC107' if (army_data['total_cost']/army_data['points']) < 0.9 else '#F44336'}">
+            {min(100, int((army_data['total_cost']/army_data['points'])*100))}% ({army_data['total_cost']}/{army_data['points']} pts)
+        </div>
+    </div>
+"""
+
+    # Charger les descriptions des règles spéciales depuis le fichier de faction
+    factions, _ = load_factions()
+    faction_data = factions.get(army_data['game'], {}).get(army_data['faction'], {})
+    rules_descriptions = faction_data.get('special_rules_descriptions', {})
+
+    html_content += """
+        <div class="section-title">Légende des règles spéciales</div>
+        <div class="rules-legend">
+    """
+
+    # Ajouter une légende des règles spéciales utilisées dans cette armée
+    used_rules = set()
+    for unit in army_data['army_list']:
+        if 'rules' in unit:
+            used_rules.update(unit['rules'])
+        if 'weapon' in unit and 'special_rules' in unit['weapon']:
+            used_rules.update(unit['weapon']['special_rules'])
+
+    # Ajouter les règles spéciales utilisées dans cette armée
+    if used_rules:
+        html_content += "<ul>"
+        for rule in sorted(used_rules):
+            description = rules_descriptions.get(rule, "Description non disponible")
+            html_content += f"<li><strong>{rule}:</strong> {description}</li>"
+        html_content += "</ul>"
+    else:
+        html_content += "<p>Aucune règle spéciale dans cette armée.</p>"
+
+    html_content += """
+        </div>
+    """
+
+    for unit in army_data['army_list']:
+        rules = unit.get('rules', [])
+        special_rules = ", ".join(rules) if rules else "Aucune"
+
+        weapon_info = unit.get('weapon', {})
+        if not isinstance(weapon_info, dict):
+            weapon_info = {
+                "name": "Arme non spécifiée",
+                "attacks": "?",
+                "ap": "?",
+                "special": []
+            }
+
+        # Affichage du nom avec la taille FINAL de l'unité
+        unit_name = f"{unit['name']} [{unit.get('size', 10)}]"
+        unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+        weapon_name = str(weapon_info['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        weapon_attacks = str(weapon_info['attacks']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        weapon_ap = str(weapon_info['ap']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        weapon_special = ', '.join(weapon_info['special']) if weapon_info['special'] else '-'
+        weapon_special = str(weapon_special).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+        # Badge héros si applicable
+        hero_badge = ""
+        if unit.get('type') == "hero":
+            hero_badge = '<span class="hero-badge">HÉROS</span>'
+
+        html_content += f"""
+        <div class="unit-container">
+            <div class="unit-header">
+                {unit_name}
+                {hero_badge}
+                <span class="unit-cost">{unit['cost']} pts</span>
+            </div>
+
+            <div class="unit-stats">
+                <div class="stat-badge">
+                    <div class="stat-label">Qualité</div>
+                    <div class="stat-value">{unit['quality']}+</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="stat-label">Défense</div>
+                    <div class="stat-value">{unit.get('defense', '?')}+</div>
+                </div>
+"""
+
+        if unit.get('coriace'):
+            html_content += f"""
+                <div class="stat-badge">
+                    <div class="stat-label">Coriace</div>
+                    <div class="stat-value">{unit['coriace']}</div>
+                </div>
+"""
+
+        html_content += """
+            </div>
+"""
+
+        if rules:
+            html_content += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</div>'
+
+        html_content += f"""
+            <div class="section-title">Arme</div>
+            <table class="weapon-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>ATK</th>
+                        <th>PA</th>
+                        <th>SPE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{weapon_name}</td>
+                        <td>{weapon_attacks}</td>
+                        <td>{weapon_ap}</td>
+                        <td>{weapon_special}</td>
+                    </tr>
+                </tbody>
+            </table>
+"""
+
+        if 'options' in unit and unit['options']:
+            for group_name, opts in unit['options'].items():
+                if isinstance(opts, list) and opts:
+                    group_name_clean = str(group_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    html_content += f'<div class="section-title">{group_name_clean}:</div>'
+                    for opt in opts:
+                        opt_name = str(opt.get("name", "")).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        html_content += f'<div>• {opt_name}</div>'
+
+        if 'mount' in unit and unit['mount']:
+            mount_details = format_mount_details(unit["mount"])
+            mount_details_clean = str(mount_details).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            html_content += f'<div class="section-title">Monture</div><p>{mount_details_clean}</p>'
+
+        html_content += "</div>"
+
+    html_content += """
+    </body>
+</html>
+"""
+
+        st.download_button(
+            "Exporter en HTML",
+            html_content,
+            file_name=f"{st.session_state.list_name}.html",
+            mime="text/html"
+        )
