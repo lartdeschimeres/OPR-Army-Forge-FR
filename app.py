@@ -32,10 +32,10 @@ GAME_CONFIG = {
         "default_points": 1000,
         "point_step": 250,
         "description": "Jeu de bataille dans un univers fantasy médiéval",
-        "hero_limit": 375,  # 1 Héros par tranche de 375 pts
-        "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
-        "unit_max_cost_ratio": 0.35,  # 35% du total des points
-        "unit_per_points": 150  # 1 unité maximum par tranche de 150 pts
+        "hero_limit": 375,
+        "unit_copy_rule": 750,
+        "unit_max_cost_ratio": 0.35,
+        "unit_per_points": 150
     },
     "Grimdark Future": {
         "display_name": "Grimdark Future",
@@ -44,10 +44,10 @@ GAME_CONFIG = {
         "default_points": 800,
         "point_step": 200,
         "description": "Jeu de bataille futuriste",
-        "hero_limit": 375,  # 1 Héros par tranche de 375 pts
-        "unit_copy_rule": 750,  # 1+X copies où X=1 pour 750 pts
-        "unit_max_cost_ratio": 0.35,  # 35% du total des points
-        "unit_per_points": 150  # 1 unité maximum par tranche de 150 pts
+        "hero_limit": 375,
+        "unit_copy_rule": 750,
+        "unit_max_cost_ratio": 0.35,
+        "unit_per_points": 150
     }
 }
 
@@ -71,7 +71,6 @@ def check_unit_copy_rule(army_list, army_points, game_config):
         x_value = math.floor(army_points / game_config["unit_copy_rule"])
         max_copies = 1 + x_value
 
-        # Compter les copies de chaque unité
         unit_counts = {}
         for unit in army_list:
             unit_name = unit["name"]
@@ -82,7 +81,6 @@ def check_unit_copy_rule(army_list, army_points, game_config):
             else:
                 unit_counts[count_key] = 1
 
-        # Vérifier les limites
         for unit_name, count in unit_counts.items():
             if count > max_copies:
                 st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
@@ -96,13 +94,11 @@ def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None)
 
     max_cost = army_points * game_config["unit_max_cost_ratio"]
 
-    # Vérifier les unités existantes
     for unit in army_list:
         if unit["cost"] > max_cost:
             st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
             return False
 
-    # Vérifier la nouvelle unité si fournie
     if new_unit_cost and new_unit_cost > max_cost:
         st.error(f"Cette unité ({new_unit_cost} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
         return False
@@ -132,7 +128,7 @@ def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
     return True
 
 # ======================================================
-# FONCTIONS UTILITAIRES
+# FONCTIONS UTILITAIRES (MODIFIÉES)
 # ======================================================
 def format_special_rule(rule):
     """Formate les règles spéciales avec parenthèses"""
@@ -258,28 +254,25 @@ def format_mount_details(mount):
     return details
 
 def format_unit_option(u):
-    """Formate l'affichage des unités dans la liste déroulante"""
+    """Formate l'affichage des unités dans la liste déroulante - MODIFIÉ POUR LES EFFECTIFS"""
     name_part = f"{u['name']}"
 
-    # Pour les héros, toujours afficher [1]
+    # Gestion des effectifs - MODIFICATION PRINCIPALE
     if u.get('type') == "hero":
-        name_part += " [1]"
+        name_part += " [1]"  # Les héros sont toujours [1]
     else:
-        # Pour les unités normales, afficher la taille de base
         base_size = u.get('size', 10)
-        name_part += f" [{base_size}]"
+        name_part += f" [{base_size}]"  # Unités normales affichent leur taille de base
 
-    qua_def = f"Qua {u['quality']}+"
+    qua_def = f"Qua {u['quality']}+ / Déf {u.get('defense', '?')}"
 
     coriace = get_coriace_from_rules(u.get('special_rules', []))
     if 'mount' in u and u['mount']:
         _, mount_coriace = get_mount_details(u['mount'])
         coriace += mount_coriace
 
-    defense = u.get('defense', '?')
-    qua_def_coriace = f"Qua {u['quality']}+ / Déf {defense}"
     if coriace > 0:
-        qua_def_coriace += f" / Coriace {coriace}"
+        qua_def += f" / Coriace {coriace}"
 
     weapons_part = ""
     if 'weapons' in u and u['weapons']:
@@ -293,14 +286,11 @@ def format_unit_option(u):
     if 'special_rules' in u and u['special_rules']:
         rules_part = ", ".join(u['special_rules'])
 
-    result = f"{name_part} - {qua_def_coriace}"
-
+    result = f"{name_part} - {qua_def}"
     if weapons_part:
         result += f" - {weapons_part}"
-
     if rules_part:
         result += f" - {rules_part}"
-
     result += f" {u['base_cost']}pts"
     return result
 
@@ -506,15 +496,6 @@ if st.session_state.page == "setup":
                 - 1 unité maximum par tranche de {config['unit_per_points']} pts d'armée
                 """)
 
-    # Section pour charger depuis GitHub
-    with st.expander("Charger une liste depuis GitHub"):
-        github_repo = st.text_input("URL du dépôt GitHub", "https://github.com/SimonJoinvilleFouquet/opr-army-forge")
-        github_file = st.text_input("Chemin du fichier", "listes/mes_listes.json")
-
-        if st.button("Charger depuis GitHub"):
-            st.warning("Fonctionnalité GitHub simulée. En environnement réel, cette fonction chargerait directement depuis GitHub.")
-            st.info("Pour l'instant, utilisez l'import JSON classique ci-dessous.")
-
     # Liste des listes sauvegardées
     st.subheader("Mes listes sauvegardées")
 
@@ -604,7 +585,7 @@ if st.session_state.page == "setup":
         st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (MODIFIÉE)
 # ======================================================
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
@@ -613,7 +594,6 @@ elif st.session_state.page == "army":
     # Vérification des règles spécifiques au jeu
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
 
-    # Utilisation de st.session_state.points (points totaux choisis en page 1)
     if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
         st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
@@ -652,7 +632,7 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
-    # Gestion des unités combinées - CORRECTION DÉFINITIVE POUR LES HÉROS
+    # Gestion des unités combinées - MODIFICATION POUR LES HÉROS
     if unit.get("type") == "hero":
         combined = False  # Les héros ne peuvent JAMAIS être combinés
         st.markdown("**Les héros ne peuvent pas être combinés**")
@@ -719,21 +699,21 @@ elif st.session_state.page == "army":
                             selected_options[group["group"]].append(o)
                             upgrades_cost += o["cost"]
 
-    # Calcul du coût final
+    # Calcul du coût final et de la taille - MODIFICATION POUR LES EFFECTIFS
     if combined and unit.get("type") != "hero":
-        # Pour les unités combinées, on double le coût de base + armes seulement
         final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
-        unit_size = base_size * 2
+        unit_size = base_size * 2  # x2 pour les unités combinées
     else:
         final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
-        unit_size = base_size
+        unit_size = base_size  # Taille normale pour les héros et unités non combinées
 
-    # Vérification finale du coût maximum
-    if not check_unit_max_cost(st.session_state.army_list, st.session_state.points, game_config, final_cost):
-        st.stop()
+    # Affichage de la taille finale de l'unité - MODIFICATION POUR LES EFFECTIFS
+    if unit.get("type") == "hero":
+        st.markdown(f"**Taille finale: 1** (les héros sont toujours des unités individuelles)")
+    else:
+        st.markdown(f"**Taille finale: {unit_size}** {'(x2 combinée)' if combined else ''}")
 
     st.markdown(f"**Coût total: {final_cost} pts**")
-    st.markdown(f"**Taille de l'unité: {unit_size} figurines**")
 
     if st.button("Ajouter à l'armée"):
         try:
@@ -765,7 +745,7 @@ elif st.session_state.page == "army":
                 "type": unit.get("type", "unit"),
                 "cost": final_cost,
                 "base_cost": base_cost,
-                "size": unit_size,  # Taille finale
+                "size": unit_size,  # Taille finale (1 pour héros, x2 pour unités combinées)
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
@@ -791,7 +771,7 @@ elif st.session_state.page == "army":
         except Exception as e:
             st.error(f"Erreur lors de la création de l'unité: {str(e)}")
 
-    # Liste de l'armée
+    # Liste de l'armée - MODIFICATION POUR L'AFFICHAGE DES EFFECTIFS
     st.divider()
     st.subheader("Liste de l'armée")
 
@@ -804,8 +784,8 @@ elif st.session_state.page == "army":
             if u.get("coriace"):
                 qua_def_coriace += f" / Coriace {u['coriace']}"
 
-            # Affichage du nom avec la taille FINAL de l'unité
-            unit_header = f"### {u['name']} [{u.get('size', 10)}] ({u['cost']} pts) | {qua_def_coriace}"
+            # Affichage du nom avec la taille FINAL de l'unité - MODIFICATION POUR LES EFFECTIFS
+            unit_header = f"### {u['name']} [{u.get('size', 1)}] ({u['cost']} pts) | {qua_def_coriace}"
             if u.get("type") == "hero":
                 unit_header += " | 🌟 Héros"
             st.markdown(unit_header)
@@ -1004,8 +984,8 @@ elif st.session_state.page == "army":
                     "special": []
                 }
 
-            # Affichage du nom avec la taille FINAL de l'unité
-            unit_name = f"{unit['name']} [{unit.get('size', 10)}]"
+            # Affichage du nom avec la taille FINAL de l'unité - MODIFICATION POUR LES EFFECTIFS
+            unit_name = f"{unit['name']} [{unit.get('size', 1)}]"
             unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
             weapon_name = str(weapon_info['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
