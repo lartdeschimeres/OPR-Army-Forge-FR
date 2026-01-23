@@ -41,9 +41,9 @@ GAME_CONFIG = {
     "Grimdark Future": {
         "display_name": "Grimdark Future",
         "max_points": 10000,
-        "min_points": 200,
-        "default_points": 800,
-        "point_step": 200,
+        "min_points": 250,
+        "default_points": 1000,
+        "point_step": 250,
         "description": "Jeu de bataille futuriste",
         "hero_limit": 375,
         "unit_copy_rule": 750,
@@ -382,37 +382,6 @@ def load_factions():
     """Charge les factions depuis les fichiers JSON"""
     factions = {}
     games = set()
-
-    # Factions par défaut minimales
-    default_factions = {
-        "Age of Fantasy": {
-            "Disciples de la Guerre": {
-                "game": "Age of Fantasy",
-                "faction": "Disciples de la Guerre",
-                "special_rules_descriptions": {
-                    "Éclaireur": "Déplacement facilité en terrain difficile.",
-                    "Furieux": "Relance les 1 en attaque.",
-                    "Héros": "Personnage inspirant."
-                },
-                "units": [
-                    {
-                        "name": "Troupe d'infanterie",
-                        "type": "unit",
-                        "size": 10,
-                        "base_cost": 50,
-                        "quality": 3,
-                        "defense": 5,
-                        "special_rules": ["Éclaireur", "Furieux"],
-                        "weapons": [{
-                            "name": "Armes à une main",
-                            "attacks": 1,
-                            "armor_piercing": 0
-                        }]
-                    }
-                ]
-            }
-        }
-    }
 
     # Charger les factions depuis les fichiers
     files_loaded = 0
