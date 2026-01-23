@@ -584,24 +584,6 @@ if "page" not in st.session_state:
 if st.session_state.page == "setup":
     st.title("OPR Army Forge FR")
 
-    # Affichage des informations sur les jeux disponibles
-    st.subheader("Jeux disponibles")
-    for game_key, config in GAME_CONFIG.items():
-        with st.expander(f"📖 {config['display_name']}"):
-            st.markdown(f"""
-            **Description**: {config['description']}
-            - **Points**: {config['min_points']} à {config['max_points']} (défaut: {config['default_points']})
-            """)
-
-            if game_key == "Age of Fantasy":
-                st.markdown(f"""
-                **Règles spécifiques à Age of Fantasy:**
-                - 1 Héros par tranche de {config['hero_limit']} pts d'armée
-                - 1+X copies de la même unité (X=1 pour {config['unit_copy_rule']} pts d'armée)
-                - Aucune unité ne peut valoir plus de {int(config['unit_max_cost_ratio']*100)}% du total des points
-                - 1 unité maximum par tranche de {config['unit_per_points']} pts d'armée
-                """)
-
     # Liste des listes sauvegardées
     st.subheader("Mes listes sauvegardées")
 
