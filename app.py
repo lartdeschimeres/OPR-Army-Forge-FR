@@ -94,13 +94,11 @@ def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None)
 
     max_cost = army_points * game_config["unit_max_cost_ratio"]
 
-    # Vérification des unités existantes
     for unit in army_list:
         if unit["cost"] > max_cost:
             st.error(f"L'unité {unit['name']} ({unit['cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
             return False
 
-    # Vérification de la nouvelle unité si fournie
     if new_unit_cost and new_unit_cost > max_cost:
         st.error(f"Cette unité ({new_unit_cost} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
         return False
@@ -274,6 +272,59 @@ def find_option_by_name(options, name):
     except Exception:
         return None
 
+def display_faction_rules(faction_data):
+    """Affiche les règles spéciales de la faction"""
+    if not faction_data or 'special_rules_descriptions' not in faction_data:
+        return
+
+    st.subheader("📜 Règles Spéciales de la Faction")
+
+    rules_descriptions = faction_data['special_rules_descriptions']
+
+    if not rules_descriptions:
+        st.info("Cette faction n'a pas de règles spéciales spécifiques.")
+        return
+
+    # Créer un conteneur pour les règles
+    with st.container():
+        st.markdown("""
+        <style>
+        .faction-rules {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .rule-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .rule-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .rule-description {
+            margin-top: 5px;
+            color: #555;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown('<div class="faction-rules">', unsafe_allow_html=True)
+
+        for rule_name, description in rules_descriptions.items():
+            st.markdown(f"""
+            <div class="rule-item">
+                <div class="rule-name">{rule_name}</div>
+                <div class="rule-description">{description}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
 # ======================================================
 # LOCAL STORAGE
 # ======================================================
@@ -317,11 +368,11 @@ def ls_set(key, value):
         st.error(f"Erreur LocalStorage: {e}")
 
 # ======================================================
-# CHARGEMENT DES FACTIONS
+# CHARGEMENT DES FACTIONS (MODIFIÉ POUR INCLURE LES RÈGLES SPÉCIALES)
 # ======================================================
 @st.cache_data
 def load_factions():
-    """Charge les factions depuis les fichiers JSON"""
+    """Charge les factions depuis les fichiers JSON avec leurs règles spéciales"""
     factions = {}
     games = set()
 
@@ -458,7 +509,6 @@ if "page" not in st.session_state:
     st.session_state.army_list = []
     st.session_state.army_cost = 0
     st.session_state.current_player = "Simon Joinville Fouquet"
-    st.session_state.history = []  # Ajout pour le système d'annulation
 
 # ======================================================
 # PAGE 1 – CONFIGURATION
@@ -508,7 +558,6 @@ if st.session_state.page == "setup":
                             st.session_state.army_cost = saved_list["total_cost"]
                             st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
                             st.session_state.page = "army"
-                            st.session_state.history = []  # Réinitialiser l'historique
                             st.rerun()
         except Exception as e:
             st.error(f"Erreur chargement listes: {e}")
@@ -558,7 +607,6 @@ if st.session_state.page == "setup":
             st.session_state.army_cost = data["total_cost"]
             st.session_state.units = factions_by_game[data["game"]][data["faction"]]["units"]
             st.session_state.page = "army"
-            st.session_state.history = []  # Réinitialiser l'historique
             st.rerun()
         except Exception as e:
             st.error(f"Erreur d'import: {e}")
@@ -571,12 +619,11 @@ if st.session_state.page == "setup":
         st.session_state.units = factions_by_game[game][st.session_state.faction]["units"]
         st.session_state.army_list = []
         st.session_state.army_cost = 0
-        st.session_state.history = []  # Initialiser l'historique
         st.session_state.page = "army"
         st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (CORRIGÉE)
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (MODIFIÉE POUR AFFICHER LES RÈGLES DE FACTION)
 # ======================================================
 elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
@@ -585,33 +632,16 @@ elif st.session_state.page == "army":
     # Vérification des règles spécifiques au jeu
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
 
-    # Boutons de contrôle en haut de page
-    col_undo, col_reset = st.columns([1, 1])
-    with col_undo:
-        undo_disabled = len(st.session_state.history) == 0
-        if st.button("↩ Annuler la dernière action", disabled=undo_disabled):
-            if st.session_state.history:
-                previous_state = st.session_state.history.pop()
-                st.session_state.army_list = previous_state["army_list"]
-                st.session_state.army_cost = previous_state["army_cost"]
-                st.rerun()
+    # AFFICHAGE DES RÈGLES SPÉCIALES DE LA FACTION (NOUVEAUTÉ)
+    faction_data = factions_by_game[st.session_state.game][st.session_state.faction]
+    display_faction_rules(faction_data)
 
-    with col_reset:
-        if st.button("🗑 Réinitialiser la liste"):
-            st.session_state.history.append({
-                "army_list": copy.deepcopy(st.session_state.army_list),
-                "army_cost": st.session_state.army_cost
-            })
-            st.session_state.army_list = []
-            st.session_state.army_cost = 0
-            st.rerun()
+    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
+        st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
     if st.button("⬅ Retour"):
         st.session_state.page = "setup"
         st.rerun()
-
-    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
-        st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
 
     # Ajout d'une unité
     st.divider()
@@ -719,10 +749,6 @@ elif st.session_state.page == "army":
         final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
         unit_size = base_size
 
-    # Vérification finale du coût maximum AVEC le coût total calculé
-    if not check_unit_max_cost(st.session_state.army_list, st.session_state.points, game_config, final_cost):
-        st.stop()
-
     # Affichage de la taille finale de l'unité
     if unit.get("type") == "hero":
         st.markdown(f"**Taille finale: 1** (les héros sont toujours des unités individuelles)")
@@ -733,12 +759,6 @@ elif st.session_state.page == "army":
 
     if st.button("Ajouter à l'armée"):
         try:
-            # Sauvegarder l'état actuel avant l'ajout
-            st.session_state.history.append({
-                "army_list": copy.deepcopy(st.session_state.army_list),
-                "army_cost": st.session_state.army_cost
-            })
-
             weapon_data = format_weapon_details(weapon)
 
             # Calcul de la coriace
@@ -779,7 +799,7 @@ elif st.session_state.page == "army":
             }
 
             # Vérification des règles avant d'ajouter
-            test_army = copy.deepcopy(st.session_state.army_list)
+            test_army = st.session_state.army_list.copy()
             test_army.append(unit_data)
             test_total = st.session_state.army_cost + final_cost
 
@@ -832,11 +852,6 @@ elif st.session_state.page == "army":
                 st.markdown(f"**Monture:** {mount_details}")
 
             if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
-                # Sauvegarder l'état avant suppression
-                st.session_state.history.append({
-                    "army_list": copy.deepcopy(st.session_state.army_list),
-                    "army_cost": st.session_state.army_cost
-                })
                 st.session_state.army_cost -= u["cost"]
                 st.session_state.army_list.pop(i)
                 st.rerun()
@@ -982,6 +997,27 @@ elif st.session_state.page == "army":
             border-radius: 4px;
             font-weight: bold;
         }}
+        .faction-rules {{
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }}
+        .rule-item {{
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }}
+        .rule-name {{
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }}
+        .rule-description {{
+            margin-top: 5px;
+            color: #555;
+        }}
         @media print {{
             .unit-container {{
                 page-break-inside: avoid;
@@ -995,6 +1031,27 @@ elif st.session_state.page == "army":
         <strong>Jeu:</strong> {army_data['game']} |
         <strong>Faction:</strong> {army_data['faction']} |
         <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']}
+    </div>
+
+    <!-- AFFICHAGE DES RÈGLES SPÉCIALES DE LA FACTION DANS L'EXPORT HTML -->
+    <div class="faction-rules">
+        <h2>Règles Spéciales de la Faction</h2>
+"""
+
+        # Ajout des règles spéciales de la faction dans l'export HTML
+        faction_data = factions_by_game[army_data['game']][army_data['faction']]
+        if 'special_rules_descriptions' in faction_data:
+            for rule_name, description in faction_data['special_rules_descriptions'].items():
+                html_content += f"""
+        <div class="rule-item">
+            <div class="rule-name">{rule_name}</div>
+            <div class="rule-description">{description}</div>
+        </div>
+"""
+        else:
+            html_content += "<p>Aucune règle spéciale pour cette faction.</p>"
+
+        html_content += """
     </div>
 """
 
