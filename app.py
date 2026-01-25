@@ -766,7 +766,7 @@ elif st.session_state.page == "unit_options":
                         checked = st.checkbox(
                             f"{option['name']} (+{option['cost']} pts)",
                             value=any(opt['name'] == option['name'] for opt in options['selected_options'][group['group']]),
-                            key=f"upgrade_{unit['name']}_{group['group']}_{option['name']}"
+                            key=f"upgrade_{unit_index}_{group['group']}_{option['name']}_{hash(unit['name'])}"
                         )
                         if checked:
                             checked_options.append(option)
