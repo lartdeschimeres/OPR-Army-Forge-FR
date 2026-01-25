@@ -599,6 +599,10 @@ elif st.session_state.page == "unit_options":
     </div>
     """, unsafe_allow_html=True)
 
+    # Option "Unité combinée" (désactivée pour les héros)
+    if unit.get('type', '').lower() != 'hero':
+        options['combined'] = st.checkbox("Unité combinée", value=options.get('combined', False), key="combined_unit")
+
     # Sélection des options
     total_cost = unit['base_cost']
     current_size = unit.get('size', 1)
@@ -680,11 +684,35 @@ elif st.session_state.page == "unit_options":
                 else:
                     options['mount'] = None
 
+    # Gestion des améliorations d'unité (checkbox multiples)
+    if 'upgrade_groups' in unit:
+        for group in unit['upgrade_groups']:
+            if group['type'] != 'mount' and group['type'] != 'weapon' and group['type'] != 'multiple':
+                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
+
+                for option in group['options']:
+                    if st.checkbox(f"{option['name']} (+{option['cost']} pts)", key=f"upgrade_{group['group']}_{option['name']}"):
+                        if group['group'] not in options['selected_options']:
+                            options['selected_options'][group['group']] = []
+                        if not any(opt['name'] == option['name'] for opt in options['selected_options'].get(group['group'], [])):
+                            options['selected_options'][group['group']].append(option)
+                            total_cost += option['cost']
+
     # Calcul du coût final
+    if options.get('combined', False) and unit.get('type', '').lower() != 'hero':
+        total_cost = (unit['base_cost'] + (next(opt for opt in group['options'] if format_weapon(opt['weapon']) == format_weapon(options['weapon']))['cost'] if 'upgrade_groups' in unit and any(g['type'] == 'weapon' for g in unit['upgrade_groups']) else 0)) * 2
+        current_size = unit.get('size', 1) * 2
+        total_cost += sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
+    else:
+        total_cost = unit['base_cost'] + \
+                     (options['mount']['cost'] if options['mount'] else 0) + \
+                     sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
+        current_size = unit.get('size', 1)
+
     st.markdown(f"""
     <div class='option-card'>
         <h4 style='margin-top: 0;'>Récapitulatif</h4>
-        <p><strong>Taille finale:</strong> {current_size}</p>
+        <p><strong>Taille finale:</strong> {current_size} {'(x2 combinée)' if options.get('combined', False) and unit.get('type', '').lower() != 'hero' else ''}</p>
         <p><strong>Coût total:</strong> {total_cost} pts</p>
     </div>
     """, unsafe_allow_html=True)
@@ -702,6 +730,7 @@ elif st.session_state.page == "unit_options":
             "weapon": options['weapon'],
             "mount": options['mount'],
             "options": options['selected_options'],
+            "combined": options.get('combined', False) and unit.get('type', '').lower() != 'hero'
         }
 
         st.session_state.army_list.append(unit_data)
