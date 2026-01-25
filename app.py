@@ -725,7 +725,7 @@ elif st.session_state.page == "unit_options":
     # Gestion des améliorations d'unité (checkbox multiples, uniquement pour les unités)
     if 'upgrade_groups' in unit and unit.get('type', '').lower() != 'hero':
         for group in unit['upgrade_groups']:
-            if group['type'] != 'mount' and group['type'] != 'weapon' and group['type'] != 'multiple':
+            if group['type'] not in ['mount', 'weapon']:
                 st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
 
                 for option in group['options']:
