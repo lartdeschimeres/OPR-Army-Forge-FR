@@ -735,6 +735,29 @@ elif st.session_state.page == "unit_options":
                         if not any(opt['name'] == option['name'] for opt in options['selected_options'].get(group['group'], [])):
                             options['selected_options'][group['group']].append(option)
                             total_cost += option['cost']
+    # Gestion des armes (choix exclusif)
+    if 'upgrade_groups' in unit:
+        for group in unit['upgrade_groups']:
+            if group['type'] == 'weapon':
+                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
+
+                weapon_options = ["Arme de base"]
+                weapon_map = {"Arme de base": None}
+
+                for opt in group['options']:
+                    label = f"{opt['name']} (+{opt['cost']} pts)"
+                    weapon_options.append(label)
+                    weapon_map[label] = opt
+
+                selected_weapon = st.radio(
+                    "Choix de l’arme",
+                    weapon_options,
+                    key=f"weapon_{unit['name']}"
+                )
+
+                if weapon_map[selected_weapon]:
+                    options['selected_weapon'] = weapon_map[selected_weapon]
+                    total_cost += weapon_map[selected_weapon]['cost']
 
     # Calcul du coût final
     if options.get('combined', False) and unit.get('type', '').lower() != 'hero':
