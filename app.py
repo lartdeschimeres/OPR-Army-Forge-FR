@@ -639,8 +639,9 @@ elif st.session_state.page == "unit_options":
 
                 if selected_role != "Aucune amélioration":
                     role_name = selected_role.split(" (+")[0]
-                    options['selected_options'][group['group']] = [next(opt for opt in group['options'] if opt['name'] == role_name)]
-                    total_cost += options['selected_options'][group['group']][0]['cost']
+                    selected_role_option = next(opt for opt in group['options'] if opt['name'] == role_name)
+                    options['selected_options'][group['group']] = [selected_role_option]
+                    total_cost += selected_role_option['cost']
                 else:
                     options['selected_options'][group['group']] = []
 
@@ -660,8 +661,9 @@ elif st.session_state.page == "unit_options":
 
                 if selected_weapon_replacement != "Aucun remplacement":
                     weapon_name = selected_weapon_replacement.split(" (+")[0]
-                    options['weapon'] = next(opt for opt in group['options'] if format_weapon(opt['weapon']) == weapon_name)['weapon']
-                    total_cost += next(opt for opt in group['options'] if format_weapon(opt['weapon']) == weapon_name)['cost']
+                    selected_weapon_option = next(opt for opt in group['options'] if format_weapon(opt['weapon']) == weapon_name)
+                    options['weapon'] = selected_weapon_option['weapon']
+                    total_cost += selected_weapon_option['cost']
 
     # Gestion des montures
     if 'upgrade_groups' in unit:
@@ -679,8 +681,9 @@ elif st.session_state.page == "unit_options":
 
                 if selected_mount != "Aucune monture":
                     mount_name = selected_mount.split(" (+")[0]
-                    options['mount'] = next(opt for opt in group['options'] if opt['name'] == mount_name)
-                    total_cost += options['mount']['cost']
+                    selected_mount_option = next(opt for opt in group['options'] if opt['name'] == mount_name)
+                    options['mount'] = selected_mount_option
+                    total_cost += selected_mount_option['cost']
                 else:
                     options['mount'] = None
 
@@ -700,9 +703,17 @@ elif st.session_state.page == "unit_options":
 
     # Calcul du coût final
     if options.get('combined', False) and unit.get('type', '').lower() != 'hero':
-        total_cost = (unit['base_cost'] + (next(opt for opt in group['options'] if format_weapon(opt['weapon']) == format_weapon(options['weapon']))['cost'] if 'upgrade_groups' in unit and any(g['type'] == 'weapon' for g in unit['upgrade_groups']) else 0)) * 2
-        current_size = unit.get('size', 1) * 2
+        base_weapon_cost = 0
+        if 'upgrade_groups' in unit:
+            for group in unit['upgrade_groups']:
+                if group['type'] == 'weapon' and group['group'] == 'Remplacement d\'arme' and options['weapon']:
+                    selected_weapon_option = next((opt for opt in group['options'] if format_weapon(opt['weapon']) == format_weapon(options['weapon'])), None)
+                    if selected_weapon_option:
+                        base_weapon_cost = selected_weapon_option['cost']
+        total_cost = (unit['base_cost'] + base_weapon_cost) * 2
         total_cost += sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
+        total_cost += options['mount']['cost'] if options['mount'] else 0
+        current_size = unit.get('size', 1) * 2
     else:
         total_cost = unit['base_cost'] + \
                      (options['mount']['cost'] if options['mount'] else 0) + \
