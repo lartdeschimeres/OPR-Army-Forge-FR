@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS personnalisé pour les expanders
+# CSS personnalisé pour les expanders et l'application
 st.markdown("""
 <style>
     .stExpander > details > summary {
@@ -30,6 +30,14 @@ st.markdown("""
         padding: 10px 12px;
         background-color: #f8f9fa;
         border-radius: 0 0 4px 4px;
+    }
+    .unit-cost {
+        float: right;
+        background-color: #3498db;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -250,7 +258,7 @@ def find_option_by_name(options, name):
         return None
 
 def display_faction_rules(faction_data):
-    """Affiche les règles spéciales de la faction sous forme d'expanders Streamlit, pliées par défaut."""
+    """Affiche les règles spéciales de la faction sous forme d'expanders Streamlit."""
     if not faction_data or 'special_rules_descriptions' not in faction_data:
         return
 
@@ -262,287 +270,12 @@ def display_faction_rules(faction_data):
         st.info("Cette faction n'a pas de règles spéciales spécifiques.")
         return
 
-    # Affichage des règles sous forme d'expanders
     for rule_name, description in rules_descriptions.items():
         with st.expander(f"**{rule_name}**", expanded=False):
             st.markdown(f"{description}")
 
-# ======================================================
-# LOCAL STORAGE
-# ======================================================
-def ls_get(key):
-    try:
-        unique_key = f"{key}_{hashlib.md5(str(datetime.now().timestamp()).encode()).hexdigest()[:8]}"
-        st.markdown(
-            f"""
-            <script>
-            const value = localStorage.getItem("{key}");
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.id = "{unique_key}";
-            input.value = value || "";
-            document.body.appendChild(input);
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-        return st.text_input("", key=unique_key, label_visibility="collapsed")
-    except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
-        return None
-
-def ls_set(key, value):
-    try:
-        if not isinstance(value, str):
-            value = json.dumps(value)
-        escaped_value = value.replace("'", "\\'").replace('"', '\\"')
-        st.markdown(
-            f"""
-            <script>
-            localStorage.setItem("{key}", `{escaped_value}`);
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-    except Exception as e:
-        st.error(f"Erreur LocalStorage: {e}")
-
-# ======================================================
-# CHARGEMENT DES FACTIONS
-# ======================================================
-@st.cache_data
-def load_factions():
-    factions = {}
-    games = set()
-    if not list(FACTIONS_DIR.glob("*.json")):
-        default_faction = {
-            "game": "Age of Fantasy",
-            "faction": "Disciples de la Guerre",
-            "special_rules_descriptions": {
-                "Éclaireur": "Déplacement facilité en terrain difficile.",
-                "Furieux": "Relance les 1 en attaque.",
-                "Né pour la guerre": "Relance les 1 en test de moral.",
-                "Héros": "Personnage inspirant.",
-                "Coriace(1)": "Ignore 1 point de dégât par phase.",
-                "Magique(1)": "Ignore 1 point de défense.",
-                "Contre-charge": "+1 aux jets de dégât lors d'une charge.",
-                "Attaque venimeuse": "Les blessures infligées par cette unité ne peuvent pas être régénérées.",
-                "Perforant": "Ignore 1 point de défense supplémentaire.",
-                "Volant": "Peut voler par-dessus les obstacles et les unités.",
-                "Effrayant(1)": "Les unités ennemies à 6\" doivent passer un test de moral ou reculer de 3\".",
-                "Lanceur de sorts (3)": "Peut lancer 3 sorts par tour."
-            },
-            "units": [
-                {
-                    "name": "Barbares de la Guerre",
-                    "type": "unit",
-                    "size": 10,
-                    "base_cost": 50,
-                    "quality": 3,
-                    "defense": 5,
-                    "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
-                    "weapons": [{
-                        "name": "Armes à une main",
-                        "attacks": 1,
-                        "armor_piercing": 0,
-                        "special_rules": []
-                    }],
-                    "upgrade_groups": [
-                        {
-                            "group": "Remplacement d'armes",
-                            "type": "weapon",
-                            "options": [
-                                {
-                                    "name": "Lance",
-                                    "cost": 35,
-                                    "weapon": {
-                                        "name": "Lance",
-                                        "attacks": 1,
-                                        "armor_piercing": 0,
-                                        "special_rules": ["Contre-charge"]
-                                    }
-                                },
-                                {
-                                    "name": "Fléau",
-                                    "cost": 20,
-                                    "weapon": {
-                                        "name": "Fléau",
-                                        "attacks": 1,
-                                        "armor_piercing": 1,
-                                        "special_rules": []
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "group": "Améliorations d'unité",
-                            "type": "upgrades",
-                            "options": [
-                                {
-                                    "name": "Icône du Ravage",
-                                    "cost": 20,
-                                    "special_rules": ["Aura de Défense versatile"]
-                                },
-                                {
-                                    "name": "Sergent",
-                                    "cost": 5,
-                                    "special_rules": []
-                                },
-                                {
-                                    "name": "Bannière",
-                                    "cost": 5,
-                                    "special_rules": []
-                                },
-                                {
-                                    "name": "Musicien",
-                                    "cost": 10,
-                                    "special_rules": []
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "name": "Maître de la Guerre Élu",
-                    "type": "hero",
-                    "size": 1,
-                    "base_cost": 150,
-                    "quality": 3,
-                    "defense": 5,
-                    "special_rules": ["Héros", "Éclaireur", "Furieux"],
-                    "weapons": [{
-                        "name": "Arme héroïque",
-                        "attacks": 2,
-                        "armor_piercing": 1,
-                        "special_rules": ["Magique(1)"]
-                    }]
-                }
-            ]
-        }
-        with open(FACTIONS_DIR / "default.json", "w", encoding="utf-8") as f:
-            json.dump(default_faction, f, indent=2)
-    for fp in FACTIONS_DIR.glob("*.json"):
-        try:
-            with open(fp, encoding="utf-8") as f:
-                data = json.load(f)
-                game = data.get("game")
-                faction = data.get("faction")
-                if game and faction:
-                    factions.setdefault(game, {})[faction] = data
-                    games.add(game)
-        except Exception as e:
-            st.warning(f"Erreur chargement {fp.name}: {e}")
-    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
-
-# ======================================================
-# FONCTION POUR LA BARRE DE PROGRESSION
-# ======================================================
-def show_points_progress(current_points, max_points):
-    ratio = min(current_points / max_points, 1.0)
-    st.progress(ratio)
-    st.markdown(f"**{current_points}/{max_points} pts**")
-
-# ======================================================
-# INITIALISATION
-# ======================================================
-factions_by_game, games = load_factions()
-
-if "page" not in st.session_state:
-    st.session_state.page = "setup"
-    st.session_state.army_list = []
-    st.session_state.army_cost = 0
-    st.session_state.current_player = "Simon Joinville Fouquet"
-
-# ======================================================
-# PAGE 1 – CONFIGURATION (SANS LA SECTION "JEUX DISPONIBLES")
-# ======================================================
-if st.session_state.page == "setup":
-    st.title("OPR Army Forge")
-
-    # Liste des listes sauvegardées
-    st.subheader("Mes listes sauvegardées")
-    saved_lists = ls_get("opr_saved_lists")
-    if saved_lists:
-        try:
-            saved_lists = json.loads(saved_lists)
-            if isinstance(saved_lists, list):
-                for i, saved_list in enumerate(saved_lists):
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"**{saved_list.get('name', 'Liste sans nom')}**")
-                        st.caption(f"{saved_list.get('game', 'Inconnu')} • {saved_list.get('faction', 'Inconnue')} • {saved_list.get('total_cost', 0)}/{saved_list.get('points', 0)} pts")
-                    with col2:
-                        if st.button(f"Charger", key=f"load_{i}"):
-                            st.session_state.game = saved_list["game"]
-                            st.session_state.faction = saved_list["faction"]
-                            st.session_state.points = saved_list["points"]
-                            st.session_state.list_name = saved_list["name"]
-                            st.session_state.army_list = saved_list["army_list"]
-                            st.session_state.army_cost = saved_list["total_cost"]
-                            st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
-                            st.session_state.page = "army"
-                            st.rerun()
-        except Exception as e:
-            st.error(f"Erreur chargement listes: {e}")
-
-    if not games:
-        st.error("Aucun jeu trouvé")
-        st.stop()
-
-    # Sélection du jeu
-    game = st.selectbox("Jeu", games)
-    game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
-
-    # Sélection de la faction (ajouté ici)
-    faction = st.selectbox("Faction", factions_by_game[game].keys())
-
-    # Stockage des points totaux choisis en page 1
-    points = st.number_input(
-        "Points",
-        min_value=game_config["min_points"],
-        max_value=game_config["max_points"],
-        value=game_config["default_points"],
-        step=game_config["point_step"]
-    )
-
-    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
-
-    # Import JSON
-    uploaded = st.file_uploader("Importer une liste JSON", type=["json"])
-    if uploaded:
-        try:
-            data = json.load(uploaded)
-            if not all(key in data for key in ["game", "faction", "army_list"]):
-                st.error("Format JSON invalide")
-                st.stop()
-            st.session_state.game = data["game"]
-            st.session_state.faction = data["faction"]
-            st.session_state.points = data["points"]
-            st.session_state.list_name = data["name"]
-            st.session_state.army_list = data["army_list"]
-            st.session_state.army_cost = data["total_cost"]
-            st.session_state.units = factions_by_game[data["game"]][data["faction"]]["units"]
-            st.session_state.page = "army"
-            st.rerun()
-        except Exception as e:
-            st.error(f"Erreur d'import: {e}")
-
-    if st.button("Créer une nouvelle liste"):
-        st.session_state.game = game
-        st.session_state.faction = faction
-        st.session_state.points = points
-        st.session_state.list_name = list_name
-        st.session_state.units = factions_by_game[game][faction]["units"]
-        st.session_state.army_list = []
-        st.session_state.army_cost = 0
-        st.session_state.page = "army"
-        st.rerun()
-
-# ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (AVEC BOUTON "RETOUR À LA PAGE 1")
-# ======================================================
 def generate_html_content(army_data):
-    """Génère le contenu HTML pour l'export, basé sur le fichier fourni."""
+    """Génère le contenu HTML pour l'export, basé sur le modèle fourni."""
     html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -817,6 +550,280 @@ def generate_html_content(army_data):
 """
     return html_content
 
+# ======================================================
+# LOCAL STORAGE
+# ======================================================
+def ls_get(key):
+    try:
+        unique_key = f"{key}_{hashlib.md5(str(datetime.now().timestamp()).encode()).hexdigest()[:8]}"
+        st.markdown(
+            f"""
+            <script>
+            const value = localStorage.getItem("{key}");
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.id = "{unique_key}";
+            input.value = value || "";
+            document.body.appendChild(input);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        return st.text_input("", key=unique_key, label_visibility="collapsed")
+    except Exception as e:
+        st.error(f"Erreur LocalStorage: {e}")
+        return None
+
+def ls_set(key, value):
+    try:
+        if not isinstance(value, str):
+            value = json.dumps(value)
+        escaped_value = value.replace("'", "\\'").replace('"', '\\"')
+        st.markdown(
+            f"""
+            <script>
+            localStorage.setItem("{key}", `{escaped_value}`);
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+    except Exception as e:
+        st.error(f"Erreur LocalStorage: {e}")
+
+# ======================================================
+# CHARGEMENT DES FACTIONS
+# ======================================================
+@st.cache_data
+def load_factions():
+    factions = {}
+    games = set()
+    if not list(FACTIONS_DIR.glob("*.json")):
+        default_faction = {
+            "game": "Age of Fantasy",
+            "faction": "Disciples de la Guerre",
+            "special_rules_descriptions": {
+                "Éclaireur": "Déplacement facilité en terrain difficile.",
+                "Furieux": "Relance les 1 en attaque.",
+                "Né pour la guerre": "Relance les 1 en test de moral.",
+                "Héros": "Personnage inspirant.",
+                "Coriace(1)": "Ignore 1 point de dégât par phase.",
+                "Magique(1)": "Ignore 1 point de défense.",
+                "Contre-charge": "+1 aux jets de dégât lors d'une charge.",
+                "Attaque venimeuse": "Les blessures infligées par cette unité ne peuvent pas être régénérées.",
+                "Perforant": "Ignore 1 point de défense supplémentaire.",
+                "Volant": "Peut voler par-dessus les obstacles et les unités.",
+                "Effrayant(1)": "Les unités ennemies à 6\" doivent passer un test de moral ou reculer de 3\".",
+                "Lanceur de sorts (3)": "Peut lancer 3 sorts par tour."
+            },
+            "units": [
+                {
+                    "name": "Barbares de la Guerre",
+                    "type": "unit",
+                    "size": 10,
+                    "base_cost": 50,
+                    "quality": 3,
+                    "defense": 5,
+                    "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
+                    "weapons": [{
+                        "name": "Armes à une main",
+                        "attacks": 1,
+                        "armor_piercing": 0,
+                        "special_rules": []
+                    }],
+                    "upgrade_groups": [
+                        {
+                            "group": "Remplacement d'armes",
+                            "type": "weapon",
+                            "options": [
+                                {
+                                    "name": "Lance",
+                                    "cost": 35,
+                                    "weapon": {
+                                        "name": "Lance",
+                                        "attacks": 1,
+                                        "armor_piercing": 0,
+                                        "special_rules": ["Contre-charge"]
+                                    }
+                                },
+                                {
+                                    "name": "Fléau",
+                                    "cost": 20,
+                                    "weapon": {
+                                        "name": "Fléau",
+                                        "attacks": 1,
+                                        "armor_piercing": 1,
+                                        "special_rules": []
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "group": "Améliorations d'unité",
+                            "type": "upgrades",
+                            "options": [
+                                {
+                                    "name": "Icône du Ravage",
+                                    "cost": 20,
+                                    "special_rules": ["Aura de Défense versatile"]
+                                },
+                                {
+                                    "name": "Sergent",
+                                    "cost": 5,
+                                    "special_rules": []
+                                },
+                                {
+                                    "name": "Bannière",
+                                    "cost": 5,
+                                    "special_rules": []
+                                },
+                                {
+                                    "name": "Musicien",
+                                    "cost": 10,
+                                    "special_rules": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Maître de la Guerre Élu",
+                    "type": "hero",
+                    "size": 1,
+                    "base_cost": 150,
+                    "quality": 3,
+                    "defense": 5,
+                    "special_rules": ["Héros", "Éclaireur", "Furieux"],
+                    "weapons": [{
+                        "name": "Arme héroïque",
+                        "attacks": 2,
+                        "armor_piercing": 1,
+                        "special_rules": ["Magique(1)"]
+                    }]
+                }
+            ]
+        }
+        with open(FACTIONS_DIR / "default.json", "w", encoding="utf-8") as f:
+            json.dump(default_faction, f, indent=2)
+    for fp in FACTIONS_DIR.glob("*.json"):
+        try:
+            with open(fp, encoding="utf-8") as f:
+                data = json.load(f)
+                game = data.get("game")
+                faction = data.get("faction")
+                if game and faction:
+                    factions.setdefault(game, {})[faction] = data
+                    games.add(game)
+        except Exception as e:
+            st.warning(f"Erreur chargement {fp.name}: {e}")
+    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
+
+# ======================================================
+# FONCTION POUR LA BARRE DE PROGRESSION
+# ======================================================
+def show_points_progress(current_points, max_points):
+    ratio = min(current_points / max_points, 1.0)
+    st.progress(ratio)
+    st.markdown(f"**{current_points}/{max_points} pts**")
+
+# ======================================================
+# INITIALISATION
+# ======================================================
+factions_by_game, games = load_factions()
+
+if "page" not in st.session_state:
+    st.session_state.page = "setup"
+    st.session_state.army_list = []
+    st.session_state.army_cost = 0
+    st.session_state.current_player = "Simon Joinville Fouquet"
+
+# ======================================================
+# PAGE 1 – CONFIGURATION (SANS LA SECTION "JEUX DISPONIBLES")
+# ======================================================
+if st.session_state.page == "setup":
+    st.title("OPR Army Forge")
+
+    # Liste des listes sauvegardées
+    st.subheader("Mes listes sauvegardées")
+    saved_lists = ls_get("opr_saved_lists")
+    if saved_lists:
+        try:
+            saved_lists = json.loads(saved_lists)
+            if isinstance(saved_lists, list):
+                for i, saved_list in enumerate(saved_lists):
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"**{saved_list.get('name', 'Liste sans nom')}**")
+                        st.caption(f"{saved_list.get('game', 'Inconnu')} • {saved_list.get('faction', 'Inconnue')} • {saved_list.get('total_cost', 0)}/{saved_list.get('points', 0)} pts")
+                    with col2:
+                        if st.button(f"Charger", key=f"load_{i}"):
+                            st.session_state.game = saved_list["game"]
+                            st.session_state.faction = saved_list["faction"]
+                            st.session_state.points = saved_list["points"]
+                            st.session_state.list_name = saved_list["name"]
+                            st.session_state.army_list = saved_list["army_list"]
+                            st.session_state.army_cost = saved_list["total_cost"]
+                            st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
+                            st.session_state.page = "army"
+                            st.rerun()
+        except Exception as e:
+            st.error(f"Erreur chargement listes: {e}")
+
+    if not games:
+        st.error("Aucun jeu trouvé")
+        st.stop()
+
+    # Sélection du jeu
+    game = st.selectbox("Jeu", games)
+    game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
+
+    # Sélection de la faction
+    faction = st.selectbox("Faction", factions_by_game[game].keys())
+
+    # Stockage des points totaux choisis en page 1
+    points = st.number_input(
+        "Points",
+        min_value=game_config["min_points"],
+        max_value=game_config["max_points"],
+        value=game_config["default_points"],
+        step=game_config["point_step"]
+    )
+
+    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
+
+    # Import JSON
+    uploaded = st.file_uploader("Importer une liste JSON", type=["json"])
+    if uploaded:
+        try:
+            data = json.load(uploaded)
+            if not all(key in data for key in ["game", "faction", "army_list"]):
+                st.error("Format JSON invalide")
+                st.stop()
+            st.session_state.game = data["game"]
+            st.session_state.faction = data["faction"]
+            st.session_state.points = data["points"]
+            st.session_state.list_name = data["name"]
+            st.session_state.army_list = data["army_list"]
+            st.session_state.army_cost = data["total_cost"]
+            st.session_state.units = factions_by_game[data["game"]][data["faction"]]["units"]
+            st.session_state.page = "army"
+            st.rerun()
+        except Exception as e:
+            st.error(f"Erreur d'import: {e}")
+
+    if st.button("Créer une nouvelle liste"):
+        st.session_state.game = game
+        st.session_state.faction = faction
+        st.session_state.points = points
+        st.session_state.list_name = list_name
+        st.session_state.units = factions_by_game[game][faction]["units"]
+        st.session_state.army_list = []
+        st.session_state.army_cost = 0
+        st.session_state.page = "army"
+        st.rerun()
+
+# ======================================================
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (AVEC BOUTON "RETOUR À LA PAGE 1")
+# ======================================================
 elif st.session_state.page == "army":
     # Bouton pour revenir à la page 1
     if st.button("⬅ Retour à la page 1"):
@@ -1035,7 +1042,8 @@ elif st.session_state.page == "army":
 
     # Sauvegarde/Export
     st.divider()
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
+
     army_data = {
         "name": st.session_state.list_name,
         "game": st.session_state.game,
@@ -1045,6 +1053,7 @@ elif st.session_state.page == "army":
         "army_list": st.session_state.army_list,
         "date": datetime.now().isoformat()
     }
+
     with col1:
         if st.button("Sauvegarder"):
             saved_lists = ls_get("opr_saved_lists")
@@ -1054,10 +1063,21 @@ elif st.session_state.page == "army":
             current_lists.append(army_data)
             ls_set("opr_saved_lists", current_lists)
             st.success("Liste sauvegardée!")
+
     with col2:
         st.download_button(
             "Exporter en JSON",
             json.dumps(army_data, indent=2, ensure_ascii=False),
             file_name=f"{st.session_state.list_name}.json",
             mime="application/json"
+        )
+
+    with col3:
+        # Génération et export HTML
+        html_content = generate_html_content(army_data)
+        st.download_button(
+            "Exporter en HTML",
+            html_content,
+            file_name=f"{st.session_state.list_name}.html",
+            mime="text/html"
         )
