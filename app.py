@@ -1189,10 +1189,7 @@ elif st.session_state.page == "unit_options":
 
         if unit.get('type') == 'hero':
             # Pour les héros: radio buttons pour chaque arme
-            weapon_options = []
-            for weapon in unit['weapons']:
-                weapon_options.append(f"{format_weapon(weapon)} (+{weapon.get('cost', 0)} pts)")
-
+            weapon_options = [f"{format_weapon(weapon)}" for weapon in unit['weapons']]
             selected_weapon = st.radio(
                 "Sélectionnez une arme",
                 weapon_options,
@@ -1201,7 +1198,6 @@ elif st.session_state.page == "unit_options":
             )
             selected_index = weapon_options.index(selected_weapon)
             options['weapon'] = unit['weapons'][selected_index]
-            total_cost += unit['weapons'][selected_index].get('cost', 0)
         else:
             # Pour les unités: selectbox
             weapon_options = [format_weapon(w) for w in unit['weapons']]
@@ -1214,18 +1210,15 @@ elif st.session_state.page == "unit_options":
             selected_index = weapon_options.index(selected_weapon)
             options['weapon'] = unit['weapons'][selected_index]
 
-    # Gestion des montures
+    # Gestion des montures et améliorations
     if 'upgrade_groups' in unit:
         for group in unit['upgrade_groups']:
-            if group['type'] == 'mount' and 'options' in group:
-                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
 
+            if group['type'] == 'mount':
                 if unit.get('type') == 'hero':
                     # Pour les héros: radio buttons pour chaque monture
-                    mount_options = []
-                    for option in group['options']:
-                        mount_options.append(f"{option['name']} (+{option['cost']} pts)")
-
+                    mount_options = [f"{option['name']} (+{option['cost']} pts)" for option in group['options']]
                     selected_mount = st.radio(
                         "Sélectionnez une monture",
                         ["Aucune monture"] + mount_options,
@@ -1239,41 +1232,11 @@ elif st.session_state.page == "unit_options":
                         total_cost += options['mount']['cost']
                     else:
                         options['mount'] = None
-                else:
-                    # Pour les unités: selectbox
-                    mount_options = ["Aucune monture"]
-                    mount_details = {}
 
-                    for option in group['options']:
-                        mount_options.append(f"{option['name']} (+{option['cost']} pts)")
-                        mount_details[option['name']] = option
-
-                    selected_mount = st.selectbox(
-                        "Sélectionnez une monture",
-                        mount_options,
-                        index=0,
-                        key=f"mount_{group['group']}"
-                    )
-
-                    if selected_mount != "Aucune monture":
-                        mount_name = selected_mount.split(" (+")[0]
-                        options['mount'] = mount_details[mount_name]
-                        total_cost += mount_details[mount_name]['cost']
-                    else:
-                        options['mount'] = None
-
-    # Gestion des améliorations
-    if 'upgrade_groups' in unit:
-        for group in unit['upgrade_groups']:
-            if group['type'] == 'upgrades' and 'options' in group:
-                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
-
+            elif group['type'] == 'upgrades':
                 if unit.get('type') == 'hero':
                     # Pour les héros: radio buttons pour chaque amélioration
-                    upgrade_options = []
-                    for option in group['options']:
-                        upgrade_options.append(f"{option['name']} (+{option['cost']} pts)")
-
+                    upgrade_options = [f"{option['name']} (+{option['cost']} pts)" for option in group['options']]
                     selected_upgrade = st.radio(
                         f"Sélectionnez une {group['group'].lower()}",
                         ["Aucune"] + upgrade_options,
@@ -1287,15 +1250,21 @@ elif st.session_state.page == "unit_options":
                         total_cost += options['selected_options'][group['group']][0]['cost']
                     else:
                         options['selected_options'][group['group']] = []
-                else:
-                    # Pour les unités: checkbox multiples
-                    for option in group['options']:
-                        if st.checkbox(f"{option['name']} (+{option['cost']} pts)", key=f"upgrade_{group['group']}_{option['name']}"):
-                            if group['group'] not in options['selected_options']:
-                                options['selected_options'][group['group']] = []
-                            if not any(opt['name'] == option['name'] for opt in options['selected_options'].get(group['group'], [])):
-                                options['selected_options'][group['group']].append(option)
-                                total_cost += option['cost']
+
+            elif group['type'] == 'weapon':
+                if unit.get('type') == 'hero':
+                    # Pour les héros: radio buttons pour chaque arme
+                    weapon_options = [f"{format_weapon(option['weapon'])} (+{option['cost']} pts)" for option in group['options']]
+                    selected_weapon = st.radio(
+                        "Sélectionnez une arme",
+                        weapon_options,
+                        index=0,
+                        key=f"weapon_radio_{group['group']}"
+                    )
+
+                    selected_index = weapon_options.index(selected_weapon)
+                    options['weapon'] = group['options'][selected_index]['weapon']
+                    total_cost += group['options'][selected_index]['cost']
 
     # Calcul du coût final
     if options.get('combined', False) and unit.get('type') != 'hero':
