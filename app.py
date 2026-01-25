@@ -762,13 +762,15 @@ elif st.session_state.page == "unit_options":
 
     # Calcul du coût de remplacement d'arme sélectionnée
     weapon_cost = 0
-    if 'upgrade_groups' in unit and options.get('weapon'):
+
+    if 'upgrade_groups' in unit:
         for group in unit['upgrade_groups']:
             if group['type'] == 'weapon':
                 for opt in group['options']:
-                    if format_weapon(opt['weapon']) == format_weapon(options['weapon']):
+                    if options.get('weapon') and \
+                       format_weapon(opt['weapon']) == format_weapon(options['weapon']):
                         weapon_cost = opt.get('cost', 0)
-                    
+    
     # Calcul du coût final
     if options.get('combined', False) and unit.get('type', '').lower() != 'hero':
         base_weapon_cost = 0
