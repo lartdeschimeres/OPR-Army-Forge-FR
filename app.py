@@ -622,9 +622,20 @@ elif st.session_state.page == "unit_options":
             )
             selected_index = weapon_options.index(selected_weapon)
             options['weapon'] = unit['weapons'][selected_index]
+        else:
+            # Pour les unités: selectbox
+            weapon_options = [format_weapon(w) for w in unit['weapons']]
+            selected_weapon = st.selectbox(
+                "Sélectionnez une arme",
+                weapon_options,
+                index=0,
+                key="weapon_select"
+            )
+            selected_index = weapon_options.index(selected_weapon)
+            options['weapon'] = unit['weapons'][selected_index]
 
-    # Gestion des améliorations de rôle
-    if 'upgrade_groups' in unit:
+    # Gestion des améliorations de rôle (uniquement pour les héros)
+    if 'upgrade_groups' in unit and unit.get('type', '').lower() == 'hero':
         for group in unit['upgrade_groups']:
             if group['type'] == 'multiple' and group['group'] == 'Améliorations de rôle':
                 st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
@@ -645,8 +656,8 @@ elif st.session_state.page == "unit_options":
                 else:
                     options['selected_options'][group['group']] = []
 
-    # Gestion des changements d'armes
-    if 'upgrade_groups' in unit:
+    # Gestion des changements d'armes (uniquement pour les héros)
+    if 'upgrade_groups' in unit and unit.get('type', '').lower() == 'hero':
         for group in unit['upgrade_groups']:
             if group['type'] == 'weapon' and group['group'] == 'Remplacement d\'arme':
                 st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
@@ -671,24 +682,48 @@ elif st.session_state.page == "unit_options":
             if group['type'] == 'mount':
                 st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
 
-                mount_options = [f"{option['name']} (+{option['cost']} pts)" for option in group['options']]
-                selected_mount = st.radio(
-                    "Sélectionnez une monture",
-                    ["Aucune monture"] + mount_options,
-                    index=0,
-                    key=f"mount_radio_{group['group']}"
-                )
+                if unit.get('type', '').lower() == 'hero':
+                    # Pour les héros: radio buttons pour chaque monture
+                    mount_options = [f"{option['name']} (+{option['cost']} pts)" for option in group['options']]
+                    selected_mount = st.radio(
+                        "Sélectionnez une monture",
+                        ["Aucune monture"] + mount_options,
+                        index=0,
+                        key=f"mount_radio_{group['group']}"
+                    )
 
-                if selected_mount != "Aucune monture":
-                    mount_name = selected_mount.split(" (+")[0]
-                    selected_mount_option = next(opt for opt in group['options'] if opt['name'] == mount_name)
-                    options['mount'] = selected_mount_option
-                    total_cost += selected_mount_option['cost']
+                    if selected_mount != "Aucune monture":
+                        mount_name = selected_mount.split(" (+")[0]
+                        selected_mount_option = next(opt for opt in group['options'] if opt['name'] == mount_name)
+                        options['mount'] = selected_mount_option
+                        total_cost += selected_mount_option['cost']
+                    else:
+                        options['mount'] = None
                 else:
-                    options['mount'] = None
+                    # Pour les unités: selectbox
+                    mount_options = ["Aucune monture"]
+                    mount_details = {}
 
-    # Gestion des améliorations d'unité (checkbox multiples)
-    if 'upgrade_groups' in unit:
+                    for option in group['options']:
+                        mount_options.append(f"{option['name']} (+{option['cost']} pts)")
+                        mount_details[option['name']] = option
+
+                    selected_mount = st.selectbox(
+                        "Sélectionnez une monture",
+                        mount_options,
+                        index=0,
+                        key=f"mount_{group['group']}"
+                    )
+
+                    if selected_mount != "Aucune monture":
+                        mount_name = selected_mount.split(" (+")[0]
+                        options['mount'] = mount_details[mount_name]
+                        total_cost += mount_details[mount_name]['cost']
+                    else:
+                        options['mount'] = None
+
+    # Gestion des améliorations d'unité (checkbox multiples, uniquement pour les unités)
+    if 'upgrade_groups' in unit and unit.get('type', '').lower() != 'hero':
         for group in unit['upgrade_groups']:
             if group['type'] != 'mount' and group['type'] != 'weapon' and group['type'] != 'multiple':
                 st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
