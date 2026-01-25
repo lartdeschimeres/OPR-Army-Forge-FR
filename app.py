@@ -602,9 +602,9 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
-    # Gestion des unités combinées - CORRECTION DÉFINITIVE POUR LES HÉROS
+    # Gestion des unités combinées - SUPPRESSION DÉFINITIVE POUR LES HÉROS
     if unit.get("type") == "hero":
-        combined = False
+        combined = False  # Les héros ne peuvent JAMAIS être combinés
     else:
         combined = st.checkbox("Unité combinée", value=False)
 
