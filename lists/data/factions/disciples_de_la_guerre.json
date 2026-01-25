@@ -37,7 +37,7 @@
       "base_cost": 60,
       "quality": 3,
       "defense": 3,
-      "special_rules": ["Attaque versatile", "Coriace (3)", "Héros", "Né pour la guerre"],
+      "special_rules": ["Attaque versatile", "Coriace (3)", "Héros", "Guerrier-né"],
       "weapons": [
         {
           "name": "Arme à une main lourde",
@@ -56,7 +56,7 @@
             {"name": "Marauder (Aura de Combattant imprévisible)", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
             {"name": "Porteur de la bannière de l'armée (Effrayant (3))", "cost": 30, "special_rules": ["Effrayant (3)"]},
             {"name": "Ensorceleur (Aura de Voile fluctuant)", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
-            {"name": "Seigneur de Guerre (Aura de Boost de Né pour la guerre)", "cost": 35, "special_rules": ["Aura de Boost de Né pour la guerre"]},
+            {"name": "Seigneur de Guerre (Aura de Boost de Guerrier-né)", "cost": 35, "special_rules": ["Aura de Boost de Guerrier-né"]},
             {"name": "Sorcier (Lanceur de sorts (2))", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
             {"name": "Maître Sorcier (Lanceur de sorts (3))", "cost": 60, "special_rules": ["Lanceur de sorts (3)"]}
           ]
@@ -182,7 +182,7 @@
       "base_cost": 100,
       "quality": 5,
       "defense": 5,
-      "special_rules": ["Éclaireur", "Furieux", "Né pour la guerre"],
+      "special_rules": ["Éclaireur", "Furieux", "Guerrier-né"],
       "weapons": [
         {
           "name": "Armes à une main",
