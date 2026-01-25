@@ -772,20 +772,15 @@ elif st.session_state.page == "unit_options":
     # Calcul du coût final
     if options.get('combined', False) and unit.get('type', '').lower() != 'hero':
         base_weapon_cost = 0
-        if 'upgrade_groups' in unit:
-            for group in unit['upgrade_groups']:
-                if group['type'] == 'weapon' and group['group'] == 'Remplacement d\'arme' and options['weapon']:
-                    selected_weapon_option = next((opt for opt in group['options'] if format_weapon(opt['weapon']) == format_weapon(options['weapon'])), None)
-                    if selected_weapon_option:
-                        base_weapon_cost = selected_weapon_option['cost']
-        total_cost = (unit['base_cost'] + base_weapon_cost) * 2
+        total_cost = (unit['base_cost'] + weapon_cost) * 2
         total_cost += sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
         total_cost += options['mount']['cost'] if options['mount'] else 0
         current_size = unit.get('size', 1) * 2
     else:
         total_cost = unit['base_cost'] + \
-                     (options['mount']['cost'] if options['mount'] else 0) + \
-                     sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
+                 weapon_cost + \
+                 (options['mount']['cost'] if options['mount'] else 0) + \
+                 sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
         current_size = unit.get('size', 1)
 
     st.markdown(f"""
