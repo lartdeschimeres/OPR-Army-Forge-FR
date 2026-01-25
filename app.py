@@ -541,6 +541,282 @@ if st.session_state.page == "setup":
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE (AVEC BOUTON "RETOUR À LA PAGE 1")
 # ======================================================
+def generate_html_content(army_data):
+    """Génère le contenu HTML pour l'export, basé sur le fichier fourni."""
+    html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste OPR - {army_data['name']}</title>
+    <meta charset="UTF-8">
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }}
+        .army-title {{
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }}
+        .army-info {{
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+        }}
+        .unit-container {{
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            page-break-inside: avoid;
+        }}
+        .unit-header {{
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }}
+        .hero-badge {{
+            background-color: gold;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }}
+        .unit-stats {{
+            display: flex;
+            margin-bottom: 15px;
+        }}
+        .stat-badge {{
+            background-color: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }}
+        .stat-value {{
+            font-size: 1.2em;
+        }}
+        .stat-label {{
+            font-size: 0.8em;
+            display: block;
+            margin-bottom: 3px;
+        }}
+        .section-title {{
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }}
+        .weapon-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }}
+        .weapon-table th {{
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }}
+        .weapon-table td {{
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }}
+        .rules-list {{
+            margin: 10px 0;
+        }}
+        .special-rules {{
+            font-style: italic;
+            color: #555;
+            margin-bottom: 15px;
+        }}
+        .unit-cost {{
+            float: right;
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }}
+        .faction-rules {{
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }}
+        .rule-item {{
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }}
+        .rule-name {{
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }}
+        .rule-description {{
+            margin-top: 5px;
+            color: #555;
+        }}
+        @media print {{
+            .unit-container {{
+                page-break-inside: avoid;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <h1 class="army-title">Liste d'armée OPR - {army_data['name']}</h1>
+    <div class="army-info">
+        <strong>Jeu:</strong> {army_data['game']} |
+        <strong>Faction:</strong> {army_data['faction']} |
+        <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']}
+    </div>
+
+    <!-- Règles spéciales de la faction -->
+    <div class="faction-rules">
+        <h2>Règles Spéciales de la Faction</h2>
+"""
+
+    # Ajout des règles spéciales de la faction
+    faction_data = factions_by_game[army_data['game']][army_data['faction']]
+    if 'special_rules_descriptions' in faction_data:
+        for rule_name, description in faction_data['special_rules_descriptions'].items():
+            html_content += f"""
+        <div class="rule-item">
+            <div class="rule-name">{rule_name}</div>
+            <div class="rule-description">{description}</div>
+        </div>
+"""
+    else:
+        html_content += "<p>Aucune règle spéciale pour cette faction.</p>"
+
+    html_content += """
+    </div>
+"""
+
+    # Ajout des unités
+    for unit in army_data['army_list']:
+        rules = unit.get('rules', [])
+        special_rules = ", ".join(rules) if rules else "Aucune"
+
+        weapon_info = unit.get('weapon', {})
+        if not isinstance(weapon_info, dict):
+            weapon_info = {
+                "name": "Arme non spécifiée",
+                "attacks": "?",
+                "ap": "?",
+                "special": []
+            }
+
+        # Nettoyage des caractères spéciaux pour HTML
+        unit_name = f"{unit['name']} [{unit.get('size', 1)}]"
+        unit_name = str(unit_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+        weapon_name = str(weapon_info['name']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        weapon_attacks = str(weapon_info['attacks']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        weapon_ap = str(weapon_info['ap']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        weapon_special = ', '.join(weapon_info['special']) if weapon_info['special'] else '-'
+        weapon_special = str(weapon_special).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+        # Badge héros si applicable
+        hero_badge = ""
+        if unit.get('type') == "hero":
+            hero_badge = '<span class="hero-badge">HÉROS</span>'
+
+        html_content += f"""
+        <div class="unit-container">
+            <div class="unit-header">
+                {unit_name}
+                {hero_badge}
+                <span class="unit-cost">{unit['cost']} pts</span>
+            </div>
+
+            <div class="unit-stats">
+                <div class="stat-badge">
+                    <div class="stat-label">Qualité</div>
+                    <div class="stat-value">{unit['quality']}+</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="stat-label">Défense</div>
+                    <div class="stat-value">{unit.get('defense', '?')}+</div>
+                </div>
+"""
+
+        if unit.get('coriace'):
+            html_content += f"""
+                <div class="stat-badge">
+                    <div class="stat-label">Coriace</div>
+                    <div class="stat-value">{unit['coriace']}</div>
+                </div>
+"""
+
+        html_content += """
+            </div>
+"""
+
+        if rules:
+            html_content += f'<div class="special-rules"><strong>Règles spéciales:</strong> {special_rules.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</div>'
+
+        html_content += f"""
+            <div class="section-title">Arme</div>
+            <table class="weapon-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>PORT</th>
+                        <th>ATK</th>
+                        <th>PA</th>
+                        <th>SPE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{weapon_name}</td>
+                        <td>-</td>
+                        <td>{weapon_attacks}</td>
+                        <td>{weapon_ap}</td>
+                        <td>{weapon_special}</td>
+                    </tr>
+                </tbody>
+            </table>
+"""
+
+        if 'options' in unit and unit['options']:
+            for group_name, opts in unit['options'].items():
+                if isinstance(opts, list) and opts:
+                    group_name_clean = str(group_name).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    html_content += f'<div class="section-title">{group_name_clean}:</div>'
+                    for opt in opts:
+                        opt_name = str(opt.get("name", "")).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        html_content += f'<div>• {opt_name}</div>'
+
+        if 'mount' in unit and unit['mount']:
+            mount_details = format_mount_details(unit["mount"])
+            mount_details_clean = str(mount_details).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            html_content += f'<div class="section-title">Monture</div><p>{mount_details_clean}</p>'
+
+        html_content += "</div>"
+
+    html_content += """
+    </body>
+</html>
+"""
+    return html_content
+
 elif st.session_state.page == "army":
     # Bouton pour revenir à la page 1
     if st.button("⬅ Retour à la page 1"):
