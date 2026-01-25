@@ -722,19 +722,6 @@ elif st.session_state.page == "unit_options":
                     else:
                         options['mount'] = None
 
-    # Gestion des améliorations d'unité (checkbox multiples, uniquement pour les unités)
-    if 'upgrade_groups' in unit and unit.get('type', '').lower() != 'hero':
-        for group in unit['upgrade_groups']:
-            if group['type'] not in ['mount', 'weapon']:
-                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
-
-                for option in group['options']:
-                    if st.checkbox(f"{option['name']} (+{option['cost']} pts)", key=f"upgrade_{group['group']}_{option['name']}"):
-                        if group['group'] not in options['selected_options']:
-                            options['selected_options'][group['group']] = []
-                        if not any(opt['name'] == option['name'] for opt in options['selected_options'].get(group['group'], [])):
-                            options['selected_options'][group['group']].append(option)
-                            total_cost += option['cost']
     # Gestion des armes (choix exclusif)
     if 'upgrade_groups' in unit:
         for group in unit['upgrade_groups']:
@@ -758,6 +745,20 @@ elif st.session_state.page == "unit_options":
                 if weapon_map[selected_weapon]:
                     options['selected_weapon'] = weapon_map[selected_weapon]
                     total_cost += weapon_map[selected_weapon]['cost']
+    
+    # Gestion des améliorations d'unité (checkbox multiples, uniquement pour les unités)
+    if 'upgrade_groups' in unit and unit.get('type', '').lower() != 'hero':
+        for group in unit['upgrade_groups']:
+            if group['type'] not in ['mount', 'weapon']:
+                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
+
+                for option in group['options']:
+                    if st.checkbox(f"{option['name']} (+{option['cost']} pts)", key=f"upgrade_{group['group']}_{option['name']}"):
+                        if group['group'] not in options['selected_options']:
+                            options['selected_options'][group['group']] = []
+                        if not any(opt['name'] == option['name'] for opt in options['selected_options'].get(group['group'], [])):
+                            options['selected_options'][group['group']].append(option)
+                            total_cost += option['cost']
 
     # Calcul du coût final
     if options.get('combined', False) and unit.get('type', '').lower() != 'hero':
