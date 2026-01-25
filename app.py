@@ -33,6 +33,125 @@ GAME_CONFIG = {
     }
 }
 
+# CSS global pour l'esthétique
+st.markdown("""
+<style>
+    /* Style général */
+    .main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Style des cartes */
+    .card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Style des boutons */
+    .stButton>button {
+        background-color: #4a6fa5;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .stButton>button:hover {
+        background-color: #3a5a8f;
+    }
+
+    /* Style des titres */
+    .title {
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    /* Style des sous-titres */
+    .subtitle {
+        color: #4a6fa5;
+        margin-top: 30px;
+        margin-bottom: 15px;
+    }
+
+    /* Style des champs de formulaire */
+    .stTextInput>div>div>input {
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    /* Style des sélecteurs */
+    .stSelectbox>div>div>select {
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    /* Style des cartes de liste sauvegardée */
+    .saved-list {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Style des unités */
+    .unit-card {
+        background-color: #2a2a2a;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        cursor: pointer;
+    }
+
+    .hero-card {
+        background-color: #2a2a2a;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        border-left: 4px solid #ffd700;
+    }
+
+    /* Style des règles spéciales */
+    .faction-rules {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+    }
+
+    /* Style des accordéons */
+    .rule-title {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    /* Style des options */
+    .option-card {
+        background-color: #f0f0f0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Fonctions utilitaires
 def format_weapon(weapon):
     if not weapon:
@@ -120,68 +239,138 @@ if "page" not in st.session_state:
     st.session_state.current_unit = None
     st.session_state.current_options = {}
 
-# PAGE 1 - Sélection de la faction
+# PAGE 1 - Sélection de la faction et création de liste
 if st.session_state.page == "faction_select":
-    st.title("OPR Army Forge FR")
+    st.markdown("<div class='main'>", unsafe_allow_html=True)
+    st.markdown("<h1 class='title'>OPR Army Forge FR</h1>", unsafe_allow_html=True)
 
-    if not games:
-        st.error("Aucun jeu trouvé. Veuillez ajouter des fichiers de faction dans le dossier approprié.")
-        st.stop()
+    # Sélection du jeu
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.subheader("Jeu")
+    game = st.selectbox(
+        "Sélectionnez un jeu",
+        games,
+        key="game_select"
+    )
 
-    game = st.selectbox("Jeu", games)
+    # Sélection de la faction
+    if game in factions_by_game:
+        st.subheader("Faction")
+        faction_options = list(factions_by_game[game].keys())
+        faction = st.selectbox(
+            "Sélectionnez une faction",
+            faction_options,
+            key="faction_select"
+        )
+
+    # Points
     game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
-
+    st.subheader("Points")
     points = st.number_input(
-        "Points",
+        "Points de l'armée",
         min_value=game_config["min_points"],
         max_value=game_config["max_points"],
         value=game_config["default_points"],
-        step=game_config["point_step"]
+        step=game_config["point_step"],
+        key="points_input"
     )
 
-    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
+    # Nom de la liste
+    st.subheader("Nom de la liste")
+    list_name = st.text_input(
+        "Nom de votre liste d'armée",
+        f"Liste_{datetime.now().strftime('%Y%m%d')}",
+        key="list_name_input"
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Chargement des listes sauvegardées
-    st.subheader("Mes listes sauvegardées")
+    st.markdown("<h2 class='subtitle'>Mes listes sauvegardées</h2>", unsafe_allow_html=True)
+    st.markdown("<div class='saved-lists-container'>", unsafe_allow_html=True)
+
     saved_lists = ls_get("opr_saved_lists")
     if saved_lists:
         try:
             saved_lists = json.loads(saved_lists)
             if isinstance(saved_lists, list):
                 for i, saved_list in enumerate(saved_lists):
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"**{saved_list.get('name', 'Liste sans nom')}**")
-                        st.caption(f"{saved_list.get('game', 'Inconnu')} • {saved_list.get('faction', 'Inconnue')} • {saved_list.get('total_cost', 0)}/{saved_list.get('points', 0)} pts")
-                    with col2:
-                        if st.button(f"Charger", key=f"load_{i}"):
-                            st.session_state.game = saved_list["game"]
-                            st.session_state.faction = saved_list["faction"]
-                            st.session_state.points = saved_list["points"]
-                            st.session_state.list_name = saved_list["name"]
-                            st.session_state.army_list = saved_list["army_list"]
-                            st.session_state.army_cost = saved_list["total_cost"]
-                            st.session_state.history = []
-                            st.session_state.page = "army_builder"
-                            st.rerun()
+                    st.markdown(f"""
+                    <div class='saved-list'>
+                        <div>
+                            <h4 style='margin:0;'>{saved_list.get('name', 'Liste sans nom')}</h4>
+                            <p style='margin:5px 0; color:#666;'>{saved_list.get('game', 'Inconnu')} • {saved_list.get('faction', 'Inconnue')} • {saved_list.get('total_cost', 0)}/{saved_list.get('points', 0)} pts</p>
+                        </div>
+                        <div>
+                            <button onclick="document.getElementById('load-{i}').click()" style='background-color:#4a6fa5; color:white; border:none; padding:8px 16px; border-radius:4px;'>Charger</button>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    if st.button(f"Charger la liste {i}", key=f"load-{i}"):
+                        st.session_state.game = saved_list["game"]
+                        st.session_state.faction = saved_list["faction"]
+                        st.session_state.points = saved_list["points"]
+                        st.session_state.list_name = saved_list["name"]
+                        st.session_state.army_list = saved_list["army_list"]
+                        st.session_state.army_cost = saved_list["total_cost"]
+                        st.session_state.units = factions_by_game[saved_list["game"]][saved_list["faction"]]["units"]
+                        st.session_state.history = []
+                        st.session_state.page = "army_builder"
+                        st.rerun()
         except Exception as e:
             st.error(f"Erreur chargement listes: {e}")
 
-    if st.button("Créer une nouvelle liste"):
-        st.session_state.game = game
-        st.session_state.faction = st.selectbox("Faction", list(factions_by_game[game].keys()))
-        st.session_state.points = points
-        st.session_state.list_name = list_name
-        st.session_state.units = factions_by_game[game][st.session_state.faction]["units"]
-        st.session_state.army_list = []
-        st.session_state.army_cost = 0
-        st.session_state.history = []
-        st.session_state.page = "army_builder"
-        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Import JSON
+    st.markdown("<h2 class='subtitle'>Importer une liste</h2>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader(
+        "Choisissez un fichier JSON à importer",
+        type=["json"],
+        key="json_uploader"
+    )
+
+    if uploaded_file is not None:
+        try:
+            army_data = json.load(uploaded_file)
+            if all(key in army_data for key in ["game", "faction", "army_list", "points"]):
+                st.session_state.game = army_data["game"]
+                st.session_state.faction = army_data["faction"]
+                st.session_state.points = army_data["points"]
+                st.session_state.list_name = army_data.get("name", f"Liste_importée_{datetime.now().strftime('%Y%m%d')}")
+                st.session_state.army_list = army_data["army_list"]
+                st.session_state.army_cost = army_data.get("total_cost", 0)
+                st.session_state.units = factions_by_game[army_data["game"]][army_data["faction"]]["units"]
+                st.session_state.history = []
+                st.session_state.page = "army_builder"
+                st.rerun()
+            else:
+                st.error("Le fichier JSON n'a pas le format attendu")
+        except Exception as e:
+            st.error(f"Erreur lors de l'import: {e}")
+
+    # Bouton pour créer une nouvelle liste
+    if st.button("Créer une nouvelle liste", key="create_list"):
+        if game in factions_by_game and 'faction' in locals():
+            st.session_state.game = game
+            st.session_state.faction = faction
+            st.session_state.points = points
+            st.session_state.list_name = list_name
+            st.session_state.units = factions_by_game[game][faction]["units"]
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
+            st.session_state.history = []
+            st.session_state.page = "army_builder"
+            st.rerun()
+        else:
+            st.error("Veuillez sélectionner un jeu et une faction valides")
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # PAGE 2 - Liste des unités (rectangles cliquables)
 elif st.session_state.page == "army_builder":
-    st.title(st.session_state.list_name)
+    st.markdown("<div class='main'>", unsafe_allow_html=True)
+    st.markdown(f"<h1 class='title'>{st.session_state.list_name}</h1>", unsafe_allow_html=True)
     st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
 
     # Boutons de contrôle
@@ -193,63 +382,41 @@ elif st.session_state.page == "army_builder":
 
     # Affichage des règles spéciales
     if 'special_rules_descriptions' in factions_by_game[st.session_state.game][st.session_state.faction]:
-        st.markdown("""
-        <style>
-        .faction-rules {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-left: 4px solid #3498db;
-        }
-        .rule-title {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        st.markdown('<div class="faction-rules">', unsafe_allow_html=True)
-        st.subheader("📜 Règles Spéciales de la Faction")
+        st.markdown("<div class='faction-rules'>", unsafe_allow_html=True)
+        st.markdown("<h3 class='rule-title'>📜 Règles Spéciales de la Faction</h3>", unsafe_allow_html=True)
 
         for rule_name, description in factions_by_game[st.session_state.game][st.session_state.faction]['special_rules_descriptions'].items():
             with st.expander(f"**{rule_name}**"):
                 st.write(description)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Séparation par type (Héros/Unités)
     heroes = [u for u in st.session_state.units if u.get('type') == 'hero']
     units = [u for u in st.session_state.units if u.get('type') != 'hero']
 
     if heroes:
-        st.subheader("🌟 HÉROS")
+        st.markdown("<h2 class='subtitle'>🌟 HÉROS</h2>", unsafe_allow_html=True)
         for unit in heroes:
             with st.container():
-                # Rectangle cliquable pour le héros
                 st.markdown(f"""
-                <div style="background-color: #2a2a2a; color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer;"
-                    onclick="document.getElementById('select-{unit['name'].replace(' ', '-')}').click()">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class='hero-card' onclick="document.getElementById('select-{unit['name'].replace(' ', '-')}').click()">
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
                         <div>
-                            <h4 style="margin: 0; color: #ffd700;">{unit['name']} [1]</h4>
-                            <p style="margin: 5px 0; color: #aaa;">Qua {unit['quality']}+ / Déf {unit.get('defense', '?')}+</p>
+                            <h4 style='margin:0; color:#ffd700;'>{unit['name']} [1]</h4>
+                            <p style='margin:5px 0; color:#aaa;'>Qua {unit['quality']}+ / Déf {unit.get('defense', '?')}+</p>
                         </div>
-                        <div style="text-align: right;">
-                            <p style="margin: 0; color: #4CAF50; font-weight: bold;">{unit['base_cost']} pts</p>
+                        <div style='text-align: right;'>
+                            <p style='margin:0; color:#4CAF50; font-weight: bold;'>{unit['base_cost']} pts</p>
                         </div>
                     </div>
-                    <div style="margin-top: 10px; color: #ccc;">
-                        <p style="margin: 5px 0; font-style: italic;">{', '.join(unit.get('special_rules', []))}</p>
-                        <p style="margin: 5px 0;">
-                            {format_weapon(unit['weapons'][0]) if 'weapons' in unit and unit['weapons'] else 'Aucune arme'}
-                        </p>
+                    <div style='margin-top: 10px; color:#ccc;'>
+                        <p style='margin:5px 0; font-style: italic;'>{', '.join(unit.get('special_rules', []))}</p>
+                        <p style='margin:5px 0;'>{format_weapon(unit['weapons'][0]) if 'weapons' in unit and unit['weapons'] else 'Aucune arme'}</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
 
-                # Bouton caché pour sélectionner l'unité
                 if st.button(f"Sélectionner {unit['name']}", key=f"select-{unit['name'].replace(' ', '-')}"):
                     st.session_state.current_unit = unit
                     st.session_state.current_options = {
@@ -262,32 +429,27 @@ elif st.session_state.page == "army_builder":
                     st.rerun()
 
     if units:
-        st.subheader("🏳️ UNITÉS")
+        st.markdown("<h2 class='subtitle'>🏳️ UNITÉS</h2>", unsafe_allow_html=True)
         for unit in units:
             with st.container():
-                # Rectangle cliquable pour l'unité
                 st.markdown(f"""
-                <div style="background-color: #1e1e1e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer;"
-                    onclick="document.getElementById('select-{unit['name'].replace(' ', '-')}').click()">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class='unit-card' onclick="document.getElementById('select-{unit['name'].replace(' ', '-')}').click()">
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
                         <div>
-                            <h4 style="margin: 0; color: #fff;">{unit['name']} [{unit.get('size', 10)}]</h4>
-                            <p style="margin: 5px 0; color: #aaa;">Qua {unit['quality']}+ / Déf {unit.get('defense', '?')}+</p>
+                            <h4 style='margin:0; color:#fff;'>{unit['name']} [{unit.get('size', 10)}]</h4>
+                            <p style='margin:5px 0; color:#aaa;'>Qua {unit['quality']}+ / Déf {unit.get('defense', '?')}+</p>
                         </div>
-                        <div style="text-align: right;">
-                            <p style="margin: 0; color: #4CAF50; font-weight: bold;">{unit['base_cost']} pts</p>
+                        <div style='text-align: right;'>
+                            <p style='margin:0; color:#4CAF50; font-weight: bold;'>{unit['base_cost']} pts</p>
                         </div>
                     </div>
-                    <div style="margin-top: 10px; color: #ccc;">
-                        <p style="margin: 5px 0; font-style: italic;">{', '.join(unit.get('special_rules', []))}</p>
-                        <p style="margin: 5px 0;">
-                            {format_weapon(unit['weapons'][0]) if 'weapons' in unit and unit['weapons'] else 'Aucune arme'}
-                        </p>
+                    <div style='margin-top: 10px; color:#ccc;'>
+                        <p style='margin:5px 0; font-style: italic;'>{', '.join(unit.get('special_rules', []))}</p>
+                        <p style='margin:5px 0;'>{format_weapon(unit['weapons'][0]) if 'weapons' in unit and unit['weapons'] else 'Aucune arme'}</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
 
-                # Bouton caché pour sélectionner l'unité
                 if st.button(f"Sélectionner {unit['name']}", key=f"select-{unit['name'].replace(' ', '-')}"):
                     st.session_state.current_unit = unit
                     st.session_state.current_options = {
@@ -301,7 +463,7 @@ elif st.session_state.page == "army_builder":
 
     # Affichage de la liste d'armée actuelle
     st.divider()
-    st.subheader(f"Liste d'armée actuelle ({st.session_state.army_cost}/{st.session_state.points} pts)")
+    st.markdown(f"<h2 class='subtitle'>Liste d'armée actuelle ({st.session_state.army_cost}/{st.session_state.points} pts)</h2>", unsafe_allow_html=True)
 
     if not st.session_state.army_list:
         st.info("Ajoutez des unités pour commencer à construire votre armée")
@@ -309,30 +471,24 @@ elif st.session_state.page == "army_builder":
     for i, u in enumerate(st.session_state.army_list):
         with st.container():
             st.markdown(f"""
-            <div style="background-color: {'#2a2a2a' if u.get('type') == 'hero' else '#1e1e1e'}; color: white; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class={'hero-card' if u.get('type') == 'hero' else 'unit-card'}>
+                <div style='display: flex; justify-content: space-between; align-items: center;'>
                     <div>
-                        <h4 style="margin: 0; color: {'#ffd700' if u.get('type') == 'hero' else '#fff'};">
-                            {u['name']} [{u.get('size', 1)}] {'🌟' if u.get('type') == 'hero' else ''}
-                        </h4>
-                        <p style="margin: 5px 0; color: #aaa;">
-                            Qua {u['quality']}+ / Déf {u.get('defense', '?')}+
-                        </p>
+                        <h4 style='margin:0; color:{"#ffd700" if u.get("type") == "hero" else "#fff"};'>{u['name']} [{u.get('size', 1)}] {'🌟' if u.get('type') == 'hero' else ''}</h4>
+                        <p style='margin:5px 0; color:#aaa;'>Qua {u['quality']}+ / Déf {u.get('defense', '?')}+</p>
                     </div>
-                    <div style="text-align: right; color: #4CAF50; font-weight: bold;">
-                        {u['cost']} pts
+                    <div style='text-align: right;'>
+                        <p style='margin:0; color:#4CAF50; font-weight: bold;'>{u['cost']} pts</p>
                     </div>
                 </div>
-                <div style="margin-top: 10px; color: #ccc;">
-                    <p style="margin: 5px 0;">
-                        {format_weapon(u.get('weapon', {}))}
-                    </p>
-                    {f"<p style='margin: 5px 0;'>Monture: {format_mount(u.get('mount'))}</p>" if u.get('mount') else ""}
+                <div style='margin-top: 10px; color:#ccc;'>
+                    <p style='margin:5px 0;'>{format_weapon(u.get('weapon', {}))}</p>
+                    {f"<p style='margin:5px 0;'>Monture: {format_mount(u.get('mount'))}</p>" if u.get('mount') else ""}
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            if st.button(f"Supprimer", key=f"del-{i}"):
+            if st.button(f"Supprimer {u['name']}", key=f"del-{i}"):
                 st.session_state.history.append({
                     "army_list": copy.deepcopy(st.session_state.army_list),
                     "army_cost": st.session_state.army_cost
@@ -343,7 +499,7 @@ elif st.session_state.page == "army_builder":
 
     # Export
     st.divider()
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     army_data = {
         "name": st.session_state.list_name,
@@ -371,12 +527,61 @@ elif st.session_state.page == "army_builder":
             mime="application/json"
         )
 
+    with col3:
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Liste OPR - {army_data['name']}</title>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .army-title {{ text-align: center; margin-bottom: 20px; }}
+                .unit {{ margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
+                .hero {{ background-color: #fffde7; }}
+                .stats {{ display: flex; gap: 10px; margin-bottom: 10px; }}
+                .stat {{ background: #e3f2fd; padding: 5px 10px; border-radius: 3px; }}
+            </style>
+        </head>
+        <body>
+            <h1 class="army-title">Liste d'armée: {army_data['name']}</h1>
+            <p><strong>Faction:</strong> {army_data['faction']} | <strong>Points:</strong> {army_data['total_cost']}/{army_data['points']}</p>
+        """
+
+        # Ajout des unités
+        for unit in army_data['army_list']:
+            html_content += f"""
+            <div class="unit {'hero' if unit.get('type') == 'hero' else ''}">
+                <h3>{unit['name']} [{unit.get('size', 1)}] ({unit['cost']} pts)</h3>
+                <div class="stats">
+                    <div class="stat"><strong>Qualité:</strong> {unit['quality']}+</div>
+                    <div class="stat"><strong>Défense:</strong> {unit.get('defense', '?')}+</div>
+                </div>
+                <p><strong>Arme:</strong> {format_weapon(unit.get('weapon', {}))}</p>
+            </div>
+            """
+
+        html_content += """
+        </body>
+        </html>
+        """
+
+        st.download_button(
+            "Exporter en HTML",
+            html_content,
+            file_name=f"{st.session_state.list_name}.html",
+            mime="text/html"
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
 # PAGE 3 - Options de l'unité (avec checkbox pour les héros)
 elif st.session_state.page == "unit_options":
     unit = st.session_state.current_unit
     options = st.session_state.current_options
 
-    st.title(f"Personnaliser: {unit['name']}")
+    st.markdown("<div class='main'>", unsafe_allow_html=True)
+    st.markdown(f"<h1 class='title'>Personnaliser: {unit['name']}</h1>", unsafe_allow_html=True)
     st.caption(f"Type: {'Héros' if unit.get('type') == 'hero' else 'Unité'} • Base: {unit['base_cost']} pts")
 
     # Bouton retour
@@ -386,8 +591,8 @@ elif st.session_state.page == "unit_options":
 
     # Affichage des caractéristiques de base
     st.markdown(f"""
-    <div style="background-color: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <h4 style="margin-top: 0;">Caractéristiques de base</h4>
+    <div class='option-card'>
+        <h4 style='margin-top: 0;'>Caractéristiques de base</h4>
         <p><strong>Taille:</strong> {unit.get('size', 10)} | <strong>Qualité:</strong> {unit['quality']}+ | <strong>Défense:</strong> {unit.get('defense', '?')}+</p>
         <p><strong>Règles spéciales:</strong> {', '.join(unit.get('special_rules', []))}</p>
     </div>
@@ -403,16 +608,16 @@ elif st.session_state.page == "unit_options":
 
     # Gestion des armes
     if 'weapons' in unit and unit['weapons']:
-        st.subheader("Armes")
-        weapon_options = [format_weapon(w) for w in unit['weapons']]
+        st.markdown("<h3 class='subtitle'>Armes</h3>", unsafe_allow_html=True)
 
         if unit.get('type') == 'hero':
             # Pour les héros: checkbox pour chaque arme
             for i, weapon in enumerate(unit['weapons']):
-                if st.checkbox(f"{format_weapon(weapon)}", key=f"weapon-{i}"):
+                if st.checkbox(f"{format_weapon(weapon)}", value=(options['weapon'] == weapon), key=f"weapon-{i}"):
                     options['weapon'] = weapon
         else:
             # Pour les unités: selectbox
+            weapon_options = [format_weapon(w) for w in unit['weapons']]
             selected_weapon = st.selectbox(
                 "Sélectionnez une arme",
                 weapon_options,
@@ -426,7 +631,7 @@ elif st.session_state.page == "unit_options":
     if 'upgrade_groups' in unit:
         for group in unit['upgrade_groups']:
             if group['type'] == 'mount' and 'options' in group:
-                st.subheader(group['group'])
+                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
 
                 if unit.get('type') == 'hero':
                     # Pour les héros: checkbox pour chaque monture
@@ -461,7 +666,7 @@ elif st.session_state.page == "unit_options":
     if 'upgrade_groups' in unit:
         for group in unit['upgrade_groups']:
             if group['type'] == 'upgrades' and 'options' in group:
-                st.subheader(group['group'])
+                st.markdown(f"<h3 class='subtitle'>{group['group']}</h3>", unsafe_allow_html=True)
 
                 if unit.get('type') == 'hero':
                     # Pour les héros: checkbox pour chaque amélioration
@@ -510,10 +715,9 @@ elif st.session_state.page == "unit_options":
                      sum(opt['cost'] for group in options['selected_options'].values() for opt in group)
         current_size = unit.get('size', 10)
 
-    st.divider()
     st.markdown(f"""
-    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px;">
-        <h4 style="margin-top: 0;">Récapitulatif</h4>
+    <div class='option-card'>
+        <h4 style='margin-top: 0;'>Récapitulatif</h4>
         <p><strong>Taille finale:</strong> {current_size} {'(x2 combinée)' if options['combined'] and unit.get('type') != 'hero' else ''}</p>
         <p><strong>Coût total:</strong> {total_cost} pts</p>
     </div>
@@ -539,3 +743,5 @@ elif st.session_state.page == "unit_options":
         st.session_state.army_cost += total_cost
         st.session_state.page = "army_builder"
         st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
