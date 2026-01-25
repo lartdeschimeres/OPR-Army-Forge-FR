@@ -27,20 +27,7 @@
     "Aura de Lacération au tir": "Cette figurine et son unité obtiennent la règle spéciale Lacération lorsqu’elles tirent.",
     "Aura de Combattant imprévisible": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible.",
     "Aura de Défense versatile": "Cette figurine et son unité obtiennent la règle spéciale Défense versatile.",
-    "Aura de Boost de Guerrier-né": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né.",
-    "Coriace (X)": "Cette figurine ignore les premières X blessures subies chaque phase.",
-    "Héros": "Cette figurine est un héros et peut mener des unités.",
-    "Furieux": "Cette unité obtient +1 aux jets d'attaque en mêlée lorsqu'elle est activée.",
-    "Effrayant (X)": "Les unités ennemies à X\" ou moins subissent un malus de -X aux jets de moral.",
-    "Lanceur de sorts (X)": "Cette figurine peut lancer X sorts par activation.",
-    "Perforant": "Cette arme ignore les bonus de Défense contre les blessures infligées.",
-    "Percée": "Cette arme permet de réallouer les blessures non sauvées à d'autres figurines dans l'unité ennemie.",
-    "Impact (X)": "Lors d'une charge, cette figurine inflige X blessures automatiques à l'unité ennemie.",
-    "Rapide": "Cette figurine peut se déplacer de 3\" supplémentaires lors d'une activation.",
-    "Volant": "Cette figurine peut voler et ignore les obstacles lors de ses déplacements.",
-    "Piétinement (A X, PA(Y))": "Cette figurine peut piétiner les unités ennemies, infligeant X attaques avec PA(Y).",
-    "Contre-charge": "Cette unité obtient +1 aux jets d'attaque en mêlée si elle est chargée.",
-    "Éclaireur": "Cette unité peut être déployée en dehors de la zone de déploiement standard."
+    "Aura de Boost de Guerrier-né": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né."
   },
   "units": [
     {
