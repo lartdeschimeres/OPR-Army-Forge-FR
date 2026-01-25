@@ -16,6 +16,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# CSS personnalisé pour les expanders
+st.markdown("""
+<style>
+    .stExpander > details > summary {
+        background-color: #e9ecef;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    .stExpander > details > div {
+        padding: 10px 12px;
+        background-color: #f8f9fa;
+        border-radius: 0 0 4px 4px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Chemins des fichiers
 BASE_DIR = Path(__file__).resolve().parent
 FACTIONS_DIR = BASE_DIR / "lists" / "data" / "factions"
@@ -232,7 +250,7 @@ def find_option_by_name(options, name):
         return None
 
 def display_faction_rules(faction_data):
-    """Affiche les règles spéciales de la faction sous forme d'accordéon dépliable, pliées par défaut."""
+    """Affiche les règles spéciales de la faction sous forme d'expanders Streamlit, pliées par défaut."""
     if not faction_data or 'special_rules_descriptions' not in faction_data:
         return
 
@@ -244,89 +262,10 @@ def display_faction_rules(faction_data):
         st.info("Cette faction n'a pas de règles spéciales spécifiques.")
         return
 
-    # CSS pour l'accordéon
-    st.markdown("""
-    <style>
-    .faction-rules {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 10px;
-        margin-bottom: 20px;
-    }
-    .rule-item {
-        margin-bottom: 5px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-    .rule-header {
-        background-color: #e9ecef;
-        padding: 8px 12px;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 4px;
-    }
-    .rule-header:hover {
-        background-color: #dee2e6;
-    }
-    .rule-name {
-        font-weight: bold;
-        color: #2c3e50;
-    }
-    .rule-description {
-        padding: 10px 12px;
-        color: #495057;
-        display: none;  /* Masqué par défaut */
-        background-color: #f8f9fa;
-        border-top: 1px solid #ddd;
-    }
-    .expand-icon {
-        transition: transform 0.2s;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # JavaScript pour gérer le dépliement
-    st.markdown("""
-    <script>
-    function toggleRule(id) {
-        const content = document.getElementById('rule-content-' + id);
-        const icon = document.getElementById('rule-icon-' + id);
-        if (content.style.display === 'block') {
-            content.style.display = 'none';
-            icon.style.transform = 'rotate(0deg)';
-            icon.textContent = '▼';
-        } else {
-            content.style.display = 'block';
-            icon.style.transform = 'rotate(180deg)';
-            icon.textContent = '▲';
-        }
-    }
-    </script>
-    """, unsafe_allow_html=True)
-
-    # Conteneur principal
-    st.markdown('<div class="faction-rules">', unsafe_allow_html=True)
-
-    # Affichage des règles sous forme d'accordéon
-    rule_id = 0
+    # Affichage des règles sous forme d'expanders
     for rule_name, description in rules_descriptions.items():
-        rule_id += 1
-        st.markdown(f"""
-        <div class="rule-item">
-            <div class="rule-header" onclick="toggleRule({rule_id})">
-                <span class="rule-name">{rule_name}</span>
-                <span id="rule-icon-{rule_id}" class="expand-icon">▼</span>
-            </div>
-            <div id="rule-content-{rule_id}" class="rule-description">
-                {description}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
+        with st.expander(f"**{rule_name}**", expanded=False):
+            st.markdown(f"{description}")
 
 # ======================================================
 # LOCAL STORAGE
