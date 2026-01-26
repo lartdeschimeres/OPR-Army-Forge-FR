@@ -659,7 +659,7 @@ elif st.session_state.page == "army":
         double_size = st.checkbox(
             "Doubler les effectifs (+100% coût de base et armes)",
             value=False,
-            key=f"double_{unit['name']}"
+            key=f"double_{unit['name']}_{len(st.session_state.army_list)}"
         )
     
     multiplier = 2 if double_size else 1
@@ -678,14 +678,6 @@ elif st.session_state.page == "army":
         label = "doublée" if double_size else "standard"
         st.markdown(f"**Taille finale : {unit_size}** ({label})")
     
-    # Affichage de la taille finale de l'unité
-    if unit.get("type") == "hero":
-        st.markdown("**Taille finale: 1** (les héros sont toujours des unités individuelles)")
-    else:
-        st.markdown(f"**Taille finale: {unit_size}**")
-
-
-
      if st.button("Ajouter à l'armée"):
         try:
             weapon_data = format_weapon_details(weapon)
@@ -710,6 +702,7 @@ elif st.session_state.page == "army":
                 "cost": final_cost,
                 "base_cost": base_cost,
                 "size": unit_size,
+                "is_doubled": double_size,
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", []) if "Coriace(0)" not in r],
