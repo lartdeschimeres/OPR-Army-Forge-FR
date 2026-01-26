@@ -655,7 +655,7 @@ elif st.session_state.page == "army":
 
     # Calcul du coût final et de la taille
     if combined and unit.get("type") != "hero":
-        final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
+        final_cost = (base_cost + weapon_cost + mount_cost + upgrades_cost) * 2
         unit_size = base_size * 2
     else:
         final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
