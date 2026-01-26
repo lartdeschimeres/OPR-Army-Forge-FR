@@ -598,16 +598,7 @@ elif st.session_state.page == "army":
     weapon_cost = 0
     mount_cost = 0
     upgrades_cost = 0
-
-    # Gestion des unités combinées - non fonctionnel
-    # combined = False
-    # if unit.get("type") != "hero":
-    #    combined = st.checkbox(
-    #        "Unité combinée",
-    #        value=False,
-    #        key=f"combined_{unit['name']}"
-    #    )
-    
+ 
     # Options de l'unité
     for group in unit.get("upgrade_groups", []):
         st.markdown(f"**{group['group']}**")
@@ -660,17 +651,32 @@ elif st.session_state.page == "army":
                         if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
                             selected_options[group["group"]].append(o)
                             upgrades_cost += o["cost"]
-
-    # Calcul du coût final et de la taille - non focntionnel
-    # if combined and unit.get("type") != "hero":
-    #    final_cost = (base_cost + weapon_cost + mount_cost + upgrades_cost) * 2
-    #    unit_size = base_size * 2
-    # else:
-    #    final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
-    #    unit_size = base_size
+    # -------------------------------
+    # Effectifs doublés (unités uniquement)
+    # -------------------------------
+    double_size = False
+    if unit.get("type") != "hero":
+        double_size = st.checkbox(
+            "Doubler les effectifs (+100% coût de base et armes)",
+            value=False,
+            key=f"double_{unit['name']}"
+        )
     
-    final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
-    unit_size = base_size
+    multiplier = 2 if double_size else 1
+    
+    # -------------------------------
+    # Calcul du coût final
+    # -------------------------------
+    core_cost = (base_cost + weapon_cost) * multiplier
+    final_cost = core_cost + upgrades_cost + mount_cost
+
+    unit_size = base_size * multiplier
+
+    if unit.get("type") == "hero":
+        st.markdown("**Taille finale : 1** (héros)")
+    else:
+        label = "doublée" if double_size else "standard"
+        st.markdown(f"**Taille finale : {unit_size}** ({label})")
     
     # Affichage de la taille finale de l'unité
     if unit.get("type") == "hero":
@@ -678,9 +684,9 @@ elif st.session_state.page == "army":
     else:
         st.markdown(f"**Taille finale: {unit_size}**")
 
-    # st.markdown(f"**Coût total: {final_cost} pts**")
 
-    if st.button("Ajouter à l'armée"):
+
+     if st.button("Ajouter à l'armée"):
         try:
             weapon_data = format_weapon_details(weapon)
             total_coriace = 0
