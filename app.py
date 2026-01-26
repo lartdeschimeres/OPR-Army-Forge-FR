@@ -8,10 +8,10 @@ import base64
 import math
 
 # ======================================================
-# CONFIGURATION POUR SIMON JOINVILLE FOUQUET
+# CONFIGURATION
 # ======================================================
 st.set_page_config(
-    page_title="OPR Army Forge FR - Simon Joinville Fouquet",
+    page_title="OPR Army Forge FR",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -596,10 +596,20 @@ elif st.session_state.page == "army":
 
     # Gestion des unités combinées - SUPPRESSION DÉFINITIVE POUR LES HÉROS
     if unit.get("type") == "hero":
-        combined = False  # Les héros ne peuvent JAMAIS être combinés
+        for k in list(st.session_state.keys()):
+            if k.startswith("combined_"):
+                del st.session_state[k]
+        combined = False
+    
+    if unit.get("type") == "hero":
+        combined = False
     else:
-        combined = st.checkbox("Unité combinée", value=False)
-
+        combined = st.checkbox(
+            "Unité combinée",
+            value=False,
+            key=f"combined_{unit['name']}"
+        )
+    
     # Options de l'unité
     for group in unit.get("upgrade_groups", []):
         st.markdown(f"**{group['group']}**")
