@@ -678,7 +678,7 @@ elif st.session_state.page == "army":
         label = "doublée" if double_size else "standard"
         st.markdown(f"**Taille finale : {unit_size}** ({label})")
     
-     if st.button("Ajouter à l'armée"):
+        if st.button("Ajouter à l'armée"):
         try:
             weapon_data = format_weapon_details(weapon)
             total_coriace = 0
