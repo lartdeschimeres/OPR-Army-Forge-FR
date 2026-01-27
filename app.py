@@ -58,9 +58,9 @@ GAME_CONFIG = {
     "Grimdark Future": {
         "display_name": "Grimdark Future",
         "max_points": 10000,
-        "min_points": 200,
-        "default_points": 800,
-        "point_step": 200,
+        "min_points": 250,
+        "default_points": 1000,
+        "point_step": 250,
         "description": "Jeu de bataille futuriste",
         "hero_limit": 375,
         "unit_copy_rule": 750,
@@ -266,7 +266,183 @@ def display_faction_rules(faction_data):
     for rule_name, description in rules_descriptions.items():
         with st.expander(f"**{rule_name}**", expanded=False):
             st.markdown(f"{description}")
+def export_html(army_list):
+    def esc(txt):
+        return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+    html = """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>OPR Army List</title>
+<style>
+:root {
+  --bg-main: #2e2f2b;
+  --bg-card: #3a3c36;
+  --bg-header: #1f201d;
+  --accent: #9fb39a;
+  --accent-soft: #6e7f6a;
+  --text-main: #e6e6e6;
+  --text-muted: #b0b0b0;
+  --border: #555;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+.army {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.unit-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.unit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-header);
+  padding: 10px 14px;
+  margin: -16px -16px 12px -16px;
+}
+
+.unit-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.cost {
+  font-weight: bold;
+}
+
+.stats {
+  margin-bottom: 10px;
+}
+
+.stats span {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: #000;
+  padding: 4px 8px;
+  margin-right: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 6px;
+  text-align: left;
+}
+
+th {
+  background: #262725;
+}
+
+.rules {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.rules span {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+<div class="army">
+"""
+
+    for unit in army_list:
+        name = esc(unit.get("name", "Unité"))
+        cost = unit.get("cost", 0)
+        quality = esc(unit.get("quality", "-"))
+        defense = esc(unit.get("defense", "-"))
+        coriace = unit.get("coriace")
+
+        html += f"""
+<section class="unit-card">
+  <div class="unit-header">
+    <h2>{name}</h2>
+    <span class="cost">{cost} pts</span>
+  </div>
+
+  <div class="stats">
+    <span>Quality {quality}</span>
+    <span>Defense {defense}</span>
+"""
+
+        if coriace:
+            html += f"<span>Tough {coriace}</span>"
+
+        html += "</div>"
+
+        # ---- WEAPONS ----
+        weapons = unit.get("weapon")
+        if weapons:
+            if not isinstance(weapons, list):
+                weapons = [weapons]
+
+            html += """
+<table>
+<thead>
+<tr>
+  <th>Weapon</th><th>RNG</th><th>ATK</th><th>AP</th><th>SPE</th>
+</tr>
+</thead>
+<tbody>
+"""
+            for w in weapons:
+                html += f"""
+<tr>
+  <td>{esc(w.get('name', '-'))}</td>
+  <td>{esc(w.get('range', '-'))}</td>
+  <td>{esc(w.get('attacks', '-'))}</td>
+  <td>{esc(w.get('ap', '-'))}</td>
+  <td>{esc(", ".join(w.get('special', [])) if w.get('special') else '-'}</td>
+</tr>
+"""
+            html += "</tbody></table>"
+
+        # ---- SPECIAL RULES ----
+        rules = unit.get("rules", [])
+        if rules:
+            html += "<div class='rules'><strong>Special Rules:</strong> "
+            for r in rules:
+                html += f"<span>{esc(r)}</span>"
+            html += "</div>"
+
+        html += "</section>"
+
+    html += """
+</div>
+</body>
+</html>
+"""
+
+    return html
+        
 # ======================================================
 # LOCAL STORAGE
 # ======================================================
