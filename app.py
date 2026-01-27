@@ -7,6 +7,12 @@ import re
 import base64
 import math
 
+# -------------------------------
+# Initialisation du session_state
+# -------------------------------
+if "game" not in st.session_state:
+    st.session_state.game = "Grimdark Future"
+    
 # ======================================================
 # CONFIGURATION
 # ======================================================
@@ -979,7 +985,7 @@ army_limit = st.session_state.get("points", 0)
 
 army_data = {
     "name": army_name,
-    "game": st.session_state.game,
+    "game": st.session_state.get("game", "Grimdark Future"),
     "faction": st.session_state.faction,
     "points": army_limit,
     "total_cost": st.session_state.army_cost,
@@ -991,6 +997,14 @@ json_data = json.dumps(army_data, indent=2, ensure_ascii=False)
 # ------------------------------------------------------
 # SAUVEGARDE & EXPORTS
 # ------------------------------------------------------
+export_data = {
+    "game": st.session_state.get("game", "Grimdark Future"),
+    "army_name": army_name,
+    "faction": faction_name,
+    "points": total_points,
+    "units": export_units
+}
+
 st.divider()
 st.subheader("Sauvegarde & Exports")
 
