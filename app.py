@@ -736,12 +736,18 @@ if st.session_state.page == "setup":
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE (AVEC BOUTON "RETOUR À LA PAGE 1")
 # ======================================================
 elif st.session_state.page == "army":
-    <div class="army-header">
-        <div class="army-title">{{army_name}}</div>
-        <div class="army-meta">
-          {{army_limit}} pts
+
+    st.markdown(
+        f"""
+        <div class="army-header">
+            <div class="army-title">{st.session_state.list_name}</div>
+            <div class="army-meta">
+              {st.session_state.army_cost} / {st.session_state.points} pts
+            </div>
         </div>
-    </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Bouton pour revenir à la page 1
     if st.button("⬅ Retour à la page 1"):
@@ -984,17 +990,26 @@ elif st.session_state.page == "army":
     army_limit = st.session_state.points
     army = st.session_state.army_list
 
-with col1:
-        if st.button("Sauvegarder"):
-            saved_lists = ls_get("opr_saved_lists")
-            current_lists = json.loads(saved_lists) if saved_lists else []
-            if not isinstance(current_lists, list):
-                current_lists = []
-            current_lists.append(army_data)
-            ls_set("opr_saved_lists", current_lists)
-            st.success("Liste sauvegardée!")
-    col1, col2 = st.columns(2)
+# ------------------------------------------------------
+# SAUVEGARDE
+# ------------------------------------------------------
+st.divider()
+st.subheader("Sauvegarde")
 
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("💾 Sauvegarder"):
+        saved_lists = ls_get("opr_saved_lists")
+        current_lists = json.loads(saved_lists) if saved_lists else []
+        if not isinstance(current_lists, list):
+            current_lists = []
+        current_lists.append(army_data)
+        ls_set("opr_saved_lists", current_lists)
+        st.success("Liste sauvegardée !")
+# ------------------------------------------------------
+# EXPORTS
+# ------------------------------------------------------
 st.divider()
 st.subheader("Exports")
 
@@ -1014,6 +1029,14 @@ with col2:
         army_list=army,
         army_name=army_name,
         army_limit=army_limit
+    )
+
+    st.download_button(
+        "🖨 Export HTML",
+        data=html_content,
+        file_name=f"{army_name}.html",
+        mime="text/html",
+        use_container_width=True
     )
 
     st.download_button(
