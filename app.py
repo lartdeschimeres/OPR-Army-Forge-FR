@@ -12,6 +12,12 @@ import math
 # -------------------------------
 if "game" not in st.session_state:
     st.session_state.game = "Grimdark Future"
+
+if "faction" not in st.session_state:
+    st.session_state.faction = None
+
+if "points" not in st.session_state:
+    st.session_state.points = GAME_CONFIG["Grimdark Future"]["default_points"]
     
 # ======================================================
 # CONFIGURATION
