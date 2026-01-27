@@ -267,7 +267,7 @@ def display_faction_rules(faction_data):
         with st.expander(f"**{rule_name}**", expanded=False):
             st.markdown(f"{description}")
 
-def export_html(army_list):
+def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -296,14 +296,6 @@ body {
   margin: 0;
   padding: 20px;
 }
-
-<div class="army-header">
-  <div class="army-title">{esc(army_name)}</div>
-  <div class="army-meta">
-    Grimdark Future – One Page Rules<br>
-    {total_points} / {army_limit} pts
-  </div>
-</div>
 
 .army-header {
     margin-bottom: 16px;
@@ -744,6 +736,13 @@ if st.session_state.page == "setup":
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE (AVEC BOUTON "RETOUR À LA PAGE 1")
 # ======================================================
 elif st.session_state.page == "army":
+    <div class="army-header">
+        <div class="army-title">{{army_name}}</div>
+        <div class="army-meta">
+          {{army_limit}} pts
+        </div>
+    </div>
+
     # Bouton pour revenir à la page 1
     if st.button("⬅ Retour à la page 1"):
         st.session_state.page = "setup"
@@ -979,7 +978,13 @@ elif st.session_state.page == "army":
         "army_list": st.session_state.army_list,
         "date": datetime.now().isoformat()
     }
-    with col1:
+    
+    json_data = json.dumps(army_data, ensure_ascii=False, indent=2)
+    army_name = st.session_state.list_name
+    army_limit = st.session_state.points
+    army = st.session_state.army_list
+
+with col1:
         if st.button("Sauvegarder"):
             saved_lists = ls_get("opr_saved_lists")
             current_lists = json.loads(saved_lists) if saved_lists else []
@@ -989,6 +994,11 @@ elif st.session_state.page == "army":
             ls_set("opr_saved_lists", current_lists)
             st.success("Liste sauvegardée!")
     col1, col2 = st.columns(2)
+
+st.divider()
+st.subheader("Exports")
+
+col1, col2 = st.columns(2)
 
 with col1:
     st.download_button(
@@ -1001,7 +1011,7 @@ with col1:
 
 with col2:
     html_content = export_html(
-        army=army,
+        army_list=army,
         army_name=army_name,
         army_limit=army_limit
     )
