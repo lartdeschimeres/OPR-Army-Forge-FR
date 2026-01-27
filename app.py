@@ -874,19 +874,19 @@ elif st.session_state.page == "army":
     
     multiplier = 2 if double_size else 1
                
-# -------------------------------
-# Calcul du coût final
-# -------------------------------
-core_cost = (base_cost + weapon_cost) * multiplier
-final_cost = core_cost + upgrades_cost + mount_cost
+    # -------------------------------
+    # Calcul du coût final
+    # -------------------------------
+    core_cost = (base_cost + weapon_cost) * multiplier
+    final_cost = core_cost + upgrades_cost + mount_cost
 
-unit_size = base_size * multiplier
+    unit_size = base_size * multiplier
 
-if unit.get("type") == "hero":
-    st.markdown("**Taille finale : 1** (héros)")
-else:
-    label = "doublée" if double_size else "standard"
-    st.markdown(f"**Taille finale : {unit_size}** ({label})")
+    if unit.get("type") == "hero":
+        st.markdown("**Taille finale : 1** (héros)")
+    else:
+        label = "doublée" if double_size else "standard"
+        st.markdown(f"**Taille finale : {unit_size}** ({label})")
     
     if st.button("Ajouter à l'armée"):
         try:
