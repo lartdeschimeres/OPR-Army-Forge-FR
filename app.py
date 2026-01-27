@@ -89,18 +89,18 @@ def check_unit_copy_rule(army_list, army_points, game_config):
         for unit in army_list:
             if unit.get("type") == "hero":
             continue  # OPR : héros exclus du calcul
-        for unit in army_list:
-            unit_name = unit["name"]
-            count_key = unit_name
-            if count_key in unit_counts:
-                unit_counts[count_key] += 1
-            else:
-                unit_counts[count_key] = 1
-        for unit_name, count in unit_counts.items():
-            if count > max_copies:
-                st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
-                return False
-    return True
+            for unit in army_list:
+                unit_name = unit["name"]
+                count_key = unit_name
+                if count_key in unit_counts:
+                    unit_counts[count_key] += 1
+                else:
+                    unit_counts[count_key] = 1
+            for unit_name, count in unit_counts.items():
+                if count > max_copies:
+                    st.error(f"Trop de copies de l'unité! Maximum autorisé: {max_copies} (1+{x_value} pour {game_config['unit_copy_rule']} pts)")
+                    return False
+        return True
 
 def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
     if not game_config.get("unit_max_cost_ratio"):
