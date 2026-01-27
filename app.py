@@ -939,39 +939,39 @@ else:
         except Exception as e:
             st.error(f"Erreur lors de la création de l'unité: {str(e)}")
 
-    # Liste de l'armée
-    st.divider()
-    st.subheader("Liste de l'armée")
-    if not st.session_state.army_list:
-        st.info("Ajoutez des unités pour commencer")
-    for i, u in enumerate(st.session_state.army_list):
-        with st.container():
-            qua_def_coriace = f"Qua {u['quality']}+ / Déf {u['defense']}+"
-            if u.get("coriace"):
-                qua_def_coriace += f" / Coriace {u['coriace']}"
-            unit_header = f"### {u['name']} [{u.get('size', 1)}] ({u['cost']} pts) | {qua_def_coriace}"
-            if u.get("type") == "hero":
-                unit_header += " | 🌟 Héros"
-            st.markdown(unit_header)
-            if u.get("rules"):
-                rules_text = ", ".join(u["rules"])
-                st.markdown(f"**Règles spéciales:** {rules_text}")
-            if 'weapon' in u and u['weapon']:
-                weapon_details = format_weapon_details(u['weapon'])
-                st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
-            if u.get("options"):
-                for group_name, opts in u["options"].items():
-                    if isinstance(opts, list) and opts:
-                        st.markdown(f"**{group_name}:**")
-                        for opt in opts:
-                            st.markdown(f"• {opt.get('name', '')}")
-            if u.get("mount"):
-                mount_details = format_mount_details(u["mount"])
-                st.markdown(f"**Monture:** {mount_details}")
-            if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
-                st.session_state.army_cost -= u["cost"]
-                st.session_state.army_list.pop(i)
-                st.rerun()
+# Liste de l'armée
+st.divider()
+st.subheader("Liste de l'armée")
+if not st.session_state.army_list:
+    st.info("Ajoutez des unités pour commencer")
+for i, u in enumerate(st.session_state.army_list):
+    with st.container():
+        qua_def_coriace = f"Qua {u['quality']}+ / Déf {u['defense']}+"
+        if u.get("coriace"):
+            qua_def_coriace += f" / Coriace {u['coriace']}"
+        unit_header = f"### {u['name']} [{u.get('size', 1)}] ({u['cost']} pts) | {qua_def_coriace}"
+        if u.get("type") == "hero":
+            unit_header += " | 🌟 Héros"
+        st.markdown(unit_header)
+        if u.get("rules"):
+            rules_text = ", ".join(u["rules"])
+            st.markdown(f"**Règles spéciales:** {rules_text}")
+        if 'weapon' in u and u['weapon']:
+            weapon_details = format_weapon_details(u['weapon'])
+            st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
+        if u.get("options"):
+            for group_name, opts in u["options"].items():
+                if isinstance(opts, list) and opts:
+                    st.markdown(f"**{group_name}:**")
+                    for opt in opts:
+                        st.markdown(f"• {opt.get('name', '')}")
+        if u.get("mount"):
+             mount_details = format_mount_details(u["mount"])
+            st.markdown(f"**Monture:** {mount_details}")
+        if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
+            st.session_state.army_cost -= u["cost"]
+            st.session_state.army_list.pop(i)
+            st.rerun()
 
 army_name = st.session_state.get("list_name", "Liste sans nom")
 army = st.session_state.get("army_list", [])
