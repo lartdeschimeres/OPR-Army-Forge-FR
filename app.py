@@ -266,6 +266,7 @@ def display_faction_rules(faction_data):
     for rule_name, description in rules_descriptions.items():
         with st.expander(f"**{rule_name}**", expanded=False):
             st.markdown(f"{description}")
+
 def export_html(army_list):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -295,6 +296,14 @@ body {
   margin: 0;
   padding: 20px;
 }
+
+<div class="army-header">
+  <div class="army-title">{esc(army_name)}</div>
+  <div class="army-meta">
+    Grimdark Future – One Page Rules<br>
+    {total_points} / {army_limit} pts
+  </div>
+</div>
 
 .army {
   max-width: 1100px;
