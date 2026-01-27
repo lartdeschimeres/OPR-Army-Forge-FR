@@ -7,18 +7,6 @@ import re
 import base64
 import math
 
-# -------------------------------
-# Initialisation du session_state
-# -------------------------------
-if "game" not in st.session_state:
-    st.session_state.game = "Grimdark Future"
-
-if "faction" not in st.session_state:
-    st.session_state.faction = None
-
-if "points" not in st.session_state:
-    st.session_state.points = GAME_CONFIG["Grimdark Future"]["default_points"]
-    
 # ======================================================
 # CONFIGURATION
 # ======================================================
@@ -98,6 +86,9 @@ def check_unit_copy_rule(army_list, army_points, game_config):
         x_value = math.floor(army_points / game_config["unit_copy_rule"])
         max_copies = 1 + x_value
         unit_counts = {}
+        for unit in army_list:
+            if unit.get("type") == "hero":
+            continue  # OPR : héros exclus du calcul
         for unit in army_list:
             unit_name = unit["name"]
             count_key = unit_name
@@ -641,6 +632,21 @@ def load_factions():
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 # ======================================================
+# INITIALISATION SESSION STATE (OBLIGATOIRE)
+# ======================================================
+if "game" not in st.session_state:
+    st.session_state.game = "Grimdark Future"
+
+if "faction" not in st.session_state:
+    st.session_state.faction = None
+
+if "points" not in st.session_state:
+    st.session_state.points = GAME_CONFIG["Grimdark Future"]["default_points"]
+
+if "army_list" not in st.session_state:
+    st.session_state.army_list = []
+
+# ======================================================
 # FONCTION POUR LA BARRE DE PROGRESSION
 # ======================================================
 def show_points_progress(current_points, max_points):
@@ -875,16 +881,19 @@ elif st.session_state.page == "army":
                             selected_options[group["group"]].append(o)
                             upgrades_cost += o["cost"]
     
-    # Doublement d'effectif : INTERDIT pour les héros
-    if unit.get("type") != "hero":
-        double_size = st.checkbox(
-            "Doubler les effectifs (+100% coût de base et armes)",
-            value=False
-        )
-    else:
-        double_size = False
-    
-    multiplier = 2 if double_size else 1
+# -------------------------------
+# Doublement d'effectif (OPR)
+# -------------------------------
+if unit.get("type") != "hero":
+    double_size = st.checkbox(
+        "Doubler les effectifs (+100% coût de base et armes)",
+        value=False,
+        key=f"double_{unit['name']}"
+    )
+else:
+    double_size = False
+
+multiplier = 2 if double_size else 1
                
     # -------------------------------
     # Calcul du coût final
@@ -1003,13 +1012,7 @@ json_data = json.dumps(army_data, indent=2, ensure_ascii=False)
 # ------------------------------------------------------
 # SAUVEGARDE & EXPORTS
 # ------------------------------------------------------
-export_data = {
-    "game": st.session_state.get("game", "Grimdark Future"),
-    "army_name": army_name,
-    "faction": faction_name,
-    "points": total_points,
-    "units": export_units
-}
+export_data = army_data
 
 st.divider()
 st.subheader("Sauvegarde & Exports")
