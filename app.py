@@ -296,9 +296,7 @@ def export_html(army_list, army_name, army_limit):
   --bg-card: #3a3c36;
   --bg-header: #1f201d;
   --accent: #9fb39a;
-  --accent-soft: #6e7f6a;
   --text-main: #e6e6e6;
-  --text-muted: #b0b0b0;
   --border: #555;
 }}
 body {{
@@ -307,24 +305,6 @@ body {{
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   margin: 0;
   padding: 20px;
-}}
-.army-header {{
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #444;
-}}
-.army-title {{
-    font-size: 22px;
-    font-weight: bold;
-    letter-spacing: 1px;
-}}
-.army-meta {{
-    font-size: 12px;
-    color: #bbb;
-}}
-.army {{
-  max-width: 1100px;
-  margin: auto;
 }}
 .unit-card {{
   background: var(--bg-card);
@@ -336,49 +316,20 @@ body {{
 .unit-header {{
   display: flex;
   justify-content: space-between;
-  align-items: center;
   background: var(--bg-header);
-  padding: 10px 14px;
+  padding: 10px;
   margin: -16px -16px 12px -16px;
   border-radius: 8px 8px 0 0;
-}}
-.unit-header h2 {{
-  margin: 0;
-  font-size: 18px;
-  color: var(--accent);
-}}
-.cost {{
-  font-weight: bold;
-  background: var(--accent-soft);
-  padding: 4px 8px;
-  border-radius: 4px;
-}}
-.stats {{
-  margin-bottom: 12px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}}
-.stats span {{
-  display: inline-block;
-  background: var(--accent-soft);
-  color: #000;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
 }}
 .section {{
   margin-bottom: 12px;
 }}
 .section-title {{
   font-weight: bold;
-  margin-bottom: 4px;
   color: var(--accent);
 }}
-.weapons-table, .rules-list, .upgrades-list, .mount-section {{
+.weapons-table, .mount-section {{
   margin-left: 16px;
-  margin-bottom: 8px;
 }}
 table {{
   width: 100%;
@@ -391,21 +342,11 @@ th, td {{
   padding: 6px;
   text-align: left;
 }}
-th {{
-  background: #262725;
-}}
-.rules-list span, .upgrades-list span {{
-  display: block;
-  margin: 2px 0;
-}}
 </style>
 </head>
 <body>
 <div class="army">
-    <div class="army-header">
-        <div class="army-title">{esc(army_name)}</div>
-        <div class="army-meta">{sum(u['cost'] for u in army_list)}/{army_limit} pts</div>
-    </div>
+    <h1>{esc(army_name)} ({sum(u['cost'] for u in army_list)}/{army_limit} pts)</h1>
 """
 
     for unit in army_list:
@@ -416,130 +357,9 @@ th {{
         coriace = unit.get("coriace", None)
 
         html += f"""
-    <section class="unit-card">
-        <div class="unit-header">
-            <h2>{name}</h2>
-            <span class="cost">{cost} pts</span>
-        </div>
+    <div class="unit-card">
+        <div class="unit-header
 
-        <div class="stats">
-            <span>Qualité {quality}+</span>
-            <span>Défense {defense}+</span>
-        """
-        if coriace:
-            html += f"<span>Coriace {coriace}</span>"
-        html += "</div>"
-
-        # Règles spéciales
-        if unit.get("special_rules"):
-            html += """
-        <div class="section">
-            <div class="section-title">Règles spéciales :</div>
-            <div class="rules-list">
-            """
-            for rule in unit["special_rules"]:
-                html += f"<span>• {esc(rule)}</span>"
-            html += "</div></div>"
-
-        # Améliorations
-        if unit.get("options"):
-            html += """
-        <div class="section">
-            <div class="section-title">Améliorations :</div>
-            <div class="upgrades-list">
-            """
-            for group_name, opts in unit["options"].items():
-                if isinstance(opts, list) and opts:
-                    for opt in opts:
-                        html += f"<span>• {esc(opt.get('name', ''))}</span>"
-            html += "</div></div>"
-
-        # Armes
-        if unit.get("weapons"):
-            html += """
-        <div class="section">
-            <div class="section-title">Armes :</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Attaques</th>
-                        <th>PA</th>
-                        <th>Règles spéciales</th>
-                    </tr>
-                </thead>
-                <tbody>
-            """
-            for weapon in unit["weapons"]:
-                html += f"""
-                <tr>
-                    <td>{esc(weapon.get('name', '-'))}</td>
-                    <td>{esc(weapon.get('attacks', '-'))}</td>
-                    <td>{esc(weapon.get('armor_piercing', '-'))}</td>
-                    <td>{esc(', '.join(weapon.get('special_rules', []))) if weapon.get('special_rules') else '-'}</td>
-                </tr>
-                """
-            html += "</tbody></table></div>"
-
-        # Monture (pour les héros)
-        if unit.get("mount"):
-            mount = unit["mount"]
-            mount_name = esc(mount.get('name', 'Monture non nommée'))
-            mount_quality = esc(mount.get('quality', '-'))
-            mount_defense = esc(mount.get('defense', '-'))
-            mount_special_rules = mount.get('special_rules', [])
-            mount_weapons = mount.get('weapons', [])
-
-            html += """
-        <div class="section">
-            <div class="section-title">Monture :</div>
-            <div class="mount-section">
-                <div class="stats">
-                    <span>Qualité {mount_quality}+</span>
-                    <span>Défense {mount_defense}+</span>
-                </div>
-            """.format(mount_quality=mount_quality, mount_defense=mount_defense)
-
-            if mount_special_rules:
-                html += "<div class='rules-list'>"
-                for rule in mount_special_rules:
-                    html += f"<span>• {esc(rule)}</span>"
-                html += "</div>"
-
-            if mount_weapons:
-                html += """
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Attaques</th>
-                            <th>PA</th>
-                            <th>Règles spéciales</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                """
-                for weapon in mount_weapons:
-                    html += f"""
-                    <tr>
-                        <td>{esc(weapon.get('name', '-'))}</td>
-                        <td>{esc(weapon.get('attacks', '-'))}</td>
-                        <td>{esc(weapon.get('armor_piercing', '-'))}</td>
-                        <td>{esc(', '.join(weapon.get('special_rules', []))) if weapon.get('special_rules') else '-'}</td>
-                    </tr>
-                    """
-                html += "</tbody></table>"
-
-            html += "</div></div>"
-
-        html += "</section>"
-
-    html += """
-</div>
-</body>
-</html>
-"""
-    return html
 
 # ======================================================
 # LOCAL STORAGE
