@@ -736,7 +736,6 @@ if st.session_state.page == "setup":
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE (AVEC BOUTON "RETOUR À LA PAGE 1")
 # ======================================================
 elif st.session_state.page == "army":
-
     st.markdown(
         f"""
         <div class="army-header">
@@ -971,30 +970,11 @@ elif st.session_state.page == "army":
                 st.session_state.army_cost -= u["cost"]
                 st.session_state.army_list.pop(i)
                 st.rerun()
-
-    # Sauvegarde/Export
-    st.divider()
-    col1, col2 = st.columns(2)
-    army_data = {
-        "name": st.session_state.list_name,
-        "game": st.session_state.game,
-        "faction": st.session_state.faction,
-        "points": st.session_state.points,
-        "total_cost": st.session_state.army_cost,
-        "army_list": st.session_state.army_list,
-        "date": datetime.now().isoformat()
-    }
-    
-    json_data = json.dumps(army_data, ensure_ascii=False, indent=2)
-    army_name = st.session_state.list_name
-    army_limit = st.session_state.points
-    army = st.session_state.army_list
-
 # ------------------------------------------------------
-# SAUVEGARDE
+# SAUVEGARDE & EXPORTS
 # ------------------------------------------------------
 st.divider()
-st.subheader("Sauvegarde")
+st.subheader("Sauvegarde & Exports")
 
 col1, col2 = st.columns(2)
 
@@ -1007,15 +987,8 @@ with col1:
         current_lists.append(army_data)
         ls_set("opr_saved_lists", current_lists)
         st.success("Liste sauvegardée !")
-# ------------------------------------------------------
-# EXPORTS
-# ------------------------------------------------------
-st.divider()
-st.subheader("Exports")
 
-col1, col2 = st.columns(2)
-
-with col1:
+with col2:
     st.download_button(
         "📦 Export JSON",
         data=json_data,
@@ -1024,19 +997,10 @@ with col1:
         use_container_width=True
     )
 
-with col2:
     html_content = export_html(
         army_list=army,
         army_name=army_name,
         army_limit=army_limit
-    )
-
-    st.download_button(
-        "🖨 Export HTML",
-        data=html_content,
-        file_name=f"{army_name}.html",
-        mime="text/html",
-        use_container_width=True
     )
 
     st.download_button(
