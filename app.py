@@ -967,7 +967,7 @@ for i, u in enumerate(st.session_state.army_list):
                         st.markdown(f"• {opt.get('name', '')}")
         if u.get("mount"):
              mount_details = format_mount_details(u["mount"])
-            st.markdown(f"**Monture:** {mount_details}")
+             st.markdown(f"**Monture:** {mount_details}")
         if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
             st.session_state.army_cost -= u["cost"]
             st.session_state.army_list.pop(i)
