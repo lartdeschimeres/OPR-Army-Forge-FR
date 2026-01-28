@@ -628,29 +628,40 @@ elif st.session_state.page == "army":
                 opt = mount_map[selected_mount]
                 mount = opt
                 mount_cost = opt["cost"]
-        else:  # Améliorations d'unité
-            if group["group"] == "Améliorations de rôle":
-                option_names = ["Aucune"] + [
-                    f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
-                ]
-                selected = st.radio(group["group"], option_names, key=f"{unit['name']}_{group['group']}")
-                if selected != "Aucune":
-                    opt_name = selected.split(" (+")[0]
-                    opt = next((o for o in group["options"] if o["name"] == opt_name), None)
-                    if opt:
-                        if group["group"] not in selected_options:
-                            selected_options[group["group"]] = []
-                        selected_options[group["group"]].append(opt)
-                        upgrades_cost += opt["cost"]
-            else:
-                st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
-                for o in group["options"]:
-                    if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
-                        if group["group"] not in selected_options:
-                            selected_options[group["group"]] = []
-                        if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
-                            selected_options[group["group"]].append(o)
-                            upgrades_cost += o["cost"]
+        else:  # upgrades
+    # 🔥 RÈGLE CLAIRE :
+    # - héros = choix UNIQUE
+    # - unités = choix MULTIPLE
+    is_hero = unit.get("type") == "hero"
+
+    if is_hero:
+        option_names = ["Aucune amélioration"] + [
+            f"{o['name']} (+{o['cost']} pts)" for o in group["options"]
+        ]
+
+        selected = st.radio(
+            group["group"],
+            option_names,
+            key=f"{unit['name']}_{group['group']}_radio"
+        )
+
+        if selected != "Aucune amélioration":
+            opt_name = selected.split(" (+")[0]
+            opt = next((o for o in group["options"] if o["name"] == opt_name), None)
+            if opt:
+                selected_options[group["group"]] = [opt]
+                upgrades_cost += opt["cost"]
+
+    else:
+        st.write("Sélectionnez les améliorations:")
+        for o in group["options"]:
+            key = f"{unit['name']}_{group['group']}_{o['name']}_chk"
+            if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=key):
+                selected_options.setdefault(group["group"], [])
+                if not any(opt["name"] == o["name"] for opt in selected_options[group["group"]]):
+                    selected_options[group["group"]].append(o)
+                    upgrades_cost += o["cost"]
+
     # -------------------------------
     # Effectifs doublés (unités uniquement)
     # -------------------------------
