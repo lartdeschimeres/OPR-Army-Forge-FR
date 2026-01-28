@@ -283,14 +283,14 @@ def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    html = """
+    html = f"""
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Liste d'Armée OPR</title>
+<title>Liste d'Armée OPR - {esc(army_name)}</title>
 <style>
-:root {
+:root {{
   --bg-main: #2e2f2b;
   --bg-card: #3a3c36;
   --bg-header: #1f201d;
@@ -299,51 +299,61 @@ def export_html(army_list, army_name, army_limit):
   --text-main: #e6e6e6;
   --text-muted: #b0b0b0;
   --border: #555;
-}
-body {
+}}
+body {{
   background: var(--bg-main);
   color: var(--text-main);
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   margin: 0;
   padding: 20px;
-}
+}}
 
-.army {
+.army {{
   max-width: 1100px;
   margin: auto;
-}
+}}
 
-.unit-card {
+.army-title {{
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}}
+
+.unit-card {{
   background: var(--bg-card);
   border: 1px solid var(--border);
   margin-bottom: 20px;
   padding: 16px;
-}
+}}
 
-.unit-header {
+.unit-header {{
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: var(--bg-header);
   padding: 10px 14px;
   margin: -16px -16px 12px -16px;
-}
+}}
 
-.unit-header h2 {
+.unit-header h2 {{
   margin: 0;
   font-size: 18px;
   color: var(--accent);
-}
+}}
 
-.cost {
+.cost {{
   font-weight: bold;
-}
+}}
 
-.stats {
+.stats {{
   margin-bottom: 10px;
-}
+}}
 
-.stats span {
+.stats span {{
   display: inline-block;
   background: var(--accent-soft);
   color: #000;
@@ -351,48 +361,47 @@ body {
   margin-right: 6px;
   font-size: 12px;
   font-weight: bold;
-}
+}}
 
-table {
+table {{
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 12px;
   border: 1px solid var(--border);
-}
+}}
 
-th, td {
+th, td {{
   border: 1px solid var(--border);
   padding: 6px;
   text-align: left;
-}
+}}
 
-th {
+th {{
   background: var(--bg-header);
   color: var(--text-main);
-}
+}}
 
-.rules {
+.rules {{
   margin-top: 10px;
   font-size: 12px;
-}
+}}
 
-.rules span {
+.rules span {{
   display: inline-block;
   margin-right: 8px;
   color: var(--accent);
-}
+}}
 
-.section-title {
+.section-title {{
   font-weight: bold;
   margin-top: 10px;
   margin-bottom: 5px;
   color: var(--text-main);
-}
+}}
 </style>
 </head>
 <body>
-html = f"""
 <div class="army">
   <!-- Titre de la liste -->
   <div class="army-title">
