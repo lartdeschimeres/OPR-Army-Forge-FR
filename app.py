@@ -279,84 +279,72 @@ def display_faction_rules(faction_data):
 # ======================================================
 # EXPORT HTML
 # ======================================================
-
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    html = f"""
+    html = """
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Liste d'Armée OPR - {esc(army_name)}</title>
+<title>Liste d'Armée OPR</title>
 <style>
-:root {{
-  --bg-main: #2e2f2b;      /* Fond sombre principal */
-  --bg-card: #3a3c36;      /* Fond des cartes d'unités */
-  --bg-header: #1f201d;    /* Fond des en-têtes */
-  --accent: #9fb39a;       /* Couleur d'accentuation */
-  --accent-soft: #6e7f6a;  /* Accentuation douce */
-  --text-main: #e6e6e6;    /* Texte principal clair */
-  --text-muted: #b0b0b0;   /* Texte secondaire atténué */
-  --border: #555;         /* Bordures */
-}}
+:root {
+  --bg-main: #ffffff;  /* Fond blanc */
+  --bg-card: #f8f9fa;  /* Fond des cartes légèrement gris clair */
+  --bg-header: #e9ecef;  /* Fond des en-têtes légèrement gris clair */
+  --accent: #9fb39a;
+  --accent-soft: #6e7f6a;
+  --text-main: #212529;  /* Texte noir */
+  --text-muted: #6c757d;  /* Texte gris */
+  --border: #2e2f2b;     /* Bordures en gris foncé */
+}
 
-body {{
+body {
   background: var(--bg-main);
   color: var(--text-main);
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   margin: 0;
   padding: 20px;
-}}
+}
 
-.army {{
+.army {
   max-width: 1100px;
   margin: auto;
-}}
+}
 
-.army-title {{
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-}}
-
-.unit-card {{
+.unit-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  margin-bottom: 30px;  /* Espacement entre les unités */
+  margin-bottom: 20px;
   padding: 16px;
-  page-break-inside: avoid;  /* Évite la coupure d'une unité sur plusieurs pages */
-}}
+}
 
-.unit-header {{
+.unit-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: var(--bg-header);
   padding: 10px 14px;
   margin: -16px -16px 12px -16px;
-}}
+}
 
-.unit-header h2 {{
+.unit-header h2 {
   margin: 0;
   font-size: 18px;
   color: var(--accent);
-}}
+}
 
-.cost {{
+.cost {
   font-weight: bold;
-}}
+}
 
-.stats {{
+.stats {
   margin-bottom: 10px;
-}}
+}
 
-.stats span {{
+.stats span {
   display: inline-block;
   background: var(--accent-soft);
   color: #000;
@@ -364,83 +352,50 @@ body {{
   margin-right: 6px;
   font-size: 12px;
   font-weight: bold;
-}}
+}
 
-table {{
+table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 12px;
   border: 1px solid var(--border);
-}}
+}
 
-th, td {{
+th, td {
   border: 1px solid var(--border);
   padding: 6px;
   text-align: left;
-}}
+}
 
-th {{
+th {
   background: var(--bg-header);
   color: var(--text-main);
-}}
+}
 
-.rules {{
+.rules {
   margin-top: 10px;
   font-size: 12px;
-}}
+}
 
-.rules span {{
+.rules span {
   display: inline-block;
   margin-right: 8px;
   color: var(--accent);
-}}
+}
 
-.section-title {{
+.section-title {
   font-weight: bold;
   margin-top: 10px;
-  margin-bottom: 5px;
-  color: var(--accent);
-}}
-
-.special-rules-title {{
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 30px;
-  margin-bottom: 10px;
-  color: var(--accent);
-  text-align: center;
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-}}
-
-.special-rules-list {{
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 15px;
-  margin-top: 10px;
-}}
-
-.special-rules-list ul {{
-  margin: 0;
-  padding-left: 20px;
-}}
-
-.special-rules-list li {{
   margin-bottom: 5px;
   color: var(--text-main);
-}}
+}
 </style>
 </head>
 <body>
 <div class="army">
-  <!-- Titre de la liste -->
-  <div class="army-title">
-    {esc(army_name)} • {sum(unit['cost'] for unit in army_list)}/{army_limit} pts • {army_list[0]['game'] if army_list else 'Jeu non spécifié'}
-  </div>
 """
 
-    # Ajout des unités
     for unit in army_list:
         name = esc(unit.get("name", "Unité"))
         cost = unit.get("cost", 0)
@@ -465,22 +420,13 @@ th {{
 
         html += "</div>"
 
-        # ---- Règles spéciales de l'unité ----
-        rules = unit.get("rules", [])
-        if rules:
-            html += '<div class="section-title">Règles spéciales :</div>'
-            html += "<div class='rules'>"
-            for r in rules:
-                html += f"<span>{esc(r)}</span>"
-            html += "</div>"
-
-        # ---- Armes ----
+        # ---- ARMES ----
         weapons = unit.get("weapon")
         if weapons:
             if not isinstance(weapons, list):
                 weapons = [weapons]
 
-            html += '<div class="section-title">Armes :</div>'
+            html += '<div class="section-title">Armes équipées :</div>'
             html += """
 <table>
 <thead>
@@ -502,7 +448,16 @@ th {{
 """
             html += "</tbody></table>"
 
-        # ---- Options ----
+        # ---- RÈGLES SPÉCIALES ----
+        rules = unit.get("rules", [])
+        if rules:
+            html += '<div class="section-title">Règles spéciales :</div>'
+            html += "<div class='rules'>"
+            for r in rules:
+                html += f"<span>{esc(r)}</span>"
+            html += "</div>"
+
+        # ---- OPTIONS ----
         options = unit.get("options", {})
         if options:
             html += '<div class="section-title">Options :</div>'
@@ -513,7 +468,7 @@ th {{
                         html += f"{esc(opt.get('name', ''))}, "
                     html += "</div>"
 
-        # ---- Monture (pour les héros) ----
+        # ---- MONTURE (pour les héros) ----
         mount = unit.get("mount")
         if mount:
             mount_name = esc(mount.get("name", "Monture non nommée"))
@@ -545,31 +500,8 @@ th {{
 
             html += "</div>"
 
-        html += "</section>"
-        html += "<br/>"  # Saut de ligne supplémentaire entre les unités
-
-    # ---- Règles spéciales de l'armée (à la fin) ----
-    if army_list and 'game' in army_list[0]:
-        game_name = army_list[0]['game']
-        faction_rules = {}
-        for unit in army_list:
-            if 'special_rules_descriptions' in unit:
-                faction_rules = unit['special_rules_descriptions']
-                break
-
-        if faction_rules:
-            html += """
-<div class="special-rules-title">
-  Règles Spéciales de l'Armée
-</div>
-<div class="special-rules-list">
-  <ul>
-"""
-            for rule_name, description in faction_rules.items():
-                html += f"<li><strong>{esc(rule_name)}</strong>: {esc(description)}</li>"
-            html += """
-  </ul>
-</div>
+    html += """
+</section>
 """
 
     html += """
@@ -577,6 +509,7 @@ th {{
 </body>
 </html>
 """
+
     return html
 
 # ======================================================
