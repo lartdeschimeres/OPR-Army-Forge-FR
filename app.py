@@ -548,6 +548,55 @@ th {{
         if 'special_rules_descriptions' in faction_data:
             faction_rules = faction_data['special_rules_descriptions']
 
+            # Utiliser TOUTES les règles spéciales de la faction
+            all_rules = sorted(faction_rules.keys())
+
+            if all_rules:
+                html += """
+                <div class="special-rules-title">
+                    Légende des règles spéciales de la faction
+                </div>
+                <div style="display: flex; flex-wrap: wrap; margin-top: 20px;">
+                    <div style="flex: 1; min-width: 300px; padding-right: 15px;">
+                """
+
+                # Diviser les règles en deux colonnes de longueur égale
+                half = len(all_rules) // 2
+                if len(all_rules) % 2 != 0:
+                    half += 1  # Ajouter une règle à la première colonne si le nombre est impair
+
+                # Première colonne
+                for rule in all_rules[:half]:
+                    html += f"""
+                    <div style="margin-bottom: 8px; font-size: 12px;">
+                        <strong>{esc(rule)}:</strong> {esc(faction_rules[rule])}
+                    </div>
+                    """
+
+                html += """
+                    </div>
+                    <div style="flex: 1; min-width: 300px; padding-left: 15px;">
+                """
+
+                # Deuxième colonne
+                for rule in all_rules[half:]:
+                    html += f"""
+                    <div style="margin-bottom: 8px; font-size: 12px;">
+                        <strong>{esc(rule)}:</strong> {esc(faction_rules[rule])}
+                    </div>
+                    """
+
+                html += """
+                    </div>
+                </div>
+                """
+        
+    # ---- RÈGLES SPÉCIALES DE L'ARMÉE (en deux colonnes) ----
+    if army_list and 'faction' in st.session_state:
+        faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
+        if 'special_rules_descriptions' in faction_data:
+            faction_rules = faction_data['special_rules_descriptions']
+
             # Utiliser TOUTES les règles spéciales de la faction (pas seulement celles utilisées)
             all_rules = sorted(faction_rules.keys())
 
