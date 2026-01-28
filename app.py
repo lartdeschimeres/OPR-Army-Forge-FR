@@ -931,35 +931,60 @@ elif st.session_state.page == "army":
     weapon_cost = 0
     mount_cost = 0
     upgrades_cost = 0
-    for group in unit.get("upgrade_groups", []):
-        st.markdown(f"**{group['group']}**")
-        if group["type"] == "weapon":
-            weapon_options = ["Arme de base"]
+# Dans la section "Ajouter une unité" de la page "army", remplacez le bloc "else" qui gère les améliorations par :
+
+for group in unit.get("upgrade_groups", []):
+    st.markdown(f"**{group['group']}**")
+    if group["type"] == "weapon":
+        weapon_options = ["Arme de base"]
+        for o in group["options"]:
+            weapon_details = format_weapon_details(o["weapon"])
+            cost_diff = o["cost"]
+            weapon_options.append(f"{o['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''}) (+{cost_diff} pts)")
+        selected_weapon = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
+        if selected_weapon != "Arme de base":
+            opt_name = selected_weapon.split(" (")[0]
+            opt = next((o for o in group["options"] if o["name"] == opt_name), None)
+            if opt:
+                weapon = opt["weapon"]
+                weapon_cost = opt["cost"]
+    elif group["type"] == "mount":
+        mount_labels = ["Aucune monture"]
+        mount_map = {}
+        for o in group["options"]:
+            mount_details = format_mount_details(o)
+            label = f"{mount_details} (+{o['cost']} pts)"
+            mount_labels.append(label)
+            mount_map[label] = o
+        selected_mount = st.radio("Monture", mount_labels, key=f"{unit['name']}_mount")
+        if selected_mount != "Aucune monture":
+            opt = mount_map[selected_mount]
+            mount = opt
+            mount_cost = opt["cost"]
+    else:
+        # Gestion différente pour les héros et les unités
+        if unit.get("type") == "hero":
+            # Pour les héros: boutons radio (choix unique)
+            option_names = ["Aucune amélioration"]
+            option_map = {}
             for o in group["options"]:
-                weapon_details = format_weapon_details(o["weapon"])
-                cost_diff = o["cost"]
-                weapon_options.append(f"{o['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''}) (+{cost_diff} pts)")
-            selected_weapon = st.radio("Arme", weapon_options, key=f"{unit['name']}_weapon")
-            if selected_weapon != "Arme de base":
-                opt_name = selected_weapon.split(" (")[0]
-                opt = next((o for o in group["options"] if o["name"] == opt_name), None)
-                if opt:
-                    weapon = opt["weapon"]
-                    weapon_cost = opt["cost"]
-        elif group["type"] == "mount":
-            mount_labels = ["Aucune monture"]
-            mount_map = {}
-            for o in group["options"]:
-                mount_details = format_mount_details(o)
-                label = f"{mount_details} (+{o['cost']} pts)"
-                mount_labels.append(label)
-                mount_map[label] = o
-            selected_mount = st.radio("Monture", mount_labels, key=f"{unit['name']}_mount")
-            if selected_mount != "Aucune monture":
-                opt = mount_map[selected_mount]
-                mount = opt
-                mount_cost = opt["cost"]
+                option_names.append(f"{o['name']} (+{o['cost']} pts)")
+                option_map[f"{o['name']} (+{o['cost']} pts)"] = o
+
+            selected_option = st.radio(
+                f"Amélioration {group['group']}",
+                option_names,
+                key=f"{unit['name']}_{group['group']}_hero"
+            )
+
+            if selected_option != "Aucune amélioration":
+                opt = option_map[selected_option]
+                if group["group"] not in selected_options:
+                    selected_options[group["group"]] = []
+                selected_options[group["group"]].append(opt)
+                upgrades_cost += opt["cost"]
         else:
+            # Pour les unités: checkbox (choix multiples)
             st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
             for o in group["options"]:
                 if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
