@@ -338,7 +338,7 @@ body {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--bg-header;
+  background: var(--bg-header);
   padding: 10px 14px;
   margin: -16px -16px 12px -16px;
 }}
@@ -447,10 +447,15 @@ th {{
         defense = esc(unit.get("defense", "-"))
         coriace = unit.get("coriace")
 
+        # Détermine l'effectif à afficher
+        unit_size = unit.get("size", 10)
+        if unit.get("type") == "hero":
+            unit_size = 1  # Les héros ont toujours un effectif de 1
+
         html += f"""
 <section class="unit-card">
   <div class="unit-header">
-    <h2>{name}</h2>
+    <h2>{name} [{unit_size}]</h2>
     <span class="cost">{cost} pts</span>
   </div>
 
@@ -601,6 +606,7 @@ th {{
 </html>
 """
     return html
+
 
 # ======================================================
 # LOCAL STORAGE
