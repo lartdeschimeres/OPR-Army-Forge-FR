@@ -198,11 +198,39 @@ def army_page():
         )
         weapon = unit["weapons"][weapon_options.index(selected_weapon)]
 
+    # 🔥 Nettoyage des anciennes checkboxes héros
+    if unit.get("type") == "hero":
+        for k in list(st.session_state.keys()):
+            if k.startswith(f"{unit['name']}_"):
+                del st.session_state[k]
+            
     # Section Améliorations
     if "upgrade_groups" in unit:
         for group in unit["upgrade_groups"]:
             st.subheader(group["group"])
 
+            if unit.get("type") == "hero":
+                labels = ["Aucune amélioration"]
+                option_map = {}
+
+                for o in group["options"]:
+                    label = f"{o['name']} (+{o['cost']} pts)"
+                    labels.append(label)
+                    option_map[label] = o
+
+                key = f"hero_{unit['name']}_{group['group']}"
+
+                selected = st.radio(
+                    f"Amélioration – {group['group']}",
+                    labels,
+                    key=key
+                )
+
+                if selected != "Aucune amélioration":
+                    opt = option_map[selected]
+                    selected_options[group["group"]] = [opt]
+                    upgrades_cost += opt["cost"]
+            
             if unit.get("type") == "hero" and group["type"] == "role_upgrades":
                 # Pour les héros: boutons radio (choix unique)
                 option_names = ["Aucune amélioration"] + [
