@@ -968,22 +968,30 @@ elif st.session_state.page == "army":
                     if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
                         selected_options[group["group"]].append(o)
                         upgrades_cost += o["cost"]
+
+    # Doublage des effectifs (UNIQUEMENT pour les unités, PAS pour les héros)
     if unit.get("type") != "hero":
         double_size = st.checkbox(
-            "Doubler les effectifs (+100% coût de base et armes)",
+            "Unité combinée (doubler les effectifs)",
             value=False,
             key=f"double_{unit['name']}"
         )
+        multiplier = 2 if double_size else 1
     else:
         double_size = False
-    multiplier = 2 if double_size else 1
+        multiplier = 1
+
+    # Calcul du coût final (en tenant compte du doublage uniquement pour les unités)
     core_cost = (base_cost + weapon_cost) * multiplier
     final_cost = core_cost + upgrades_cost + mount_cost
     unit_size = base_size * multiplier
+
     if unit.get("type") == "hero":
         st.markdown("**Effectif final : [1]** (héros)")
     else:
-        st.markdown(f"**Effectif final : [{unit_size}]**")
+        label = "combinée" if double_size else "standard"
+        st.markdown(f"**Effectif final : [{unit_size}]** ({label})")
+
     if st.button("Ajouter à l'armée"):
         try:
             weapon_data = format_weapon_details(weapon)
@@ -1008,7 +1016,7 @@ elif st.session_state.page == "army":
                 "cost": final_cost,
                 "base_cost": base_cost,
                 "size": unit_size,
-                "is_doubled": double_size,
+                "is_combined": double_size if unit.get("type") != "hero" else False,
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", []) if "Coriace(0)" not in r],
@@ -1016,7 +1024,7 @@ elif st.session_state.page == "army":
                 "options": selected_options,
                 "mount": mount,
                 "coriace": total_coriace,
-                "game": st.session_state.game  # Ajoute cette ligne pour stocker le jeu
+                "game": st.session_state.game
             }
             test_army = st.session_state.army_list.copy()
             test_army.append(unit_data)
