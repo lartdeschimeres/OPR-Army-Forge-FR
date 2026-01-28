@@ -905,27 +905,29 @@ def main():
             else:
                 # Gestion différente pour les héros et les unités
                 if unit.get("type") == "hero":
-                    # Pour les héros: boutons radio (choix unique)
+                    # Pour les héros: boutons radio (1 choix par groupe)
                     option_names = ["Aucune amélioration"]
                     option_map = {}
-                    for o in group["options"]:
-                        option_names.append(f"{o['name']} (+{o['cost']} pts)")
-                        option_map[f"{o['name']} (+{o['cost']} pts)"] = o
 
-                    if f"{unit['name']}_{group['group']}_hero" not in st.session_state:
-                        st.session_state[f"{unit['name']}_{group['group']}_hero"] = "Aucune amélioration"
-                    
+                    for o in group["options"]:
+                        label = f"{o['name']} (+{o['cost']} pts)"
+                        option_names.append(label)
+                        option_map[label] = o
+
+                    key = f"{unit['name']}_{group['group']}_hero"
+
+                    if key not in st.session_state:
+                        st.session_state[key] = "Aucune amélioration"
+
                     selected_option = st.radio(
                         f"Amélioration {group['group']}",
                         option_names,
-                        key=f"{unit['name']}_{group['group']}_hero"
+                        key=key
                     )
 
                     if selected_option != "Aucune amélioration":
                         opt = option_map[selected_option]
-                        if group["group"] not in selected_options:
-                            selected_options[group["group"]] = []
-                        selected_options[group["group"]].append(opt)
+                        selected_options[group["group"]] = [opt]
                         upgrades_cost += opt["cost"]
                 else:
                     # Pour les unités: checkbox (choix multiples)
