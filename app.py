@@ -895,6 +895,9 @@ elif st.session_state.page == "army":
     st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
     faction_data = factions_by_game[st.session_state.game][st.session_state.faction]
+    display_faction_rules(faction_data)
+    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
+        st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
     st.divider()
     st.subheader("Points d'armée")
     show_points_progress(st.session_state.army_cost, st.session_state.points)
@@ -907,15 +910,6 @@ elif st.session_state.page == "army":
         index=0,
         key="unit_select"
     )
-
-    # Case à cocher pour combiner l'unité (UNIQUEMENT pour les unités, PAS pour les héros)
-    combined = False
-    if unit.get("type") != "hero":
-        combined = st.checkbox(
-            "Unité combinée (x2 effectif, coût x2 hors améliorations)",
-            value=False,
-            key=f"combined_{unit['name']}"
-        )
 
     for k in list(st.session_state.keys()):
         if k.startswith("combined_"):
@@ -973,26 +967,32 @@ elif st.session_state.page == "army":
                         selected_options[group["group"]].append(o)
                         upgrades_cost += o["cost"]
 
-    # Calcul du coût final et de la taille - MODIFICATION POUR LES EFFECTIFS
-    if combined and unit.get("type") != "hero":
+    # UNIQUEMENT POUR LES UNITÉS (les héros n'ont PAS cette option)
+    combined = False
+    if unit.get("type") != "hero":
+        combined = st.checkbox(
+            "Unité combinée (x2 effectif, coût x2 hors améliorations)",
+            value=False,
+            key=f"combined_{unit['name']}"
+        )
+
+    # Calcul du coût final et de la taille
+    if unit.get("type") != "hero" and combined:
         final_cost = (base_cost + weapon_cost) * 2 + mount_cost + upgrades_cost
-        unit_size = base_size * 2  # x2 pour les unités combinées
+        unit_size = base_size * 2
     else:
         final_cost = base_cost + weapon_cost + mount_cost + upgrades_cost
-        unit_size = base_size  # Taille normale pour les héros et unités non combinées
+        unit_size = base_size
 
-    # Affichage de la taille finale de l'unité - MODIFICATION POUR LES EFFECTIFS
+    # Affichage de l'effectif final
     if unit.get("type") == "hero":
-        st.markdown(f"**Effectif final: 1** (les héros sont toujours des unités individuelles)")
+        st.markdown("**Effectif final : [1]** (héros)")
     else:
-        st.markdown(f"**Effectif final: {unit_size}** {'(x2 combinée)' if combined else ''}")
-
-    st.markdown(f"**Coût total: {final_cost} pts**")
+        st.markdown(f"**Effectif final : [{unit_size}]** {'(x2 combinée)' if combined else ''}")
 
     if st.button("Ajouter à l'armée"):
         try:
             weapon_data = format_weapon_details(weapon)
-            # Calcul de la coriace
             total_coriace = 0
             if 'special_rules' in unit and isinstance(unit.get('special_rules'), list):
                 total_coriace += get_coriace_from_rules(unit['special_rules'])
@@ -1007,14 +1007,14 @@ elif st.session_state.page == "army":
                                 total_coriace += get_coriace_from_rules(opt['special_rules'])
             if 'special_rules' in weapon and isinstance(weapon.get('special_rules'), list):
                 total_coriace += get_coriace_from_rules(weapon['special_rules'])
-
+            total_coriace = total_coriace if total_coriace > 0 else None
             unit_data = {
                 "name": unit["name"],
                 "type": unit.get("type", "unit"),
                 "cost": final_cost,
                 "base_cost": base_cost,
                 "size": unit_size,
-                "is_combined": combined,
+                "is_combined": combined if unit.get("type") != "hero" else False,
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", []) if "Coriace(0)" not in r],
@@ -1024,7 +1024,6 @@ elif st.session_state.page == "army":
                 "coriace": total_coriace,
                 "game": st.session_state.game
             }
-
             test_army = st.session_state.army_list.copy()
             test_army.append(unit_data)
             test_total = st.session_state.army_cost + final_cost
