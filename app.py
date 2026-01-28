@@ -959,41 +959,42 @@ elif st.session_state.page == "army":
                 opt = mount_map[selected_mount]
                 mount = opt
                 mount_cost = opt["cost"]
+st.write(f"### {group['group']}")
+
+# ----- HÉROS : CHOIX UNIQUE -----
+if unit.get("type") == "hero":
+    options = [{"name": "Aucune amélioration", "cost": 0}] + group["options"]
+
+    labels = [
+        f"{o['name']} (+{o['cost']} pts)" if o["cost"] > 0 else o["name"]
+        for o in options
+    ]
+
+    selected_label = st.radio(
+        "Choisissez une amélioration",
+        labels,
+        key=f"{unit['name']}_{group['group']}_radio"
+    )
+
+    selected_index = labels.index(selected_label)
+    selected_option = options[selected_index]
+
+    if selected_option["cost"] > 0:
+        selected_options[group["group"]] = [selected_option]
+        upgrades_cost += selected_option["cost"]
+
+# ----- UNITÉS : CHOIX MULTIPLES -----
 else:
-    # --- CAS DES HÉROS : CHOIX UNIQUE ---
-    if unit.get("type") == "hero":
-        labels = ["Aucune amélioration"]
-        option_map = {}
-
-        for o in group["options"]:
-            label = f"{o['name']} (+{o['cost']} pts)"
-            labels.append(label)
-            option_map[label] = o
-
-        selected_label = st.radio(
-            "Amélioration du héros",
-            labels,
-            key=f"{unit['name']}_{group['group']}_hero"
-        )
-
-        if selected_label != "Aucune amélioration":
-            opt = option_map[selected_label]
-            selected_options[group["group"]] = [opt]
-            upgrades_cost += opt["cost"]
-
-    # --- CAS DES UNITÉS : CHOIX MULTIPLES ---
-    else:
-        st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
-        for o in group["options"]:
-            if st.checkbox(
-                f"{o['name']} (+{o['cost']} pts)",
-                key=f"{unit['name']}_{group['group']}_{o['name']}"
-            ):
-                if group["group"] not in selected_options:
-                    selected_options[group["group"]] = []
-                if not any(opt.get("name") == o["name"] for opt in selected_options[group["group"]]):
-                    selected_options[group["group"]].append(o)
-                    upgrades_cost += o["cost"]
+    for o in group["options"]:
+        if st.checkbox(
+            f"{o['name']} (+{o['cost']} pts)",
+            key=f"{unit['name']}_{group['group']}_{o['name']}"
+        ):
+            if group["group"] not in selected_options:
+                selected_options[group["group"]] = []
+            if not any(opt["name"] == o["name"] for opt in selected_options[group["group"]]):
+                selected_options[group["group"]].append(o)
+                upgrades_cost += o["cost"]
 
 # Nettoyage de l'état Streamlit pour éviter l'affichage du doublage chez les héros
     double_key = f"double_{unit['name']}"
