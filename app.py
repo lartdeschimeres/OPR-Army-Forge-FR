@@ -969,7 +969,12 @@ elif st.session_state.page == "army":
                         selected_options[group["group"]].append(o)
                         upgrades_cost += o["cost"]
 
-    # Doublage des effectifs (UNIQUEMENT pour les unités, PAS pour les héros)
+# Nettoyage de l'état Streamlit pour éviter l'affichage du doublage chez les héros
+    double_key = f"double_{unit['name']}"
+    if unit.get("type") == "hero" and double_key in st.session_state:
+        del st.session_state[double_key]    
+    
+# Doublage des effectifs (UNIQUEMENT pour les unités, PAS pour les héros)
     if unit.get("type") != "hero":
         double_size = st.checkbox(
             "Unité combinée (doubler les effectifs)",
@@ -980,6 +985,7 @@ elif st.session_state.page == "army":
     else:
         double_size = False
         multiplier = 1
+
 
     # Calcul du coût final (en tenant compte du doublage uniquement pour les unités)
     core_cost = (base_cost + weapon_cost) * multiplier
