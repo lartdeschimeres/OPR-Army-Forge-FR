@@ -934,6 +934,7 @@ elif st.session_state.page == "army":
                 "options": selected_options,
                 "mount": mount,
                 "coriace": total_coriace,
+                "game": st.session_state.game  # Ajoute cette ligne pour stocker le jeu
             }
             test_army = st.session_state.army_list.copy()
             test_army.append(unit_data)
