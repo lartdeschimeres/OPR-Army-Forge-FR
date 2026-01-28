@@ -546,35 +546,23 @@ th {{
     if army_list and 'faction' in st.session_state:
         faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
         if 'special_rules_descriptions' in faction_data:
-            faction_rules = faction_rules = faction_data['special_rules_descriptions']
+            faction_rules = faction_data['special_rules_descriptions']
 
-            # Collecter les règles utilisées dans l'armée
-            used_rules = set()
-            for unit in army_list:
-                if 'rules' in unit:
-                    used_rules.update(unit['rules'])
-                if 'weapon' in unit and 'special_rules' in unit['weapon']:
-                    used_rules.update(unit['weapon']['special_rules'])
-                if 'mount' in unit and unit['mount']:
-                    mount_data = unit['mount']['mount'] if 'mount' in unit['mount'] else unit['mount']
-                    if 'special_rules' in mount_data:
-                        used_rules.update(mount_data['special_rules'])
+            # Utiliser TOUTES les règles spéciales de la faction (pas seulement celles utilisées)
+            all_rules = sorted(faction_rules.keys())
 
-            # Filtrer les règles utilisées et existantes dans faction_rules
-            used_rules = [rule for rule in used_rules if rule in faction_rules]
-
-            if used_rules:
+            if all_rules:
                 html += """
                 <div class="special-rules-title">
-                    Légende des règles spéciales de l'armée
+                    Légende des règles spéciales de la faction
                 </div>
                 <div class="special-rules-container">
                     <div class="special-rules-column">
                 """
 
                 # Diviser les règles en deux colonnes
-                half = len(used_rules) // 2
-                for i, rule in enumerate(used_rules):
+                half = len(all_rules) // 2
+                for i, rule in enumerate(all_rules):
                     if i < half:
                         html += f"""
                         <div><strong>{esc(rule)}:</strong> {esc(faction_rules[rule])}</div>
