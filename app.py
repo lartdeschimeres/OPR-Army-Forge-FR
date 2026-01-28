@@ -875,7 +875,7 @@ def main():
         upgrades_cost = 0
 
         for group in unit.get("upgrade_groups", []):
-            st.markdown(f"### {group['group']} (1 choix)")
+            st.markdown(f"### {group['group']} ")
             if group["type"] == "weapon":
                 weapon_options = ["Arme de base"]
                 for o in group["options"]:
