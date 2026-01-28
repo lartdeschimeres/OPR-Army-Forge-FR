@@ -875,7 +875,7 @@ def main():
         upgrades_cost = 0
 
         for group in unit.get("upgrade_groups", []):
-            st.markdown(f"**{group['group']}**")
+            st.markdown(f"### {group['group']} (1 choix)")
             if group["type"] == "weapon":
                 weapon_options = ["Arme de base"]
                 for o in group["options"]:
@@ -912,6 +912,9 @@ def main():
                         option_names.append(f"{o['name']} (+{o['cost']} pts)")
                         option_map[f"{o['name']} (+{o['cost']} pts)"] = o
 
+                    if f"{unit['name']}_{group['group']}_hero" not in st.session_state:
+                        st.session_state[f"{unit['name']}_{group['group']}_hero"] = "Aucune amélioration"
+                    
                     selected_option = st.radio(
                         f"Amélioration {group['group']}",
                         option_names,
