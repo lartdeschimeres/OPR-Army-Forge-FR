@@ -993,16 +993,6 @@ elif st.session_state.page == "army":
                         selected_options.setdefault(group["group"], []).append(o)
                         upgrades_cost += o["cost"]
         
-        else:
-            st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
-            for o in group["options"]:
-                if st.checkbox(f"{o['name']} (+{o['cost']} pts)", key=f"{unit['name']}_{group['group']}_{o['name']}"):
-                    if group["group"] not in selected_options:
-                        selected_options[group["group"]] = []
-                    if not any(opt.get("name") == o["name"] for opt in selected_options.get(group["group"], [])):
-                        selected_options[group["group"]].append(o)
-                        upgrades_cost += o["cost"]
-
 # Nettoyage de l'état Streamlit pour éviter l'affichage du doublage chez les héros
     double_key = f"double_{unit['name']}"
     if unit.get("type", "").lower() == "hero": and double_key in st.session_state:
