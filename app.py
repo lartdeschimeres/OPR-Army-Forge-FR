@@ -1079,30 +1079,30 @@ def main():
                         upgrades_cost += opt["cost"]
                     st.markdown('</div>', unsafe_allow_html=True)
                else:
-    # Gestion différente pour les héros et les unités
-    st.write("DEBUG type unité:", unit.get("type"))
-    if unit.get("type") == "hero":
-        # 🔥 HÉROS = UN SEUL CHOIX PAR GROUPE (radio)
-        option_names = ["Aucune amélioration"]
-        option_map = {}
+                # Gestion différente pour les héros et les unités
+                st.write("DEBUG type unité:", unit.get("type"))
+                if unit.get("type") == "hero":
+                    # 🔥 HÉROS = UN SEUL CHOIX PAR GROUPE (radio)
+                    option_names = ["Aucune amélioration"]
+                    option_map = {}
 
-        for o in group["options"]:
-            label = f"{o['name']} (+{o['cost']} pts)"
-            option_names.append(label)
-            option_map[label] = o
+                    for o in group["options"]:
+                        label = f"{o['name']} (+{o['cost']} pts)"
+                        option_names.append(label)
+                        option_map[label] = o
 
-        key = f"hero_{unit['name']}_{group['group']}"
+                    key = f"hero_{unit['name']}_{group['group']}"
 
-        selected_option = st.radio(
-            f"{group['group']} (choix unique)",
-            option_names,
-            key=key
-        )
+                    selected_option = st.radio(
+                        f"{group['group']} (choix unique)",
+                        option_names,
+                        key=key
+                    )
 
-        if selected_option != "Aucune amélioration":
-            opt = option_map[selected_option]
-            selected_options[group["group"]] = [opt]
-            upgrades_cost += opt["cost"]
+                    if selected_option != "Aucune amélioration":
+                        opt = option_map[selected_option]
+                        selected_options[group["group"]] = [opt]
+                        upgrades_cost += opt["cost"]
 
     else:
         # 🔧 UNITÉS = CHOIX MULTIPLES (checkbox)
