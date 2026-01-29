@@ -993,11 +993,6 @@ elif st.session_state.page == "army":
                         selected_options.setdefault(group["group"], []).append(o)
                         upgrades_cost += o["cost"]
         
-# Nettoyage de l'état Streamlit pour éviter l'affichage du doublage chez les héros
-    double_key = f"double_{unit['name']}"
-    if unit.get("type", "").lower() == "hero": and double_key in st.session_state:
-        del st.session_state[double_key]    
-    
 # Doublage des effectifs (UNIQUEMENT pour les unités, PAS pour les héros)
     if unit.get("type") != "hero":
         double_size = st.checkbox(
