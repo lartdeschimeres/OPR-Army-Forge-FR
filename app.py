@@ -101,8 +101,12 @@ def check_unit_copy_rule(army_list, army_points, game_config):
         max_copies = 1 + x_value
         unit_counts = {}
         for unit in army_list:
-            if unit.get("type", "").lower() == "hero" and double_key in st.session_state:
-                continue
+            for unit in army_list:
+                unit_name = unit["name"]
+                if unit_name in unit_counts:
+                    unit_counts[unit_name] += 1
+                else:
+                    unit_counts[unit_name] = 1
             unit_name = unit["name"]
             if unit_name in unit_counts:
                 unit_counts[unit_name] += 1
