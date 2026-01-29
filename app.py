@@ -89,7 +89,7 @@ GAME_CONFIG = {
 def check_hero_limit(army_list, army_points, game_config):
     if game_config.get("hero_limit"):
         max_heroes = math.floor(army_points / game_config["hero_limit"])
-        hero_count = sum(1 for unit in army_list if unit.get("type") == "hero":
+        hero_count = sum(1 for unit in army_list if unit.get("type", "").lower() == "hero")
         if hero_count > max_heroes:
             st.error(f"Limite de héros dépassée! Maximum autorisé: {max_heroes} (1 héros par {game_config['hero_limit']} pts)")
             return False
@@ -101,7 +101,7 @@ def check_unit_copy_rule(army_list, army_points, game_config):
         max_copies = 1 + x_value
         unit_counts = {}
         for unit in army_list:
-            if unit.get("type", "").lower() == "hero":
+            if unit.get("type", "").lower() == "hero" and double_key in st.session_state:
                 continue
             unit_name = unit["name"]
             if unit_name in unit_counts:
@@ -959,6 +959,40 @@ elif st.session_state.page == "army":
                 opt = mount_map[selected_mount]
                 mount = opt
                 mount_cost = opt["cost"]
+        
+        else:
+            is_hero = unit.get("type", "").lower() == "hero"
+
+            if is_hero:
+                option_labels = ["Aucune amélioration"]
+                option_map = {}
+    
+                for o in group["options"]:
+                    label = f"{o['name']} (+{o['cost']} pts)"
+                    option_labels.append(label)
+                    option_map[label] = o
+
+                selected = st.radio(
+                    f"Amélioration – {group['group']}",
+                    option_labels,
+                    key=f"{unit['name']}_{group['group']}_hero"
+                )
+
+                if selected != "Aucune amélioration":
+                    opt = option_map[selected]
+                        selected_options[group['group']] = [opt]
+                    upgrades_cost += opt["cost"]
+
+            else:
+                st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
+                for o in group["options"]:
+                    if st.checkbox(
+                        f"{o['name']} (+{o['cost']} pts)",
+                        key=f"{unit['name']}_{group['group']}_{o['name']}"
+                    ):
+                        selected_options.setdefault(group["group"], []).append(o)
+                        upgrades_cost += o["cost"]
+        
         else:
             st.write("Sélectionnez les améliorations (plusieurs choix possibles):")
             for o in group["options"]:
