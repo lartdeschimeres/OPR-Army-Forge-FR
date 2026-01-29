@@ -980,7 +980,7 @@ elif st.session_state.page == "army":
 
                 if selected != "Aucune amélioration":
                     opt = option_map[selected]
-                        selected_options[group['group']] = [opt]
+                    selected_options[group['group']] = [opt]
                     upgrades_cost += opt["cost"]
 
             else:
