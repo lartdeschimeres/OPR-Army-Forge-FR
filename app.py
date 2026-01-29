@@ -89,7 +89,7 @@ GAME_CONFIG = {
 def check_hero_limit(army_list, army_points, game_config):
     if game_config.get("hero_limit"):
         max_heroes = math.floor(army_points / game_config["hero_limit"])
-        hero_count = sum(1 for unit in army_list if unit.get("type", "").lower() == "hero":
+        hero_count = sum(1 for unit in army_list if unit.get("type") == "hero":
         if hero_count > max_heroes:
             st.error(f"Limite de héros dépassée! Maximum autorisé: {max_heroes} (1 héros par {game_config['hero_limit']} pts)")
             return False
