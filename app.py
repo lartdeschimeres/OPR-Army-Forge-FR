@@ -164,6 +164,9 @@ def check_unit_per_points(army_list, army_points, game_config):
     return True
 
 def validate_army_rules(army_list, army_points, game, new_unit_cost=None):
+    game = st.session_state.get("game")
+    if game is None:
+        st.stop()
     game_config = GAME_CONFIG.get(game, {})
     if game in GAME_CONFIG:
         return (check_hero_limit(army_list, army_points, game_config) and
