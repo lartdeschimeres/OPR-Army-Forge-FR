@@ -1054,25 +1054,25 @@ elif st.session_state.page == "army":
     json_data = json.dumps(army_data, indent=2, ensure_ascii=False)
     st.divider()
 
-st.markdown("---")
-st.subheader("📤 Exporter l’armée")
+    st.markdown("---")
+    st.subheader("📤 Exporter l’armée")
 
-col_json, col_html = st.columns(2)
+    col_json, col_html = st.columns(2)
 
-with col_json:
-    st.download_button(
-        label="📄 Exporter en JSON (OPR Army Forge)",
-        data=json.dumps(export_data, indent=2, ensure_ascii=False),
-        file_name=f"{st.session_state.list_name or 'army'}_opr.json",
-        mime="application/json",
-        use_container_width=True
-    )
+    with col_json:
+        st.download_button(
+            label="📄 Exporter en JSON (OPR Army Forge)",
+            data=json.dumps(export_data, indent=2, ensure_ascii=False),
+            file_name=f"{st.session_state.list_name or 'army'}_opr.json",
+            mime="application/json",
+            use_container_width=True
+        )
 
-with col_html:
-    st.download_button(
-        label="🌐 Exporter en HTML (fiche imprimable)",
-        data=html_export,
-        file_name=f"{st.session_state.list_name or 'army'}.html",
-        mime="text/html",
-        use_container_width=True
-    )
+    with col_html:
+        st.download_button(
+            label="🌐 Exporter en HTML (fiche imprimable)",
+            data=html_export,
+            file_name=f"{st.session_state.list_name or 'army'}.html",
+            mime="text/html",
+            use_container_width=True
+        )
