@@ -1054,7 +1054,7 @@ elif st.session_state.page == "army":
     json_data = json.dumps(army_data, indent=2, ensure_ascii=False)
     st.divider()
 
-    st.markdown("---")
+    st.divider()
     st.subheader("📤 Exporter l’armée")
 
     col_json, col_html = st.columns(2)
@@ -1062,7 +1062,7 @@ elif st.session_state.page == "army":
     with col_json:
         st.download_button(
             label="📄 Exporter en JSON (OPR Army Forge)",
-            data=json.dumps(export_data, indent=2, ensure_ascii=False),
+            data=json.dumps(army_data, indent=2, ensure_ascii=False),
             file_name=f"{st.session_state.list_name or 'army'}_opr.json",
             mime="application/json",
             use_container_width=True
