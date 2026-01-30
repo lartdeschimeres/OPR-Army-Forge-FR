@@ -849,63 +849,33 @@ if st.session_state.page == "setup":
 
     st.subheader("🎮 Choisis ton jeu")
 
-    # CSS pour les cartes de jeu
-    st.markdown("""
-    <style>
-        .game-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .game-card {
-            flex: 1 1 200px;
-            min-height: 250px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: white;
-            position: relative;
-        }
-        .game-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        .game-card.selected {
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
-        }
-        .game-image {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            display: block;
-        }
-        .game-title {
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            background: white;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-        .no-image {
-            height: 180px;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    cols = st.columns(len(games))
 
-    # Conteneur pour les cartes de jeu
-    st.markdown('<div class="game-selector">', unsafe_allow_html=True)
+    for col, game_name in zip(cols, games):
+        with col:
+            card = GAME_CARDS.get(game_name)
+
+            if card and card.get("image") and card["image"].exists():
+                st.image(
+                    str(card["image"]),
+                    use_container_width=True
+                )
+            else:
+                st.markdown(
+                    "<div style='height:180px; background:#eee; display:flex; align-items:center; justify-content:center;'>Image manquante</div>",
+                    unsafe_allow_html=True
+                )
+    
+            if st.button(
+                f"🎯 {game_name}",
+                key=f"select_{game_name}",
+                use_container_width=True
+            ):
+                st.session_state.game = game_name
+                st.rerun()
+
+
+   
 
     # Affichage des cartes de jeu
     for game_name in games:
