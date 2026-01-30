@@ -775,6 +775,49 @@ if "page" not in st.session_state:
 # PAGE 1 – CONFIGURATION
 # ======================================================
 if st.session_state.page == "setup":
+    st.divider()
+    st.subheader("🔄 Recharger une liste JSON")
+
+    uploaded = st.file_uploader(
+        "Importer une liste exportée",
+        type=["json"],
+        key="import_json"
+    )
+
+    if uploaded is not None:
+    try:
+        data = json.load(uploaded)
+
+        # Vérification minimale
+        required_keys = {"game", "faction", "army_list", "points"}
+        if not required_keys.issubset(data.keys()):
+            st.error("❌ Fichier JSON invalide ou incomplet")
+        else:
+            st.session_state.game = data["game"]
+            st.session_state.faction = data["faction"]
+            st.session_state.points = data["points"]
+            st.session_state.list_name = data.get("name", "Liste importée")
+            st.session_state.army_list = data["army_list"]
+            st.session_state.army_cost = data.get("total_cost", 0)
+
+            # Recharger les unités de la faction
+            factions_by_game, _ = load_factions()
+            st.session_state.units = factions_by_game[
+                st.session_state.game
+            ][
+                st.session_state.faction
+            ]["units"]
+
+            st.session_state.page = "army"
+            st.success("✅ Liste chargée avec succès")
+            st.rerun()
+
+            st.toast("Liste prête au combat 🔥", icon="⚔️")
+    
+    except Exception as e:
+        st.error(f"❌ Erreur lors du chargement : {e}")
+    
+    
     st.title("OPR Army Forge")
     if not games:
         st.error("Aucun jeu trouvé")
