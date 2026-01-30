@@ -804,7 +804,7 @@ if "page" not in st.session_state:
     st.session_state.current_player = "Simon Joinville Fouquet"
 
 # ======================================================
-# PAGE 1 – CONFIGURATION
+# PAGE 1 – CONFIGURATION (SECTION MODIFIÉE UNIQUEMENT)
 # ======================================================
 if st.session_state.page == "setup":
     st.title("OPR Army Forge")
@@ -855,57 +855,95 @@ if st.session_state.page == "setup":
         st.error("Aucun jeu trouvé")
         st.stop()
 
-    st.subheader("Choisis ton jeu")
-
-    cols = st.columns(3)
-
     st.subheader("🎮 Choisis ton jeu")
 
-    cols = st.columns(3)
+    # CSS supplémentaire pour les cartes de jeu
+    st.markdown("""
+    <style>
+        .game-card {
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            text-align: center;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            border-color: #4a90e2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .game-card.selected {
+            border-color: #2a7fd1;
+            background-color: #f0f7ff;
+        }
+        .game-image {
+            width: 100%;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .game-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
+    # Création des colonnes pour les cartes de jeu
+    game_cols = st.columns(3)
+
+    # Variable pour suivre le jeu sélectionné
+    current_game = st.session_state.get("game")
+
+    # Affichage des cartes de jeu cliquables
     for i, game_name in enumerate(games):
         card = GAME_CARDS.get(game_name)
+        is_selected = current_game == game_name
 
-        with cols[i % 3]:
-            if card and card.get("image") and card["image"].exists():
-                st.image(str(card["image"]), use_container_width=True)
-            else:
-                st.warning("Image manquante")
+        with game_cols[i % 3]:
+            # Conteneur cliquable pour la carte
+            container = st.container()
 
-            if st.button(game_name, key=f"game_{game_name}"):
-                st.session_state.game = game_name
-                st.rerun()
+            # Utilisation de HTML pour créer une carte cliquable
+            with container:
+                if st.button("", key=f"game_select_{game_name}"):
+                    st.session_state.game = game_name
+                    st.rerun()
 
-    if "game" not in st.session_state:
+                # Style CSS dynamique en fonction de la sélection
+                card_style = f"""
+                <style>
+                    #game-card-{game_name.replace(" ", "-")} {{
+                        border: 2px solid {'#2a7fd1' if is_selected else 'transparent'};
+                        background-color: {'#f0f7ff' if is_selected else 'transparent'};
+                        border-radius: 8px;
+                        padding: 10px;
+                        margin-bottom: 15px;
+                        transition: all 0.3s ease;
+                        text-align: center;
+                    }}
+                </style>
+                """
+
+                st.markdown(card_style, unsafe_allow_html=True)
+
+                # Contenu de la carte
+                st.markdown(f"""
+                <div id="game-card-{game_name.replace(" ", "-")}" onclick="document.getElementById('game_select_{game_name}').click()">
+                    {f'<img src="file://{card["image"]}" class="game-image" style="width:100%; border-radius:6px; margin-bottom:8px;">' if card and card.get("image") and card["image"].exists() else '<div style="height:150px; background:#eee; border-radius:6px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; color:#666;">Image manquante</div>'}
+                    <div class="game-title">{game_name}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    if "game" not in st.session_state or not st.session_state.game:
         st.info("⬆️ Sélectionne un jeu pour continuer")
-        st.stop()  
-
-    st.subheader("🎮 Choisis ton jeu")
-    
-    cols = st.columns(3)
-
-    for i, game_name in enumerate(games):
-        card = GAME_CARDS.get(game_name)
-
-        with cols[i % 3]:
-            if card and card.get("image") and card["image"].exists():
-                st.image(str(card["image"]), use_container_width=True)
-            else:
-                st.warning("Image manquante")
-
-            if st.button(game_name, key=f"game_{game_name}"):
-                st.session_state.game = game_name
-                st.rerun()
-
-    if "game" not in st.session_state:
-        st.info("Sélectionne un jeu pour continuer")
         st.stop()
-    
+
     game = st.session_state.game
     game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
 
     faction = st.selectbox("Faction", factions_by_game[game].keys())
-        
+
     points = st.number_input(
         "Points",
         min_value=game_config["min_points"],
