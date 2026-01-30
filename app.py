@@ -1053,34 +1053,26 @@ elif st.session_state.page == "army":
     }
     json_data = json.dumps(army_data, indent=2, ensure_ascii=False)
     st.divider()
-    st.subheader("Sauvegarde & Exports")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("💾 Sauvegarder"):
-            saved_lists = ls_get("opr_saved_lists")
-            current_lists = json.loads(saved_lists) if saved_lists else []
-            if not isinstance(current_lists, list):
-                current_lists = []
-            current_lists.append(army_data)
-            ls_set("opr_saved_lists", current_lists)
-            st.success("Liste sauvegardée !")
-    with col2:
-        st.download_button(
-            "📦 Export JSON",
-            data=json_data,
-            file_name=f"{army_name}.json",
-            mime="application/json",
-            use_container_width=True
-        )
-        html_content = export_html(
-            army_list=army,
-            army_name=army_name,
-            army_limit=army_limit
-        )
-        st.download_button(
-            "🖨 Export HTML",
-            data=html_content,
-            file_name=f"{army_name}.html",
-            mime="text/html",
-            use_container_width=True
-        )
+
+st.markdown("---")
+st.subheader("📤 Exporter l’armée")
+
+col_json, col_html = st.columns(2)
+
+with col_json:
+    st.download_button(
+        label="📄 Exporter en JSON (OPR Army Forge)",
+        data=json.dumps(export_data, indent=2, ensure_ascii=False),
+        file_name=f"{st.session_state.list_name or 'army'}_opr.json",
+        mime="application/json",
+        use_container_width=True
+    )
+
+with col_html:
+    st.download_button(
+        label="🌐 Exporter en HTML (fiche imprimable)",
+        data=html_export,
+        file_name=f"{st.session_state.list_name or 'army'}.html",
+        mime="text/html",
+        use_container_width=True
+    )
