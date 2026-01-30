@@ -385,7 +385,8 @@
                 "attacks": 3,
                 "armor_piercing": 0,
                 "special_rules": ["Percée"]
-              },
+              }
+            },
             {
               "name": "Grande arme",
               "cost": 10,
@@ -410,8 +411,9 @@
                 "name": "Arc court",
                 "range": "18",
                 "attacks": 2,
-                "armor_piercing": 0,
-              },
+                "armor_piercing": 0
+              }
+            },
             {
               "name": "Javelots barbelés",
               "cost": 10,
@@ -422,9 +424,9 @@
                 "armor_piercing": 1,
                 "special_rules": ["Éclatement"]
               }
+            } 
           ]
-        },
-        
+        },        
         {
           "group": "Montures",
           "type": "mount",
@@ -442,7 +444,6 @@
         }
       ]
     },
-
     
     {
       "name": "Pïllards Barbares de la Guerre",
