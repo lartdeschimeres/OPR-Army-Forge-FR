@@ -952,16 +952,16 @@ if st.session_state.page == "setup":
 
     st.subheader("🎮 Choisis ton jeu")
 
-            if card and card.get("image") and card["image"].exists():
-                st.image(
-                    str(card["image"]),
-                    use_container_width=True
-                )
-            else:
-                st.markdown(
-                    "<div style='height:180px; background:#eee; display:flex; align-items:center; justify-content:center;'>Image manquante</div>",
-                    unsafe_allow_html=True
-                )
+        if card and card.get("image") and card["image"].exists():
+            st.image(
+                str(card["image"]),
+                use_container_width=True
+            )
+        else:
+            st.markdown(
+                "<div style='height:180px; background:#eee; display:flex; align-items:center; justify-content:center;'>Image manquante</div>",
+                unsafe_allow_html=True
+            )
     
             if st.button(
                 f"🎯 {game_name}",
