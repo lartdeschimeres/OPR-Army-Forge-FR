@@ -952,12 +952,6 @@ if st.session_state.page == "setup":
 
     st.subheader("🎮 Choisis ton jeu")
 
-    cols = st.columns(len(games))
-
-    for col, game_name in zip(cols, games):
-        with col:
-            card = GAME_CARDS.get(game_name)
-
             if card and card.get("image") and card["image"].exists():
                 st.image(
                     str(card["image"]),
