@@ -1036,7 +1036,7 @@ if st.session_state.page == "setup":
         st.session_state.army_list = st.session_state.get("army_list", [])
         st.session_state.army_cost = st.session_state.get("army_cost", 0)
         st.session_state.page = "army"
-        st.rerun(
+        st.rerun()
 
     st.divider()
 
