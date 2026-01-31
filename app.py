@@ -950,7 +950,7 @@ if st.session_state.page == "setup":
         st.error("Aucun jeu trouvé")
         st.stop()
 
-        st.subheader("🎮 Choisis ton jeu")
+        st.subheader("Choisis ton jeu")
 
     cols = st.columns(len(games))
 
