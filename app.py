@@ -1053,15 +1053,15 @@ for game_name in games:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-            # HTML pour la carte cliquable
-            html_content = f"""
-            <div class="game-card {'selected' if is_selected else ''}"
-                 onclick="document.getElementById('game_select_{game_name.replace(' ', '_')}').click()">
-                {'<img src="file:///' + str(card["image"].absolute()) + '" class="game-image">' if card and card.get("image") and card["image"].exists() else '<div class="no-image">Image manquante</div>'}
-                <div class="game-title">{game_name}</div>
-            </div>
-            """
-            st.markdown(html_content, unsafe_allow_html=True)
+        # HTML pour la carte cliquable
+        html_content = f"""
+        <div class="game-card {'selected' if is_selected else ''}"
+        onclick="document.getElementById('game_select_{game_name.replace(' ', '_')}').click()">
+            {'<img src="file:///' + str(card["image"].absolute()) + '" class="game-image">' if card and card.get("image") and card["image"].exists() else '<div class="no-image">Image manquante</div>'}
+            <div class="game-title">{game_name}</div>
+        </div>
+        """
+        st.markdown(html_content, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
