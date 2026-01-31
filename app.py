@@ -1027,7 +1027,13 @@ if st.session_state.page == "setup":
     )
     list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
 
-   if st.button("➡️ Construire l’armée", use_container_width=True):
+    st.divider()
+
+    st.markdown("### 🚀 Étape suivante")
+
+    st.info("Tu pourras ajouter, modifier et exporter ton armée à l’étape suivante.")
+
+    if st.button("➡️ Construire l’armée", use_container_width=True):
         st.session_state.game = game
         st.session_state.faction = faction
         st.session_state.points = points
@@ -1035,16 +1041,6 @@ if st.session_state.page == "setup":
         st.session_state.units = factions_by_game[game][faction]["units"]
         st.session_state.army_list = st.session_state.get("army_list", [])
         st.session_state.army_cost = st.session_state.get("army_cost", 0)
-        st.session_state.page = "army"
-        st.rerun()
-
-    st.divider()
-
-    st.markdown("### 🚀 Étape suivante")
-
-    st.info("Tu pourras ajouter, modifier et exporter ton armée à l’étape suivante.")
-
-    if st.button("➡️ Construire l’armée", type="primary", use_container_width=True):
         st.session_state.page = "army"
         st.rerun()
         
