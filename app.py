@@ -1137,9 +1137,6 @@ elif st.session_state.page == "army":
                 st.markdown(f"### 🛡️ {unit['name']}")
                 ...
                 
-        with st.container(border=True):
-            st.markdown(f"### 🛡️ {unit_name}")
-
             cols = st.columns([1, 2])
 
             with cols[0]:
