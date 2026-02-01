@@ -912,9 +912,60 @@ if "page" not in st.session_state:
 if st.session_state.page == "setup":
     st.title("OPR Army Forge")
 
-    # ======================================================
-    # IMPORT D'UNE LISTE EXISTANTE
-    # ======================================================
+    # ==================================================
+    # STYLES UX – CARTES DE JEUX
+    # ==================================================
+    st.markdown("""
+    <style>
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 10px;
+    }
+    .game-card {
+        border: 2px solid transparent;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #111;
+        transition: all 0.25s ease;
+        cursor: pointer;
+    }
+    .game-card:hover {
+        transform: translateY(-4px);
+        border-color: #ff8c42;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    }
+    .game-card.selected {
+        border-color: #ff8c42;
+        box-shadow: 0 0 0 2px rgba(255,140,66,0.35);
+    }
+    .game-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        display: block;
+    }
+    .game-title {
+        text-align: center;
+        padding: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: rgba(0,0,0,0.6);
+    }
+    /* Boutons Streamlit invisibles */
+    button[kind="secondary"] {
+        opacity: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ==================================================
+    # IMPORT DE LISTE
+    # ==================================================
     st.divider()
     st.subheader("🔄 Recharger une liste JSON")
 
@@ -927,7 +978,6 @@ if st.session_state.page == "setup":
     if uploaded is not None:
         try:
             data = json.load(uploaded)
-
             required_keys = {"game", "faction", "army_list", "points"}
             if not required_keys.issubset(data.keys()):
                 st.error("❌ Fichier JSON invalide ou incomplet")
@@ -949,13 +999,12 @@ if st.session_state.page == "setup":
                 st.session_state.page = "army"
                 st.success("✅ Liste chargée avec succès")
                 st.rerun()
-
         except Exception as e:
             st.error(f"❌ Erreur lors du chargement : {e}")
 
-    # ======================================================
-    # SÉLECTION DU JEU (CARTES VISUELLES)
-    # ======================================================
+    # ==================================================
+    # SÉLECTION DU JEU (CARTES)
+    # ==================================================
     st.divider()
     st.subheader("🎮 Choisis ton jeu")
 
@@ -963,56 +1012,42 @@ if st.session_state.page == "setup":
         st.error("Aucun jeu trouvé")
         st.stop()
 
-    # Grille 4 colonnes → 8 jeux = 2 lignes
-    cols = st.columns(4)
+    st.markdown('<div class="games-grid">', unsafe_allow_html=True)
 
-    for i, game_name in enumerate(games):
-        col = cols[i % 4]
+    for game_name in games:
         card = GAME_CARDS.get(game_name)
         is_selected = st.session_state.get("game") == game_name
 
-        with col:
-            with st.container(border=True):
-                # Image du jeu
-                if card and card.get("image") and card["image"].exists():
-                    st.image(
-                        str(card["image"]),
-                        use_container_width=True
-                    )
-                else:
-                    st.image(
-                        "assets/games/onepagerules_round_128x128.png",
-                        use_container_width=True
-                    )
+        img_path = ""
+        if card and card.get("image") and card["image"].exists():
+            img_path = str(card["image"])
+        else:
+            img_path = ""
 
-                # Nom du jeu
-                st.markdown(
-                    f"<div style='text-align:center; font-weight:600; margin-top:6px;'>"
-                    f"{game_name}</div>",
-                    unsafe_allow_html=True
-                )
+        st.markdown(f"""
+        <div class="game-card {'selected' if is_selected else ''}">
+            {"<img src='" + img_path + "' class='game-image'>" if img_path else ""}
+            <div class="game-title">{game_name}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-                # Bouton de sélection
-                if st.button(
-                    "✔ Sélectionner" if not is_selected else "✅ Sélectionné",
-                    key=f"select_game_{game_name}",
-                    use_container_width=True,
-                    disabled=is_selected
-                ):
-                    st.session_state.game = game_name
-                    st.rerun()
+        # Bouton Streamlit invisible associé
+        if st.button("", key=f"select_{game_name}"):
+            st.session_state.game = game_name
+            st.rerun()
 
-    # Jeu non sélectionné → on bloque la suite
+    st.markdown('</div>', unsafe_allow_html=True)
+
     if "game" not in st.session_state:
         st.info("⬆️ Sélectionne un jeu pour continuer")
         st.stop()
 
+    # ==================================================
+    # PARAMÈTRES DE LA LISTE
+    # ==================================================
     game = st.session_state.game
     game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
 
-    # ======================================================
-    # PARAMÈTRES DE LISTE
-    # ======================================================
     st.divider()
     st.subheader("⚙️ Paramètres de la liste")
 
@@ -1035,6 +1070,23 @@ if st.session_state.page == "setup":
         "Nom de la liste",
         f"Liste_{datetime.now().strftime('%Y%m%d')}"
     )
+
+    # ==================================================
+    # PASSAGE À LA PAGE 2
+    # ==================================================
+    st.divider()
+    st.markdown("### 🚀 Étape suivante")
+    st.info("Tu pourras ajouter, modifier et exporter ton armée à l’étape suivante.")
+
+    if st.button("➡️ Construire l’armée", use_container_width=True):
+        st.session_state.faction = faction
+        st.session_state.points = points
+        st.session_state.list_name = list_name
+        st.session_state.units = factions_by_game[game][faction]["units"]
+        st.session_state.army_list = st.session_state.get("army_list", [])
+        st.session_state.army_cost = st.session_state.get("army_cost", 0)
+        st.session_state.page = "army"
+        st.rerun()
 
     # ======================================================
     # PASSAGE À LA CONSTRUCTION DE L'ARMÉE
