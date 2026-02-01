@@ -989,37 +989,43 @@ if st.session_state.page == "setup":
         col = cols[i % 4]
         card = GAME_CARDS.get(game_name)
         is_selected = st.session_state.get("game") == game_name
+        css_class = "game-card selected" if is_selected else "game-card"
 
         with col:
-            with st.container(border=True):
-                # Image du jeu
-                if card and card.get("image") and card["image"].exists():
-                    st.image(
-                        str(card["image"]),
-                        use_container_width=True
-                    )
-                else:
-                    st.image(
-                        "assets/games/onepagerules_round_128x128.png",
-                        use_container_width=True
-                    )
+            # 👉 ouverture de la carte HTML contrôlée
+            st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
 
-                # Nom du jeu
-                st.markdown(
-                    f"<div style='text-align:center; font-weight:600; margin-top:6px;'>"
-                    f"{game_name}</div>",
-                    unsafe_allow_html=True
+            # Image du jeu
+            if card and card.get("image") and card["image"].exists():
+                st.image(
+                    str(card["image"]),
+                    use_container_width=True
+                )
+            else:
+                st.image(
+                    "assets/games/onepagerules_round_128x128.png",
+                    use_container_width=True
                 )
 
-                # Bouton de sélection
-                if st.button(
-                    "✔ Sélectionner" if not is_selected else "✅ Sélectionné",
-                    key=f"select_game_{game_name}",
-                    use_container_width=True,
-                    disabled=is_selected
-                ):
-                    st.session_state.game = game_name
-                    st.rerun()
+            # Nom du jeu
+            st.markdown(
+                f"<div style='text-align:center; font-weight:600; margin-top:6px;'>"
+                f"{game_name}</div>",
+                unsafe_allow_html=True
+            )
+
+            # Bouton de sélection
+            if st.button(
+                "✔ Sélectionner" if not is_selected else "✅ Sélectionné",
+                key=f"select_game_{game_name}",
+                use_container_width=True,
+                disabled=is_selected
+            ):
+                st.session_state.game = game_name
+                st.rerun()
+
+        # 👉 fermeture de la carte HTML
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Jeu non sélectionné → on bloque la suite
     if "game" not in st.session_state:
