@@ -916,7 +916,7 @@ if st.session_state.page == "setup":
     <style>
     .game-card {
         border-radius: 16px;
-        padding: 12px;
+        overflow: hidden;          /* 🔥 clé du fix */
         transition: all 0.25s ease;
     }
 
@@ -1006,7 +1006,9 @@ if st.session_state.page == "setup":
                     "assets/games/onepagerules_round_128x128.png",
                     use_container_width=True
                 )
-
+            
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            
             # Nom du jeu
             st.markdown(
                 f"<div style='text-align:center; font-weight:600; margin-top:6px;'>"
