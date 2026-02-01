@@ -922,17 +922,6 @@
           "description": "Améliorations disponibles pour l'unité",
           "options": [
             {
-              "name": "Une Grande arme lourde (A2, PA (3))",
-              "cost": 20,
-              "weapon": {
-                "name": "Grande arme lourde",
-                "range": "-",
-                "attacks": 2,
-                "armor_piercing": 3,
-                "special_rules": []
-              }
-            },
-            {
               "name": "Bannière",
               "cost": 5,
               "special_rules": []
