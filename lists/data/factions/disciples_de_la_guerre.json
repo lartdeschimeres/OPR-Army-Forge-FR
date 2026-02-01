@@ -371,7 +371,7 @@
           "name": "Arme à une main",
           "range": "-",
           "attacks": 3,
-          "armor_piercing": 0
+          "armor_piercing": "-"
         }
       ],
       "upgrade_groups": [
@@ -399,7 +399,7 @@
                 "name": "Paire d'armes à une main",
                 "range": "-",
                 "attacks": 4,
-                "armor_piercing": 0
+                "armor_piercing": "-"
 		        }
             },
             {
@@ -409,7 +409,7 @@
                 "name": "Hallebarde",
                 "range": "-",
                 "attacks": 3,
-                "armor_piercing": 0,
+                "armor_piercing": "-",
                 "special_rules": ["Perforant"]
               }
             },
@@ -420,7 +420,7 @@
                 "name": "Lance",
                 "range": "-",
                 "attacks": 3,
-                "armor_piercing": 0,
+                "armor_piercing": "-",
                 "special_rules": ["Percée"]
               }
             },
@@ -448,7 +448,7 @@
                 "name": "Arc court",
                 "range": "18",
                 "attacks": 2,
-                "armor_piercing": 0
+                "armor_piercing": "-"
               }
             },
             {
@@ -494,7 +494,7 @@
           "name": "Armes à une main",
           "range": "-",
           "attacks": 1,
-          "armor_piercing": 0
+          "armor_piercing": "-"
         }
       ],
       "upgrade_groups": [
@@ -510,7 +510,7 @@
                 "name": "Lance",
                 "range": "-",
                 "attacks": 1,
-                "armor_piercing": 0,
+                "armor_piercing": "-",
                 "special_rules": ["Contre-charge"]
               }
             },
@@ -585,7 +585,7 @@
                 "name": "Paire d'armes à une main",
                 "range": "-",
                 "attacks": 2,
-                "armor_piercing": 0,
+                "armor_piercing": "-",
                 "special_rules": []
               }
             }
@@ -800,7 +800,7 @@
           "name": "Membres mutants",
           "range": "-",
           "attacks": 2,
-          "armor_piercing": 0
+          "armor_piercing": "-"
         }
       ]
     },
@@ -833,7 +833,7 @@
                 "name": "Paire d'armes à une main",
                 "range": "-",
                 "attacks": 2,
-                "armor_piercing": 0,
+                "armor_piercing": "-",
                 "special_rules": []
               }
             }
@@ -858,6 +858,7 @@
               "name": "Musicien",
               "cost": 10,
               "special_rules": []
+            }
           ]
         }
       ]
@@ -892,8 +893,8 @@
           "name": "Paires d'armes ensorcelées",
           "range": "-",
           "attacks": 4,
-          "armor_piercing": 0
-	  "special_rules": [Perforant]
+          "armor_piercing": "-",
+	        "special_rules": ["Perforant"]
         }
       ],
       "upgrade_groups": [
@@ -910,7 +911,7 @@
                 "range": "-",
                 "attacks": 4,
                 "armor_piercing": 2,
-                "special_rules": [Perforant]
+                "special_rules": ["Perforant"]
               }
             }
           ]
@@ -963,12 +964,13 @@
           "name": "Arcs courts",
           "range": "18",
           "attacks": 1,
-          "armor_piercing": 0
-	},
+          "armor_piercing": "-"
+	      },
+        {
           "name": "Armes à une main",
           "range": "-",
           "attacks": 1,
-          "armor_piercing": 0
+          "armor_piercing": "-"
 	}
       ],
       "upgrade_groups": [
@@ -1017,8 +1019,8 @@
           "name": "Griffes perorantes",
           "range": "-",
           "attacks": 1,
-          "armor_piercing": 0
-	  "special_rules": ["Perforant"]
+          "armor_piercing": "-",
+	        "special_rules": ["Perforant"]
 	}
       ],
       "upgrade_groups": [
@@ -1040,6 +1042,6 @@
           ]
         }
       ]
-    },
+    }
   ]
 }
