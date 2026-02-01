@@ -1102,7 +1102,19 @@ elif st.session_state.page == "army":
     st.title(st.session_state.list_name)
     st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
     game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
-    faction_data = factions_by_game[st.session_state.game][st.session_state.faction]
+    
+    game = st.session_state.get("game")
+    faction = st.session_state.get("faction")
+
+    if not game or game not in factions_by_game:
+        st.warning("⚠️ Jeu non valide ou non sélectionné")
+        st.stop()
+
+    if not faction or faction not in factions_by_game[game]:
+        st.warning("⚠️ Faction non valide ou non sélectionnée")
+        st.stop()
+
+faction_data = factions_by_game[game][faction]
     display_faction_rules(faction_data)
     if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
         st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées. Voir les messages d'erreur ci-dessus.")
