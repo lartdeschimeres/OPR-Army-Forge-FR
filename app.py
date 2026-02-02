@@ -629,7 +629,7 @@ th {{
           <td>{esc(w.get('range', '-'))}</td>
           <td>{esc(w.get('attacks', '-'))}</td>
           <td>{esc(w.get('armor_piercing', '-'))}</td>
-          <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-'}</td>
+          <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-')}</td>
         </tr>
         """
             html += "</tbody></table>"
