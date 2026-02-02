@@ -1119,7 +1119,7 @@ elif st.session_state.page == "army":
                 opt_name = selected_weapon.split(" (")[0]
                 opt = next((o for o in group["options"] if o["name"] == opt_name), None)
                 if opt:
-                    weapon = opt["weapon"]
+                    weapon = [opt["weapon"]]
                     weapon_cost = opt["cost"]
         elif group["type"] == "mount":
             mount_labels = ["Aucune monture"]
