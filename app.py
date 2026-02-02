@@ -611,28 +611,29 @@ th {{
 
         # ---- ARMES ----
         weapons = unit.get("weapons", [])
-
+        if weapons:
             html += '<div class="section-title">Armes équipées :</div>'
             html += """
-<table>
-<thead>
-<tr>
-  <th>Arme</th><th>Port</th><th>Att</th><th>PA</th><th>Règles spéciales</th>
-</tr>
-</thead>
-<tbody>
-"""
+        <table>
+        <thead>
+        <tr>
+          <th>Arme</th><th>Port</th><th>Att</th><th>PA</th><th>Règles spéciales</th>
+        </tr>
+        </thead>
+        <tbody>
+        """
             for w in weapons:
                 html += f"""
-<tr>
-  <td>{esc(w.get('name', '-'))}</td>
-  <td>{esc(w.get('range', '-'))}</td>
-  <td>{esc(w.get('attacks', '-'))}</td>
-  <td>{esc(w.get('armor_piercing', '-'))}</td>
-  <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-')}</td>
-</tr>
-"""
+        <tr>
+          <td>{esc(w.get('name', '-'))}</td>
+          <td>{esc(w.get('range', '-'))}</td>
+          <td>{esc(w.get('attacks', '-'))}</td>
+          <td>{esc(w.get('armor_piercing', '-'))}</td>
+          <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-'}</td>
+        </tr>
+        """
             html += "</tbody></table>"
+
 
         # ---- RÈGLES SPÉCIALES ----
         rules = unit.get("rules", [])
