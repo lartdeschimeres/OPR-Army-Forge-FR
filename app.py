@@ -1,4 +1,4 @@
-import json
+    import json
 import streamlit as st
 from pathlib import Path
 from datetime import datetime
@@ -611,36 +611,30 @@ th {{
 
         # ---- ARMES ----
         if unit.get("weapons"):
-            html += "<div class='weapons'><strong>Armes :</strong><ul>"
-            for w in unit["weapons"]:
-                html += (
-                    f"<li>{w['name']} "
-                    f"(A{w['attacks']}, PA({w['ap']})"
-                    f"{', ' + ', '.join(w['special']) if w['special'] else ''})</li>"
-                )
-            html += "</ul></div>"
-        
-        if unit.get("weapons"):
-            st.markdown("**Armes de base**")
-            for w in unit["weapons"]:
-                wd = format_weapon_details(w)
-                st.markdown(
-                    f"- **{wd['name']}** "
-                    f"(Portée {wd['range']}, "
-                    f"A{wd['attacks']}, "
-                    f"PA({wd['ap']})"
-                    f"{', ' + ', '.join(wd['special']) if wd['special'] else ''})"
-                )
-
-            def format_weapon_line(w):
-                return (
-                    f"{w['name']} (A{w['attacks']}, PA({w['ap']})"
-                    f"{', ' + ', '.join(w['special']) if w['special'] else ''})"
-                )
-
-            
-            html += '<div class="section-title">Armes équipées :</div>'
+            html += '<div class="section-title">Armes :</div>'
             html += """
+        <table>
+        <thead>
+        <tr>
+          <th>Arme</th>
+          <th>Att</th>
+          <th>PA</th>
+          <th>Règles spéciales</th>
+        </tr>
+        </thead>
+        <tbody>
+        """
+            for w in unit["weapons"]:
+                html += f"""
+        <tr>
+          <td>{esc(w.get('name', '-'))}</td>
+          <td>{esc(w.get('attacks', '-'))}</td>
+          <td>{esc(w.get('ap', '-'))}</td>
+          <td>{esc(", ".join(w.get('special', [])) if w.get('special') else '-'}</td>
+        </tr>
+        """
+            html += "</tbody></table>"
+            
 <table>
 <thead>
 <tr>
@@ -649,7 +643,7 @@ th {{
 </thead>
 <tbody>
 """
-            for w in weapons:
+            for w in unit.get("weapons", []):
                 html += f"""
 <tr>
   <td>{esc(w.get('name', '-'))}</td>
