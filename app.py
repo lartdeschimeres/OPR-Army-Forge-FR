@@ -645,20 +645,6 @@ th {{
                 html += f"<div><strong>{esc(r)}</strong></div>"
             html += "</div>"
 
-        # ---- SORTS DE LA FACTION ----
-        if 'faction' in st.session_state:
-            faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
-            if 'spells' in faction_data:
-                spells = faction_data['spells']
-                if spells:
-                    html += '<div class="section-title">Sorts de la faction :</div>'
-                    html += "<div class='rules'>"
-                    for spell_name, spell_info in spells.items():
-                        cost = spell_info.get('cost', '?')
-                        description = spell_info.get('description', '')
-                        html += f"<div><strong>{esc(spell_name)} [{cost}]</strong>: {esc(description)}</div>"
-                    html += "</div>"
-
         # ---- OPTIONS ----
         options = unit.get("options", {})
         if options:
@@ -753,13 +739,47 @@ th {{
                 </div>
                 """
 
+    # ---- SORTS DE LA FACTION (en dehors des unités, en une seule colonne) ----
+    if 'faction' in st.session_state:
+        faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
+        if 'spells' in faction_data:
+            spells = faction_data['spells']
+            if spells:
+                html += """
+                <div style="margin-top: 40px;">
+                    <h3 style="text-align: center; color: var(--accent); border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
+                        Sorts de la faction
+                    </h3>
+                    <div style="display: flex; flex-direction: column; font-size: 12px; margin-bottom: 20px; max-width: 100%;">
+                        <div style="flex: 1; padding: 0 10px; width: 100%;">
+                """
+
+                # Trier les sorts par nom
+                spell_names = sorted(spells.keys())
+
+                # Afficher chaque sort en une seule colonne
+                for spell_name in spell_names:
+                    spell_info = spells[spell_name]
+                    cost = spell_info.get('cost', '?')
+                    description = spell_info.get('description', '')
+                    html += f"""
+                    <div style="margin-bottom: 12px; line-height: 1.4; width: 100%;">
+                        <strong>{esc(spell_name)} [{cost}]</strong>: {esc(description)}
+                    </div>
+                    """
+
+                html += """
+                        </div>
+                    </div>
+                </div>
+                """
+
     html += """
 </div>
 </body>
 </html>
 """
     return html
-
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
