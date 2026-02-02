@@ -610,38 +610,36 @@ th {{
         html += "</div>"
 
         # ---- ARMES ----
-        special = ", ".join(w.get("special", [])) if w.get("special") else "-"
-        html += f"""
-        <tr>
-          <td>{esc(w.get('name', '-'))}</td>
-          <td>{esc(w.get('attacks', '-'))}</td>
-          <td>{esc(w.get('ap', '-'))}</td>
-          <td>{esc(special)}</td>
-        </tr>
-        """  
-        if unit.get("weapons"):
+        weapons = unit.get("weapons", [])
+
+        if weapons:
             html += '<div class="section-title">Armes :</div>'
             html += """
-        <table>
-        <thead>
-        <tr>
-          <th>Arme</th>
-          <th>Att</th>
-          <th>PA</th>
-          <th>Règles spéciales</th>
-        </tr>
-        </thead>
-        <tbody>
-        """
-            for w in unit["weapons"]:
+            <table>
+            <thead>
+            <tr>
+              <th>Arme</th>
+              <th>Portée</th>
+              <th>Att</th>
+              <th>PA</th>
+              <th>Règles spéciales</th>
+            </tr>
+            </thead>
+            <tbody>
+            """
+
+            for w in weapons:
+                special = ", ".join(w.get("special_rules", [])) if w.get("special_rules") else "-"
                 html += f"""
-        <tr>
-          <td>{esc(w.get('name', '-'))}</td>
-          <td>{esc(w.get('attacks', '-'))}</td>
-          <td>{esc(w.get('ap', '-'))}</td>
-          <td>{esc(", ".join(w.get('special', [])) if w.get('special') else '-')}</td>
-        </tr>
-        """
+                <tr>
+                  <td>{esc(w.get('name', '-'))}</td>
+                  <td>{esc(w.get('range', '-'))}</td>
+                  <td>{esc(w.get('attacks', '-'))}</td>
+                  <td>{esc(w.get('armor_piercing', '-'))}</td>
+                  <td>{esc(special)}</td>
+                </tr>
+                """
+
             html += "</tbody></table>"
             
 <table>
@@ -1311,7 +1309,7 @@ elif st.session_state.page == "army":
                 "quality": unit["quality"],
                 "defense": unit["defense"],
                 "rules": [format_special_rule(r) for r in unit.get("special_rules", []) if "Coriace(0)" not in r],
-                "weapon": weapon_data,
+                "weapons": unit.get("weapons", [weapon_data]),
                 "options": selected_options,
                 "mount": mount,
                 "coriace": total_coriace,
