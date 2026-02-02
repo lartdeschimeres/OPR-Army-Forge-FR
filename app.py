@@ -1100,7 +1100,7 @@ elif st.session_state.page == "army":
     if unit["base_cost"] > max_cost:
         st.error(f"Cette unité ({unit['base_cost']} pts) dépasse la limite de {int(max_cost)} pts ({int(game_config['unit_max_cost_ratio']*100)}% du total)")
         st.stop()
-    weapon = unit.get("weapons", [{}])[0]
+    weapon = unit.get("weapons", [])
     selected_options = {}
     mount = None
     weapon_cost = 0
