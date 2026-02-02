@@ -610,30 +610,32 @@ th {{
         html += "</div>"
 
         # ---- ARMES ----
-        weapons = unit.get("weapons", [])
+        weapons = unit.get("weapon")
         if weapons:
+            if not isinstance(weapons, list):
+                weapons = [weapons]
+
             html += '<div class="section-title">Armes équipées :</div>'
             html += """
-        <table>
-        <thead>
-        <tr>
-          <th>Arme</th><th>Port</th><th>Att</th><th>PA</th><th>Règles spéciales</th>
-        </tr>
-        </thead>
-        <tbody>
-        """
+<table>
+<thead>
+<tr>
+  <th>Arme</th><th>Port</th><th>Att</th><th>PA</th><th>Règles spéciales</th>
+</tr>
+</thead>
+<tbody>
+"""
             for w in weapons:
                 html += f"""
-        <tr>
-          <td>{esc(w.get('name', '-'))}</td>
-          <td>{esc(w.get('range', '-'))}</td>
-          <td>{esc(w.get('attacks', '-'))}</td>
-          <td>{esc(w.get('armor_piercing', '-'))}</td>
-          <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-')}</td>
-        </tr>
-        """
+<tr>
+  <td>{esc(w.get('name', '-'))}</td>
+  <td>{esc(w.get('range', '-'))}</td>
+  <td>{esc(w.get('attacks', '-'))}</td>
+  <td>{esc(w.get('ap', '-'))}</td>
+  <td>{esc(", ".join(w.get('special', [])) if w.get('special') else '-')}</td>
+</tr>
+"""
             html += "</tbody></table>"
-
 
         # ---- RÈGLES SPÉCIALES ----
         rules = unit.get("rules", [])
@@ -1217,7 +1219,7 @@ elif st.session_state.page == "army":
                 "is_combined": double_size if unit.get("type") != "hero" else False,
                 "quality": unit["quality"],
                 "defense": unit["defense"],
-                "special_rules": [format_special_rule(r) for r in unit.get("special_rules", []) if "Coriace(0)" not in r],
+                "rules": [format_special_rule(r) for r in unit.get("special_rules", []) if "Coriace(0)" not in r],
                 "weapon": weapon_data,
                 "options": selected_options,
                 "mount": mount,
@@ -1254,8 +1256,8 @@ elif st.session_state.page == "army":
             if u.get("type") == "hero":
                 unit_header += " | 🌟 Héros"
             st.markdown(unit_header)
-            if u.get("special_rules"):
-                rules_text = ", ".join(u["special_rules"])
+            if u.get("rules"):
+                rules_text = ", ".join(u["rules"])
                 st.markdown(f"**Règles spéciales:** {rules_text}")
             if 'weapon' in u and u['weapon']:
                 weapon_details = format_weapon_details(u['weapon'])
