@@ -610,6 +610,15 @@ th {{
         html += "</div>"
 
         # ---- ARMES ----
+        special = ", ".join(w.get("special", [])) if w.get("special") else "-"
+        html += f"""
+        <tr>
+          <td>{esc(w.get('name', '-'))}</td>
+          <td>{esc(w.get('attacks', '-'))}</td>
+          <td>{esc(w.get('ap', '-'))}</td>
+          <td>{esc(special)}</td>
+        </tr>
+        """  
         if unit.get("weapons"):
             html += '<div class="section-title">Armes :</div>'
             html += """
