@@ -385,7 +385,7 @@ def format_unit_option(u):
         weapons = []
         for weapon in u['weapons']:
             weapon_details = format_weapon_details(weapon)
-            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon'hui_details['special'] else ''})")
+            weapons.append(f"{weapon.get('name', 'Arme')} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
         weapons_part = " | ".join(weapons)
     rules_part = ""
     if 'special_rules' in u and u['special_rules']:
