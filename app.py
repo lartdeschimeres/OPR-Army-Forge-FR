@@ -471,7 +471,7 @@ body {{
   border: 1px solid var(--border);
   margin-bottom: 40px;
   padding: 16px;
-  page-break-inside: avoid;  /* Évite la coupure d'une unité sur plusieurs pages */
+  page-break-inside: avoid;
 }}
 
 .unit-header {{
@@ -531,10 +531,9 @@ th {{
   font-size: 12px;
 }}
 
-.rules span {{
-  display: inline-block;
-  margin-right: 8px;
-  color: var(--accent);
+.rules div {{
+  margin-bottom: 6px;
+  color: var(--text-main);
 }}
 
 .section-title {{
@@ -643,9 +642,23 @@ th {{
             html += '<div class="section-title">Règles spéciales :</div>'
             html += "<div class='rules'>"
             for r in rules:
-                html += f"<span>{esc(r)}</span>"
+                html += f"<div><strong>{esc(r)}</strong></div>"
             html += "</div>"
-   
+
+        # ---- SORTS DE LA FACTION ----
+        if 'faction' in st.session_state:
+            faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
+            if 'spells' in faction_data:
+                spells = faction_data['spells']
+                if spells:
+                    html += '<div class="section-title">Sorts de la faction :</div>'
+                    html += "<div class='rules'>"
+                    for spell_name, spell_info in spells.items():
+                        cost = spell_info.get('cost', '?')
+                        description = spell_info.get('description', '')
+                        html += f"<div><strong>{esc(spell_name)} [{cost}]</strong>: {esc(description)}</div>"
+                    html += "</div>"
+
         # ---- OPTIONS ----
         options = unit.get("options", {})
         if options:
@@ -740,19 +753,7 @@ th {{
                 </div>
                 """
 
-        # ---- SORTS DE LA FACTION ----
-        if 'faction' in st.session_state:
-            faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
-            if 'spells' in faction_data:
-                spells = faction_data['spells']
-                if spells:
-                    html += '<div class="section-title">Sorts de la faction :</div>'
-                    html += "<div class='rules'>"
-                    for spell_name, spell_info in spells.items():
-                        cost = spell_info.get('cost', '?')
-                        description = spell_info.get('description', '')
-                        html += f"<div><strong>{esc(spell_name)} [{cost}]</strong>: {esc(description)}</div>"
-                    html += "</div>"
+    html += """
 </div>
 </body>
 </html>
