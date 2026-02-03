@@ -1009,8 +1009,8 @@
           "range": "-",
           "attacks": 1,
           "armor_piercing": "-",
-	        "special_rules": ["Perforant"]
-	}
+	      "special_rules": ["Perforant"]
+	     }
       ],
       "upgrade_groups": [
         {
@@ -1033,6 +1033,7 @@
       ]
     },
     {
+    {
       "name": "Cavaliers barbares de la Guerre",
       "type": "unit",
       "size": 5,
@@ -1045,67 +1046,70 @@
           "name": "Armes à une main",
           "range": "-",
           "attacks": 1,
-          "armor_piercing": "-"
+          "armor_piercing": 0
         }
       ],
-"upgrade_groups": [
-  {
-    "group": "Remplacement d'armes",
-    "type": "weapon",
-    "description": "Remplacez toutes les armes à une main par:",
-    "options": [
-      {
-        "name": "Fléau",
-        "cost": 10,
-        "weapon": {
-          "name": "Fléau",
-          "range": "-",
-          "attacks": 1,
-          "armor_piercing": 1,
-          "special_rules": []
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez toutes les armes à une main par:",
+          "options": [
+            {
+              "name": "Fléau",
+              "cost": 10,
+              "weapon": {
+                "name": "Fléau",
+                "range": "-",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Icône du Ravage (Aura de Défense versatile)",
+              "cost": 20,
+              "special_rules": ["Aura de Défense versatile"]
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'armes",
+          "type": "upgrades",
+          "description": "Améliorer toutes les figurines avec une des options suivantes (un seul choix possible)",
+          "options": [
+            {
+              "name": "Arc court",
+              "cost": 25,
+              "weapon": {
+                "name": "Arc court",
+                "range": "18",
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Javelot barbelé",
+              "cost": 30,
+              "weapon": {
+                "name": "Javelot barbelé",
+                "range": "12",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": ["Éclatement"]
+              }
+            }
+          ]
         }
-      }
-    ]
-  },
-  {
-    "group": "Améliorations d'unité",
-    "type": "upgrades",
-    "description": "Améliorations disponibles pour l'unité",
-    "options": [
-      {
-        "name": "Icône du Ravage (Aura de Défense versatile)",
-        "cost": 20,
-        "special_rules": ["Aura de Défense versatile"]
-      }
-    ]
-  },
-  {
-    "group": "Améliorations d'armes",
-    "type": "upgrades",
-    "description": "Améliorer toutes les figurines avec une des options suivantes (un seul choix possible)",
-    "options": [
-      {
-        "name": "Arc court",
-        "cost": 25,
-        "weapon": {
-          "name": "Arc court",
-          "range": "18",
-          "attacks": 1,
-          "armor_piercing": 0,
-          "special_rules": []
-        }
-      },
-      {
-        "name": "Javelot barbelé",
-        "cost": 30,
-        "weapon": {
-          "name": "Javelot barbelé",
-          "range": "12",
-          "attacks": 1,
-          "armor_piercing": 1,
-          "special_rules": ["Éclatement"]
-        }
-      }
-    ]
-  }
-]
+      ]
+    }
+  ]
+}
