@@ -6,7 +6,7 @@
   "description": "Les Disciples de la Guerre sont une faction brutale et impitoyable, composée de guerriers fanatiques et de monstres déchaînés.",
   "special_rules_descriptions": {
     "Warbound [Guerrier-né]": "Les ennemis qui lancent les dés pour bloquer les touches infligées par les armes de cette figurine subissent une blessure supplémentaire pour chaque résultat non modifié de 1 obtenu.",
-    "Bloodthirsty Fighter [Combattant sanguinaire] ": "Pour chaque résultat de 1 non modifié obtenu par les ennemis lorsqu'ils bloquent les touches portées par les armes de cette figurine en mêlée, cette figurine peut effectuer un jet d'attaque supplémentaire avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées.",
+    "Bloodthirsty Fighter [Combattant sanguinaire]": "Pour chaque résultat de 1 non modifié obtenu par les ennemis lorsqu'ils bloquent les touches portées par les armes de cette figurine en mêlée, cette figurine peut effectuer un jet d'attaque supplémentaire avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées.",
     "Break [Dislocation]": "Ignore la Régénération, et sur les résultats non modifiés de 6 pour toucher, ces coups obtiennent PA (+2).",
     "Breath Attack [Attaque de souffle]": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6 : sur un résultat de 2+, une unité ennemie dans un rayon de 6\" en ligne de mire subit une touche avec Explosion (3) et PA (1).",
     "Melee Evasion [Esquive en mêlée]": "Les ennemis subissent un malus de -1 aux jets d'attaque en mêlée lorsqu'ils attaquent des unités dont toutes les figurines possèdent cette règle.",
