@@ -385,7 +385,7 @@ def format_mount_details(mount):
         if 'quality' in mount_data:
             details += f"Qua{mount_data['quality']}+"
         if 'defense' in mount_data:
-            details += f" Déf{mount_data['defense']}+"
+            details += f" Défense {mount_data['defense']}+"
         details += ")"
     if 'special_rules' in mount_data and mount_data['special_rules']:
         details += " | " + ", ".join(mount_data['special_rules'])
@@ -1080,10 +1080,13 @@ elif st.session_state.page == "army":
                 opt_name = selected_weapon.split(" (")[0]
                 opt = next((o for o in group["options"] if o["name"] == opt_name), None)
                 if opt:
-                    # Remplace uniquement l'arme concernée (ex: "Arcs courts" → "Javelots barbelés")
-                    # Conserve l'arme à une main
-                    weapon = [w for w in unit.get("weapons", []) if w.get("name") != "Arcs courts"]
-                    weapon.append(opt["weapon"])
+                    # Conserver les armes de base (comme "Armes à une main") et remplacer uniquement l'arme concernée (comme "Arcs courts")
+                    new_weapons = []
+                    for w in unit.get("weapons", []):
+                        if w.get("name") != "Arcs courts":  # Conserver les armes de base
+                            new_weapons.append(w)
+                    new_weapons.append(opt["weapon"])  # Ajouter l'arme de remplacement
+                    weapon = new_weapons
                     weapon_cost = opt["cost"]
         elif group["type"] == "mount":
             mount_labels = ["Aucune monture"]
