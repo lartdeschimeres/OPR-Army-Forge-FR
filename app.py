@@ -212,6 +212,20 @@ st.markdown("""
         border-radius: 5px;
         margin-bottom: 15px;
     }
+    .stRadio > div {
+        display: flex;
+        flex-direction: column;
+    }
+    .stRadio > div > label {
+        margin-bottom: 8px;
+    }
+    .stCheckbox > div {
+        display: flex;
+        flex-direction: column;
+    }
+    .stCheckbox > div > label {
+        margin-bottom: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
