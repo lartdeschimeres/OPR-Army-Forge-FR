@@ -1052,7 +1052,7 @@
 	  "upgrade_groups": [
  	    {
 		  "group": "Remplacement d'armes",
-  	      "type": "weapon",  // Déjà en "weapon" pour les remplacements d'armes
+  	      "type": "weapon",
   	      "options": [
   	    {
  	      "name": "Fléau (A1, PA(1))",
@@ -1062,8 +1062,8 @@
 	    ]
 	    },
 	    {
-	      "group": "Améliorations d'armes",  // Changement ici
- 	      "type": "weapon",  // Passe de "upgrade" à "weapon" pour des boutons radio
+	      "group": "Améliorations d'armes", 
+ 	      "type": "weapon",
  	      "options": [
    	        {
     	      "name": "Arc court (+25 pts)",
@@ -1079,7 +1079,7 @@
    	    },
     	{
 	      "group": "Améliorations d'unité",
-   	  	  "type": "upgrade",  // Reste en "upgrade" pour plusieurs choix possibles
+   	  	  "type": "upgrade", 
      	 "options": [
       	  {
       	    "name": "Icône du Ravage (Aura de Défense versatile)",
