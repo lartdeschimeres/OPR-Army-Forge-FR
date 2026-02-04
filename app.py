@@ -1064,55 +1064,32 @@ if st.session_state.page == "setup":
         st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version corrigée)
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version finale simplifiée)
 # ======================================================
 elif st.session_state.page == "army":
-    st.markdown(
-        f"""
-        <div class="army-header">
-            <div class="army-title">{st.session_state.list_name}</div>
-            <div class="army-meta">
-              {st.session_state.army_cost} / {st.session_state.points} pts
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # Initialisation sécurisée
+    if "widget_counter" not in st.session_state:
+        st.session_state.widget_counter = 0
 
-    if st.button("⬅ Retour à la page Configuration"):
+    # Nettoyage des anciennes clés
+    keys_to_clean = [k for k in st.session_state.keys() if k.startswith("unit_")]
+    for k in keys_to_clean:
+        del st.session_state[k]
+
+    # Affichage de base
+    st.markdown(f"<div class='army-header'><h2>{st.session_state.list_name}</h2><p>{st.session_state.army_cost}/{st.session_state.points} pts</p></div>", unsafe_allow_html=True)
+
+    if st.button("⬅ Retour à la configuration"):
         st.session_state.page = "setup"
         st.rerun()
-
-    st.title(st.session_state.list_name)
-    st.caption(f"{st.session_state.game} • {st.session_state.faction} • {st.session_state.army_cost}/{st.session_state.points} pts")
-
-    game_config = GAME_CONFIG.get(st.session_state.game, GAME_CONFIG["Age of Fantasy"])
-    faction_data = factions_by_game[st.session_state.game][st.session_state.faction]
-    display_faction_rules(faction_data)
-
-    if not validate_army_rules(st.session_state.army_list, st.session_state.points, st.session_state.game):
-        st.warning("⚠️ Certaines règles spécifiques ne sont pas respectées.")
-
-    st.divider()
-    st.subheader("Points d'armée")
-    show_points_progress(st.session_state.army_cost, st.session_state.points)
-
-    st.divider()
-    st.subheader("Ajouter une unité")
 
     # Sélection de l'unité
     unit = st.selectbox(
         "Unité disponible",
         st.session_state.units,
         format_func=format_unit_option,
-        index=0,
         key="unit_select"
     )
-
-    # Nettoyage des anciennes clés de session
-    keys_to_delete = [k for k in st.session_state.keys() if k.startswith("unit_") or k.startswith("combined_")]
-    for k in keys_to_delete:
-        del st.session_state[k]
 
     # Initialisation des variables
     weapon = unit.get("weapons", [])
@@ -1122,93 +1099,57 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
-    # Boucle des groupes d'améliorations (version corrigée)
+    # Traitement des améliorations
     for group_idx, group in enumerate(unit.get("upgrade_groups", [])):
+        st.session_state.widget_counter += 1
         unique_key = f"unit_{st.session_state.widget_counter}_{group_idx}"
 
-        st.markdown(f"**{group['group']}**")
+        st.subheader(group['group'])
 
         if group["type"] == "weapon":
             # Boutons radio pour les armes (choix unique)
             weapon_options = ["Arme de base"]
             for o in group["options"]:
                 weapon_details = format_weapon_details(o["weapon"])
-                weapon_options.append(
-                    f"{o['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']})"
-                    f"{', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''}) "
-                    f"(+{o['cost']} pts)"
-                )
-
-            # Utilisation d'un index sécurisé
-            default_index = 0
-            if f"{unique_key}_weapon" in st.session_state:
-                try:
-                    default_index = weapon_options.index(st.session_state[f"{unique_key}_weapon"])
-                except:
-                    default_index = 0
+                weapon_options.append(f"{o['name']} (+{o['cost']} pts)")
 
             selected_weapon = st.radio(
                 "Sélectionnez une arme",
                 weapon_options,
-                key=f"{unique_key}_weapon",
-                index=default_index
+                key=f"{unique_key}_weapon"
             )
 
-            # Mise à jour sécurisée de la sélection
-            try:
-                st.session_state[f"{unique_key}_weapon"] = selected_weapon
-            except:
-                pass
-
             if selected_weapon != "Arme de base":
-                opt_name = selected_weapon.split(" (")[0]
+                opt_name = selected_weapon.split(" (+")[0]
                 opt = next((o for o in group["options"] if o["name"] == opt_name), None)
                 if opt:
-                    if unit.get("type", "").lower() == "hero":
-                        weapon = [opt["weapon"]]  # Remplacement total pour les héros
+                    if unit.get("type") == "hero":
+                        weapon = [opt["weapon"]]
                     else:
-                        weapon = unit.get("weapons", []) + [opt["weapon"]]  # Ajout pour les unités
+                        weapon = unit.get("weapons", []) + [opt["weapon"]]
                     weapon_cost += opt["cost"]
 
         elif group["type"] == "mount":
             # Boutons radio pour les montures
-            mount_labels = ["Aucune monture"]
+            mount_options = ["Aucune monture"]
             mount_map = {}
             for o in group["options"]:
-                mount_details = format_mount_details(o)
-                label = f"{mount_details} (+{o['cost']} pts)"
-                mount_labels.append(label)
-                mount_map[label] = o
-
-            default_index = 0
-            if f"{unique_key}_mount" in st.session_state:
-                try:
-                    default_index = mount_labels.index(st.session_state[f"{unique_key}_mount"])
-                except:
-                    default_index = 0
+                mount_options.append(f"{o['name']} (+{o['cost']} pts)")
+                mount_map[f"{o['name']} (+{o['cost']} pts)"] = o
 
             selected_mount = st.radio(
                 "Sélectionnez une monture",
-                mount_labels,
-                key=f"{unique_key}_mount",
-                index=default_index
+                mount_options,
+                key=f"{unique_key}_mount"
             )
 
-            try:
-                st.session_state[f"{unique_key}_mount"] = selected_mount
-            except:
-                pass
-
             if selected_mount != "Aucune monture":
-                opt = mount_map.get(selected_mount)
-                if opt:
-                    mount = opt
-                    mount_cost = opt["cost"]
+                mount = mount_map[selected_mount]
+                mount_cost = mount["cost"]
 
         else:
             # Checkboxes pour les améliorations (choix multiples)
-            is_hero = unit.get("type", "").lower() == "hero"
-            if is_hero:
+            if unit.get("type") == "hero":
                 option_labels = ["Aucune amélioration"]
                 option_map = {}
                 for o in group["options"]:
@@ -1216,105 +1157,68 @@ elif st.session_state.page == "army":
                     option_labels.append(label)
                     option_map[label] = o
 
-                default_index = 0
-                if f"{unique_key}_hero" in st.session_state:
-                    try:
-                        default_index = option_labels.index(st.session_state[f"{unique_key}_hero"])
-                    except:
-                        default_index = 0
-
                 selected = st.radio(
                     f"Amélioration – {group['group']}",
                     option_labels,
-                    key=f"{unique_key}_hero",
-                    index=default_index
+                    key=f"{unique_key}_hero"
                 )
 
-                try:
-                    st.session_state[f"{unique_key}_hero"] = selected
-                except:
-                    pass
-
                 if selected != "Aucune amélioration":
-                    opt = option_map.get(selected)
-                    if opt:
-                        selected_options[group['group']] = [opt]
-                        upgrades_cost += opt["cost"]
+                    opt = option_map[selected]
+                    selected_options[group['group']] = [opt]
+                    upgrades_cost += opt["cost"]
             else:
-                st.write("Améliorations (plusieurs choix possibles):")
                 for o in group["options"]:
-                    option_key = f"{unique_key}_{o['name']}"
-                    if option_key not in st.session_state:
-                        st.session_state[option_key] = False
-
                     if st.checkbox(
                         f"{o['name']} (+{o['cost']} pts)",
-                        value=st.session_state.get(option_key, False),
-                        key=option_key
+                        key=f"{unique_key}_{o['name']}"
                     ):
-                        st.session_state[option_key] = True
                         selected_options.setdefault(group["group"], []).append(o)
                         upgrades_cost += o["cost"]
-                    else:
-                        st.session_state[option_key] = False
 
-    # Doublage des effectifs (UNIQUEMENT pour les unités, PAS pour les héros)
-    double_size_key = f"unit_double_{unit['name']}"
+    # Doublage des effectifs (uniquement pour les unités)
     if unit.get("type") != "hero":
-        double_size = st.checkbox(
-            "Unité combinée (doubler les effectifs)",
-            value=st.session_state.get(double_size_key, False),
-            key=double_size_key
-        )
-        st.session_state[double_size_key] = double_size
+        double_size = st.checkbox("Unité combinée (doubler les effectifs)")
         multiplier = 2 if double_size else 1
     else:
         multiplier = 1
 
     # Calcul du coût final
+    base_cost = unit.get("base_cost", 0)
     core_cost = (base_cost + weapon_cost) * multiplier
     final_cost = core_cost + upgrades_cost + mount_cost
-    unit_size = base_size * multiplier
 
-    if unit.get("type", "").lower() == "hero":
+    # Affichage des informations finales
+    if unit.get("type") == "hero":
         st.markdown("**Effectif final : [1]** (héros)")
     else:
-        st.markdown(f"**Effectif final : [{unit_size}]** ('combinée' if double_size else 'standard')")
+        st.markdown(f"**Effectif final : [{unit.get('size', 10) * multiplier}]**")
 
     if st.button("Ajouter à l'armée"):
         try:
-            # Formate les armes
-            if isinstance(weapon, list):
-                weapon_data = [format_weapon_details(w) for w in weapon]
-            else:
-                weapon_data = [format_weapon_details(weapon)]
-
-            # Crée les données de l'unité
+            # Création des données de l'unité
             unit_data = {
                 "name": unit["name"],
                 "type": unit.get("type", "unit"),
                 "cost": final_cost,
                 "base_cost": base_cost,
-                "size": unit_size,
-                "is_combined": double_size if unit.get("type") != "hero" else False,
-                "quality": unit["quality"],
-                "defense": unit["defense"],
-                "rules": [format_special_rule(r) for r in unit.get("special_rules", [])],
-                "weapon": weapon_data,
+                "size": unit.get("size", 10) * multiplier,
+                "quality": unit.get("quality", 3),
+                "defense": unit.get("defense", 3),
+                "rules": unit.get("special_rules", []),
+                "weapon": weapon,
                 "options": selected_options,
                 "mount": mount,
                 "game": st.session_state.game
             }
 
-            # Valide les règles
+            # Validation et ajout
             test_army = st.session_state.army_list.copy()
             test_army.append(unit_data)
             test_total = st.session_state.army_cost + final_cost
 
             if test_total > st.session_state.points:
                 st.error("Limite de points dépassée!")
-            elif not validate_army_rules(test_army, st.session_state.points, st.session_state.game, final_cost):
-                st.error("Règles du jeu non respectées")
             else:
                 st.session_state.army_list.append(unit_data)
                 st.session_state.army_cost += final_cost
@@ -1322,80 +1226,52 @@ elif st.session_state.page == "army":
 
         except Exception as e:
             st.error(f"Erreur: {str(e)}")
+
+    # Affichage de la liste de l'armée
     st.divider()
     st.subheader("Liste de l'armée")
     if not st.session_state.army_list:
         st.info("Ajoutez des unités pour commencer")
+
     for i, u in enumerate(st.session_state.army_list):
-        with st.container():
-            qua_def_coriace = f"Qua {u['quality']}+ / Déf {u['defense']}+"
-            if u.get("coriace"):
-                qua_def_coriace += f" / Coriace {u['coriace']}"
-            unit_header = f"### {u['name']} [{u.get('size', 1) if u.get('type') != 'hero' else 1}] ({u['cost']} pts) | {qua_def_coriace}"
-            if u.get("type") == "hero":
-                unit_header += " | 🌟 Héros"
-            st.markdown(unit_header)
-            if u.get("rules"):
-                rules_text = ", ".join(u["rules"])
-                st.markdown(f"**Règles spéciales:** {rules_text}")
+        with st.expander(f"{u['name']} ({u['cost']} pts)"):
+            st.markdown(f"**Qualité/Défense**: {u['quality']}+/{u['defense']}+")
             if 'weapon' in u and u['weapon']:
-                if isinstance(u['weapon'], list):
-                    for w in u['weapon']:
-                        weapon_details = format_weapon_details(w)
-                        st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
-                else:
-                    weapon_details = format_weapon_details(u['weapon'])
-                    st.markdown(f"**Arme:** {weapon_details['name']} (A{weapon_details['attacks']}, PA({weapon_details['ap']}){', ' + ', '.join(weapon_details['special']) if weapon_details['special'] else ''})")
+                st.markdown("**Armes:**")
+                for w in u['weapon']:
+                    st.markdown(f"- {w.get('name', 'Arme')} (A{w.get('attacks', '?')}, PA{w.get('ap', '?')})")
+
             if u.get("options"):
                 for group_name, opts in u["options"].items():
-                    if isinstance(opts, list) and opts:
-                        st.markdown(f"**{group_name}:**")
-                        for opt in opts:
-                            st.markdown(f"• {opt.get('name', '')}")
-            if u.get("mount"):
-                 mount_details = format_mount_details(u["mount"])
-                 st.markdown(f"**Monture:** {mount_details}")
+                    st.markdown(f"**{group_name}:** {', '.join(o.get('name', '') for o in opts)}")
+
             if st.button(f"Supprimer {u['name']}", key=f"del_{i}"):
                 st.session_state.army_cost -= u["cost"]
                 st.session_state.army_list.pop(i)
                 st.rerun()
 
-    army_name = st.session_state.get("list_name", "Liste sans nom")
-    army = st.session_state.get("army_list", [])
-    army_limit = st.session_state.get("points", 0)
-    army_data = {
-        "name": army_name,
-        "game": st.session_state.get("game", "Grimdark Future"),
-        "faction": st.session_state.faction,
-        "points": army_limit,
-        "total_cost": st.session_state.army_cost,
-        "army_list": army
-    }
-    html_export = export_html(
-        army_list=army,
-        army_name=army_name,
-        army_limit=army_limit
-    )
-
+    # Export
     st.divider()
-    st.subheader("📤 Exporter l'armée")
+    st.subheader("Exporter l'armée")
+    army_data = {
+        "name": st.session_state.list_name,
+        "game": st.session_state.game,
+        "faction": st.session_state.faction,
+        "army_list": st.session_state.army_list
+    }
 
-    col_json, col_html = st.columns(2)
-
-    with col_json:
+    col1, col2 = st.columns(2)
+    with col1:
         st.download_button(
-            label="📄 Exporter en JSON",
-            data=json.dumps(army_data, indent=2, ensure_ascii=False),
-            file_name=f"{st.session_state.list_name or 'army'}_opr.json",
-            mime="application/json",
-            use_container_width=True
+            "Exporter en JSON",
+            json.dumps(army_data, indent=2),
+            f"{st.session_state.list_name}.json"
         )
-
-    with col_html:
+    with col2:
+        html = export_html(st.session_state.army_list, st.session_state.list_name, st.session_state.points)
         st.download_button(
-            label="🌐 Exporter en HTML",
-            data=html_export,
-            file_name=f"{st.session_state.list_name or 'army'}.html",
-            mime="text/html",
-            use_container_width=True
+            "Exporter en HTML",
+            html,
+            f"{st.session_state.list_name}.html",
+            mime="text/html"
         )
