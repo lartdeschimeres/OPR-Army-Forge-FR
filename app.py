@@ -20,127 +20,14 @@ if "unit_selections" not in st.session_state:
 # ======================================================
 # CONFIGURATION DES JEUX
 # ======================================================
-GAME_COVERS = {
-    "Grimdark Future": "assets/games/gf_cover.jpg",
-    "Age of Fantasy": "assets/games/aof_cover.jpg",
-    "Age of Fantasy Regiments": "assets/games/aofr_cover.jpg",
-    "Grimdark Future Firefight": "assets/games/gff_cover.jpg",
-    "Age of Fantasy Quest": "assets/games/aofq_cover.jpg",
-    "Grimdark Future Squad": "assets/games/gfsq_cover.jpg",
-}
-
-BASE_DIR = Path(__file__).resolve().parent
-
-GAME_CARDS = {
-    "Grimdark Future": {
-        "image": BASE_DIR / "assets/games/gf_cover.jpg",
-        "description": "Escarmouches sci-fi à grande échelle"
-    },
-    "Grimdark Future Firefight": {
-        "image": BASE_DIR / "assets/games/gff_cover.jpg",
-        "description": "Combat tactique en petites escouades"
-    },
-    "Age of Fantasy": {
-        "image": BASE_DIR / "assets/games/aof_cover.jpg",
-        "description": "Batailles fantasy"
-    },
-    "Age of Fantasy Skirmish": {
-        "image": BASE_DIR / "assets/games/aofs_cover.jpg",
-        "description": "Fantasy en escarmouche"
-    },
-}
-
-st.set_page_config(
-    page_title="OPR Army Forge FR",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# CSS personnalisé
-st.markdown("""
-<style>
-    .game-card {
-        border-radius: 8px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-        cursor: pointer;
-        width: 200px;
-        margin: 10px;
-        background: white;
-    }
-    .game-card.selected {
-        border: 2px solid #4a90e2;
-        box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
-    }
-    .game-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    .game-image {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-    }
-    .game-title {
-        text-align: center;
-        padding: 10px;
-        background: #f8f9fa;
-        font-weight: bold;
-    }
-    .game-button {
-        width: 100%;
-        margin-top: 10px;
-        background: #4a90e2;
-        color: white;
-        border: none;
-        padding: 8px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .game-button:disabled {
-        background: #cccccc;
-        cursor: not-allowed;
-    }
-    .game-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .unit-card {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-    }
-    .hero-badge {
-        color: gold;
-        font-weight: bold;
-    }
-    .rule-badge {
-        background-color: #e9ecef;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-right: 5px;
-        font-size: 12px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# ======================================================
-# CONFIGURATION DES JEUX
-# ======================================================
 GAME_CONFIG = {
     "Age of Fantasy": {
         "max_points": 10000,
         "min_points": 250,
         "default_points": 1000,
-        "hero_limit": 375,
+        "hero_limit": 375,  # 1 héros par 375pts
         "unit_copy_rule": 750,
-        "unit_max_cost_ratio": 0.35,
+        "unit_max_cost_ratio": 0.35,  # 35% du total
         "unit_per_points": 150
     },
     "Grimdark Future": {
@@ -247,111 +134,17 @@ def load_factions():
 if st.session_state.page == "setup":
     st.title("OPR Army Forge - Configuration")
 
-    # Section d'import de liste
-    st.divider()
-    st.subheader("🔄 Recharger une liste JSON")
-    uploaded = st.file_uploader(
-        "Importer une liste exportée",
-        type=["json"],
-        key="import_json"
-    )
-    if uploaded is not None:
-        try:
-            data = json.load(uploaded)
-            required_keys = {"game", "faction", "army_list", "points"}
-            if not required_keys.issubset(data.keys()):
-                st.error("❌ Fichier JSON invalide ou incomplet")
-            else:
-                st.session_state.game = data["game"]
-                st.session_state.faction = data["faction"]
-                st.session_state.points = data["points"]
-                st.session_state.list_name = data.get("name", "Liste importée")
-                st.session_state.army_list = data["army_list"]
-                st.session_state.army_cost = data.get("total_cost", 0)
-                factions_by_game, _ = load_factions()
-                st.session_state.units = factions_by_game[st.session_state.game][st.session_state.faction]["units"]
-                st.session_state.page = "army"
-                st.success("✅ Liste chargée avec succès")
-                st.rerun()
-        except Exception as e:
-            st.error(f"❌ Erreur lors du chargement : {e}")
-
-    # Section de sélection des jeux (CARTES CLIQUABLES)
-    st.divider()
-    st.subheader("🎮 Choisis ton jeu")
-
     factions_by_game, games = load_factions()
     if not games:
         st.error("Aucun jeu trouvé")
         st.stop()
 
-    # Grille de cartes de jeu
-    st.markdown('<div class="game-grid">', unsafe_allow_html=True)
-
-    for game_name in games:
-        card = GAME_CARDS.get(game_name)
-        is_selected = st.session_state.get("game") == game_name
-
-        # Conteneur de la carte
-        with st.container():
-            # Image du jeu
-            if card and card.get("image") and card["image"].exists():
-                st.image(str(card["image"]), use_column_width=True)
-            else:
-                try:
-                    st.image("assets/games/onepagerules_round_128x128.png", use_column_width=True)
-                except:
-                    st.warning("Image par défaut non trouvée")
-
-            # Titre du jeu
-            st.markdown(f"""
-            <div style='text-align:center; font-weight:600; margin-top:6px;'>{game_name}</div>
-            """, unsafe_allow_html=True)
-
-            # Bouton de sélection
-            if st.button(
-                "✅ Sélectionné" if is_selected else "✔ Sélectionner",
-                key=f"select_game_{game_name}",
-                use_container_width=True,
-                disabled=is_selected
-            ):
-                st.session_state.game = game_name
-                st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Jeu non sélectionné → on bloque la suite
-    if "game" not in st.session_state:
-        st.info("⬆️ Sélectionne un jeu pour continuer")
-        st.stop()
-
-    game = st.session_state.game
-    game_config = GAME_CONFIG.get(game, GAME_CONFIG["Age of Fantasy"])
-
-    # PARAMÈTRES DE LISTE
-    st.divider()
-    st.subheader("⚙️ Paramètres de la liste")
-
-    factions_by_game, _ = load_factions()
+    game = st.selectbox("Jeu", games)
     faction = st.selectbox("Faction", factions_by_game[game].keys())
-    points = st.number_input(
-        "Points",
-        min_value=game_config["min_points"],
-        max_value=game_config["max_points"],
-        value=game_config["default_points"],
-        step=game_config["point_step"]
-    )
-    list_name = st.text_input(
-        "Nom de la liste",
-        f"Liste_{datetime.now().strftime('%Y%m%d')}"
-    )
+    points = st.number_input("Points", min_value=250, max_value=10000, value=1000)
+    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
 
-    # PASSAGE À LA CONSTRUCTION DE L'ARMÉE
-    st.divider()
-    st.markdown("### 🚀 Étape suivante")
-    st.info("Tu pourras ajouter, modifier et exporter ton armée à l'étape suivante.")
-
-    if st.button("➡️ Construire l'armée", use_container_width=True):
+    if st.button("Construire l'armée"):
         st.session_state.game = game
         st.session_state.faction = faction
         st.session_state.points = points
@@ -388,10 +181,14 @@ elif st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
 
+    # Initialisation de la structure de sélection pour cette unité
+    unit_key = f"unit_{unit['name']}"
+    if unit_key not in st.session_state.unit_selections:
+        st.session_state.unit_selections[unit_key] = {}
+
     # Traitement des améliorations
     for group_idx, group in enumerate(unit.get("upgrade_groups", [])):
-        unique_key = f"unit_{unit['name']}_{group_idx}"
-
+        group_key = f"group_{group_idx}"
         st.subheader(group['group'])
 
         if group["type"] == "weapon":
@@ -401,15 +198,15 @@ elif st.session_state.page == "army":
                 weapon_details = format_weapon_details(o["weapon"])
                 weapon_options.append(f"{o['name']} (+{o['cost']} pts)")
 
-            current_selection = st.session_state.get(f"{unique_key}_weapon", weapon_options[0])
+            current_selection = st.session_state.unit_selections[unit_key].get(group_key, weapon_options[0])
             selected_weapon = st.radio(
                 "Sélectionnez une arme",
                 weapon_options,
                 index=weapon_options.index(current_selection) if current_selection in weapon_options else 0,
-                key=f"{unique_key}_weapon"
+                key=f"{unit_key}_{group_key}_weapon"
             )
 
-            st.session_state[f"{unique_key}_weapon"] = selected_weapon
+            st.session_state.unit_selections[unit_key][group_key] = selected_weapon
 
             if selected_weapon != "Arme de base":
                 opt_name = selected_weapon.split(" (+")[0]
@@ -429,15 +226,15 @@ elif st.session_state.page == "army":
                 mount_options.append(f"{o['name']} (+{o['cost']} pts)")
                 mount_map[f"{o['name']} (+{o['cost']} pts)"] = o
 
-            current_selection = st.session_state.get(f"{unique_key}_mount", mount_options[0])
+            current_selection = st.session_state.unit_selections[unit_key].get(group_key, mount_options[0])
             selected_mount = st.radio(
                 "Sélectionnez une monture",
                 mount_options,
                 index=mount_options.index(current_selection) if current_selection in mount_options else 0,
-                key=f"{unique_key}_mount"
+                key=f"{unit_key}_{group_key}_mount"
             )
 
-            st.session_state[f"{unique_key}_mount"] = selected_mount
+            st.session_state.unit_selections[unit_key][group_key] = selected_mount
 
             if selected_mount != "Aucune monture":
                 opt = mount_map.get(selected_mount)
@@ -455,15 +252,15 @@ elif st.session_state.page == "army":
                     option_labels.append(label)
                     option_map[label] = o
 
-                current_selection = st.session_state.get(f"{unique_key}_hero", option_labels[0])
+                current_selection = st.session_state.unit_selections[unit_key].get(group_key, option_labels[0])
                 selected = st.radio(
                     f"Amélioration – {group['group']}",
                     option_labels,
                     index=option_labels.index(current_selection) if current_selection in option_labels else 0,
-                    key=f"{unique_key}_hero"
+                    key=f"{unit_key}_{group_key}_hero"
                 )
 
-                st.session_state[f"{unique_key}_hero"] = selected
+                st.session_state.unit_selections[unit_key][group_key] = selected
 
                 if selected != "Aucune amélioration":
                     opt = option_map.get(selected)
@@ -472,20 +269,20 @@ elif st.session_state.page == "army":
                         upgrades_cost += opt["cost"]
             else:
                 for o in group["options"]:
-                    option_key = f"{unique_key}_{o['name']}"
-                    if option_key not in st.session_state:
-                        st.session_state[option_key] = False
+                    option_key = f"{o['name']}"
+                    if option_key not in st.session_state.unit_selections[unit_key]:
+                        st.session_state.unit_selections[unit_key][option_key] = False
 
                     if st.checkbox(
                         f"{o['name']} (+{o['cost']} pts)",
-                        value=st.session_state.get(option_key, False),
-                        key=option_key
+                        value=st.session_state.unit_selections[unit_key][option_key],
+                        key=f"{unit_key}_{group_key}_{option_key}"
                     ):
-                        st.session_state[option_key] = True
+                        st.session_state.unit_selections[unit_key][option_key] = True
                         selected_options.setdefault(group["group"], []).append(o)
                         upgrades_cost += o["cost"]
                     else:
-                        st.session_state[option_key] = False
+                        st.session_state.unit_selections[unit_key][option_key] = False
 
     # Doublage des effectifs (UNIQUEMENT pour les unités non-héros)
     if unit.get("type") != "hero":
@@ -530,7 +327,7 @@ elif st.session_state.page == "army":
             if test_total > st.session_state.points:
                 st.error(f"Limite de points dépassée! ({st.session_state.points} pts max)")
             elif not validate_army_rules(test_army, st.session_state.points, st.session_state.game):
-                pass
+                pass  # Les erreurs sont déjà affichées par les fonctions de validation
             else:
                 st.session_state.army_list.append(unit_data)
                 st.session_state.army_cost += final_cost
