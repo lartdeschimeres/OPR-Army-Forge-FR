@@ -6,6 +6,42 @@ import re
 import math
 
 # ======================================================
+# SIDEBAR – CONTEXTE & NAVIGATION
+# ======================================================
+with st.sidebar:
+    st.title("🛡️ Army Forge")
+
+    st.subheader("📋 Armée")
+
+    game = st.session_state.get("game", "—")
+    faction = st.session_state.get("faction", "—")
+    points = st.session_state.get("points", 0)
+    army_cost = st.session_state.get("army_cost", 0)
+
+    st.markdown(f"**Jeu :** {game}")
+    st.markdown(f"**Faction :** {faction}")
+    st.markdown(f"**Format :** {points} pts")
+
+    if points > 0:
+        st.progress(min(army_cost / points, 1.0))
+        st.markdown(f"**Coût :** {army_cost} / {points} pts")
+
+        if army_cost > points:
+            st.error("⚠️ Dépassement de points")
+
+    st.divider()
+
+    st.subheader("🧭 Navigation")
+
+    if st.button("⚙️ Configuration", use_container_width=True):
+        st.session_state.page = "setup"
+        st.rerun()
+
+    if st.button("🧩 Construction", use_container_width=True):
+        st.session_state.page = "army"
+        st.rerun()
+
+# ======================================================
 # INITIALISATION
 # ======================================================
 if "page" not in st.session_state:
