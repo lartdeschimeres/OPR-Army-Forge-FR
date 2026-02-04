@@ -61,10 +61,11 @@ with st.sidebar:
 GAME_COVERS = {
     "Grimdark Future": "assets/games/gf_cover.jpg",
     "Age of Fantasy": "assets/games/aof_cover.jpg",
-    "Age of Fantasy Regiments": "assets/games/aofr_cover.jpg",
     "Grimdark Future Firefight": "assets/games/gff_cover.jpg",
+    "Age of Fantasy Skirmish": "assets/games/aofs_cover.jpg",
     "Age of Fantasy Quest": "assets/games/aofq_cover.jpg",
-    "Grimdark Future Squad": "assets/games/gfsq_cover.jpg",
+    "Grimdark Future Starquest": "assets/games/gfsq_cover.jpg",
+    "Age of Fantasy Regiments": "assets/games/aofr_cover.jpg"
 }
 
 BASE_DIR = Path(__file__).parent
