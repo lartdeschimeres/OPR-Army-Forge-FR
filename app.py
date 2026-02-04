@@ -42,6 +42,51 @@ with st.sidebar:
         st.rerun()
 
 # ======================================================
+# CONFIGURATION
+# ======================================================
+GAME_COVERS = {
+    "Age of Fantasy": "assets/games/aof_cover.jpg",
+    "Age of Fantasy Quest": "assets/games/aofq_cover.jpg",
+    "Age of Fantasy Regiments": "assets/games/aofr_cover.jpg",
+    "Grimdark Future": "assets/games/gf_cover.jpg",
+    "Grimdark Future Firefight": "assets/games/gff_cover.jpg",
+    "Grimdark Future Squad": "assets/games/gfsq_cover.jpg",
+}
+
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent
+
+GAME_CARDS = {
+    "Grimdark Future": {
+        "image": BASE_DIR / "assets/games/gf_cover.jpg",
+        "description": "Escarmouches sci-fi à grande échelle"
+    },
+    "GF Firefight": {
+        "image": BASE_DIR / "assets/games/gff_cover.jpg",
+        "description": "Combat tactique en petites escouades"
+    },
+    "Age of Fantasy": {
+        "image": BASE_DIR / "assets/games/aof_cover.jpg",
+        "description": "Batailles fantasy"
+    },
+    "Age of Fantasy Skirmish": {
+        "image": BASE_DIR / "assets/games/aofs_cover.jpg",
+        "description": "Fantasy en escarmouche"
+    },
+        "Age of Fantasy Regiments": {
+        "image": BASE_DIR / "assets/games/aofr_cover.jpg",
+        "description": "Fantasy en régiment"
+    },
+}
+
+st.set_page_config(
+    page_title="OPR Army Forge FR",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# ======================================================
 # INITIALISATION
 # ======================================================
 if "page" not in st.session_state:
