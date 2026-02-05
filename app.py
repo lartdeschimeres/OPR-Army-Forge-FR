@@ -1,4 +1,4 @@
-    import json
+import json
 import streamlit as st
 from pathlib import Path
 from datetime import datetime
@@ -229,13 +229,17 @@ elif st.session_state.page == "army":
 
     with col1:
         units_cap = math.floor(points / game_cfg.get("unit_per_points", 150))
-        units_now = len([u for u in st.session_state.army_list if u.get("type") != "hero"])
+        units_now = len(
+            [u for u in st.session_state.army_list if u.get("type") != "hero"]
+        )
         st.progress(min(units_now / max(units_cap, 1), 1.0))
         st.caption(f"Unités : {units_now} / {units_cap}")
 
     with col2:
         heroes_cap = math.floor(points / game_cfg.get("hero_limit", 375))
-        heroes_now = len([u for u in st.session_state.army_list if u.get("type") == "hero"])
+        heroes_now = len(
+            [u for u in st.session_state.army_list if u.get("type") == "hero"]
+        )
         st.progress(min(heroes_now / max(heroes_cap, 1), 1.0))
         st.caption(f"Héros : {heroes_now} / {heroes_cap}")
 
@@ -266,8 +270,6 @@ elif st.session_state.page == "army":
     if st.session_state.get("faction_spells"):
         with st.expander("✨ Sorts de la faction", expanded=False):
             for spell in st.session_state.faction_spells:
-
-                # Cas 1 : sort structuré (dict)
                 if isinstance(spell, dict):
                     st.markdown(
                         f"**{spell.get('name', 'Sort')}**\n\n"
@@ -275,11 +277,9 @@ elif st.session_state.page == "army":
                         f"*Portée :* {spell.get('range', '?')}  \n\n"
                         f"{spell.get('description', '')}"
                     )
-
-                # Cas 2 : sort simple (string)
                 else:
                     st.markdown(f"- {spell}")
-                    
+
     # ======================================================
     # SÉLECTION DE L’UNITÉ
     # ======================================================
@@ -287,7 +287,7 @@ elif st.session_state.page == "army":
         "Unité disponible",
         st.session_state.units,
         format_func=format_unit_option,
-        key="unit_select"
+        key="unit_select",
     )
 
     unit_key = f"unit_{unit['name']}"
@@ -322,7 +322,7 @@ elif st.session_state.page == "army":
                 "Sélection de l’arme",
                 choices,
                 index=choices.index(current) if current in choices else 0,
-                key=f"{unit_key}_{g_key}_weapon"
+                key=f"{unit_key}_{g_key}_weapon",
             )
 
             st.session_state.unit_selections[unit_key][g_key] = choice
@@ -351,7 +351,7 @@ elif st.session_state.page == "army":
                 "Monture",
                 choices,
                 index=choices.index(current) if current in choices else 0,
-                key=f"{unit_key}_{g_key}_mount"
+                key=f"{unit_key}_{g_key}_mount",
             )
 
             st.session_state.unit_selections[unit_key][g_key] = choice
@@ -367,19 +367,31 @@ elif st.session_state.page == "army":
                 checked = st.checkbox(
                     f"{o['name']} (+{o['cost']} pts)",
                     value=st.session_state.unit_selections[unit_key].get(opt_key, False),
-                    key=opt_key
+                    key=opt_key,
                 )
                 st.session_state.unit_selections[unit_key][opt_key] = checked
                 if checked:
                     upgrades_cost += o["cost"]
-                    selected_options.setdefault(group.get("group", "Options"), []).append(o)
+                    selected_options.setdefault(
+                        group.get("group", "Options"), []
+                    ).append(o)
 
     # ======================================================
     # EFFECTIFS & COÛT
     # ======================================================
-    multiplier = 2 if unit.get("type") != "hero" and st.checkbox("Unité combinée") else 1
+    multiplier = (
+        2
+        if unit.get("type") != "hero"
+        and st.checkbox("Unité combinée")
+        else 1
+    )
+
     base_cost = unit.get("base_cost", 0)
-    final_cost = (base_cost + weapon_cost) * multiplier + upgrades_cost + mount_cost
+    final_cost = (
+        (base_cost + weapon_cost) * multiplier
+        + upgrades_cost
+        + mount_cost
+    )
 
     # ======================================================
     # AJOUT À L’ARMÉE
@@ -389,7 +401,11 @@ elif st.session_state.page == "army":
             "name": unit["name"],
             "type": unit.get("type", "unit"),
             "cost": final_cost,
-            "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
+            "size": (
+                unit.get("size", 10) * multiplier
+                if unit.get("type") != "hero"
+                else 1
+            ),
             "quality": unit.get("quality"),
             "defense": unit.get("defense"),
             "weapon": weapons,
@@ -398,7 +414,11 @@ elif st.session_state.page == "army":
         }
 
         test_army = st.session_state.army_list + [unit_data]
-        if validate_army_rules(test_army, st.session_state.points, st.session_state.game):
+        if validate_army_rules(
+            test_army,
+            st.session_state.points,
+            st.session_state.game,
+        ):
             st.session_state.army_list.append(unit_data)
             st.session_state.army_cost += final_cost
             st.rerun()
