@@ -1,4 +1,4 @@
-import json
+    import json
 import streamlit as st
 from pathlib import Path
 from datetime import datetime
@@ -266,15 +266,20 @@ elif st.session_state.page == "army":
     if st.session_state.get("faction_spells"):
         with st.expander("✨ Sorts de la faction", expanded=False):
             for spell in st.session_state.faction_spells:
-                st.markdown(
-                    f"**{spell.get('name', 'Sort')}**\n\n"
-                    f"*Coût :* {spell.get('cost', '?')} pts  \n"
-                    f"*Portée :* {spell.get('range', '?')}  \n\n"
-                    f"{spell.get('description', '')}"
-                )
 
-    st.divider()
+                # Cas 1 : sort structuré (dict)
+                if isinstance(spell, dict):
+                    st.markdown(
+                        f"**{spell.get('name', 'Sort')}**\n\n"
+                        f"*Coût :* {spell.get('cost', '?')} pts  \n"
+                        f"*Portée :* {spell.get('range', '?')}  \n\n"
+                        f"{spell.get('description', '')}"
+                    )
 
+                # Cas 2 : sort simple (string)
+                else:
+                    st.markdown(f"- {spell}")
+                    
     # ======================================================
     # SÉLECTION DE L’UNITÉ
     # ======================================================
