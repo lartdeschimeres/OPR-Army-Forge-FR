@@ -198,6 +198,17 @@ if st.session_state.page == "setup":
 # ======================================================
 elif st.session_state.page == "army":
 
+    # ======================================================
+    # SÉCURISATION DU SESSION STATE
+    # ======================================================
+    st.session_state.setdefault("list_name", "Nouvelle Armée")
+    st.session_state.setdefault("army_cost", 0)
+    st.session_state.setdefault("army_list", [])
+    st.session_state.setdefault("unit_selections", {})
+
+    # ======================================================
+    # TITRE & NAVIGATION
+    # ======================================================
     st.title(
         f"{st.session_state.list_name} "
         f"- {st.session_state.army_cost}/{st.session_state.points} pts"
@@ -218,13 +229,13 @@ elif st.session_state.page == "army":
 
     with col1:
         units_cap = math.floor(points / game_cfg.get("unit_per_points", 150))
-        units_now = len([u for u in st.session_state.army_list if u["type"] != "hero"])
+        units_now = len([u for u in st.session_state.army_list if u.get("type") != "hero"])
         st.progress(min(units_now / max(units_cap, 1), 1.0))
         st.caption(f"Unités : {units_now} / {units_cap}")
 
     with col2:
         heroes_cap = math.floor(points / game_cfg.get("hero_limit", 375))
-        heroes_now = len([u for u in st.session_state.army_list if u["type"] == "hero"])
+        heroes_now = len([u for u in st.session_state.army_list if u.get("type") == "hero"])
         st.progress(min(heroes_now / max(heroes_cap, 1), 1.0))
         st.caption(f"Héros : {heroes_now} / {heroes_cap}")
 
@@ -277,7 +288,7 @@ elif st.session_state.page == "army":
     unit_key = f"unit_{unit['name']}"
     st.session_state.unit_selections.setdefault(unit_key, {})
 
-    weapons = list(unit.get("weapons", []))  # copie défensive
+    weapons = list(unit.get("weapons", []))
     selected_options = {}
     mount = None
     weapon_cost = 0
@@ -289,14 +300,14 @@ elif st.session_state.page == "army":
     # ======================================================
     for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
         g_key = f"group_{g_idx}"
-        st.subheader(group["group"])
+        st.subheader(group.get("group", "Améliorations"))
 
         # ---------- ARMES ----------
-        if group["type"] == "weapon":
+        if group.get("type") == "weapon":
             choices = ["Arme de base"]
             opt_map = {}
 
-            for o in group["options"]:
+            for o in group.get("options", []):
                 label = f"{o['name']} (+{o['cost']} pts)"
                 choices.append(label)
                 opt_map[label] = o
@@ -314,14 +325,18 @@ elif st.session_state.page == "army":
             if choice != "Arme de base":
                 opt = opt_map[choice]
                 weapon_cost += opt["cost"]
-                weapons = [opt["weapon"]] if unit.get("type") == "hero" else weapons + [opt["weapon"]]
+                weapons = (
+                    [opt["weapon"]]
+                    if unit.get("type") == "hero"
+                    else weapons + [opt["weapon"]]
+                )
 
         # ---------- MONTURE ----------
-        elif group["type"] == "mount":
+        elif group.get("type") == "mount":
             choices = ["Aucune monture"]
             opt_map = {}
 
-            for o in group["options"]:
+            for o in group.get("options", []):
                 label = f"{o['name']} (+{o['cost']} pts)"
                 choices.append(label)
                 opt_map[label] = o
@@ -342,7 +357,7 @@ elif st.session_state.page == "army":
 
         # ---------- OPTIONS ----------
         else:
-            for o in group["options"]:
+            for o in group.get("options", []):
                 opt_key = f"{unit_key}_{g_key}_{o['name']}"
                 checked = st.checkbox(
                     f"{o['name']} (+{o['cost']} pts)",
@@ -352,7 +367,7 @@ elif st.session_state.page == "army":
                 st.session_state.unit_selections[unit_key][opt_key] = checked
                 if checked:
                     upgrades_cost += o["cost"]
-                    selected_options.setdefault(group["group"], []).append(o)
+                    selected_options.setdefault(group.get("group", "Options"), []).append(o)
 
     # ======================================================
     # EFFECTIFS & COÛT
