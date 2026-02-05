@@ -196,6 +196,36 @@ if st.session_state.page == "setup":
 elif st.session_state.page == "army":
     st.title(f"{st.session_state.list_name} - {st.session_state.army_cost}/{st.session_state.points} pts")
 
+    # ======================================================
+    # BARRE DE PROGRESSION – PALIERS D’ARMÉE
+    # ======================================================
+    points = st.session_state.points
+    army_cost = st.session_state.army_cost
+    game_cfg = GAME_CONFIG.get(st.session_state.game, {})
+
+    st.subheader("📊 Progression de l’armée")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        units_cap = math.floor(points / game_cfg.get("unit_per_points", 150))
+        units_current = len([u for u in st.session_state.army_list if u["type"] != "hero"])
+        st.progress(min(units_current / max(units_cap, 1), 1.0))
+        st.caption(f"Unités : {units_current} / {units_cap}")
+
+    with col2:
+        heroes_cap = math.floor(points / game_cfg.get("hero_limit", 375))
+        heroes_current = len([u for u in st.session_state.army_list if u["type"] == "hero"])
+        st.progress(min(heroes_current / max(heroes_cap, 1), 1.0))
+        st.caption(f"Héros : {heroes_current} / {heroes_cap}")
+
+    with col3:
+        copy_cap = 1 + math.floor(points / game_cfg.get("unit_copy_rule", 750))
+        st.progress(min(copy_cap / 5, 1.0))
+        st.caption(f"Copies max : {copy_cap} / unité")
+
+    st.divider()
+
     if st.button("Retour à la configuration"):
         st.session_state.page = "setup"
         st.rerun()
