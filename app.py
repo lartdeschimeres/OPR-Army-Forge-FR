@@ -6,74 +6,6 @@ import re
 import math
 
 # ======================================================
-# CSS global
-# ======================================================
-st.markdown("""
-<style>
-
-/* --- Nettoyage Streamlit --- */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-
-/* --- Fond général --- */
-.stApp {
-    background: radial-gradient(circle at top, #1b1f2a, #0e1016);
-    color: #e6e6e6;
-}
-
-/* --- Titres --- */
-h1, h2, h3 {
-    letter-spacing: 0.04em;
-}
-
-/* --- Cartes --- */
-.card {
-    background: linear-gradient(180deg, #23283a, #191d2b);
-    border: 1px solid #303650;
-    border-radius: 16px;
-    padding: 1.5rem;
-    transition: all 0.25s ease;
-}
-
-/* --- Inputs visibles --- */
-div[data-baseweb="select"] > div,
-div[data-baseweb="input"] input,
-div[data-baseweb="base-input"] input {
-    background-color: #f3f4f6 !important;
-    color: #111827 !important;
-    border-radius: 10px !important;
-    font-weight: 500;
-}
-
-/* --- Bouton principal --- */
-button[kind="primary"] {
-    background: linear-gradient(135deg, #4da6ff, #2563eb) !important;
-    color: white !important;
-    font-weight: 600 !important;
-    border-radius: 12px !important;
-}
-
-/* --- Texte secondaire --- */
-.muted {
-    color: #9aa4bf;
-    font-size: 0.9rem;
-}
-
-/* --- Badge --- */
-.badge {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 8px;
-    background: #2a3042;
-    font-size: 0.75rem;
-    margin-bottom: 0.6rem;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ======================================================
 # INITIALISATION
 # ======================================================
 if "page" not in st.session_state:
@@ -84,27 +16,130 @@ if "army_cost" not in st.session_state:
     st.session_state.army_cost = 0
 if "unit_selections" not in st.session_state:
     st.session_state.unit_selections = {}
-
 # ======================================================
-# SIDEBAR
+# SIDEBAR – CONTEXTE & NAVIGATION
 # ======================================================
 with st.sidebar:
     st.title("🛡️ Army Forge")
-    st.markdown(f"**Jeu :** {st.session_state.get('game','—')}")
-    st.markdown(f"**Faction :** {st.session_state.get('faction','—')}")
-    st.markdown(f"**Format :** {st.session_state.get('points',0)} pts")
+
+    st.subheader("📋 Armée")
+
+    game = st.session_state.get("game", "—")
+    faction = st.session_state.get("faction", "—")
+    points = st.session_state.get("points", 0)
+    army_cost = st.session_state.get("army_cost", 0)
+
+    st.markdown(f"**Jeu :** {game}")
+    st.markdown(f"**Faction :** {faction}")
+    st.markdown(f"**Format :** {points} pts")
+
+    if points > 0:
+        st.progress(min(army_cost / points, 1.0))
+        st.markdown(f"**Coût :** {army_cost} / {points} pts")
+
+        if army_cost > points:
+            st.error("⚠️ Dépassement de points")
+
+    st.divider()
+
+    st.subheader("🧭 Navigation")
+
+    if st.button("⚙️ Configuration", use_container_width=True):
+        st.session_state.page = "setup"
+        st.rerun()
+
+    if st.button("🧩 Construction", use_container_width=True):
+        st.session_state.page = "army"
+        st.rerun()
 
 # ======================================================
-# CONFIG DES JEUX
+# CONFIGURATION DES JEUX
 # ======================================================
 GAME_CONFIG = {
-    "Age of Fantasy": {"hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
-    "Grimdark Future": {"hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
+    "Age of Fantasy": {
+        "max_points": 10000,
+        "min_points": 250,
+        "default_points": 1000,
+        "hero_limit": 375,  # 1 héros par 375pts
+        "unit_copy_rule": 750,
+        "unit_max_cost_ratio": 0.35,  # 35% du total
+        "unit_per_points": 150
+    },
+    "Grimdark Future": {
+        "max_points": 10000,
+        "min_points": 250,
+        "default_points": 1000,
+        "hero_limit": 375,
+        "unit_copy_rule": 750,
+        "unit_max_cost_ratio": 0.35,
+        "unit_per_points": 150
+    }
 }
+
+# ======================================================
+# FONCTIONS DE VALIDATION
+# ======================================================
+def check_hero_limit(army_list, army_points, game_config):
+    max_heroes = math.floor(army_points / game_config["hero_limit"])
+    hero_count = sum(1 for unit in army_list if unit.get("type") == "hero")
+    if hero_count > max_heroes:
+        st.error(f"Limite de héros dépassée! Max: {max_heroes} (1 héros/{game_config['hero_limit']} pts)")
+        return False
+    return True
+
+def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
+    max_cost = army_points * game_config["unit_max_cost_ratio"]
+    for unit in army_list:
+        if unit["cost"] > max_cost:
+            st.error(f"Unité {unit['name']} dépasse {int(max_cost)} pts (35% du total)")
+            return False
+    if new_unit_cost and new_unit_cost > max_cost:
+        st.error(f"Cette unité dépasse {int(max_cost)} pts (35% du total)")
+        return False
+    return True
+
+def check_unit_copy_rule(army_list, army_points, game_config):
+    x_value = math.floor(army_points / game_config["unit_copy_rule"])
+    max_copies = 1 + x_value
+    unit_counts = {}
+    for unit in army_list:
+        name = unit["name"]
+        unit_counts[name] = unit_counts.get(name, 0) + 1
+    for unit_name, count in unit_counts.items():
+        if count > max_copies:
+            st.error(f"Trop de copies de {unit_name}! Max: {max_copies}")
+            return False
+    return True
+
+def validate_army_rules(army_list, army_points, game):
+    game_config = GAME_CONFIG.get(game, {})
+    return (check_hero_limit(army_list, army_points, game_config) and
+            check_unit_max_cost(army_list, army_points, game_config) and
+            check_unit_copy_rule(army_list, army_points, game_config))
 
 # ======================================================
 # FONCTIONS UTILITAIRES
 # ======================================================
+def format_weapon_details(weapon):
+    if not weapon:
+        return {"name": "Arme non spécifiée", "attacks": "?", "ap": "?", "special": []}
+    return {
+        "name": weapon.get('name', 'Arme non nommée'),
+        "attacks": weapon.get('attacks', '?'),
+        "ap": weapon.get('armor_piercing', '?'),
+        "special": weapon.get('special_rules', [])
+    }
+
+def format_unit_option(u):
+    name_part = f"{u['name']}"
+    if u.get('type') == "hero":
+        name_part += " [1]"
+    else:
+        name_part += f" [{u.get('size', 10)}]"
+    qua_def = f"Qua {u['quality']}+ / Déf {u.get('defense', '?')}"
+    result = f"{name_part} - {qua_def} {u['base_cost']}pts"
+    return result
+
 def export_army_json():
     return {
         "game": st.session_state.game,
@@ -112,10 +147,9 @@ def export_army_json():
         "points": st.session_state.points,
         "list_name": st.session_state.list_name,
         "army_cost": st.session_state.army_cost,
-        "army_list": st.session_state.army_list,
-        "exported_at": datetime.now().isoformat(),
+        "units": st.session_state.army_list,
+        "exported_at": datetime.now().isoformat()
     }
-
 
 def export_army_html():
     html = f"""
@@ -125,16 +159,16 @@ def export_army_html():
         <title>{st.session_state.list_name}</title>
         <style>
             body {{
-                background: #0e1016;
-                color: #e6e6e6;
+                background:#0e1016;
+                color:#e6e6e6;
                 font-family: Arial, sans-serif;
             }}
-            h1 {{ color: #4da6ff; }}
+            h1 {{ color:#4da6ff; }}
             .unit {{
-                border: 1px solid #2a3042;
-                border-radius: 10px;
-                padding: 10px;
-                margin-bottom: 10px;
+                border:1px solid #2a3042;
+                border-radius:12px;
+                padding:12px;
+                margin-bottom:12px;
             }}
         </style>
     </head>
@@ -148,7 +182,8 @@ def export_army_html():
         html += f"""
         <div class="unit">
             <strong>{u['name']}</strong><br>
-            Coût : {u['cost']} pts
+            Coût: {u['cost']} pts<br>
+            Taille: {u.get('size', '?')}
         </div>
         """
 
@@ -162,67 +197,77 @@ def export_army_html():
 def load_factions():
     factions = {}
     games = set()
-    base = Path(__file__).resolve().parent / "lists" / "data" / "factions"
-    for fp in base.glob("*.json"):
-        with open(fp, encoding="utf-8") as f:
-            data = json.load(f)
-            factions.setdefault(data["game"], {})[data["faction"]] = data
-            games.add(data["game"])
-    return factions, sorted(games)
+    FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
+    for fp in FACTIONS_DIR.glob("*.json"):
+        try:
+            with open(fp, encoding="utf-8") as f:
+                data = json.load(f)
+                game = data.get("game")
+                faction = data.get("faction")
+                if game and faction:
+                    if game not in factions:
+                        factions[game] = {}
+                    factions[game][faction] = data
+                    games.add(game)
+        except Exception as e:
+            st.warning(f"Erreur chargement {fp.name}: {e}")
+    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 # ======================================================
-# PAGE SETUP
+# PAGE 1 – CONFIGURATION
 # ======================================================
 if st.session_state.page == "setup":
-
-    st.markdown("## 🛡️ OPR Army Forge")
-    st.markdown("<p class='muted'>Forgez vos armées One Page Rules.</p>", unsafe_allow_html=True)
+    st.title("OPR Army Forge - Configuration")
 
     factions_by_game, games = load_factions()
+    if not games:
+        st.error("Aucun jeu trouvé")
+        st.stop()
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("<div class='card'><span class='badge'>Jeu</span>", unsafe_allow_html=True)
-        game = st.selectbox("", games, label_visibility="collapsed")
-        st.markdown("</div>", unsafe_allow_html=True)
+    game = st.selectbox("Jeu", games)
+    faction = st.selectbox("Faction", factions_by_game[game].keys())
+    points = st.number_input("Points", min_value=250, max_value=10000, value=1000)
+    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
 
-    with col2:
-        st.markdown("<div class='card'><span class='badge'>Faction</span>", unsafe_allow_html=True)
-        faction = st.selectbox("", factions_by_game[game].keys(), label_visibility="collapsed")
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with col3:
-        st.markdown("<div class='card'><span class='badge'>Format</span>", unsafe_allow_html=True)
-        points = st.number_input("", 250, 10000, 1000, 250, label_visibility="collapsed")
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    colA, colB = st.columns([2,1])
-    with colA:
-        st.markdown("<div class='card'><span class='badge'>Liste</span>", unsafe_allow_html=True)
-        list_name = st.text_input("", f"Liste_{datetime.now().strftime('%Y%m%d')}", label_visibility="collapsed")
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with colB:
-        st.markdown("<div class='card'><span class='badge'>Action</span>", unsafe_allow_html=True)
-        if st.button("🔥 Construire l’armée", use_container_width=True, type="primary"):
-            st.session_state.update({
-                "game": game,
-                "faction": faction,
-                "points": points,
-                "list_name": list_name,
-                "units": factions_by_game[game][faction]["units"],
-                "faction_rules": factions_by_game[game][faction].get("special_rules", []),
-                "faction_spells": factions_by_game[game][faction].get("spells", []),
-                "army_list": [],
-                "army_cost": 0,
-                "page": "army"
-            })
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+    if st.button("Construire l'armée"):
+        st.session_state.game = game
+        st.session_state.faction = faction
+        st.session_state.points = points
+        st.session_state.list_name = list_name
+        faction_data = factions_by_game[game][faction]
+        st.session_state.units = faction_data["units"]
+        st.session_state.faction_rules = faction_data.get("special_rules", [])
+        st.session_state.faction_spells = faction_data.get("spells", [])
+        st.session_state.army_list = []
+        st.session_state.army_cost = 0
+        st.session_state.page = "army"
+        st.rerun()
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
 # ======================================================
+st.markdown("### 📤 Export de la liste")
+
+colE1, colE2 = st.columns(2)
+
+with colE1:
+    st.download_button(
+        "📄 Export JSON",
+        data=json.dumps(export_army_json(), indent=2, ensure_ascii=False),
+        file_name=f"{st.session_state.list_name}.json",
+        mime="application/json"
+    )
+
+with colE2:
+    st.download_button(
+        "🌐 Export HTML",
+        data=export_army_html(),
+        file_name=f"{st.session_state.list_name}.html",
+        mime="text/html"
+    )
+
+st.divider()
+
 elif st.session_state.page == "army":
 
     # ======================================================
@@ -244,28 +289,6 @@ elif st.session_state.page == "army":
     if st.button("⬅️ Retour à la configuration"):
         st.session_state.page = "setup"
         st.rerun()
-        
-    col_exp1, col_exp2 = st.columns(2)
-
-    with col_exp1:
-        st.download_button(
-            "📄 Export JSON",
-            data=json.dumps(
-                export_army_json(),
-                indent=2,
-                ensure_ascii=False
-            ),
-            file_name=f"{st.session_state.list_name}.json",
-            mime="application/json",
-        )
-
-    with col_exp2:
-        st.download_button(
-            "🌐 Export HTML",
-            data=export_army_html(),
-            file_name=f"{st.session_state.list_name}.html",
-            mime="text/html",
-        )
 
     # ======================================================
     # BARRE DE PROGRESSION – PALIERS D’ARMÉE
