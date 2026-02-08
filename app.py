@@ -6,6 +6,99 @@ import re
 import math
 
 # ======================================================
+# CSS GLOBAL
+# ======================================================
+st.markdown("""
+<style>
+
+/* --- Nettoyage Streamlit --- */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* --- Fond général --- */
+.stApp {
+    background: radial-gradient(circle at top, #1b1f2a, #0e1016);
+    color: #e6e6e6;
+}
+
+/* --- Titres --- */
+h1, h2, h3 {
+    letter-spacing: 0.04em;
+}
+
+/* --- Cartes --- */
+.card {
+    background: linear-gradient(180deg, #1f2432, #171a24);
+    border: 1px solid #2a3042;
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    height: 100%;
+}
+
+.card:hover {
+    border-color: #4da6ff;
+    box-shadow: 0 0 0 1px rgba(77,166,255,0.4),
+                0 12px 30px rgba(0,0,0,0.6);
+    transform: translateY(-2px);
+}
+
+/* --- Texte secondaire --- */
+.muted {
+    color: #9aa4bf;
+    font-size: 0.9rem;
+}
+
+/* --- Badge --- */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    background: #2a3042;
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+/* --- Inputs dans les cartes --- */
+div[data-baseweb="select"] > div,
+div[data-baseweb="input"] input,
+div[data-baseweb="base-input"] input {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+    border-radius: 10px !important;
+    font-weight: 500;
+}
+
+/* Placeholder / texte interne */
+div[data-baseweb="select"] span {
+    color: #111827 !important;
+}
+
+/* Carte plus visible */
+.card {
+    background: linear-gradient(180deg, #23283a, #191d2b);
+    border: 1px solid #303650;
+}
+
+/* --- Bouton principal --- */
+button[kind="primary"] {
+    background: linear-gradient(135deg, #4da6ff, #2563eb) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    padding: 0.6rem 1rem !important;
+}
+
+button[kind="primary"]:hover {
+    filter: brightness(1.1);
+}
+
+# ======================================================
 # INITIALISATION
 # ======================================================
 if "page" not in st.session_state:
@@ -16,6 +109,7 @@ if "army_cost" not in st.session_state:
     st.session_state.army_cost = 0
 if "unit_selections" not in st.session_state:
     st.session_state.unit_selections = {}
+
 # ======================================================
 # SIDEBAR – CONTEXTE & NAVIGATION
 # ======================================================
@@ -139,7 +233,56 @@ def format_unit_option(u):
     qua_def = f"Qua {u['quality']}+ / Déf {u.get('defense', '?')}"
     result = f"{name_part} - {qua_def} {u['base_cost']}pts"
     return result
+def export_army_json():
+    return {
+        "game": st.session_state.game,
+        "faction": st.session_state.faction,
+        "points": st.session_state.points,
+        "list_name": st.session_state.list_name,
+        "army_cost": st.session_state.army_cost,
+        "units": st.session_state.army_list,
+        "exported_at": datetime.now().isoformat()
+    }
 
+def export_army_html():
+    html = f"""
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>{st.session_state.list_name}</title>
+        <style>
+            body {{
+                background:#0e1016;
+                color:#e6e6e6;
+                font-family: Arial, sans-serif;
+            }}
+            h1 {{ color:#4da6ff; }}
+            .unit {{
+                border:1px solid #2a3042;
+                border-radius:12px;
+                padding:12px;
+                margin-bottom:12px;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>{st.session_state.list_name}</h1>
+        <p>{st.session_state.game} – {st.session_state.faction}</p>
+        <p>{st.session_state.army_cost} / {st.session_state.points} pts</p>
+    """
+
+    for u in st.session_state.army_list:
+        html += f"""
+        <div class="unit">
+            <strong>{u['name']}</strong><br>
+            Coût: {u['cost']} pts<br>
+            Taille: {u.get('size', '?')}
+        </div>
+        """
+
+    html += "</body></html>"
+    return html
+    
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
@@ -167,31 +310,93 @@ def load_factions():
 # PAGE 1 – CONFIGURATION
 # ======================================================
 if st.session_state.page == "setup":
-    st.title("OPR Army Forge - Configuration")
+
+    st.markdown("## 🛡️ OPR Army Forge")
+    st.markdown(
+        "<p class='muted'>Construisez, équilibrez et façonnez vos armées pour "
+        "Age of Fantasy et Grimdark Future.</p>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("---")
 
     factions_by_game, games = load_factions()
     if not games:
         st.error("Aucun jeu trouvé")
         st.stop()
 
-    game = st.selectbox("Jeu", games)
-    faction = st.selectbox("Faction", factions_by_game[game].keys())
-    points = st.number_input("Points", min_value=250, max_value=10000, value=1000)
-    list_name = st.text_input("Nom de la liste", f"Liste_{datetime.now().strftime('%Y%m%d')}")
+    # --- Sélection en cartes ---
+    col1, col2, col3 = st.columns(3)
 
-    if st.button("Construire l'armée"):
-        st.session_state.game = game
-        st.session_state.faction = faction
-        st.session_state.points = points
-        st.session_state.list_name = list_name
-        faction_data = factions_by_game[game][faction]
-        st.session_state.units = faction_data["units"]
-        st.session_state.faction_rules = faction_data.get("special_rules", [])
-        st.session_state.faction_spells = faction_data.get("spells", [])
-        st.session_state.army_list = []
-        st.session_state.army_cost = 0
-        st.session_state.page = "army"
-        st.rerun()
+    with col1:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Jeu</span>", unsafe_allow_html=True)
+        game = st.selectbox(
+            "Choisissez un système",
+            games,
+            label_visibility="collapsed"
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Faction</span>", unsafe_allow_html=True)
+        faction = st.selectbox(
+            "Faction",
+            factions_by_game[game].keys(),
+            label_visibility="collapsed"
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col3:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Format</span>", unsafe_allow_html=True)
+        points = st.number_input(
+            "Points",
+            min_value=250,
+            max_value=10000,
+            value=1000,
+            step=250,
+            label_visibility="collapsed"
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("")
+
+    colA, colB = st.columns([2, 1])
+
+    with colA:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Liste</span>", unsafe_allow_html=True)
+        list_name = st.text_input(
+            "Nom de la liste",
+            f"Liste_{datetime.now().strftime('%Y%m%d')}",
+            label_visibility="collapsed"
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with colB:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Action</span>", unsafe_allow_html=True)
+        st.markdown("Prêt à forger votre armée ?", unsafe_allow_html=True)
+
+        if st.button("🔥 Construire l’armée", use_container_width=True, type="primary"):
+            st.session_state.game = game
+            st.session_state.faction = faction
+            st.session_state.points = points
+            st.session_state.list_name = list_name
+
+            faction_data = factions_by_game[game][faction]
+            st.session_state.units = faction_data["units"]
+            st.session_state.faction_rules = faction_data.get("special_rules", [])
+            st.session_state.faction_spells = faction_data.get("spells", [])
+
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
+            st.session_state.page = "army"
+            st.rerun()
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
