@@ -24,15 +24,15 @@ header {visibility: visible;}
 
 /* --- Fond général --- */
 .stApp {
-    background: #9e9e9e; /* Pantone 420 C - gris clair moyen */
-    color: #333333; /* Texte foncé pour un bon contraste */
+    background: #f5f5f5; /* Fond gris clair */
+    color: #333333; /* Texte noir */
 }
 
 /* --- Sidebar --- */
 section[data-testid="stSidebar"] {
-    background: #8a8a8a; /* Gris légèrement plus foncé pour la sidebar */
+    background: #e9ecef; /* Fond légèrement plus clair pour la sidebar */
     color: #333333;
-    border-right: 1px solid #5c7d47; /* Pantone 5747 C - vert militaire */
+    border-right: 1px solid #dee2e6;
 }
 
 /* --- Bouton pour afficher/masquer la sidebar --- */
@@ -42,33 +42,32 @@ button[data-testid="SidebarToggle"] {
 
 /* --- Titres --- */
 h1, h2, h3 {
-    color: #5c7d47; /* Pantone 5747 C - vert militaire */
+    color: #2c3e50; /* Bleu foncé */
     letter-spacing: 0.04em;
-    text-shadow: 0 0 3px rgba(92, 125, 71, 0.5);
 }
 
 /* --- Cartes --- */
 .card {
-    background: linear-gradient(180deg, #ffffff, #e0e0e0);
-    border: 2px solid #5c7d47; /* Pantone 5747 C */
+    background: #ffffff; /* Fond blanc */
+    border: 2px solid #3498db; /* Bleu clair */
     border-radius: 8px;
     padding: 1.2rem;
     transition: all 0.2s ease;
     cursor: pointer;
     height: 100%;
-    box-shadow: 0 0 10px rgba(92, 125, 71, 0.3);
-    color: #333333; /* Texte foncé pour un bon contraste */
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+    color: #333333; /* Texte noir */
 }
 
 .card:hover {
-    border-color: #4a6b3a; /* Nuance plus foncée du Pantone 5747 C */
-    box-shadow: 0 0 20px rgba(92, 125, 71, 0.6);
+    border-color: #2980b9; /* Bleu légèrement plus foncé */
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
     transform: translateY(-2px);
 }
 
 /* --- Texte secondaire --- */
 .muted {
-    color: #666666;
+    color: #6c757d; /* Gris */
     font-size: 0.9rem;
 }
 
@@ -77,7 +76,7 @@ h1, h2, h3 {
     display: inline-block;
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
-    background: #5c7d47; /* Pantone 5747 C */
+    background: #3498db; /* Bleu clair */
     color: #ffffff;
     font-size: 0.75rem;
     margin-bottom: 0.6rem;
@@ -90,7 +89,7 @@ div[data-baseweb="input"] input,
 div[data-baseweb="base-input"] input {
     background-color: #ffffff !important;
     color: #333333 !important;
-    border: 1px solid #5c7d47 !important; /* Pantone 5747 C */
+    border: 1px solid #3498db !important; /* Bleu clair */
     border-radius: 6px !important;
     font-weight: 500;
 }
@@ -101,23 +100,23 @@ div[data-baseweb="select"] span {
 
 /* --- Bouton principal --- */
 button[kind="primary"] {
-    background: linear-gradient(135deg, #5c7d47, #4a6b3a) !important; /* Pantone 5747 C et nuance plus foncée */
+    background: linear-gradient(135deg, #3498db, #2980b9) !important; /* Bleu clair et bleu légèrement plus foncé */
     color: #ffffff !important;
     font-weight: bold !important;
     border-radius: 6px !important;
     padding: 0.6rem 1rem !important;
     border: none !important;
-    box-shadow: 0 0 10px rgba(92, 125, 71, 0.5);
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
 }
 
 button[kind="primary"]:hover {
     filter: brightness(1.1);
-    box-shadow: 0 0 20px rgba(92, 125, 71, 0.8);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
 }
 
 /* --- Avertissements --- */
 .stAlert {
-    background: #5c7d47; /* Pantone 5747 C */
+    background: #e74c3c; /* Rouge pour les erreurs */
     color: #ffffff;
     border-radius: 6px;
     padding: 0.8rem;
@@ -125,7 +124,7 @@ button[kind="primary"]:hover {
 
 /* --- Barre de progression --- */
 .stProgress > div > div > div {
-    background: linear-gradient(90deg, #5c7d47, #4a6b3a); /* Pantone 5747 C et nuance plus foncée */
+    background: linear-gradient(90deg, #3498db, #2980b9); /* Bleu clair et bleu légèrement plus foncé */
 }
 
 /* --- Export HTML --- */
@@ -136,15 +135,15 @@ body {
 }
 
 h1 {
-    color: #5c7d47; /* Pantone 5747 C */
+    color: #2c3e50; /* Bleu foncé */
 }
 
 .unit {
-    border: 1px solid #5c7d47; /* Pantone 5747 C */
+    border: 1px solid #3498db; /* Bleu clair */
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 12px;
-    background: #f5f5f5; /* Fond très clair pour les unités */
+    background: #f8f9fa; /* Fond très clair pour les unités */
     color: #333333;
 }
 
@@ -155,11 +154,11 @@ h1 {
 
 [role="radiogroup"] > div[data-baseweb="radio"] div {
     background: #ffffff;
-    border: 1px solid #5c7d47; /* Pantone 5747 C */
+    border: 1px solid #3498db; /* Bleu clair */
 }
 
 [role="radiogroup"] > div[data-baseweb="radio"] div:hover {
-    background: #5c7d47; /* Pantone 5747 C */
+    background: #3498db; /* Bleu clair */
     color: #ffffff;
 }
 
