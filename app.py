@@ -375,6 +375,11 @@ def load_factions():
                         factions[game] = {}
                     factions[game][faction] = data
                     games.add(game)
+                    # Vérification des règles spéciales
+                    if "special_rules" not in data:
+                        data["special_rules"] = []
+                    if "spells" not in data:
+                        data["spells"] = []
         except Exception as e:
             st.warning(f"Erreur chargement {fp.name}: {e}")
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
