@@ -18,36 +18,38 @@ header {visibility: hidden;}
 
 /* --- Fond général --- */
 .stApp {
-    background: radial-gradient(circle at top, #1b1f2a, #0e1016);
-    color: #e6e6e6;
+    background: #0a0a0a;
+    color: #e0e0e0;
 }
 
 /* --- Titres --- */
 h1, h2, h3 {
+    color: #ff8c00;
     letter-spacing: 0.04em;
+    text-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
 }
 
 /* --- Cartes --- */
 .card {
-    background: linear-gradient(180deg, #23283a, #191d2b);
-    border: 1px solid #303650;
-    border-radius: 16px;
-    padding: 1.5rem;
-    transition: all 0.25s ease;
+    background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+    border: 2px solid #ff8c00;
+    border-radius: 8px;
+    padding: 1.2rem;
+    transition: all 0.2s ease;
     cursor: pointer;
     height: 100%;
+    box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
 }
 
 .card:hover {
-    border-color: #4da6ff;
-    box-shadow: 0 0 0 1px rgba(77,166,255,0.4),
-                0 12px 30px rgba(0,0,0,0.6);
+    border-color: #ffcc00;
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
     transform: translateY(-2px);
 }
 
 /* --- Texte secondaire --- */
 .muted {
-    color: #9aa4bf;
+    color: #aaa;
     font-size: 0.9rem;
 }
 
@@ -55,37 +57,75 @@ h1, h2, h3 {
 .badge {
     display: inline-block;
     padding: 0.2rem 0.6rem;
-    border-radius: 8px;
-    background: #2a3042;
+    border-radius: 4px;
+    background: #ff8c00;
+    color: #000;
     font-size: 0.75rem;
     margin-bottom: 0.6rem;
+    font-weight: bold;
 }
 
 /* --- Inputs visibles --- */
 div[data-baseweb="select"] > div,
 div[data-baseweb="input"] input,
 div[data-baseweb="base-input"] input {
-    background-color: #f3f4f6 !important;
-    color: #111827 !important;
-    border-radius: 10px !important;
+    background-color: #1a1a1a !important;
+    color: #ff8c00 !important;
+    border: 1px solid #ff8c00 !important;
+    border-radius: 6px !important;
     font-weight: 500;
 }
 
 div[data-baseweb="select"] span {
-    color: #111827 !important;
+    color: #ff8c00 !important;
 }
 
 /* --- Bouton principal --- */
 button[kind="primary"] {
-    background: linear-gradient(135deg, #4da6ff, #2563eb) !important;
-    color: white !important;
-    font-weight: 600 !important;
-    border-radius: 12px !important;
+    background: linear-gradient(135deg, #ff8c00, #ffcc00) !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    border-radius: 6px !important;
     padding: 0.6rem 1rem !important;
+    border: none !important;
+    box-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
 }
 
 button[kind="primary"]:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.2);
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.8);
+}
+
+/* --- Avertissements --- */
+.stAlert {
+    background: #ff8c00;
+    color: #000;
+    border-radius: 6px;
+    padding: 0.8rem;
+}
+
+/* --- Barre de progression --- */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, #ff8c00, #ffcc00);
+}
+
+/* --- Export HTML --- */
+body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    color: #ff8c00;
+}
+
+.unit {
+    border: 1px solid #ff8c00;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #1a1a1a;
 }
 
 </style>
