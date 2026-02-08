@@ -520,6 +520,30 @@ elif st.session_state.page == "army":
             mime="text/html",
             use_container_width=True
         )
+        
+    # ======================================================
+    # BARRE DE PROGRESSION DES POINTS
+    # ======================================================
+    st.subheader("📊 Points de l'Armée")
+    points_used = st.session_state.army_cost
+    points_total = st.session_state.points
+    progress_ratio = min(points_used / points_total, 1.0) if points_total > 0 else 0
+
+    # Affichage de la barre de progression
+    st.progress(progress_ratio)
+
+    # Affichage des points en texte
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"**Points utilisés :** {points_used} pts")
+    with col2:
+        st.markdown(f"**Points totaux :** {points_total} pts")
+
+    # Avertissement si dépassement
+    if points_used > points_total:
+        st.error("⚠️ Dépassement du total de points autorisé")
+
+    st.divider()
     
     # ======================================================
     # BARRE DE PROGRESSION – PALIERS D’ARMÉE
