@@ -140,56 +140,6 @@ def format_unit_option(u):
     result = f"{name_part} - {qua_def} {u['base_cost']}pts"
     return result
 
-def export_army_json():
-    return {
-        "game": st.session_state.game,
-        "faction": st.session_state.faction,
-        "points": st.session_state.points,
-        "list_name": st.session_state.list_name,
-        "army_cost": st.session_state.army_cost,
-        "units": st.session_state.army_list,
-        "exported_at": datetime.now().isoformat()
-    }
-
-def export_army_html():
-    html = f"""
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>{st.session_state.list_name}</title>
-        <style>
-            body {{
-                background:#0e1016;
-                color:#e6e6e6;
-                font-family: Arial, sans-serif;
-            }}
-            h1 {{ color:#4da6ff; }}
-            .unit {{
-                border:1px solid #2a3042;
-                border-radius:12px;
-                padding:12px;
-                margin-bottom:12px;
-            }}
-        </style>
-    </head>
-    <body>
-        <h1>{st.session_state.list_name}</h1>
-        <p>{st.session_state.game} – {st.session_state.faction}</p>
-        <p>{st.session_state.army_cost} / {st.session_state.points} pts</p>
-    """
-
-    for u in st.session_state.army_list:
-        html += f"""
-        <div class="unit">
-            <strong>{u['name']}</strong><br>
-            Coût: {u['cost']} pts<br>
-            Taille: {u.get('size', '?')}
-        </div>
-        """
-
-    html += "</body></html>"
-    return html
-
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
@@ -246,28 +196,6 @@ if st.session_state.page == "setup":
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
 # ======================================================
-st.markdown("### 📤 Export de la liste")
-
-colE1, colE2 = st.columns(2)
-
-with colE1:
-    st.download_button(
-        "📄 Export JSON",
-        data=json.dumps(export_army_json(), indent=2, ensure_ascii=False),
-        file_name=f"{st.session_state.list_name}.json",
-        mime="application/json"
-    )
-
-with colE2:
-    st.download_button(
-        "🌐 Export HTML",
-        data=export_army_html(),
-        file_name=f"{st.session_state.list_name}.html",
-        mime="text/html"
-    )
-
-st.divider()
-
 elif st.session_state.page == "army":
 
     # ======================================================
