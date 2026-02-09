@@ -546,7 +546,7 @@ th {{
                     html += f"<span>{esc(r)}</span>"
             html += "</div>"
 
-        # ---- OPTIONS ----
+        # ---- AMÉLIORATIONS D'UNITÉ ----
         options = unit.get("options", {})
         if options:
             html += '<div class="section-title">Améliorations d\'unité :</div>'
@@ -556,6 +556,18 @@ th {{
                     for opt in opts:
                         html += f"{esc(opt.get('name', ''))}, "
                     html += "</div>"
+
+        # ---- AMÉLIORATIONS D'ARME ----
+        weapon_upgrades = unit.get("weapon_upgrades", [])
+        if weapon_upgrades:
+            html += '<div class="section-title">Améliorations d\'arme :</div>'
+            html += "<div class='rules'>"
+            for w in weapon_upgrades:
+                if isinstance(w, dict):
+                    html += f"<span>{esc(w.get('name', ''))}: {esc(w.get('description', ''))}</span>"
+                else:
+                    html += f"<span>{esc(w)}</span>"
+            html += "</div>"
 
         # ---- MONTURE (pour les héros) ----
         mount = unit.get("mount")
@@ -646,6 +658,7 @@ th {{
 </html>
 """
     return html
+
 
 # ======================================================
 # CHARGEMENT DES FACTIONS
