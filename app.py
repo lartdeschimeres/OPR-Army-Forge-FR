@@ -274,38 +274,50 @@ def export_army_html():
         <style>
             body {{
                 font-family: Arial, sans-serif;
-                background-color: #f5f5f5;
-                color: #333;
+                background-color: #121212;
+                color: #e0e0e0;
                 margin: 0;
                 padding: 20px;
             }}
             .container {{
                 max-width: 800px;
                 margin: 0 auto;
-                background-color: white;
+                background-color: #1e1e1e;
                 padding: 20px;
                 border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             }}
             h1 {{
-                color: #2c3e50;
+                color: #bb86fc;
                 text-align: center;
+                font-size: 24px;
+                margin-bottom: 10px;
             }}
             .army-info {{
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 20px;
                 padding-bottom: 10px;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px solid #444;
             }}
             .army-stats {{
                 font-size: 14px;
-                color: #666;
+                color: #ccc;
+                text-align: right;
+            }}
+            .army-details {{
+                color: #ccc;
+            }}
+            h2 {{
+                color: #bb86fc;
+                text-align: center;
+                font-size: 20px;
+                margin-bottom: 20px;
             }}
             .unit {{
-                background-color: #f9f9f9;
-                border: 1px solid #ddd;
-                border-radius: 6px;
+                background-color: #2d2d2d;
+                border: 1px solid #bb86fc;
+                border-radius: 8px;
                 padding: 15px;
                 margin-bottom: 15px;
             }}
@@ -318,61 +330,59 @@ def export_army_html():
             .unit-name {{
                 font-weight: bold;
                 font-size: 16px;
-                color: #2c3e50;
+                color: #bb86fc;
             }}
             .unit-cost {{
-                color: #e74c3c;
+                color: #ff6b6b;
                 font-weight: bold;
             }}
-            .characteristics {{
-                display: flex;
+            .unit-characteristics {{
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
                 margin-bottom: 15px;
             }}
             .characteristic {{
-                background-color: #e3f2fd;
-                color: #1976d2;
-                padding: 5px 10px;
-                margin-right: 10px;
-                border-radius: 4px;
-                font-weight: bold;
+                display: flex;
+                justify-content: space-between;
             }}
-            .weapons-table {{
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 15px;
+            .characteristic-label {{
+                color: #bb86fc;
             }}
-            .weapons-table th, .weapons-table td {{
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
+            .characteristic-value {{
+                color: #fff;
             }}
-            .weapons-table th {{
-                background-color: #f2f2f2;
-                color: #333;
-            }}
-            .weapons-table tr:nth-child(even) {{
-                background-color: #f9f9f9;
-            }}
-            .special-rules {{
+            .weapons-section, .mount-section {{
                 margin-top: 10px;
                 padding: 10px;
-                background-color: #f0f0f0;
+                background-color: #1a1a1a;
                 border-radius: 4px;
-                border-left: 3px solid #2196F3;
+                border-left: 3px solid #bb86fc;
+            }}
+            .weapon-item {{
+                margin-bottom: 10px;
+            }}
+            .weapon-name {{
+                font-weight: bold;
+                color: #4dd0e1;
+            }}
+            .weapon-details {{
+                margin-left: 10px;
+                color: #ccc;
             }}
             .rules-section {{
                 margin-top: 20px;
                 padding: 15px;
-                background-color: #f0f0f0;
+                background-color: #1a1a1a;
                 border-radius: 6px;
-                border-left: 3px solid #2196F3;
+                border-left: 3px solid #bb86fc;
             }}
             .rule-item {{
                 margin-bottom: 10px;
             }}
             .rule-name {{
                 font-weight: bold;
-                color: #2196F3;
+                color: #bb86fc;
             }}
         </style>
     </head>
@@ -380,9 +390,9 @@ def export_army_html():
         <div class="container">
             <h1>{st.session_state.list_name}</h1>
             <div class="army-info">
-                <div>
-                    <strong>Jeu:</strong> {st.session_state.game}<br>
-                    <strong>Faction:</strong> {st.session_state.faction}
+                <div class="army-details">
+                    <div><strong>Jeu:</strong> {st.session_state.game}</div>
+                    <div><strong>Faction:</strong> {st.session_state.faction}</div>
                 </div>
                 <div class="army-stats">
                     <strong>Points:</strong> {st.session_state.army_cost} / {st.session_state.points}
@@ -401,61 +411,52 @@ def export_army_html():
                     <div class="unit-name">{u['name']}</div>
                     <div class="unit-cost">{u['cost']} pts</div>
                 </div>
-                <div class="characteristics">
-                    <div class="characteristic">Qualité {u.get('quality', '?')}+</div>
-                    <div class="characteristic">Défense {u.get('defense', '?')}+</div>
-                    <div class="characteristic">Coriace ({coriace_value})</div>
+                <div class="unit-characteristics">
+                    <div class="characteristic">
+                        <span class="characteristic-label">Taille:</span>
+                        <span class="characteristic-value">{u.get('size', '?')}</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-label">Qualité:</span>
+                        <span class="characteristic-value">{u.get('quality', '?')}+</span>
+                    </div>
+                    <div class="characteristic">
+                        <span class="characteristic-label">Coriace:</span>
+                        <span class="characteristic-value">{coriace_value}</span>
+                    </div>
                 </div>
         """
 
         # Ajout des armes
         if u.get('weapon'):
-            html += """
-                <table class="weapons-table">
-                    <thead>
-                        <tr>
-                            <th>Arme</th>
-                            <th>POR</th>
-                            <th>ATK</th>
-                            <th>PA</th>
-                            <th>Règles Spéciales</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            """
+            html += '<div class="weapons-section"><strong>Armes:</strong>'
             for weapon in u['weapon']:
                 html += f"""
-                    <tr>
-                        <td>{weapon.get('name', 'Arme non nommée')}</td>
-                        <td>-</td>
-                        <td>{weapon.get('attacks', '?')}</td>
-                        <td>{weapon.get('armor_piercing', '?')}</td>
-                        <td>{', '.join(weapon.get('special_rules', []))}</td>
-                    </tr>
-                """
-            html += """
-                    </tbody>
-                </table>
-            """
+                    <div class="weapon-item">
+                        <span class="weapon-name">{weapon.get('name', 'Arme non nommée')}</span>
+                        <div class="weapon-details">
+                            <span>Attaques: {weapon.get('attacks', '?')}</span><br>
+                            <span>Pénétration: {weapon.get('armor_piercing', '?')}</span>
+                        """
+                if weapon.get('special_rules'):
+                    html += f'<br><span>Règles spéciales: {", ".join(weapon["special_rules"])}</span>'
+                html += "</div></div>"
+            html += "</div>"
 
         # Ajout de la monture
         if u.get('mount'):
             mount = u['mount']
             html += f"""
-                <div class="special-rules">
+                <div class="mount-section">
                     <strong>Monture:</strong>
-                    <div>{mount.get('name', 'Monture non nommée')}</div>
-                    <div>Qualité {mount.get('quality', '?')}+ / Défense {mount.get('defense', '?')}+ / Bonus de Défense {mount.get('defense_bonus', 0)}</div>
+                    <div class="weapon-item">
+                        <span class="weapon-name">{mount.get('name', 'Monture non nommée')}</span>
+                        <div class="weapon-details">
+                            <span>Bonus de défense: {mount.get('defense_bonus', 0)}</span>
+                        </div>
+                    </div>
                 </div>
             """
-
-        # Ajout des améliorations
-        if u.get('options'):
-            html += '<div class="special-rules"><strong>Améliorations:</strong>'
-            for option_type, options in u['options'].items():
-                for option in options:
-                    html += f"<div>- {option.get('name', 'Option non nommée')} (+{option.get('cost', '?')} pts)</div>"
-            html += '</div>'
 
         html += "</div>"
 
@@ -487,6 +488,7 @@ def export_army_html():
     </html>
     """
     return html
+
     
 # ======================================================
 # CHARGEMENT DES FACTIONS
