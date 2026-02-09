@@ -438,7 +438,7 @@
         },
         {
           "group": "Améliorations d'arme",
-          "type": "weapon_upgrades",
+          "type": "upgrades",
           "description": "Améliorer avec une des options suivantes (un seul choix possible)",
           "options": [
             {
