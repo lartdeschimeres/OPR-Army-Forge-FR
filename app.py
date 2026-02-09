@@ -11,64 +11,63 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ======================================================
+# CSS
+# ======================================================
 st.markdown(
     """
     <style>
-    /* --- Nettoyage Streamlit --- */
+
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {background: transparent;}
+    header {
+        background: transparent;
+    }
 
-    /* --- Fond général --- */
     .stApp {
-        background: #121212;
-        color: #e0e0e0;
+        background: #f5f5f5;
+        color: #333333;
     }
 
-    /* --- Sidebar --- */
     section[data-testid="stSidebar"] {
-        background: #1e1e1e;
-        border-right: 1px solid #333;
+        background: #e9ecef;
+        border-right: 1px solid #dee2e6;
     }
 
-    /* --- Titres --- */
     h1, h2, h3 {
-        color: #bb86fc;
+        color: #2c3e50;
         letter-spacing: 0.04em;
     }
 
-    /* --- Cartes --- */
     .card {
-        background: #2d2d2d;
-        border: 2px solid #bb86fc;
+        background: #ffffff;
+        border: 2px solid #3498db;
         border-radius: 8px;
         padding: 1.2rem;
         transition: all 0.2s ease;
         cursor: pointer;
-        box-shadow: 0 0 10px rgba(187, 134, 252, 0.2);
+        box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
     }
 
     .card:hover {
-        border-color: #9c27b0;
-        box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+        border-color: #2980b9;
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
         transform: translateY(-2px);
     }
 
-    /* --- Badges --- */
     .badge {
         display: inline-block;
         padding: 0.25rem 0.6rem;
         border-radius: 4px;
-        background: #bb86fc;
+        background: #3498db;
         color: white;
         font-size: 0.75rem;
         margin-bottom: 0.5rem;
         font-weight: bold;
     }
 
-    /* --- Boutons --- */
     button[kind="primary"] {
-        background: linear-gradient(135deg, #bb86fc, #9c27b0) !important;
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
         color: white !important;
         font-weight: bold;
         border-radius: 6px;
@@ -76,70 +75,19 @@ st.markdown(
         border: none;
     }
 
-    /* --- Règles et sorts --- */
     .rule-item, .spell-item {
         font-size: 14px;
         margin-bottom: 5px;
         display: flex;
         align-items: center;
     }
-
     .rule-name, .spell-name {
         font-weight: bold;
         color: #bb86fc;
         margin-right: 10px;
     }
-
     .rule-description, .spell-description {
         color: #ccc;
-    }
-
-    /* --- Expanders --- */
-    .stExpander {
-        background-color: #1e1e1e;
-        border-radius: 8px;
-        border: 1px solid #333;
-        margin-bottom: 10px;
-    }
-
-    /* --- Progress bars --- */
-    .stProgress > div > div > div {
-        background: linear-gradient(90deg, #bb86fc, #9c27b0);
-    }
-
-    /* --- Inputs --- */
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="input"] input,
-    div[data-baseweb="base-input"] input {
-        background-color: #2d2d2d !important;
-        color: #e0e0e0 !important;
-        border: 1px solid #bb86fc !important;
-        border-radius: 6px !important;
-        font-weight: 500;
-    }
-
-    div[data-baseweb="select"] span {
-        color: #e0e0e0 !important;
-    }
-
-    /* --- Checkbox --- */
-    [role="checkbox"] {
-        color: #e0e0e0;
-    }
-
-    /* --- Radio buttons --- */
-    [role="radiogroup"] > div[data-baseweb="radio"] label {
-        color: #e0e0e0;
-    }
-
-    [role="radiogroup"] > div[data-baseweb="radio"] div {
-        background: #2d2d2d;
-        border: 1px solid #bb86fc;
-    }
-
-    [role="radiogroup"] > div[data-baseweb="radio"] div:hover {
-        background: #bb86fc;
-        color: #000;
     }
     </style>
     """,
