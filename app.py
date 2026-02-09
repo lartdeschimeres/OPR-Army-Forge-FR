@@ -14,184 +14,69 @@ st.set_page_config(
 # ======================================================
 # CSS GLOBAL
 # ======================================================
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
 
-/* --- Nettoyage Streamlit (ne pas masquer la sidebar) --- */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
 
-header {
-    visibility: hidden;
-    height: 0px;
-}
+    .stApp {
+        background: #f5f5f5;
+        color: #333333;
+    }
 
-[data-testid="stHeader"] {
-    display: none;
-}
+    section[data-testid="stSidebar"] {
+        background: #e9ecef;
+        border-right: 1px solid #dee2e6;
+    }
 
-/* --- Fond général --- */
-.stApp {
-    background: #f5f5f5; /* Fond gris clair */
-    color: #333333; /* Texte noir */
-}
+    h1, h2, h3 {
+        color: #2c3e50;
+        letter-spacing: 0.04em;
+    }
 
-/* --- Sidebar --- */
-section[data-testid="stSidebar"] {
-    background: #e9ecef; /* Fond légèrement plus clair pour la sidebar */
-    color: #333333;
-    border-right: 1px solid #dee2e6;
-}
+    .card {
+        background: #ffffff;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        padding: 1.2rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+    }
 
-/* --- Bouton pour afficher/masquer la sidebar --- */
-button[data-testid="SidebarToggle"] {
-    visibility: visible !important;
-}
+    .card:hover {
+        border-color: #2980b9;
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
+        transform: translateY(-2px);
+    }
 
-/* --- Titres --- */
-h1, h2, h3 {
-    color: #2c3e50; /* Bleu foncé */
-    letter-spacing: 0.04em;
-}
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        background: #3498db;
+        color: white;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
 
-/* --- Cartes --- */
-.card {
-    background: #ffffff; /* Fond blanc */
-    border: 2px solid #3498db; /* Bleu clair */
-    border-radius: 8px;
-    padding: 1.2rem;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    height: 100%;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
-    color: #333333; /* Texte noir */
-}
+    button[kind="primary"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        border: none;
+    }
 
-.card:hover {
-    border-color: #2980b9; /* Bleu légèrement plus foncé */
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
-    transform: translateY(-2px);
-}
-
-/* --- Texte secondaire --- */
-.muted {
-    color: #6c757d; /* Gris */
-    font-size: 0.9rem;
-}
-
-/* --- Badge --- */
-.badge {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    background: #3498db; /* Bleu clair */
-    color: #ffffff;
-    font-size: 0.75rem;
-    margin-bottom: 0.6rem;
-    font-weight: bold;
-}
-
-/* --- Inputs visibles --- */
-div[data-baseweb="select"] > div,
-div[data-baseweb="input"] input,
-div[data-baseweb="base-input"] input {
-    background-color: #ffffff !important;
-    color: #333333 !important;
-    border: 1px solid #3498db !important; /* Bleu clair */
-    border-radius: 6px !important;
-    font-weight: 500;
-}
-
-div[data-baseweb="select"] span {
-    color: #333333 !important;
-}
-
-/* --- Bouton principal --- */
-button[kind="primary"] {
-    background: linear-gradient(135deg, #3498db, #2980b9) !important; /* Bleu clair et bleu légèrement plus foncé */
-    color: #ffffff !important;
-    font-weight: bold !important;
-    border-radius: 6px !important;
-    padding: 0.6rem 1rem !important;
-    border: none !important;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
-}
-
-button[kind="primary"]:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
-}
-
-/* --- Avertissements --- */
-.stAlert {
-    background: #e74c3c; /* Rouge pour les erreurs */
-    color: #ffffff;
-    border-radius: 6px;
-    padding: 0.8rem;
-}
-
-/* --- Barre de progression vide --- */
-[data-testid="stProgress"] > div > div {
-    background-color: #e9ecef !important; /* Fond de la barre de progression */
-}
-
-/* --- Barre de progression remplie --- */
-[data-testid="stProgress"] > div > div > div {
-    background: #dc241f !important; /* R:220, V:36, B:31 */
-}
-
-/* --- Export HTML --- */
-body {
-    background: #ffffff; /* Fond blanc pour l'export HTML */
-    color: #333333;
-    font-family: Arial, sans-serif;
-}
-
-h1 {
-    color: #2c3e50; /* Bleu foncé */
-}
-
-.unit {
-    border: 1px solid #3498db; /* Bleu clair */
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 12px;
-    background: #f8f9fa; /* Fond très clair pour les unités */
-    color: #333333;
-}
-
-/* --- Sélecteurs radio --- */
-[role="radiogroup"] > div[data-baseweb="radio"] label {
-    color: #333333;
-}
-
-[role="radiogroup"] > div[data-baseweb="radio"] div {
-    background: #ffffff;
-    border: 1px solid #3498db; /* Bleu clair */
-}
-
-[role="radiogroup"] > div[data-baseweb="radio"] div:hover {
-    background: #3498db; /* Bleu clair */
-    color: #ffffff;
-}
-
-/* --- Checkbox --- */
-[role="checkbox"] {
-    color: #333333;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-/* Cartes Streamlit (conteneurs réels) */
-div[data-testid="column"] > div:has(.badge) {
-    background: #ffffff;
-    border: 2px solid #3498db;
-    border-radius: 10px;
-    padding: 1.2rem;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
-}
-
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # ======================================================
 # INITIALISATION
 # ======================================================
