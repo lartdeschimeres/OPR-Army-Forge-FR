@@ -466,13 +466,16 @@ th {{
         defense = esc(unit.get("defense", "-"))
 
         # Calcul de la valeur Coriace
-        coriace = unit.get("coriace")
-        if coriace is None:
-            coriace = unit.get("defense", 0)
-        try:
-            coriace = int(coriace)
-        except (ValueError, TypeError):
-            coriace = 0
+        coriace = unit.get("coriace", 0)
+        mount = unit.get("mount", {})
+        mount_defense_bonus = mount.get("defense_bonus", 0) if isinstance(mount, dict) else mount.get("mount", {}).get("defense_bonus", 0) if isinstance(mount, dict) and "mount" in mount else 0
+
+        # Si coriace n'est pas défini, utiliser la défense de base
+        if coriace == 0:
+            coriace = int(defense)
+
+        # Ajouter le bonus de défense de la monture
+        coriace += mount_defense_bonus
 
         # Détermine l'effectif à afficher
         unit_size = unit.get("size", 10)
@@ -489,29 +492,26 @@ th {{
   <div class="stats">
     <span>Qualité {quality}+</span>
     <span>Défense {defense}+</span>
+    <span>Coriace {coriace}</span>
+  </div>
 """
 
-        if coriace > 0:
-            html += f"<span>Coriace {coriace}</span>"
-
-        html += "</div>"
-
         # ---- ARMES ----
-        weapon = unit.get("weapon", [])
-        if weapon:
-            if not isinstance(weapon, list):
-                weapon = [weapon]
+        weapons = unit.get("weapon", [])
+        if weapons:
+            if not isinstance(weapons, list):
+                weapons = [weapons]
 
             # Filtrer les armes de base si d'autres armes sont présentes
-            filtered_weapon = []
-            has_custom_weapon = False
+            filtered_weapons = []
+            has_custom_weapons = False
 
-            for w in weapon:
+            for w in weapons:
                 if w.get('name', '').lower() not in ['arme de base', 'armes de base']:
-                    filtered_weapon.append(w)
-                    has_custom_weapon = True
+                    filtered_weapons.append(w)
+                    has_custom_weapons = True
 
-            if filtered_weapon or not has_custom_weapon:
+            if filtered_weapons or not has_custom_weapons:
                 html += '<div class="section-title">Armes équipées :</div>'
                 html += """
     <table>
@@ -522,7 +522,7 @@ th {{
     </thead>
     <tbody>
     """
-                for w in filtered_weapon if filtered_weapon else weapon:
+                for w in filtered_weapons if filtered_weapons else weapons:
                     html += f"""
     <tr>
       <td>{esc(w.get('name', '-'))}</td>
@@ -570,12 +570,9 @@ th {{
             html += "</div>"
 
         # ---- MONTURE (pour les héros) ----
-        mount = unit.get("mount")
-        if mount:
+        if mount and isinstance(mount, dict):
             mount_name = esc(mount.get("name", "Monture non nommée"))
-            mount_data = mount
-            if 'mount' in mount:
-                mount_data = mount['mount']
+            mount_data = mount.get("mount", mount)
 
             html += '<div class="section-title">Monture :</div>'
             html += f"<div><strong>{mount_name}</strong>"
@@ -591,8 +588,8 @@ th {{
             if 'special_rules' in mount_data and mount_data['special_rules']:
                 html += " | " + ", ".join(esc(rule) for rule in mount_data['special_rules'])
 
-            if 'weapon' in mount_data and mount_data['weapon']:
-                for weapon in mount_data['weapon']:
+            if 'weapons' in mount_data and mount_data['weapons']:
+                for weapon in mount_data['weapons']:
                     weapon_details = weapon
                     html += f" | {weapon.get('name', 'Arme')} (Att{weapon_details.get('attacks', '-')}, PA({weapon_details.get('armor_piercing', '-')})"
                     if weapon_details.get('special_rules'):
@@ -658,7 +655,6 @@ th {{
 </html>
 """
     return html
-
 
 # ======================================================
 # CHARGEMENT DES FACTIONS
