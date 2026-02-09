@@ -20,7 +20,15 @@ st.markdown("""
 /* --- Nettoyage Streamlit (ne pas masquer la sidebar) --- */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
-header {visibility: visible;}
+
+header {
+    visibility: hidden;
+    height: 0px;
+}
+
+[data-testid="stHeader"] {
+    display: none;
+}
 
 /* --- Fond général --- */
 .stApp {
@@ -175,6 +183,14 @@ h1 {
 </style>
 """, unsafe_allow_html=True)
 
+/* Cartes Streamlit (conteneurs réels) */
+div[data-testid="column"] > div:has(.badge) {
+    background: #ffffff;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+}
 
 # ======================================================
 # INITIALISATION
@@ -225,26 +241,57 @@ with st.sidebar:
         st.rerun()
 
 # ======================================================
-# CONFIGURATION DES JEUX
+# CONFIGURATION DES JEUX OPR (EXTENSIBLE)
 # ======================================================
 GAME_CONFIG = {
     "Age of Fantasy": {
-        "max_points": 10000,
         "min_points": 250,
-        "default_points": 1000,
-        "hero_limit": 375,  # 1 héros par 375pts
-        "unit_copy_rule": 750,
-        "unit_max_cost_ratio": 0.35,  # 35% du total
-        "unit_per_points": 150
-    },
-    "Grimdark Future": {
         "max_points": 10000,
-        "min_points": 250,
         "default_points": 1000,
         "hero_limit": 375,
         "unit_copy_rule": 750,
         "unit_max_cost_ratio": 0.35,
         "unit_per_points": 150
+    },
+
+    "Age of Fantasy: Regiments": {
+        "min_points": 500,
+        "max_points": 20000,
+        "default_points": 2000,
+        "hero_limit": 500,
+        "unit_copy_rule": 1000,
+        "unit_max_cost_ratio": 0.4,
+        "unit_per_points": 200
+    },
+
+    "Grimdark Future": {
+        "min_points": 250,
+        "max_points": 10000,
+        "default_points": 1000,
+        "hero_limit": 375,
+        "unit_copy_rule": 750,
+        "unit_max_cost_ratio": 0.35,
+        "unit_per_points": 150
+    },
+
+    "Grimdark Future: Firefight": {
+        "min_points": 150,
+        "max_points": 1000,
+        "default_points": 300,
+        "hero_limit": 300,
+        "unit_copy_rule": 300,
+        "unit_max_cost_ratio": 0.6,
+        "unit_per_points": 100
+    },
+
+    "Age of Fantasy: Skirmish": {
+        "min_points": 150,
+        "max_points": 1000,
+        "default_points": 300,
+        "hero_limit": 300,
+        "unit_copy_rule": 300,
+        "unit_max_cost_ratio": 0.6,
+        "unit_per_points": 100
     }
 }
 
@@ -394,6 +441,9 @@ def load_factions():
 # ======================================================
 if st.session_state.page == "setup":
 
+    # --------------------------------------------------
+    # TITRE
+    # --------------------------------------------------
     st.markdown("## 🛡️ OPR Army Forge")
     st.markdown(
         "<p class='muted'>Construisez, équilibrez et façonnez vos armées pour "
@@ -403,67 +453,86 @@ if st.session_state.page == "setup":
 
     st.markdown("---")
 
+    # --------------------------------------------------
+    # CHARGEMENT DES FACTIONS
+    # --------------------------------------------------
     factions_by_game, games = load_factions()
     if not games:
         st.error("Aucun jeu trouvé")
         st.stop()
 
-    # --- Sélection en cartes ---
+    # --------------------------------------------------
+    # CARTES DE CONFIGURATION
+    # --------------------------------------------------
     col1, col2, col3 = st.columns(3)
 
+    # --- JEU ---
     with col1:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("<span class='badge'>Jeu</span>", unsafe_allow_html=True)
         game = st.selectbox(
             "Choisissez un système",
             games,
+            index=games.index(st.session_state.get("game")) if st.session_state.get("game") in games else 0,
             label_visibility="collapsed"
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
+    # --- FACTION ---
     with col2:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("<span class='badge'>Faction</span>", unsafe_allow_html=True)
         faction = st.selectbox(
             "Faction",
-            factions_by_game[game].keys(),
+            list(factions_by_game[game].keys()),
+            index=0,
             label_visibility="collapsed"
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
+    # --- FORMAT ---
     with col3:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("<span class='badge'>Format</span>", unsafe_allow_html=True)
+        game_cfg = GAME_CONFIG.get(game, {})
         points = st.number_input(
             "Points",
-            min_value=250,
-            max_value=10000,
-            value=1000,
+            min_value=game_cfg.get("min_points", 250),
+            max_value=game_cfg.get("max_points", 10000),
+            value=game_cfg.get("default_points", 1000),
             step=250,
             label_visibility="collapsed"
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("")
 
+    # --------------------------------------------------
+    # NOM DE LA LISTE + ACTION
+    # --------------------------------------------------
     colA, colB = st.columns([2, 1])
 
     with colA:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("<span class='badge'>Liste</span>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Nom de la liste</span>", unsafe_allow_html=True)
         list_name = st.text_input(
             "Nom de la liste",
-            f"Liste_{datetime.now().strftime('%Y%m%d')}",
+            value=st.session_state.get(
+                "list_name",
+                f"Liste_{datetime.now().strftime('%Y%m%d')}"
+            ),
             label_visibility="collapsed"
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with colB:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("<span class='badge'>Action</span>", unsafe_allow_html=True)
-        st.markdown("Prêt à forger votre armée ?", unsafe_allow_html=True)
+        st.markdown(
+            "<p class='muted'>Prêt à forger votre armée ?</p>",
+            unsafe_allow_html=True
+        )
 
-        if st.button("🔥 Construire l’armée", use_container_width=True, type="primary"):
+        can_build = all([game, faction, points > 0, list_name.strip() != ""])
+
+        if st.button(
+            "🔥 Construire l’armée",
+            use_container_width=True,
+            type="primary",
+            disabled=not can_build
+        ):
+            # --- SESSION STATE ---
             st.session_state.game = game
             st.session_state.faction = faction
             st.session_state.points = points
@@ -474,12 +543,14 @@ if st.session_state.page == "setup":
             st.session_state.faction_rules = faction_data.get("special_rules", [])
             st.session_state.faction_spells = faction_data.get("spells", [])
 
+            # --- RESET ARMÉE ---
             st.session_state.army_list = []
             st.session_state.army_cost = 0
+            st.session_state.unit_selections = {}
+
+            # --- NAVIGATION ---
             st.session_state.page = "army"
             st.rerun()
-
-        st.markdown("</div>", unsafe_allow_html=True)
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
