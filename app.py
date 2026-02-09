@@ -79,7 +79,23 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
+<style>
+    .rule-item, .spell-item {
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .rule-name, .spell-name {
+        font-weight: bold;
+        color: #bb86fc;
+        margin-right: 10px;
+    }
+    .rule-description, .spell-description {
+        color: #ccc;
+    }
+</style>
+        
 # ======================================================
 # INITIALISATION
 # ======================================================
@@ -292,23 +308,22 @@ def export_army_html():
         <style>
             body {{
                 font-family: Arial, sans-serif;
-                background-color: #000;
-                color: #fff;
+                background-color: #121212;
+                color: #e0e0e0;
                 margin: 0;
                 padding: 20px;
             }}
             .container {{
                 max-width: 800px;
                 margin: 0 auto;
-                background-color: #111;
+                background-color: #1e1e1e;
                 padding: 20px;
                 border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             }}
-            h1 {{
-                color: #9c27b0;
+            h1, h2 {{
+                color: #bb86fc;
                 text-align: center;
-                font-size: 24px;
-                margin-bottom: 10px;
             }}
             .army-info {{
                 display: flex;
@@ -326,14 +341,12 @@ def export_army_html():
                 color: #ccc;
             }}
             h2 {{
-                color: #9c27b0;
-                text-align: center;
                 font-size: 20px;
                 margin-bottom: 20px;
             }}
             .unit {{
-                background-color: #1e1e1e;
-                border: 2px solid #9c27b0;
+                background-color: #2d2d2d;
+                border: 2px solid #bb86fc;
                 border-radius: 8px;
                 padding: 15px;
                 margin-bottom: 15px;
@@ -347,7 +360,7 @@ def export_army_html():
             .unit-name {{
                 font-weight: bold;
                 font-size: 16px;
-                color: #9c27b0;
+                color: #bb86fc;
             }}
             .unit-cost {{
                 color: #ff5252;
@@ -364,7 +377,7 @@ def export_army_html():
                 justify-content: space-between;
             }}
             .characteristic-label {{
-                color: #9c27b0;
+                color: #bb86fc;
             }}
             .characteristic-value {{
                 color: #fff;
@@ -374,7 +387,7 @@ def export_army_html():
                 padding: 10px;
                 background-color: #2a2a2a;
                 border-radius: 4px;
-                border-left: 3px solid #9c27b0;
+                border-left: 3px solid #bb86fc;
             }}
             .weapon-item {{
                 margin-bottom: 10px;
@@ -387,19 +400,26 @@ def export_army_html():
                 margin-left: 10px;
                 color: #ccc;
             }}
-            .rules-section {{
+            .rules-section, .spells-section {{
                 margin-top: 20px;
                 padding: 15px;
                 background-color: #2a2a2a;
                 border-radius: 6px;
-                border-left: 3px solid #9c27b0;
+                border-left: 3px solid #bb86fc;
             }}
-            .rule-item {{
-                margin-bottom: 10px;
+            .rule-item, .spell-item {{
+                font-size: 14px;
+                margin-bottom: 5px;
+                display: flex;
+                align-items: center;
             }}
-            .rule-name {{
+            .rule-name, .spell-name {{
                 font-weight: bold;
-                color: #9c27b0;
+                color: #bb86fc;
+                margin-right: 10px;
+            }}
+            .rule-description, .spell-description {{
+                color: #ccc;
             }}
         </style>
     </head>
@@ -478,23 +498,45 @@ def export_army_html():
         html += "</div>"
 
     # Ajout des règles spéciales de la faction
-    if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:  # Modifié
+    if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
         html += """
             <div class="rules-section">
                 <h2>Règles Spéciales de la Faction</h2>
         """
-        for rule in st.session_state.faction_special_rules:  # Modifié
+        for rule in st.session_state.faction_special_rules:
             if isinstance(rule, dict):
                 html += f"""
                     <div class="rule-item">
-                        <span class="rule-name">{rule.get('name', 'Règle sans nom')}</span><br>
-                        <span>{rule.get('description', '')}</span>
+                        <span class="rule-name">{rule.get('name', 'Règle sans nom')}:</span>
+                        <span class="rule-description">{rule.get('description', '')}</span>
                     </div>
                 """
             else:
                 html += f"""
                     <div class="rule-item">
                         <span>{rule}</span>
+                    </div>
+                """
+        html += "</div>"
+
+    # Ajout des sorts de la faction
+    if hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
+        html += """
+            <div class="spells-section">
+                <h2>Sorts de la Faction</h2>
+        """
+        for spell in st.session_state.faction_spells:
+            if isinstance(spell, dict):
+                html += f"""
+                    <div class="spell-item">
+                        <span class="spell-name">{spell.get('name', 'Sort sans nom')}:</span>
+                        <span class="spell-description">Coût: {spell.get('cost', '?')} pts, Portée: {spell.get('range', '?')}, {spell.get('description', '')}</span>
+                    </div>
+                """
+            else:
+                html += f"""
+                    <div class="spell-item">
+                        <span>{spell}</span>
                     </div>
                 """
         html += "</div>"
@@ -759,30 +801,23 @@ elif st.session_state.page == "army":
     # RÈGLES SPÉCIALES DE FACTION
     # ======================================================
     if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
-        with st.expander("📜 Règles spéciales de la faction", expanded=True):  # Expanded par défaut
+        with st.expander("📜 Règles spéciales de la faction", expanded=True):
             for rule in st.session_state.faction_special_rules:
                 if isinstance(rule, dict):
-                    st.markdown(f"**{rule.get('name', 'Règle sans nom')}**")
-                    st.markdown(f"{rule.get('description', '')}")
-                    st.markdown("---")  # Séparateur visuel
+                    st.markdown(f"**{rule.get('name', 'Règle sans nom')}**: {rule.get('description', '')}", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"- {rule}")
+                    st.markdown(f"- {rule}", unsafe_allow_html=True)
 
     # ======================================================
     # SORTS DE LA FACTION
     # ======================================================
     if hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
-        with st.expander("✨ Sorts de la faction", expanded=False):
+        with st.expander("✨ Sorts de la faction", expanded=True):
             for spell in st.session_state.faction_spells:
                 if isinstance(spell, dict):
-                    st.markdown(
-                        f"**{spell.get('name', 'Sort')}**\n\n"
-                        f"*Coût :* {spell.get('cost', '?')} pts  \n"
-                        f"*Portée :* {spell.get('range', '?')}  \n\n"
-                        f"{spell.get('description', '')}"
-                    )
+                    st.markdown(f"**{spell.get('name', 'Sort sans nom')}**: Coût: {spell.get('cost', '?')} pts, Portée: {spell.get('range', '?')}, {spell.get('description', '')}", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"- {spell}")
+                    st.markdown(f"- {spell}", unsafe_allow_html=True)
 
     # ======================================================
     # LISTE DE L'ARMÉE
