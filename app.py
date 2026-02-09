@@ -350,7 +350,7 @@ body {{
   border: 1px solid var(--border);
   margin-bottom: 40px;
   padding: 16px;
-  page-break-inside: avoid;  /* Évite la coupure d'une unité sur plusieurs pages */
+  page-break-inside: avoid;
 }}
 
 .unit-header {{
@@ -502,27 +502,37 @@ th {{
             if not isinstance(weapons, list):
                 weapons = [weapons]
 
-            html += '<div class="section-title">Armes équipées :</div>'
-            html += """
-<table>
-<thead>
-<tr>
-  <th>Arme</th><th>Port</th><th>Att</th><th>PA</th><th>Règles spéciales</th>
-</tr>
-</thead>
-<tbody>
-"""
+            # Filtrer les armes de base si d'autres armes sont présentes
+            filtered_weapons = []
+            has_custom_weapons = False
+
             for w in weapons:
-                html += f"""
-<tr>
-  <td>{esc(w.get('name', '-'))}</td>
-  <td>{esc(w.get('range', '-'))}</td>
-  <td>{esc(w.get('attacks', '-'))}</td>
-  <td>{esc(w.get('armor_piercing', '-'))}</td>
-  <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-')}</td>
-</tr>
-"""
-            html += "</tbody></table>"
+                if w.get('name', '').lower() not in ['arme de base', 'armes de base']:
+                    filtered_weapons.append(w)
+                    has_custom_weapons = True
+
+            if filtered_weapons or not has_custom_weapons:
+                html += '<div class="section-title">Armes équipées :</div>'
+                html += """
+    <table>
+    <thead>
+    <tr>
+      <th>Arme</th><th>Port</th><th>Att</th><th>PA</th><th>Règles spéciales</th>
+    </tr>
+    </thead>
+    <tbody>
+    """
+                for w in filtered_weapons if filtered_weapons else weapons:
+                    html += f"""
+    <tr>
+      <td>{esc(w.get('name', '-'))}</td>
+      <td>{esc(w.get('range', '-'))}</td>
+      <td>{esc(w.get('attacks', '-'))}</td>
+      <td>{esc(w.get('armor_piercing', '-'))}</td>
+      <td>{esc(", ".join(w.get('special_rules', [])) if w.get('special_rules') else '-')}</td>
+    </tr>
+    """
+                html += "</tbody></table>"
 
         # ---- RÈGLES SPÉCIALES ----
         rules = unit.get("special_rules", [])
@@ -539,7 +549,7 @@ th {{
         # ---- OPTIONS ----
         options = unit.get("options", {})
         if options:
-            html += '<div class="section-title">Options :</div>'
+            html += '<div class="section-title">Améliorations d\'unité :</div>'
             for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
                     html += f"<div><strong>{esc(group_name)} :</strong> "
@@ -636,6 +646,7 @@ th {{
 </html>
 """
     return html
+
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
