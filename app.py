@@ -101,8 +101,8 @@ if "list_name" not in st.session_state:
     st.session_state.list_name = ""
 if "units" not in st.session_state:
     st.session_state.units = []
-if "faction_rules" not in st.session_state:
-    st.session_state.faction_rules = []
+if "faction_special_rules" not in st.session_state:  # Modifié
+    st.session_state.faction_special_rules = []  # Modifié
 if "faction_spells" not in st.session_state:
     st.session_state.faction_spells = []
 
@@ -114,7 +114,7 @@ with st.sidebar:
         "<div style='height:1px;'></div>",
         unsafe_allow_html=True
     )
-    
+
 with st.sidebar:
     st.title("🛡️ Army Forge")
 
@@ -269,6 +269,7 @@ def format_unit_option(u):
     qua_def = f"Qua {u['quality']}+ / Déf {u.get('defense', '?')}"
     result = f"{name_part} - {qua_def} {u['base_cost']}pts"
     return result
+
 def export_army_json():
     return {
         "game": st.session_state.game,
@@ -477,12 +478,12 @@ def export_army_html():
         html += "</div>"
 
     # Ajout des règles spéciales de la faction
-    if st.session_state.get("faction_rules"):
+    if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:  # Modifié
         html += """
             <div class="rules-section">
                 <h2>Règles Spéciales de la Faction</h2>
         """
-        for rule in st.session_state.faction_rules:
+        for rule in st.session_state.faction_special_rules:  # Modifié
             if isinstance(rule, dict):
                 html += f"""
                     <div class="rule-item">
@@ -504,7 +505,7 @@ def export_army_html():
     </html>
     """
     return html
-    
+
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
@@ -525,8 +526,8 @@ def load_factions():
                     factions[game][faction] = data
                     games.add(game)
                     # Vérification des règles spéciales
-                    if "special_rules" not in data:
-                        data["special_rules"] = []
+                    if "faction_special_rules" not in data:  # Modifié
+                        data["faction_special_rules"] = []  # Modifié
                     if "spells" not in data:
                         data["spells"] = []
         except Exception as e:
@@ -637,7 +638,7 @@ if st.session_state.page == "setup":
 
             faction_data = factions_by_game[game][faction]
             st.session_state.units = faction_data["units"]
-            st.session_state.faction_rules = faction_data.get("special_rules", [])
+            st.session_state.faction_special_rules = faction_data.get("faction_special_rules", [])  # Modifié
             st.session_state.faction_spells = faction_data.get("spells", [])
 
             # --- RESET ARMÉE ---
@@ -653,7 +654,7 @@ if st.session_state.page == "setup":
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
 # ======================================================
 elif st.session_state.page == "army":
-    if not all(key in st.session_state for key in ["game", "faction", "points", "list_name", "units", "faction_rules", "faction_spells"]):
+    if not all(key in st.session_state for key in ["game", "faction", "points", "list_name", "units", "faction_special_rules", "faction_spells"]):  # Modifié
         st.error("Erreur de configuration. Veuillez retourner à la page de configuration.")
         st.stop()
 
@@ -701,7 +702,7 @@ elif st.session_state.page == "army":
             mime="text/html",
             use_container_width=True
         )
-        
+
     # ======================================================
     # BARRE DE PROGRESSION DES POINTS
     # ======================================================
@@ -725,7 +726,7 @@ elif st.session_state.page == "army":
         st.error("⚠️ Dépassement du total de points autorisé")
 
     st.divider()
-    
+
     # ======================================================
     # BARRE DE PROGRESSION – PALIERS D’ARMÉE
     # ======================================================
@@ -761,9 +762,9 @@ elif st.session_state.page == "army":
     # ======================================================
     # RÈGLES SPÉCIALES DE FACTION
     # ======================================================
-    if st.session_state.get("faction_rules"):
+    if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:  # Modifié
         with st.expander("📜 Règles spéciales de la faction", expanded=False):
-            for rule in st.session_state.faction_rules:
+            for rule in st.session_state.faction_special_rules:  # Modifié
                 if isinstance(rule, dict):
                     st.markdown(
                         f"**{rule.get('name', 'Règle sans nom')}**\n\n"
@@ -775,7 +776,7 @@ elif st.session_state.page == "army":
     # ======================================================
     # SORTS DE LA FACTION
     # ======================================================
-    if st.session_state.get("faction_spells"):
+    if hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
         with st.expander("✨ Sorts de la faction", expanded=False):
             for spell in st.session_state.faction_spells:
                 if isinstance(spell, dict):
@@ -809,7 +810,7 @@ elif st.session_state.page == "army":
                     st.rerun()
 
     st.divider()
-    
+
     # ======================================================
     # SÉLECTION DE L’UNITÉ
     # ======================================================
@@ -932,7 +933,7 @@ elif st.session_state.page == "army":
                     selected_options.setdefault(
                         group.get("group", "Options"), []
                     ).append(o)
-    
+
     # ======================================================
     # EFFECTIFS & COÛT
     # ======================================================
@@ -956,7 +957,7 @@ elif st.session_state.page == "army":
     st.subheader("Coût de l'unité sélectionnée")
     st.markdown(f"**Coût total :** {final_cost} pts")
     st.divider()
-    
+
     # ======================================================
     # AJOUT À L’ARMÉE
     # ======================================================
@@ -995,4 +996,4 @@ elif st.session_state.page == "army":
         ):
             st.session_state.army_list.append(unit_data)
             st.session_state.army_cost += final_cost
-            st.rerun() 
+            st.rerun()
