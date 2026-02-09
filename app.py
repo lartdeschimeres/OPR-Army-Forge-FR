@@ -20,7 +20,9 @@ st.markdown(
 
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    header {
+        background: transparent;
+    }
 
     .stApp {
         background: #f5f5f5;
@@ -77,6 +79,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 # ======================================================
 # INITIALISATION
 # ======================================================
