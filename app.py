@@ -265,41 +265,128 @@ def export_army_json():
 
 def export_army_html():
     html = f"""
-    <html>
+    <!DOCTYPE html>
+    <html lang="fr">
     <head>
-        <meta charset="utf-8">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{st.session_state.list_name}</title>
         <style>
             body {{
-                background:#0e1016;
-                color:#e6e6e6;
                 font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                color: #333;
+                margin: 0;
+                padding: 20px;
             }}
-            h1 {{ color:#4da6ff; }}
+            .container {{
+                max-width: 800px;
+                margin: 0 auto;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }}
+            h1 {{
+                color: #2c3e50;
+                text-align: center;
+            }}
+            .army-info {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #ddd;
+            }}
+            .army-stats {{
+                font-size: 14px;
+                color: #666;
+            }}
             .unit {{
-                border:1px solid #2a3042;
-                border-radius:12px;
-                padding:12px;
-                margin-bottom:12px;
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 15px;
+                margin-bottom: 15px;
+            }}
+            .unit-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }}
+            .unit-name {{
+                font-weight: bold;
+                font-size: 16px;
+                color: #2c3e50;
+            }}
+            .unit-cost {{
+                color: #dc241f;
+                font-weight: bold;
+            }}
+            .unit-details {{
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }}
+            .detail-item {{
+                display: flex;
+                justify-content: space-between;
+            }}
+            .detail-label {{
+                font-weight: bold;
+                color: #666;
             }}
         </style>
     </head>
     <body>
-        <h1>{st.session_state.list_name}</h1>
-        <p>{st.session_state.game} – {st.session_state.faction}</p>
-        <p>{st.session_state.army_cost} / {st.session_state.points} pts</p>
+        <div class="container">
+            <h1>{st.session_state.list_name}</h1>
+            <div class="army-info">
+                <div>
+                    <strong>Jeu:</strong> {st.session_state.game}<br>
+                    <strong>Faction:</strong> {st.session_state.faction}
+                </div>
+                <div class="army-stats">
+                    <strong>Points:</strong> {st.session_state.army_cost} / {st.session_state.points}
+                </div>
+            </div>
+            <h2>Liste de l'Armée</h2>
     """
 
     for u in st.session_state.army_list:
         html += f"""
-        <div class="unit">
-            <strong>{u['name']}</strong><br>
-            Coût: {u['cost']} pts<br>
-            Taille: {u.get('size', '?')}
-        </div>
+            <div class="unit">
+                <div class="unit-header">
+                    <div class="unit-name">{u['name']}</div>
+                    <div class="unit-cost">{u['cost']} pts</div>
+                </div>
+                <div class="unit-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Type:</span>
+                        <span>{u.get('type', 'Unité')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Taille:</span>
+                        <span>{u.get('size', '?')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Qualité:</span>
+                        <span>{u.get('quality', '?')}+</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Défense:</span>
+                        <span>{u.get('defense', '?')}+</span>
+                    </div>
+                </div>
+            </div>
         """
 
-    html += "</body></html>"
+    html += """
+        </div>
+    </body>
+    </html>
+    """
     return html
     
 # ======================================================
