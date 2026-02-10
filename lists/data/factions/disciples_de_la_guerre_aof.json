@@ -507,7 +507,7 @@
         },
         {
           "group": "Améliorations d'arme",
-          "type": "upgrades",
+          "type": "weapon_upgrades",
           "description": "Améliorer avec une des options suivantes (un seul choix possible)",
           "options": [
             {
@@ -1139,7 +1139,7 @@
         },
         {
           "group": "Améliorations d'armes",
-          "type": "weapon",
+          "type": "weapon_upgrades",
           "description": "Améliorer toutes les figurines avec une des options suivantes (un seul choix possible)",
           "options": [
             {"name": "Arc court", "cost": 25, "weapon": {"name": "Arc court", "range": "12", "attacks": 1, "armor_piercing": 0, "special_rules": []}},
