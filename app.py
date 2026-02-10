@@ -474,7 +474,7 @@ th {{
         defense = esc(unit.get("defense", "-"))
 
         # Calcul de la valeur Coriace
-        coriace = unit.get("coriace", 0)
+        coriace = unit.get("coriace", None)
         mount = unit.get("mount", {})
         mount_defense_bonus = 0
 
@@ -482,12 +482,11 @@ th {{
             mount_data = mount.get("mount", mount)
             mount_defense_bonus = mount_data.get("defense_bonus", 0)
 
-        # Si coriace n'est pas défini, utiliser la défense de base
-        if coriace == 0:
-            coriace = int(defense)
-
-        # Ajouter le bonus de défense de la monture
-        coriace += mount_defense_bonus
+        # Si coriace n'est pas défini dans le JSON, on ne l'affiche pas
+        if coriace is None:
+            # Si la valeur n'est pas définie dans le JSON, on utilise la défense de base + bonus de monture
+            coriace = int(defense) + mount_defense_bonus
+            # Mais on ne l'affichera pas dans le HTML
 
         # Détermine l'effectif à afficher
         unit_size = unit.get("size", 10)
@@ -504,9 +503,13 @@ th {{
   <div class="stats">
     <span>Qualité {quality}+</span>
     <span>Défense {defense}+</span>
-    <span>Coriace {coriace}</span>
-  </div>
 """
+
+        # N'afficher la valeur Coriace que si elle est explicitement définie dans le JSON
+        if "coriace" in unit:
+            html += f"<span>Coriace {coriace}</span>"
+
+        html += "</div>"
 
         # ---- ARMES ----
         weapons = unit.get("weapon", [])
@@ -710,6 +713,7 @@ th {{
 </html>
 """
     return html
+
 
 # ======================================================
 # CHARGEMENT DES FACTIONS
