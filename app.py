@@ -551,34 +551,32 @@ th {{
                         html += f"{esc(opt.get('name', ''))}, "
                     html += "</div>"
 
-        # ---- MONTURE (pour les héros) ----
-        if mount and isinstance(mount, dict):
-            mount_name = esc(mount.get("name", "Monture non nommée"))
-            mount_data = mount.get("mount", mount)
+        # ---------- MONTURE ----------
+        elif group.get("type") == "mount":
+            choices = ["Aucune monture"]
+            opt_map = {}
 
-            html += '<div class="section-title">Monture :</div>'
-            html += f"<div><strong>{mount_name}</strong>"
+            for o in group.get("options", []):
+                label = f"{o['name']} (+{o['cost']} pts)"
+                choices.append(label)
+                opt_map[label] = o
 
-            if 'quality' in mount_data or 'defense' in mount_data:
-                html += " ("
-                if 'quality' in mount_data:
-                    html += f"Qualité {mount_data['quality']}+"
-                if 'defense' in mount_data:
-                    html += f" Défense {mount_data['defense']}+"
-                html += ")"
+            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
+            choice = st.radio(
+                "Monture",
+                choices,
+                index=choices.index(current) if current in choices else 0,
+                key=f"{unit_key}_{g_key}_mount",
+            )
 
-            if 'special_rules' in mount_data and mount_data['special_rules']:
-                html += " | " + ", ".join(esc(rule) for rule in mount_data['special_rules'])
+            st.session_state.unit_selections[unit_key][g_key] = choice
 
-            if 'weapons' in mount_data and mount_data['weapons']:
-                for weapon in mount_data['weapons']:
-                    if weapon:
-                        html += f" | {weapon.get('name', 'Arme')} (Att{weapon.get('attacks', '-')}, PA({weapon.get('armor_piercing', '-')})"
-                        if weapon.get('special_rules'):
-                            html += ", " + ", ".join(esc(rule) for rule in weapon.get('special_rules', []))
-                        html += ")"
-
-            html += "</div>"
+            if choice != "Aucune monture":
+                mount = opt_map[choice]
+                mount_cost = mount["cost"]
+                # Ajouter les données de la monture pour le calcul de la valeur Coriace
+                mount_data = mount.get("mount", {})
+                mount["defense_bonus"] = mount_data.get("defense_bonus", 0)
 
         html += "</section>"
 
@@ -998,32 +996,37 @@ elif st.session_state.page == "army":
     st.markdown(f"**Coût total :** {final_cost} pts")
     st.divider()
 
-    if st.button("➕ Ajouter à l’armée"):
-        if st.session_state.army_cost + final_cost > st.session_state.points:
-            st.error(f"⛔ Dépassement du format : {st.session_state.army_cost + final_cost} / {st.session_state.points} pts")
-            st.stop()
+if st.button("➕ Ajouter à l’armée"):
+    if st.session_state.army_cost + final_cost > st.session_state.points:
+        st.error(f"⛔ Dépassement du format : {st.session_state.army_cost + final_cost} / {st.session_state.points} pts")
+        st.stop()
 
-        coriace = unit.get("defense", 0)
-        if mount:
-            mount_defense_bonus = mount.get("defense_bonus", 0)
-            coriace += mount_defense_bonus
+    # Calcul de la valeur Coriace
+    coriace = unit.get("defense", 0)
+    if mount:
+        mount_defense_bonus = mount.get("defense_bonus", 0)
+        coriace += mount_defense_bonus
 
-        unit_data = {
-            "name": unit["name"],
-            "type": unit.get("type", "unit"),
-            "cost": final_cost,
-            "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
-            "quality": unit.get("quality"),
-            "defense": unit.get("defense"),
-            "coriace": coriace,
-            "weapon": weapons,
-            "options": selected_options,
-            "mount": mount,
-        }
+    # Vérifier si l'unité a une valeur coriace spécifique
+    if "coriace" in unit:
+        coriace = unit["coriace"] + mount_defense_bonus
 
-        test_army = st.session_state.army_list + [unit_data]
+    unit_data = {
+        "name": unit["name"],
+        "type": unit.get("type", "unit"),
+        "cost": final_cost,
+        "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
+        "quality": unit.get("quality"),
+        "defense": unit.get("defense"),
+        "coriace": coriace,
+        "weapon": weapons,
+        "options": selected_options,
+        "mount": mount,
+    }
 
-        if validate_army_rules(test_army, st.session_state.points, st.session_state.game):
-            st.session_state.army_list.append(unit_data)
-            st.session_state.army_cost += final_cost
-            st.rerun()
+    test_army = st.session_state.army_list + [unit_data]
+
+    if validate_army_rules(test_army, st.session_state.points, st.session_state.game):
+        st.session_state.army_list.append(unit_data)
+        st.session_state.army_cost += final_cost
+        st.rerun()
