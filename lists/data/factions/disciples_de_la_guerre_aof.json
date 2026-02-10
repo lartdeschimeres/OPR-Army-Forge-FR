@@ -171,7 +171,7 @@
         {
           "group": "Remplacement d'arme",
           "type": "weapon",
-          "description": "Remplacez l'arme de base par:",
+          "description": "Remplacez l'arme à une main lourde par :",
           "options": [
             {
               "name": "Hallebarde lourde",
@@ -316,7 +316,7 @@
         {
           "group": "Remplacement d'arme",
           "type": "weapon",
-          "description": "Remplacez l'arme de base par:",
+          "description": "Remplacez l'arme à une main lourde par :",
           "options": [
             {
               "name": "Hallebarde lourde",
@@ -459,7 +459,7 @@
         {
           "group": "Remplacement d'arme",
           "type": "weapon",
-          "description": "Remplacez l'arme de base par:",
+          "description": "Remplacez l'arme à une main par :",
           "options": [
             {
               "name": "Paire d'armes à une main",
@@ -570,19 +570,8 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes de base par:",
+          "description": "Remplacez toutes les armes à une main par :",
           "options": [
-            {
-              "name": "Lance",
-              "cost": 35,
-              "weapon": {
-                "name": "Lance",
-                "range": "-",
-                "attacks": 1,
-                "armor_piercing": "-",
-                "special_rules": ["Contre-charge"]
-              }
-            },
             {
               "name": "Fléau",
               "cost": 20,
@@ -592,8 +581,17 @@
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
-            }
+            },
+            {
+              "name": "Pique",
+              "cost": 35,
+              "weapon": {
+                "name": "Pique",
+                "range": "-",
+                "attacks": 1,
+                "armor_piercing": "-",
+                "special_rules": ["Contre-charge"]
+            },
           ]
         },
         {
@@ -645,7 +643,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes de base par:",
+          "description": "Remplacez toutes les grandes armes par :",
           "options": [
             {
               "name": "Paire d'armes à une main",
@@ -694,7 +692,7 @@
       "special_rules": ["Guerrier-né"],
       "weapon": [
         {
-          "name": "Armes à une main lourdes",
+          "name": "Armes à une main lourde",
           "range": "-",
           "attacks": 1,
           "armor_piercing": 1
@@ -704,7 +702,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes de base par ",
+          "description": "Remplacez toutes les armes à une main lourdes par :",
           "options": [
             {
               "name": "Hallebarde lourde",
@@ -771,7 +769,7 @@
       ]
     },
     {
-      "name": "Guerriers du Ravage de la Guerre",
+      "name": "Guerriers du Ravage de la Guerre Élus",
       "type": "unit",
       "size": 5,
       "base_cost": 100,
@@ -790,7 +788,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes de base par ",
+          "description": "Remplacez toutes les armes à une main mourdes par :",
           "options": [
             {
               "name": "Hallebarde lourde",
@@ -893,7 +891,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes de base par: ",
+          "description": "Remplacez toutes les armes à une main lourdes par :",
           "options": [
             {
               "name": "Paire d'armes à une main",
@@ -907,6 +905,21 @@
               }
             }
           ]
+          {
+          "group": "Améliorations d'arme",
+          "type": "weapon_upgrades",
+          "description": "Remplacer une seule arme à une main lourde par :",
+          "options": [
+            {
+              "name": "Grande arme lourde",
+              "cost": 30,
+              "weapon": {
+                "name": "Grande arme lourde",
+                "range": "-",
+                "attacks": 2,
+                "armor_piercing": "3"
+              }
+            },
         },
         {
           "group": "Améliorations d'unité",
