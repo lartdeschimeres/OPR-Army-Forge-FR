@@ -473,25 +473,10 @@ th {{
         quality = esc(unit.get("quality", "-"))
         defense = esc(unit.get("defense", "-"))
 
-        # Calcul de la valeur Coriace
-        coriace = unit.get("coriace", None)
-        mount = unit.get("mount", {})
-        mount_defense_bonus = 0
-
-        if isinstance(mount, dict):
-            mount_data = mount.get("mount", mount)
-            mount_defense_bonus = mount_data.get("defense_bonus", 0)
-
-        # Si coriace n'est pas défini dans le JSON, on ne l'affiche pas
-        if coriace is None:
-            # Si la valeur n'est pas définie dans le JSON, on utilise la défense de base + bonus de monture
-            coriace = int(defense) + mount_defense_bonus
-            # Mais on ne l'affichera pas dans le HTML
-
         # Détermine l'effectif à afficher
         unit_size = unit.get("size", 10)
         if unit.get("type", "").lower() == "hero":
-            unit_size = 1  # Les héros ont toujours un effectif de 1
+            unit_size = 1
 
         html += f"""
 <section class="unit-card">
@@ -505,9 +490,9 @@ th {{
     <span>Défense {defense}+</span>
 """
 
-        # N'afficher la valeur Coriace que si elle est explicitement définie dans le JSON
+        # N'afficher la valeur Coriace que si elle existe dans unit_data
         if "coriace" in unit:
-            html += f"<span>Coriace {coriace}</span>"
+            html += f"<span>Coriace {unit['coriace']}</span>"
 
         html += "</div>"
 
@@ -516,16 +501,7 @@ th {{
         if not isinstance(weapons, list):
             weapons = [weapons]
 
-        # Filtrer les armes de base si d'autres armes sont présentes
-        filtered_weapons = []
-        has_custom_weapons = False
-
-        for w in weapons:
-            if w and w.get('name', '').lower() not in ['arme de base', 'armes de base']:
-                filtered_weapons.append(w)
-                has_custom_weapons = True
-
-        if filtered_weapons or not has_custom_weapons:
+        if weapons:
             html += '<div class="section-title">Armes équipées :</div>'
             html += """
     <table>
@@ -536,7 +512,7 @@ th {{
     </thead>
     <tbody>
     """
-            for w in filtered_weapons if filtered_weapons else weapons:
+            for w in weapons:
                 if w:
                     html += f"""
     <tr>
@@ -598,8 +574,9 @@ th {{
                         html += f"{esc(opt.get('name', ''))}, "
                     html += "</div>"
 
-        # ---- MONTURE (pour les héros) ----
-        if mount and isinstance(mount, dict):
+        # ---- MONTURE ----
+        if "mount" in unit and unit["mount"]:
+            mount = unit["mount"]
             mount_name = esc(mount.get("name", "Monture non nommée"))
             mount_data = mount.get("mount", mount)
 
@@ -629,7 +606,7 @@ th {{
 
         html += "</section>"
 
-    # ---- RÈGLES SPÉCIALES DE L'ARMÉE (en deux colonnes) ----
+    # ---- RÈGLES SPÉCIALES DE L'ARMÉE ----
     if sorted_army_list and hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
         faction_rules = st.session_state.faction_special_rules
         all_rules = [rule for rule in faction_rules if isinstance(rule, dict)]
@@ -644,12 +621,10 @@ th {{
                     <div style="flex: 1; min-width: 300px; padding-right: 15px;">
             """
 
-            # Diviser les règles en deux colonnes de longueur égale
             half = len(all_rules) // 2
             if len(all_rules) % 2 != 0:
-                half += 1  # Ajouter une règle à la première colonne si le nombre est impair
+                half += 1
 
-            # Première colonne
             for rule in all_rules[:half]:
                 if isinstance(rule, dict):
                     html += f"""
@@ -663,7 +638,6 @@ th {{
                     <div style="flex: 1; min-width: 300px; padding-left: 15px;">
             """
 
-            # Deuxième colonne
             for rule in all_rules[half:]:
                 if isinstance(rule, dict):
                     html += f"""
@@ -678,7 +652,7 @@ th {{
             </div>
             """
 
-    # ---- SORTS DE LA FACTION (en une seule colonne, même style que les règles spéciales) ----
+    # ---- SORTS DE LA FACTION ----
     if sorted_army_list and hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
         spells = st.session_state.faction_spells
         all_spells = [{"name": name, "details": details} for name, details in spells.items() if isinstance(details, dict)]
@@ -692,7 +666,6 @@ th {{
                 <div class="special-rules-column" style="min-width: 100%;">
             """
 
-            # Une seule colonne pour les sorts, même style que les règles spéciales
             for spell in all_spells:
                 if isinstance(spell, dict):
                     html += f"""
@@ -713,7 +686,6 @@ th {{
 </html>
 """
     return html
-
 
 # ======================================================
 # CHARGEMENT DES FACTIONS
@@ -961,6 +933,9 @@ elif st.session_state.page == "army":
                 st.markdown(f"**Qualité :** {unit_data.get('quality', '?')}+")
                 st.markdown(f"**Défense :** {unit_data.get('defense', '?')}+")
 
+                if "coriace" in unit_data:
+                    st.markdown(f"**Coriace :** {unit_data.get('coriace', '?')}")
+
                 if st.button(f"Supprimer {unit_data['name']}", key=f"delete_{i}"):
                     st.session_state.army_cost -= unit_data['cost']
                     st.session_state.army_list.pop(i)
@@ -1063,6 +1038,9 @@ elif st.session_state.page == "army":
             if choice != "Aucune monture":
                 mount = opt_map[choice]
                 mount_cost = mount["cost"]
+                # Ajout du coriace_bonus si présent
+                if "mount" in mount and "coriace_bonus" in mount["mount"]:
+                    mount["coriace_bonus"] = mount["mount"]["coriace_bonus"]
 
         # ---------- OPTIONS / RÔLES ----------
         elif group.get("type") == "role" and unit.get("type") == "hero":
@@ -1117,15 +1095,27 @@ elif st.session_state.page == "army":
             st.error(f"⛔ Dépassement du format : {st.session_state.army_cost + final_cost} / {st.session_state.points} pts")
             st.stop()
 
-        # Coriace uniquement si l’unité possède la règle
-        coriace = None
-        base_coriace = unit.get("coriace")
+        # Calcul de la valeur Coriace
+        coriace = 0
 
-        if base_coriace is not None:
-            coriace = base_coriace
-            if mount:
-                coriace += mount.get("defense_bonus", 0)
+        # 1. Valeur de base de l'unité (seulement si explicitement définie)
+        if "coriace" in unit:
+            coriace = unit["coriace"]
 
+        # 2. Bonus de la monture (utilisation de coriace_bonus)
+        if mount:
+            mount_data = mount.get("mount", mount)
+            coriace += mount_data.get("coriace_bonus", 0)
+
+        # 3. Extraction des valeurs Coriace depuis les règles spéciales
+        if "special_rules" in unit:
+            for rule in unit["special_rules"]:
+                if isinstance(rule, str) and "Coriace" in rule:
+                    match = re.search(r'Coriace\s*\((\d+)\)', rule)
+                    if match:
+                        coriace = max(coriace, int(match.group(1)))
+
+        # Création de l'unité
         unit_data = {
             "name": unit["name"],
             "type": unit.get("type", "unit"),
@@ -1139,8 +1129,8 @@ elif st.session_state.page == "army":
             "mount": mount,
         }
 
-        # On n’ajoute coriace que s’il existe
-        if coriace is not None:
+        # Ajout de la valeur Coriace seulement si > 0
+        if coriace > 0:
             unit_data["coriace"] = coriace
 
         test_army = st.session_state.army_list + [unit_data]
