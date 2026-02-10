@@ -285,9 +285,6 @@ def export_army_json():
         "exported_at": datetime.now().isoformat()
     }
 
-# ======================================================
-# EXPORT HTML
-# ======================================================
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -454,22 +451,7 @@ th {{
         cost = unit.get("cost", 0)
         quality = esc(unit.get("quality", "-"))
         defense = esc(unit.get("defense", "-"))
-
-        # Calcul de la valeur Coriace
         coriace = unit.get("coriace", 0)
-        mount = unit.get("mount", {})
-        mount_defense_bonus = 0
-
-        if isinstance(mount, dict):
-            mount_data = mount.get("mount", mount)
-            mount_defense_bonus = mount_data.get("defense_bonus", 0)
-
-        # Si coriace n'est pas défini, utiliser la défense de base
-        if coriace == 0:
-            coriace = int(defense)
-
-        # Ajouter le bonus de défense de la monture
-        coriace += mount_defense_bonus
 
         # Détermine l'effectif à afficher
         unit_size = unit.get("size", 10)
@@ -551,32 +533,35 @@ th {{
                         html += f"{esc(opt.get('name', ''))}, "
                     html += "</div>"
 
-        # ---------- MONTURE ----------
-        elif group.get("type") == "mount":
-            choices = ["Aucune monture"]
-            opt_map = {}
+        # ---- MONTURE (pour les héros) ----
+        mount = unit.get("mount")
+        if mount and isinstance(mount, dict):
+            mount_name = esc(mount.get("name", "Monture non nommée"))
+            mount_data = mount.get("mount", mount)
 
-            for o in group.get("options", []):
-                label = f"{o['name']} (+{o['cost']} pts)"
-                choices.append(label)
-                opt_map[label] = o
+            html += '<div class="section-title">Monture :</div>'
+            html += f"<div><strong>{mount_name}</strong>"
 
-            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
-            choice = st.radio(
-                "Monture",
-                choices,
-                index=choices.index(current) if current in choices else 0,
-                key=f"{unit_key}_{g_key}_mount",
-            )
+            if 'quality' in mount_data or 'defense' in mount_data:
+                html += " ("
+                if 'quality' in mount_data:
+                    html += f"Qualité {mount_data['quality']}+"
+                if 'defense' in mount_data:
+                    html += f" Défense {mount_data['defense']}+"
+                html += ")"
 
-            st.session_state.unit_selections[unit_key][g_key] = choice
+            if 'special_rules' in mount_data and mount_data['special_rules']:
+                html += " | " + ", ".join(esc(rule) for rule in mount_data['special_rules'])
 
-            if choice != "Aucune monture":
-                mount = opt_map[choice]
-                mount_cost = mount["cost"]
-                # Ajouter les données de la monture pour le calcul de la valeur Coriace
-                mount_data = mount.get("mount", {})
-                mount["defense_bonus"] = mount_data.get("defense_bonus", 0)
+            if 'weapons' in mount_data and mount_data['weapons']:
+                for weapon in mount_data['weapons']:
+                    if weapon:
+                        html += f" | {weapon.get('name', 'Arme')} (Att{weapon.get('attacks', '-')}, PA({weapon.get('armor_piercing', '-')})"
+                        if weapon.get('special_rules'):
+                            html += ", " + ", ".join(esc(rule) for rule in weapon.get('special_rules', []))
+                        html += ")"
+
+            html += "</div>"
 
         html += "</section>"
 
@@ -635,7 +620,6 @@ th {{
 </html>
 """
     return html
-
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
