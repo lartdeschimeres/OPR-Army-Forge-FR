@@ -5,133 +5,133 @@
   "status": "complete",
   "description": "Les Disciples de la Guerre sont une faction brutale et impitoyable, composée de guerriers fanatiques et de monstres déchaînés.",
   "faction_special_rules": [
-        {
-            "name": "Warbound [Guerrier-né]",
-            "description": "Les ennemis qui lancent les dés pour bloquer les touches infligées par les armes de cette figurine subissent une blessure supplémentaire pour chaque résultat non modifié de 1 obtenu."
-        },
-        {
-            "name": "Bloodthirsty Fighter [Combattant sanguinaire]",
-            "description": "Pour chaque résultat de 1 non modifié obtenu par les ennemis lorsqu'ils bloquent les touches portées par les armes de cette figurine en mêlée, cette figurine peut effectuer un jet d'attaque supplémentaire avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées."
-        },
-        {
-            "name": "Break [Dislocation]s",
-            "description": "Ignore la Régénération, et sur les résultats non modifiés de 6 pour toucher, ces coups obtiennent PA (+2)."
-        },
-        {
-            "name": "Breath Attack [Attaque de souffle]",
-            "description": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6 : sur un résultat de 2+, une unité ennemie dans un rayon de 6\" en ligne de mire subit une touche avec Explosion (3) et PA (1)."
-        },
-        {
-            "name": "Melee Evasion [Esquive en mêlée]",
-            "description": "Les ennemis subissent un malus de -1 aux jets d'attaque en mêlée lorsqu'ils attaquent des unités dont toutes les figurines possèdent cette règle.."
-        },
-        {
-            "name": "Piercing Assault [Assaut tranchant]",
-            "description": "Cette figurine gagne PA (+1) lorsqu'elle charge."
-        },
-        {
-            "name": "Precision Fighter Buff [Bonus de combattant précis]",
-            "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
-        },
-        {
-            "name": "Ranger Shrouding [Voile fluctuant]",
-            "description": "Les ennemis ont une portée réduite de 6\" lorsqu'ils tentent de tirer sur des unités dont toutes les figurines possèdent cette règle."
-        },
-        {
-            "name": "Shred [Lacération]",
-            "description": "Sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
-        },
-        {
-            "name": "Slam [Éclatement]",
-            "description": "Ignore les Couverts, et sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
-        },
-        {
-            "name": "Steadfast [Inébranlable]",
-            "description": "Si une unité dont toutes les figurines possèdent cette règle est Ébranlée au début du round, lancez un dé. Sur un résultat de 4+, elle cesse d'être Ébranlée."
-        },
-        {
-            "name": "Steadfast Buff [Bonus d’Inébranlable]",
-            "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient Inébranlable une fois (la prochaine fois que l'effet s'appliquerait)."
-        },
-        {
-            "name": "Unpredictable [Imprévisible]",
-            "description": "Lors d'une attaque, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
-        },
-        {
-            "name": "Unpredictable Fighter [Combattant imprévisible]",
-            "description": "En mêlée, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque.."
-        },
-        {
-            "name": "Versatile Attack [Attaque versatile]",
-            "description": "Lorsque cette unité est activée, choisissez un effet : jusqu'à la fin de l'activation, toutes les figurines bénéficiant de cette règle obtiennent soit PA (+1) lorsqu'elles attaquent, soit +1 aux jets pour toucher lorsque'elles attaquent."
-        },
-        {
-            "name": "Versatile Defense [Défense versatile]",
-            "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle est déployée ou activée, choisissez un effet : lorsqu'on lui tire dessus ou lorsqu'elle est chargée à plus de 9\", l'unité gagne +1 aux jets de Défense, ou les unités ennemies subissent -1 aux jets pour la toucher. Cet effet dure jusqu'à la prochaine activation de l'unité."
-        },
-        {
-            "name": "Warbound Boost [Boost de Guerrier-né]",
-            "description": "Si cette figurine dispose de la règle spéciale Guerrier-né, les ennemis qui subissent des blessures de sa part subissent des blessures supplémentaires sur les jets de Défense ratés de 1-2 issues de Guerrier-né (au lieu de seulement sur 1)."
-        },
-        {
-            "name": "Ranged Shrouding Aura [Aura de Voile fluctuant]",
-            "description": "Cette figurine et son unité obtiennent la règle spéciale Voile fluctuant.."
-        },
-        {
-            "name": "Scout Aura [Aura d’Éclaireur]",
-            "description": "Cette figurine et son unité obtiennent la règle spéciale Éclaireur."
-        },
-        {
-            "name": "Shred when Shooting Aura [Aura de Lacération au tir]",
-            "description": "Cette figurine et son unité obtiennent la règle spéciale Lacération lorsqu'elles tirent."
-        },
-        {
-            "name": "Unpredictable Fighter Aura [Aura de Combattant imprévisible]",
-            "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
-        },
-        {
-            "name": "Versatile Defense Aura [Aura de Défense Versatile]",
-            "description": "Cette figurine et son unité obtiennent la règle spéciale Défense versatile."
-        },
-        {
-            "name": "Warbound Boost Aura [Aura de Boost de Guerrier-né]",
-            "description": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né."
-        }
-    ],
+    {
+      "name": "Warbound [Guerrier-né]",
+      "description": "Les ennemis qui lancent les dés pour bloquer les touches infligées par les armes de cette figurine subissent une blessure supplémentaire pour chaque résultat non modifié de 1 obtenu."
+    },
+    {
+      "name": "Bloodthirsty Fighter [Combattant sanguinaire]",
+      "description": "Pour chaque résultat de 1 non modifié obtenu par les ennemis lorsqu'ils bloquent les touches portées par les armes de cette figurine en mêlée, cette figurine peut effectuer un jet d'attaque supplémentaire avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées."
+    },
+    {
+      "name": "Break [Dislocation]",
+      "description": "Ignore la Régénération, et sur les résultats non modifiés de 6 pour toucher, ces coups obtiennent PA (+2)."
+    },
+    {
+      "name": "Breath Attack [Attaque de souffle]",
+      "description": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6 : sur un résultat de 2+, une unité ennemie dans un rayon de 6\" en ligne de mire subit une touche avec Explosion (3) et PA (1)."
+    },
+    {
+      "name": "Melee Evasion [Esquive en mêlée]",
+      "description": "Les ennemis subissent un malus de -1 aux jets d'attaque en mêlée lorsqu'ils attaquent des unités dont toutes les figurines possèdent cette règle."
+    },
+    {
+      "name": "Piercing Assault [Assaut tranchant]",
+      "description": "Cette figurine gagne PA (+1) lorsqu'elle charge."
+    },
+    {
+      "name": "Precision Fighter Buff [Bonus de combattant précis]",
+      "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    {
+      "name": "Ranger Shrouding [Voile fluctuant]",
+      "description": "Les ennemis ont une portée réduite de 6\" lorsqu'ils tentent de tirer sur des unités dont toutes les figurines possèdent cette règle."
+    },
+    {
+      "name": "Shred [Lacération]",
+      "description": "Sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
+    },
+    {
+      "name": "Slam [Éclatement]",
+      "description": "Ignore les Couverts, et sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
+    },
+    {
+      "name": "Steadfast [Inébranlable]",
+      "description": "Si une unité dont toutes les figurines possèdent cette règle est Ébranlée au début du round, lancez un dé. Sur un résultat de 4+, elle cesse d'être Ébranlée."
+    },
+    {
+      "name": "Steadfast Buff [Bonus d'Inébranlable]",
+      "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient Inébranlable une fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    {
+      "name": "Unpredictable [Imprévisible]",
+      "description": "Lors d'une attaque, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
+    },
+    {
+      "name": "Unpredictable Fighter [Combattant imprévisible]",
+      "description": "En mêlée, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
+    },
+    {
+      "name": "Versatile Attack [Attaque versatile]",
+      "description": "Lorsque cette unité est activée, choisissez un effet : jusqu'à la fin de l'activation, toutes les figurines bénéficiant de cette règle obtiennent soit PA (+1) lorsqu'elles attaquent, soit +1 aux jets pour toucher lorsque elles attaquent."
+    },
+    {
+      "name": "Versatile Defense [Défense versatile]",
+      "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle est déployée ou activée, choisissez un effet : lorsqu'on lui tire dessus ou lorsqu'elle est chargée à plus de 9\", l'unité gagne +1 aux jets de Défense, ou les unités ennemies subissent -1 aux jets pour la toucher. Cet effet dure jusqu'à la prochaine activation de l'unité."
+    },
+    {
+      "name": "Warbound Boost [Boost de Guerrier-né]",
+      "description": "Si cette figurine dispose de la règle spéciale Guerrier-né, les ennemis qui subissent des blessures de sa part subissent des blessures supplémentaires sur les jets de Défense ratés de 1-2 issues de Guerrier-né (au lieu de seulement sur 1)."
+    },
+    {
+      "name": "Ranged Shrouding Aura [Aura de Voile fluctuant]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Voile fluctuant."
+    },
+    {
+      "name": "Scout Aura [Aura d'Éclaireur]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Éclaireur."
+    },
+    {
+      "name": "Shred when Shooting Aura [Aura de Lacération au tir]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Lacération lorsqu'elles tirent."
+    },
+    {
+      "name": "Unpredictable Fighter Aura [Aura de Combattant imprévisible]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
+    },
+    {
+      "name": "Versatile Defense Aura [Aura de Défense Versatile]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Défense versatile."
+    },
+    {
+      "name": "Warbound Boost Aura [Aura de Boost de Guerrier-né]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né."
+    }
+  ],
   "spells": {
     "Terrifying Fury [Fureur terrifiante]": {
       "cost": 1,
-      "description": "Choisissez une unité ennemie à 18” ou moins, qui doit effectuer un Test de Moral. En cas d'échec, elle devient Fatiguée.",
+      "description": "Choisissez une unité ennemie à 18\" ou moins, qui doit effectuer un Test de Moral. En cas d'échec, elle devient Fatiguée.",
       "range": "18\"",
       "target": "1 unité ennemie"
     },
     "Flame of Destruction [Flammes de la destruction]": {
       "cost": 1,
-      "description": "Choisissez une unité ennemie à 18” ou moins, qui subit une touche avec Explosion (3).",
+      "description": "Choisissez une unité ennemie à 18\" ou moins, qui subit une touche avec Explosion (3).",
       "range": "18\"",
       "target": "1 unité ennemie"
     },
     "Fiery Protection [Protection ardente]": {
       "cost": 2,
-      "description": "Choisissez jusqu'à deux unités amies à 12” ou moins, qui obtiennent Esquive en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait).",
+      "description": "Choisissez jusqu'à deux unités amies à 12\" ou moins, qui obtiennent Esquive en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait).",
       "range": "12\"",
       "target": "jusqu'à 2 unités amies"
     },
     "Brutal Massacre [Massacre brutal]": {
       "cost": 2,
-      "description": "Choisissez une unité ennemie à 6” ou moins qui subit six touches avec Dislocation. Lancez autant de dés que de touches pour voir si les effets « sur un résultat de 6 » se déclenchent.",
+      "description": "Choisissez une unité ennemie à 6\" ou moins qui subit six touches avec Dislocation. Lancez autant de dés que de touches pour voir si les effets « sur un résultat de 6 » se déclenchent.",
       "range": "6\"",
       "target": "1 unité ennemie"
     },
     "War Boon [Bénédiction guerrière]": {
       "cost": 3,
-      "description": "Choisissez jusqu'à trois unités amies à 12” ou moins, qui bénéficient une fois de Boost de Guerrier-né (la prochaine fois que l'effet s'appliquera).",
+      "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui bénéficient une fois de Boost de Guerrier-né (la prochaine fois que l'effet s'appliquera).",
       "range": "12\"",
       "target": "jusqu'à 3 unités amies"
     },
     "Headtaker Strike [Décapitation]": {
       "cost": 3,
-      "description": "Choisissez jusqu'à deux unités ennemies à 12” ou moins, qui subissent chacune trois blessures avec PA (2).",
+      "description": "Choisissez jusqu'à deux unités ennemies à 12\" ou moins, qui subissent chacune trois blessures avec PA (2).",
       "range": "12\"",
       "target": "jusqu'à 2 unités ennemies"
     }
@@ -581,6 +581,7 @@
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": []
+              }
             },
             {
               "name": "Pique",
@@ -591,7 +592,8 @@
                 "attacks": 1,
                 "armor_piercing": "-",
                 "special_rules": ["Contre-charge"]
-            },
+              }
+            }
           ]
         },
         {
@@ -692,7 +694,7 @@
       "special_rules": ["Guerrier-né"],
       "weapon": [
         {
-          "name": "Armes à une main lourde",
+          "name": "Armes à une main lourdes",
           "range": "-",
           "attacks": 1,
           "armor_piercing": 1
@@ -788,7 +790,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes à une main mourdes par :",
+          "description": "Remplacez toutes les armes à une main lourdes par :",
           "options": [
             {
               "name": "Hallebarde lourde",
@@ -905,7 +907,8 @@
               }
             }
           ]
-          {
+        },
+        {
           "group": "Améliorations d'arme",
           "type": "weapon_upgrades",
           "description": "Remplacer une seule arme à une main lourde par :",
@@ -917,9 +920,10 @@
                 "name": "Grande arme lourde",
                 "range": "-",
                 "attacks": 2,
-                "armor_piercing": "3"
+                "armor_piercing": 3
               }
-            },
+            }
+          ]
         },
         {
           "group": "Améliorations d'unité",
@@ -952,7 +956,7 @@
       "base_cost": 170,
       "quality": 3,
       "defense": 4,
-      "special_rules": ["Coriance (3)", "Guerrier-né", "Impact (2)"],
+      "special_rules": ["Coriace (3)", "Guerrier-né", "Impact (2)"],
       "weapon": [
         {
           "name": "Paire de marteau-fléaux",
@@ -983,7 +987,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes de base par: ",
+          "description": "Remplacez toutes les armes de base par : ",
           "options": [
             {
               "name": "Grande arme ensorcelée",
@@ -1048,7 +1052,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez tous les Arcs courts par: ",
+          "description": "Remplacez tous les Arcs courts par : ",
           "options": [
             {
               "name": "Javelots barbelés",
@@ -1135,7 +1139,7 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez toutes les armes à une main par:",
+          "description": "Remplacez toutes les armes à une main par :",
           "options": [
             {
               "name": "Fléau",
@@ -1155,8 +1159,28 @@
           "type": "weapon_upgrades",
           "description": "Améliorer toutes les figurines avec une des options suivantes (un seul choix possible)",
           "options": [
-            {"name": "Arc court", "cost": 25, "weapon": {"name": "Arc court", "range": "12", "attacks": 1, "armor_piercing": 0, "special_rules": []}},
-            {"name": "Javelot barbelé", "cost": 30, "weapon": {"name": "Javelot barbelé", "range": "12", "attacks": 1, "armor_piercing": 1, "special_rules": ["Éclatement"]}}
+            {
+              "name": "Arc court",
+              "cost": 25,
+              "weapon": {
+                "name": "Arc court",
+                "range": "12",
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Javelot barbelé",
+              "cost": 30,
+              "weapon": {
+                "name": "Javelot barbelé",
+                "range": "12",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": ["Éclatement"]
+              }
+            }
           ]
         },
         {
