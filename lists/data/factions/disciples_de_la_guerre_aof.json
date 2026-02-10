@@ -236,6 +236,7 @@
               "cost": 70,
               "mount": {
                 "name": "Grande bête",
+                "coriace_bonus": 3,
                 "special_rules": ["Griffes lourdes (A1, PA(1))", "Coriace (3)", "Impact (2)", "Rapide"]
               }
             },
