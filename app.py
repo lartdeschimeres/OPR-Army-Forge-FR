@@ -86,6 +86,12 @@ st.markdown(
     .rule-description, .spell-description {
         color: #ccc;
     }
+    .upgrade-description {
+        font-style: italic;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-left: 10px;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -154,7 +160,6 @@ with st.sidebar:
 
     if st.button("🧩 Construction", use_container_width=True):
         if all(key in st.session_state for key in ["game", "faction", "points", "list_name"]):
-            # MODIFICATION : Vérification supplémentaire pour s'assurer que les unités sont chargées
             factions_by_game, games = load_factions()
             faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
 
@@ -473,6 +478,13 @@ th {{
 .spell-description {{
   color: var(--text-main);
 }}
+
+.upgrade-description {{
+  font-style: italic;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 10px;
+}}
 </style>
 </head>
 <body>
@@ -512,11 +524,12 @@ th {{
 
         html += "</div>"
 
-        # ---- ARMES ----
+        # ---- ARMES - TOUJOURS AFFICHÉES ----
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
             weapons = [weapons]
 
+        # MODIFICATION: Toujours afficher les armes de base
         if weapons:
             html += '<div class="section-title">Armes équipées :</div>'
             html += """
@@ -579,7 +592,7 @@ th {{
                     html += f"<span>{esc(r)}</span>"
             html += "</div>"
 
-        # ---- OPTIONS ----
+        # ---- AMÉLIORATIONS D'UNITÉ - AVEC DESCRIPTIONS ----
         options = unit.get("options", {})
         if options:
             html += '<div class="section-title">Améliorations d\'unité :</div>'
@@ -587,7 +600,11 @@ th {{
                 if isinstance(opts, list) and opts:
                     html += f"<div><strong>{esc(group_name)} :</strong> "
                     for opt in opts:
-                        html += f"{esc(opt.get('name', ''))}, "
+                        html += f"{esc(opt.get('name', ''))}"
+                        # MODIFICATION: Ajout de la description entre parenthèses si disponible
+                        if 'special_rules' in opt and opt['special_rules']:
+                            html += f" ({', '.join(opt['special_rules'])})"
+                        html += ", "
                     html += "</div>"
 
         # ---- MONTURE ----
@@ -704,7 +721,7 @@ th {{
     return html
 
 # ======================================================
-# CHARGEMENT DES FACTIONS - MODIFIÉ POUR PLUS DE ROBUSTESSE
+# CHARGEMENT DES FACTIONS
 # ======================================================
 @st.cache_data
 def load_factions():
@@ -847,10 +864,10 @@ if st.session_state.page == "setup":
             st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE - MODIFIÉ POUR PLUS DE ROBUSTESSE
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE
 # ======================================================
 elif st.session_state.page == "army":
-    # MODIFICATION : Vérification renforcée des données requises
+    # Vérification renforcée des données requises
     required_keys = ["game", "faction", "points", "list_name", "units", "faction_special_rules", "faction_spells"]
     if not all(key in st.session_state for key in required_keys):
         st.error("Configuration incomplète. Veuillez retourner à la page de configuration.")
@@ -859,7 +876,7 @@ elif st.session_state.page == "army":
             st.rerun()
         st.stop()
 
-    # MODIFICATION : Vérification que les unités sont bien chargées
+    # Vérification que les unités sont bien chargées
     if not st.session_state.units:
         st.error("Aucune unité disponible pour cette faction. Veuillez choisir une autre faction.")
         if st.button("Retour à la configuration"):
@@ -991,7 +1008,7 @@ elif st.session_state.page == "army":
 
     st.divider()
 
-    # MODIFICATION : Vérification que des unités sont disponibles
+    # Vérification que des unités sont disponibles
     if not st.session_state.units:
         st.error("Aucune unité disponible pour cette faction.")
         if st.button("Retour à la configuration"):
@@ -1137,7 +1154,11 @@ elif st.session_state.page == "army":
                     upgrades_cost += o["cost"]
                     selected_options.setdefault(group.get("group", "Options"), []).append(o)
 
-    multiplier = 2 if unit.get("type") != "hero" and st.checkbox("Unité combinée") else 1
+    # MODIFICATION: Désactiver l'option "Unité combinée" pour les unités de taille 1
+    multiplier = 1
+    if unit.get("type") != "hero" and unit.get("size", 1) > 1:
+        if st.checkbox("Unité combinée"):
+            multiplier = 2
 
     base_cost = unit.get("base_cost", 0)
     final_cost = (base_cost + weapon_cost + upgrades_cost) * multiplier + mount_cost
