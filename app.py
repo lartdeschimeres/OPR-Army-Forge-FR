@@ -154,6 +154,22 @@ with st.sidebar:
 
     if st.button("🧩 Construction", use_container_width=True):
         if all(key in st.session_state for key in ["game", "faction", "points", "list_name"]):
+            # MODIFICATION : Vérification supplémentaire pour s'assurer que les unités sont chargées
+            factions_by_game, games = load_factions()
+            faction_data = factions_by_game.get(st.session_state.game, {}).get(st.session_state.faction, {})
+
+            if not faction_data or "units" not in faction_data:
+                st.error("Aucune donnée disponible pour cette faction. Veuillez choisir une autre faction.")
+                st.stop()
+
+            st.session_state.units = faction_data.get("units", [])
+            st.session_state.faction_special_rules = faction_data.get("faction_special_rules", [])
+            st.session_state.faction_spells = faction_data.get("spells", {})
+
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
+            st.session_state.unit_selections = {}
+
             st.session_state.page = "army"
             st.rerun()
         else:
@@ -688,30 +704,43 @@ th {{
     return html
 
 # ======================================================
-# CHARGEMENT DES FACTIONS
+# CHARGEMENT DES FACTIONS - MODIFIÉ POUR PLUS DE ROBUSTESSE
 # ======================================================
 @st.cache_data
 def load_factions():
     factions = {}
     games = set()
-    FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
-    for fp in FACTIONS_DIR.glob("*.json"):
-        try:
-            with open(fp, encoding="utf-8") as f:
-                data = json.load(f)
-                game = data.get("game")
-                faction = data.get("faction")
-                if game and faction:
-                    if game not in factions:
-                        factions[game] = {}
-                    if "faction_special_rules" not in data:
-                        data["faction_special_rules"] = []
-                    if "spells" not in data:
-                        data["spells"] = {}
-                    factions[game][faction] = data
-                    games.add(game)
-        except Exception as e:
-            st.warning(f"Erreur chargement {fp.name}: {e}")
+    try:
+        # Essayer d'abord le chemin principal
+        FACTIONS_DIR = Path(__file__).resolve().parent / "frontend" / "public" / "factions"
+        if not FACTIONS_DIR.exists():
+            # Chemin alternatif si le premier n'existe pas
+            FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
+
+        for fp in FACTIONS_DIR.glob("*.json"):
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    data = json.load(f)
+                    game = data.get("game")
+                    faction = data.get("faction")
+                    if game and faction:
+                        if game not in factions:
+                            factions[game] = {}
+                        if "faction_special_rules" not in data:
+                            data["faction_special_rules"] = []
+                        if "spells" not in data:
+                            data["spells"] = {}
+                        if "units" not in data:
+                            data["units"] = []
+                        factions[game][faction] = data
+                        games.add(game)
+            except Exception as e:
+                st.warning(f"Erreur chargement {fp.name}: {e}")
+                continue
+    except Exception as e:
+        st.error(f"Erreur lors du chargement des factions: {str(e)}")
+        return {}, []
+
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 # ======================================================
@@ -745,9 +774,14 @@ if st.session_state.page == "setup":
 
     with col2:
         st.markdown("<span class='badge'>Faction</span>", unsafe_allow_html=True)
+        faction_options = list(factions_by_game.get(game, {}).keys())
+        if not faction_options:
+            st.error("Aucune faction disponible pour ce jeu")
+            st.stop()
+
         faction = st.selectbox(
             "Faction",
-            list(factions_by_game[game].keys()),
+            faction_options,
             index=0,
             label_visibility="collapsed"
         )
@@ -799,8 +833,9 @@ if st.session_state.page == "setup":
             st.session_state.points = points
             st.session_state.list_name = list_name
 
+            # Charger les données de la faction sélectionnée
             faction_data = factions_by_game[game][faction]
-            st.session_state.units = faction_data["units"]
+            st.session_state.units = faction_data.get("units", [])
             st.session_state.faction_special_rules = faction_data.get("faction_special_rules", [])
             st.session_state.faction_spells = faction_data.get("spells", {})
 
@@ -812,11 +847,24 @@ if st.session_state.page == "setup":
             st.rerun()
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE - MODIFIÉ POUR PLUS DE ROBUSTESSE
 # ======================================================
 elif st.session_state.page == "army":
-    if not all(key in st.session_state for key in ["game", "faction", "points", "list_name", "units", "faction_special_rules", "faction_spells"]):
-        st.error("Erreur de configuration. Veuillez retourner à la page de configuration.")
+    # MODIFICATION : Vérification renforcée des données requises
+    required_keys = ["game", "faction", "points", "list_name", "units", "faction_special_rules", "faction_spells"]
+    if not all(key in st.session_state for key in required_keys):
+        st.error("Configuration incomplète. Veuillez retourner à la page de configuration.")
+        if st.button("Retour à la configuration"):
+            st.session_state.page = "setup"
+            st.rerun()
+        st.stop()
+
+    # MODIFICATION : Vérification que les unités sont bien chargées
+    if not st.session_state.units:
+        st.error("Aucune unité disponible pour cette faction. Veuillez choisir une autre faction.")
+        if st.button("Retour à la configuration"):
+            st.session_state.page = "setup"
+            st.rerun()
         st.stop()
 
     st.session_state.setdefault("list_name", "Nouvelle Armée")
@@ -942,6 +990,14 @@ elif st.session_state.page == "army":
                     st.rerun()
 
     st.divider()
+
+    # MODIFICATION : Vérification que des unités sont disponibles
+    if not st.session_state.units:
+        st.error("Aucune unité disponible pour cette faction.")
+        if st.button("Retour à la configuration"):
+            st.session_state.page = "setup"
+            st.rerun()
+        st.stop()
 
     unit = st.selectbox(
         "Unité disponible",
