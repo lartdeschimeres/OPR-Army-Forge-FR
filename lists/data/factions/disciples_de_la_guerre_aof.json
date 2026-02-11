@@ -160,13 +160,13 @@
           "type": "role",
           "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
           "options": [
-            {"name": "Conquérant (Aura d'Éclaireur)", "cost": 20, "special_rules": ["Aura d'Éclaireur"]},
-            {"name": "Marauder (Aura de Combattant imprévisible)", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
-            {"name": "Porteur de la bannière de l'armée (Effrayant (3))", "cost": 30, "special_rules": ["Effrayant (3)"]},
-            {"name": "Ensorceleur (Aura de Voile fluctuant)", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
-            {"name": "Sorcier (Lanceur de sorts (2))", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
-            {"name": "Seigneur de Guerre (Aura de Boost de Guerrier-né)", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]},
-            {"name": "Maître Sorcier (Lanceur de sorts (3))", "cost": 65, "special_rules": ["Lanceur de sorts (3)"]}
+            {"name": "Conquérant", "cost": 20, "special_rules": ["Aura d'Éclaireur"]},
+            {"name": "Marauder", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
+            {"name": "Porteur de la bannière de l'armée", "cost": 30, "special_rules": ["Effrayant (3)"]},
+            {"name": "Ensorceleur", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
+            {"name": "Sorcier", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
+            {"name": "Seigneur de Guerre", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]},
+            {"name": "Maître Sorcier", "cost": 65, "special_rules": ["Lanceur de sorts (3)"]}
           ]
         },
         {
@@ -312,13 +312,13 @@
           "type": "role",
           "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
           "options": [
-            {"name": "Conquérant (Aura d'Éclaireur)", "cost": 20, "special_rules": ["Aura d'Éclaireur"]},
-            {"name": "Marauder (Aura de Combattant imprévisible)", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
-            {"name": "Porteur de la bannière de l'armée (Effrayant (3))", "cost": 30, "special_rules": ["Effrayant (3)"]},
-            {"name": "Ensorceleur (Aura de Voile fluctuant)", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
-            {"name": "Sorcier (Lanceur de sorts (2))", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
-            {"name": "Seigneur de Guerre (Aura de Boost de Guerrier-né)", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]},
-            {"name": "Maître Sorcier (Lanceur de sorts (3))", "cost": 65, "special_rules": ["Lanceur de sorts (3)"]}
+            {"name": "Conquérant", "cost": 20, "special_rules": ["Aura d'Éclaireur"]},
+            {"name": "Marauder", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
+            {"name": "Porteur de la bannière de l'armée", "cost": 30, "special_rules": ["Effrayant (3)"]},
+            {"name": "Ensorceleur", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
+            {"name": "Sorcier", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
+            {"name": "Seigneur de Guerre)", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]},
+            {"name": "Maître Sorcier", "cost": 65, "special_rules": ["Lanceur de sorts (3)"]}
           ]
         },
         {
@@ -464,11 +464,11 @@
           "type": "role",
           "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
           "options": [
-            {"name": "Héraut (Aura de Lacération au tir)", "cost": 25, "special_rules": ["Aura de Lacération au tir"]},
-            {"name": "Marauder (Aura de Combattant imprévisible)", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
-            {"name": "Ensorceleur (Aura de Voile fluctuant)", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
-            {"name": "Sorcier (Lanceur de sorts (2))", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
-            {"name": "Seigneur de Guerre (Aura de Boost de Guerrier-né)", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]}
+            {"name": "Héraut", "cost": 25, "special_rules": ["Aura de Lacération au tir"]},
+            {"name": "Marauder", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
+            {"name": "Ensorceleur", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
+            {"name": "Sorcier", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
+            {"name": "Seigneur de Guerre", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]}
           ]
         },
         {
