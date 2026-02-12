@@ -145,7 +145,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 3,
-      "special_rules": ["Coriace (3)", "Attaque versatile", "Héros", "Guerrier-né"],
+      "special_rules": ["Attaque versatile", "Héros", "Guerrier-né"],
       "weapon": [
         {
           "name": "Arme à une main lourde",
@@ -245,7 +245,7 @@
                     "armor_piercing": 1
                     }
                 ],
-                "special_rules": ["Coriace (3)", "Impact (2)", "Rapide"]
+                "special_rules": ["Impact (2)", "Rapide"]
               }
             },
             {
