@@ -6,7 +6,7 @@ import re
 import math
 
 st.set_page_config(
-    page_title="OPR Army Builder FR",
+    page_title="OPR Army Forge",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -394,32 +394,32 @@ def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-        def calculate_total_tough(unit):
-            """Calcule la valeur totale de Coriace sans double comptage"""
-            tough = 0
+    def calculate_total_tough(unit):
+        """Calcule la valeur totale de Coriace en évitant le double comptage"""
+        tough = 0
 
-            # 1. Valeur de base de l'unité (propre au héros/unité)
-            if "coriace" in unit:
-                tough = unit["coriace"]
+        # 1. Valeur de base de l'unité
+        if "coriace" in unit:
+            tough = unit["coriace"]
 
-            # 2. Extraction des valeurs Coriace depuis les règles spéciales
-            #    (exclut celles qui viennent de la monture)
-            if "special_rules" in unit:
-                for rule in unit["special_rules"]:
-                    if isinstance(rule, str) and "Coriace" in rule:
-                        # On vérifie que ce n'est pas une règle de monture
-                        if not any(m in rule.lower() for m in ["monture", "mount", "cheval", "destrier"]):
-                            match = re.search(r'Coriace\s*\((\d+)\)', rule)
-                            if match:
-                                tough = max(tough, int(match.group(1)))
+        # 2. Extraction des valeurs Coriace depuis les règles spéciales
+        #    (exclut celles qui viennent de la monture)
+        if "special_rules" in unit:
+            for rule in unit["special_rules"]:
+                if isinstance(rule, str) and "Coriace" in rule:
+                    # On ne prend que les règles de Coriace qui ne viennent pas de la monture
+                    if "Monture" not in rule and "mount" not in rule.lower():
+                        match = re.search(r'Coriace\s*\((\d+)\)', rule)
+                        if match:
+                            tough = max(tough, int(match.group(1)))
 
-            # 3. Bonus de la monture (ajouté une seule fois via coriace_bonus)
-            if "mount" in unit and unit["mount"]:
-                mount_data = unit["mount"].get("mount", {})
-                if "coriace_bonus" in mount_data:
-                    tough += mount_data["coriace_bonus"]
+        # 3. Bonus de la monture (ajouté une seule fois via coriace_bonus)
+        if "mount" in unit and unit["mount"]:
+            mount_data = unit["mount"].get("mount", {})
+            if "coriace_bonus" in mount_data:
+                tough += mount_data["coriace_bonus"]
 
-            return tough
+        return tough
 
     def format_weapon(weapon):
         """Formate une arme pour l'affichage"""
@@ -1597,7 +1597,7 @@ if st.button("➕ Ajouter à l'armée"):
     if "special_rules" in unit:
         for rule in unit["special_rules"]:
             if isinstance(rule, str) and "Coriace" in rule:
-                if not any(m in rule.lower() for m in ["monture", "mount", "cheval", "destrier"]):
+                if "Monture" not in rule and "mount" not in rule.lower():
                     match = re.search(r'Coriace\s*\((\d+)\)', rule)
                     if match:
                         coriace = max(coriace, int(match.group(1)))
@@ -1609,7 +1609,7 @@ if st.button("➕ Ajouter à l'armée"):
         mount_coriace = mount_data.get("coriace_bonus", 0)
         coriace += mount_coriace
 
-    # Préparation des règles spéciales
+    # Préparation des règles spéciales complètes
     all_special_rules = []
 
     # Règles spéciales de base
@@ -1626,7 +1626,7 @@ if st.button("➕ Ajouter à l'armée"):
                     if f"{opt['name']} (+{opt['cost']} pts)" == selected_option and "special_rules" in opt:
                         all_special_rules.extend(opt["special_rules"])
 
-    # Règles spéciales de la monture (sans la Coriace)
+    # Règles spéciales de la monture (sans la Coriace qui est déjà comptée)
     if mount:
         mount_data = mount.get("mount", {})
         if "special_rules" in mount_data:
@@ -1656,8 +1656,7 @@ if st.button("➕ Ajouter à l'armée"):
     # Ajout d'une description pour la monture si elle apporte de la Coriace
     if mount_coriace > 0 and mount:
         mount_name = mount.get("name", "Monture")
-        all_special_rules.append(f"{mount_name} (Coriace +{mount_coriace})")
-        unit_data["special_rules"] = all_special_rules
+        unit_data["special_rules"].append(f"{mount_name} (Coriace +{mount_coriace})")
 
     test_army = st.session_state.army_list + [unit_data]
 
