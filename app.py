@@ -402,18 +402,7 @@ def export_html(army_list, army_name, army_limit):
         if "coriace" in unit:
             tough = unit["coriace"]
 
-        # 2. Extraction des valeurs Coriace depuis les règles spéciales
-        #    (exclut celles qui viennent de la monture)
-        if "special_rules" in unit:
-            for rule in unit["special_rules"]:
-                if isinstance(rule, str) and "Coriace" in rule:
-                    # On ne prend que les règles de Coriace qui ne viennent pas de la monture
-                    if "Monture" not in rule and "mount" not in rule.lower():
-                        match = re.search(r'Coriace\s*\((\d+)\)', rule)
-                        if match:
-                            tough = max(tough, int(match.group(1)))
-
-        # 3. Bonus de la monture (ajouté une seule fois via coriace_bonus)
+        # 2. Bonus de la monture (ajouté une seule fois via coriace_bonus)
         if "mount" in unit and unit["mount"]:
             mount_data = unit["mount"].get("mount", {})
             if "coriace_bonus" in mount_data:
