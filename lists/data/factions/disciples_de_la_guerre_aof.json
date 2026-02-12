@@ -145,7 +145,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 3,
-      "special_rules": ["Attaque versatile", "Coriace (3)", "Héros", "Guerrier-né"],
+      "special_rules": ["Attaque versatile", "Héros", "Guerrier-né"],
       "weapon": [
         {
           "name": "Arme à une main lourde",
@@ -245,7 +245,7 @@
                     "armor_piercing": 1
                     }
                 ],
-                "special_rules": ["Coriace (3)", "Impact (2)", "Rapide"]
+                "special_rules": ["Impact (2)", "Rapide"]
               }
             },
             {
@@ -262,7 +262,7 @@
                     "armor_piercing": 1
                     }
                 ],
-                "special_rules": ["Coriace (3)", "Effrayant (1)", "Impact (2)", "Rapide"]
+                "special_rules": ["Effrayant (1)", "Impact (2)", "Rapide"]
               }
             },
             {
@@ -270,7 +270,7 @@
               "cost": 125,
               "mount": {
                 "name": "Char",
-                "coriace_bonus": 0,
+                "coriace_bonus": 6,
                 "weapon": [
                   {
                     "name": "Sabots",
@@ -279,7 +279,7 @@
                     "armor_piercing": 0
                     }
                 ],
-                "special_rules": ["Coriace (6)", "Impact (4)", "Rapide"]
+                "special_rules": ["Impact (4)", "Rapide"]
               }
             },
             {
@@ -296,7 +296,7 @@
                     "armor_piercing": 1
                     }
                 ],
-                "special_rules": ["Coriace (6)", "Effrayant (1)", "Impact (4)", "Rapide"]
+                "special_rules": ["Effrayant (1)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -311,10 +311,10 @@
                     "range": "Mêlée",
                     "attacks": 6,
                     "armor_piercing": 0,
-                    "special rules":  ["Perforant"]
+                    "special_rules":  ["Perforant"]
                     }
                 ],
-                "special_rules": ["Coriace (6)", "Effrayant (1)", "Volant"]
+                "special_rules": ["Effrayant (1)", "Volant"]
               }
             },
             {
@@ -329,17 +329,17 @@
                     "range": "Mêlée",
                     "attacks": 6,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     },
                    {
                     "name": "Piétinelent",
                     "range": "Mêlée",
                     "attacks": 4,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     }
                 ],
-                "special_rules": ["Attaque de souffle", "Coriace (12)", "Effrayant (2)", "Volant"]
+                "special_rules": ["Attaque de souffle", "Effrayant (2)", "Volant"]
               }
             }
           ]
@@ -354,7 +354,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 3,
-      "special_rules": ["Coriace (3)", "Héros", "Guerrier-né"],
+      "special_rules": ["Héros", "Guerrier-né"],
       "weapon": [
         {
           "name": "Arme à une main lourde",
@@ -374,7 +374,7 @@
             {"name": "Porteur de la bannière de l'armée", "cost": 30, "special_rules": ["Effrayant (3)"]},
             {"name": "Ensorceleur", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
             {"name": "Sorcier", "cost": 40, "special_rules": ["Lanceur de sorts (2)"]},
-            {"name": "Seigneur de Guerre)", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]},
+            {"name": "Seigneur de Guerre", "cost": 50, "special_rules": ["Aura de Boost de Guerrier-né"]},
             {"name": "Maître Sorcier", "cost": 65, "special_rules": ["Lanceur de sorts (3)"]}
           ]
         },
@@ -452,10 +452,10 @@
                     "range": "Mêlée",
                     "attacks": 1,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     }
                 ],
-                "special_rules": ["Coriace (3)", "Impact (2)", "Rapide"]
+                "special_rules": ["Impact (2)", "Rapide"]
               }
             },
             {
@@ -470,10 +470,10 @@
                     "range": "Mêlée",
                     "attacks": 1,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     }
                 ],
-                "special_rules": ["Coriace (3)", "Effrayant (1)", "Impact (2)", "Rapide"]
+                "special_rules": ["Effrayant (1)", "Impact (2)", "Rapide"]
               }
             },
             {
@@ -488,10 +488,10 @@
                     "range": "Mêlée",
                     "attacks": 2,
                     "armor_piercing": 0,
-                    "special rules":  []
+                    "special_rules":  []
                     }
                   ],
-                "special_rules": ["Sabots (A2)", "Coriace (6)", "Impact (4)", "Rapide"]
+                "special_rules": ["Sabots (A2)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -504,12 +504,12 @@
                   {
                     "name": "Griffes lourdes",
                     "range": "Mêlée",
-                    "attacks": 2
+                    "attacks": 2,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     }
                   ],
-                "special_rules": ["Coriace (6)", "Effrayant (1)", "Impact (4)", "Rapide"]
+                "special_rules": ["Effrayant (1)", "Impact (4)", "Rapide"]
               }
             },
             {
@@ -524,10 +524,10 @@
                     "range": "Mêlée",
                     "attacks": 6,
                     "armor_piercing": 0,
-                    "special rules":  ["Perforant"]
+                    "special_rules":  ["Perforant"]
                     }
                   ],
-                "special_rules": ["Coriace (6)", "Effrayant (1)", "Volant"]
+                "special_rules": ["Effrayant (1)", "Volant"]
               }
             },
             {
@@ -542,17 +542,17 @@
                     "range": "Mêlée",
                     "attacks": 6,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     },
                   {
                     "name": "Piétinement",
                     "range": "Mêlée",
                     "attacks": 4,
                     "armor_piercing": 1,
-                    "special rules":  []
+                    "special_rules":  []
                     }
                   ],
-                "special_rules": ["Attaque de souffle", "Coriace (12)", "Effrayant (2)", "Volant"]
+                "special_rules": ["Attaque de souffle", "Effrayant (2)", "Volant"]
               }
             }
           ]
@@ -567,7 +567,7 @@
       "quality": 5,
       "defense": 5,
       "coriace": 3,
-      "special_rules": ["Coriace (3)", "Éclaireur", "Furieux", "Guerrier-né", "Héros"],
+      "special_rules": ["Éclaireur", "Furieux", "Guerrier-né", "Héros"],
       "weapon": [
         {
           "name": "Arme à une main",
@@ -1091,7 +1091,7 @@
       "quality": 3,
       "defense": 4,
       "coriace": 3,
-      "special_rules": ["Coriace (3)", "Guerrier-né", "Impact (2)"],
+      "special_rules": ["Guerrier-né", "Impact (2)"],
       "weapon": [
         {
           "name": "Paire de marteau-fléaux",
@@ -1109,7 +1109,7 @@
       "quality": 3,
       "defense": 4,
       "coriace": 3,
-      "special_rules": ["Assaut tranchant", "Coriace (3)", "Guerrier-né"],
+      "special_rules": ["Assaut tranchant", "Guerrier-né"],
       "weapon": [
         {
           "name": "Paires d'armes ensorcelées",
@@ -1341,7 +1341,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 3,
-      "special_rules": ["Coriace (3)", "Guerrier-né", "Impact (1)", "Rapide"],
+      "special_rules": ["Guerrier-né", "Impact (1)", "Rapide"],
       "weapon": [
         {
           "name": "Armes à une main lourdes",
@@ -1407,7 +1407,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 3,
-      "special_rules": ["Coriace (3)", "Guerrier-né", "Impact (2)", "Rapide"],
+      "special_rules": ["Guerrier-né", "Impact (2)", "Rapide"],
       "weapon": [
         {
           "name": "Griffes lourdes",
@@ -1475,7 +1475,7 @@
       "quality": 3,
       "defense": 4,
       "coriace": 6,
-      "special_rules": ["Coriace (6)", "Effrayant (1)", "Furieux", "Guerrier-né"],
+      "special_rules": ["Effrayant (1)", "Furieux", "Guerrier-né"],
       "weapon": [
         {
           "name": "Griffes perforantes",
@@ -1508,7 +1508,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 6,
-      "special_rules": ["Coriace (6)", "Guerrier-né", "Impact (4)", "Rapide"],
+      "special_rules": ["Guerrier-né", "Impact (4)", "Rapide"],
       "weapon": [
         {
           "name": "Attaques lourdes de l'équipage",
@@ -1566,7 +1566,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 6,
-      "special_rules": ["Coriace (6)", "Effrayant (1)", "Guerrier-né", "Impact (4)", "Rapide"],
+      "special_rules": ["Effrayant (1)", "Guerrier-né", "Impact (4)", "Rapide"],
       "weapon": [
         {
           "name": "Griffes lourdes",
@@ -1606,7 +1606,7 @@
       "quality": 3,
       "defense": 3,
       "coriace": 12,
-      "special_rules": ["Coriace (12)", "Effrayant (2)", "Guerrier-né"],
+      "special_rules": ["Effrayant (2)", "Guerrier-né"],
       "weapon": [
         {
           "name": "Poings géants",
