@@ -6,7 +6,7 @@ import re
 import math
 
 st.set_page_config(
-    page_title="OPR Army Forge",
+    page_title="OPR Army Builder FR",
     layout="wide",
     initial_sidebar_state="expanded"
 )
