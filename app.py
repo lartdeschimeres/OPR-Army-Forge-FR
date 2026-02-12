@@ -395,24 +395,8 @@ def export_html(army_list, army_name, army_limit):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     def calculate_total_tough(unit):
-        """Calcule la valeur totale de Coriace"""
-        tough = unit.get("coriace", 0)
-
-        # Vérifier les règles spéciales
-        if "special_rules" in unit:
-            for rule in unit["special_rules"]:
-                if isinstance(rule, str) and "Coriace" in rule:
-                    match = re.search(r'Coriace\s*\((\d+)\)', rule)
-                    if match:
-                        tough = max(tough, int(match.group(1)))
-
-        # Vérifier la monture
-        if "mount" in unit and unit["mount"]:
-            mount_data = unit["mount"].get("mount", {})
-            if "coriace_bonus" in mount_data:
-                tough += mount_data["coriace_bonus"]
-
-        return tough
+        """Retourne la Coriace déjà calculée lors de l'ajout à l'armée"""
+        return unit.get("coriace", 0)
 
     def format_weapon(weapon):
         """Formate une arme pour l'affichage"""
@@ -1431,7 +1415,7 @@ elif st.session_state.page == "army":
     unit_key = f"unit_{unit['name']}"
     st.session_state.unit_selections.setdefault(unit_key, {})
 
-    weapons = list(unit.get("weapons", []))
+    weapons = list(unit.get("weapon", []))
     selected_options = {}
     mount = None
     weapon_cost = 0
