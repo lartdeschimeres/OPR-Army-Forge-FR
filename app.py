@@ -399,48 +399,26 @@ def export_html(army_list, army_name, army_limit):
         return unit.get("coriace", 0)
 
     def format_weapon(weapon):
-        """Formate une arme pour l'affichage"""
         if not weapon:
             return "Arme non spécifiée"
 
         range_text = weapon.get('range', '-')
-        if range_text == "-":
+        if range_text == "-" or range_text is None:
             range_text = "Mêlée"
 
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
         special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
 
-        result = f"{weapon.get('name', 'Arme')} | {range_text} | A{attacks}"
-        if ap != "-":
+        result = f"{range_text} | A{attacks}"
+
+        if ap not in ("-", 0, "0", None):
             result += f" | PA({ap})"
+
         if special:
             result += f" | {special}"
 
         return result
-
-    def format_mount_weapons(mount_weapons):
-        """Formate les armes de monture"""
-        if not mount_weapons:
-            return ""
-
-        result = []
-        for weapon in mount_weapons:
-            if weapon:
-                name = weapon.get('name', 'Arme')
-                attacks = weapon.get('attacks', '-')
-                ap = weapon.get('armor_piercing', '-')
-                special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
-
-                weapon_str = f"{name} | A{attacks}"
-                if ap != "-":
-                    weapon_str += f" | PA({ap})"
-                if special:
-                    weapon_str += f" | {special}"
-
-                result.append(weapon_str)
-
-        return ", ".join(result)
 
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
@@ -924,7 +902,7 @@ body {{
         if mount:
             mount_data = mount.get("mount", {})
             mount_name = esc(mount.get("name", "Monture"))
-            mount_weapons = mount_data.get("weapons", [])
+            mount_weapons = mount_data.get("weapon", [])
 
             html += f'''
   <div class="mount-section">
@@ -952,14 +930,23 @@ body {{
 
             # Armes de la monture
             if mount_weapons:
-                html += f'''
-    <div style="margin-top: 8px;">
-      <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Armes:</div>
-      <div style="font-size: 12px; color: var(--text-muted);">
-        {format_mount_weapons(mount_weapons)}
-      </div>
-    </div>
-'''
+                html += '''
+                <div style="margin-top: 8px;">
+                  <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Armes:</div>
+                  <div class="weapon-list">
+            '''
+                for weapon in mount_weapons:
+                    if weapon:
+                        html += f'''
+                    <div class="weapon-item">
+                      <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
+                      <div class="weapon-stats">{format_weapon(weapon)}</div>
+                    </div>
+            '''
+                html += '''
+                  </div>
+                </div>
+            '''
 
             # Règles spéciales de la monture
             if 'special_rules' in mount_data and mount_data['special_rules']:
