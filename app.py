@@ -1376,9 +1376,71 @@ def format_weapon_option(weapon):
     return f"{name} (A{attacks}/PA{ap}/{range_text})"
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète modifiée)
+# FONCTIONS UTILITAIRES (à placer avant la page 2)
 # ======================================================
-elif st.session_state.page == "army":
+import json
+import math
+from pathlib import Path
+import base64
+
+def format_unit_option(u):
+    """Formate l'option d'unité avec tous les détails"""
+    name_part = f"{u['name']}"
+    if u.get('type') == "hero":
+        name_part += " [1]"
+    else:
+        name_part += f" [{u.get('size', 10)}]"
+
+    # Récupération des armes de base
+    weapons = u.get('weapon', [])
+    weapon_profiles = []
+    if isinstance(weapons, list):
+        for weapon in weapons:
+            if isinstance(weapon, dict):
+                attacks = weapon.get('attacks', '?')
+                ap = weapon.get('armor_piercing', '?')
+                weapon_profiles.append(f"A{attacks}/PA{ap}")
+    elif isinstance(weapons, dict):
+        attacks = weapons.get('attacks', '?')
+        ap = weapons.get('armor_piercing', '?')
+        weapon_profiles.append(f"A{attacks}/PA{ap}")
+
+    weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune"
+
+    # Récupération des règles spéciales
+    special_rules = u.get('special_rules', [])
+    rules_text = []
+    if isinstance(special_rules, list):
+        for rule in special_rules:
+            if isinstance(rule, str):
+                if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
+                    rules_text.append(rule)
+            elif isinstance(rule, dict):
+                rules_text.append(rule.get('name', ''))
+
+    rules_text = ", ".join(rules_text) if rules_text else "Aucune"
+
+    qua_def = f"Déf {u.get('defense', '?')}+"
+    cost = f"{u.get('base_cost', 0)}pts"
+
+    return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
+
+def format_weapon_option(weapon):
+    """Formate le nom de l'arme avec son profil complet"""
+    if not weapon or not isinstance(weapon, dict):
+        return "Aucune arme"
+
+    name = weapon.get('name', 'Arme')
+    attacks = weapon.get('attacks', '?')
+    ap = weapon.get('armor_piercing', '?')
+    range_text = weapon.get('range', 'Mêlée')
+
+    return f"{name} (A{attacks}/PA{ap}/{range_text})"
+
+# ======================================================
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète et corrigée)
+# ======================================================
+if st.session_state.page == "army":
     # Vérification renforcée des données requises
     required_keys = ["game", "faction", "points", "list_name", "units", "faction_special_rules", "faction_spells"]
     if not all(key in st.session_state for key in required_keys):
@@ -1414,7 +1476,14 @@ elif st.session_state.page == "army":
     colE1, colE2, colE3 = st.columns(3)
 
     with colE1:
-        json_data = json.dumps(export_army_json(), indent=2, ensure_ascii=False)
+        json_data = json.dumps({
+            "game": st.session_state.game,
+            "faction": st.session_state.faction,
+            "points": st.session_state.points,
+            "list_name": st.session_state.list_name,
+            "army_list": st.session_state.army_list,
+            "army_cost": st.session_state.army_cost
+        }, indent=2, ensure_ascii=False)
         st.download_button(
             "📄 Export JSON",
             data=json_data,
@@ -1443,33 +1512,28 @@ elif st.session_state.page == "army":
 
         if uploaded_file is not None:
             try:
-                file_content = uploaded_file.getvalue().decode("utf-8")
-                imported_data = json.loads(file_content)
+                imported_data = json.loads(uploaded_file.getvalue().decode("utf-8"))
 
-                if not isinstance(imported_data, dict):
-                    st.error("Le fichier n'est pas un JSON valide.")
-                    st.stop()
-
-                if "army_list" not in imported_data:
-                    st.error("Le fichier ne contient pas de liste d'armée.")
+                if not isinstance(imported_data, dict) or "army_list" not in imported_data:
+                    st.error("Fichier JSON invalide. Veuillez importer un fichier valide.")
                     st.stop()
 
                 st.session_state.list_name = imported_data.get("list_name", st.session_state.list_name)
                 st.session_state.army_list = imported_data["army_list"]
-                st.session_state.army_cost = sum(unit["cost"] for unit in imported_data["army_list"])
+                st.session_state.army_cost = imported_data.get("army_cost", sum(u["cost"] for u in imported_data["army_list"]))
 
                 st.success(f"Liste importée avec succès! ({len(imported_data['army_list'])} unités)")
                 st.rerun()
             except Exception as e:
                 st.error(f"Erreur lors de l'import: {str(e)}")
 
+    # Affichage des points
     st.subheader("📊 Points de l'Armée")
     points_used = st.session_state.army_cost
     points_total = st.session_state.points
     progress_ratio = min(points_used / points_total, 1.0) if points_total > 0 else 0
 
     st.progress(progress_ratio)
-
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"**Points utilisés :** {points_used} pts")
@@ -1481,52 +1545,46 @@ elif st.session_state.page == "army":
 
     st.divider()
 
-    points = st.session_state.points
+    # Progression de l'armée
     game_cfg = GAME_CONFIG.get(st.session_state.game, {})
-
-    st.subheader("📊 Progression de l'armée")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        units_cap = math.floor(points / game_cfg.get("unit_per_points", 150))
+        units_cap = math.floor(st.session_state.points / game_cfg.get("unit_per_points", 150))
         units_now = len([u for u in st.session_state.army_list if u.get("type") != "hero"])
         st.progress(min(units_now / max(units_cap, 1), 1.0))
         st.caption(f"Unités : {units_now} / {units_cap}")
 
     with col2:
-        heroes_cap = math.floor(points / game_cfg.get("hero_limit", 375))
+        heroes_cap = math.floor(st.session_state.points / game_cfg.get("hero_limit", 375))
         heroes_now = len([u for u in st.session_state.army_list if u.get("type") == "hero"])
         st.progress(min(heroes_now / max(heroes_cap, 1), 1.0))
         st.caption(f"Héros : {heroes_now} / {heroes_cap}")
 
     with col3:
-        copy_cap = 1 + math.floor(points / game_cfg.get("unit_copy_rule", 750))
+        copy_cap = 1 + math.floor(st.session_state.points / game_cfg.get("unit_copy_rule", 750))
         st.progress(min(copy_cap / 5, 1.0))
         st.caption(f"Copies max : {copy_cap} / unité")
 
     st.divider()
 
-    # Règles spéciales de faction
+    # Règles spéciales et sorts
     if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
         with st.expander("📜 Règles spéciales de la faction", expanded=False):
             for rule in st.session_state.faction_special_rules:
                 if isinstance(rule, dict):
-                    st.markdown(f"**{rule.get('name', 'Règle sans nom')}**: {rule.get('description', '')}", unsafe_allow_html=True)
+                    st.markdown(f"**{rule.get('name', 'Règle sans nom')}**: {rule.get('description', '')}")
                 else:
-                    st.markdown(f"- {rule}", unsafe_allow_html=True)
+                    st.markdown(f"- {rule}")
 
-    # Sorts de la faction
     if hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
         with st.expander("✨ Sorts de la faction", expanded=False):
             for spell_name, spell_details in st.session_state.faction_spells.items():
                 if isinstance(spell_details, dict):
-                    st.markdown(
-                        f"**{spell_name}** ({spell_details.get('cost', '?')} pts): {spell_details.get('description', '')}",
-                        unsafe_allow_html=True
-                    )
+                    st.markdown(f"**{spell_name}** ({spell_details.get('cost', '?')} pts): {spell_details.get('description', '')}")
 
+    # Liste de l'armée
     st.subheader("Liste de l'Armée")
-
     if not st.session_state.army_list:
         st.markdown("Aucune unité ajoutée pour le moment.")
     else:
@@ -1547,7 +1605,7 @@ elif st.session_state.page == "army":
 
     st.divider()
 
-    # Vérification que des unités sont disponibles
+    # Sélection de l'unité
     if not st.session_state.units:
         st.error("Aucune unité disponible pour cette faction.")
         if st.button("Retour à la configuration"):
@@ -1555,7 +1613,6 @@ elif st.session_state.page == "army":
             st.rerun()
         st.stop()
 
-    # Sélection de l'unité avec le nouveau format
     unit = st.selectbox(
         "Unité disponible",
         st.session_state.units,
@@ -1579,13 +1636,11 @@ elif st.session_state.page == "army":
         g_key = f"group_{g_idx}"
         st.subheader(group.get("group", "Améliorations"))
 
-        # ARMES - MODIFIÉ POUR AFFICHER LES PROFILS
+        # ARMES
         if group.get("type") == "weapon":
-            # Création de la liste des choix avec les profils d'armes
             choices = []
-
-            # Ajout des armes de base avec leurs profils
             base_weapons = unit.get("weapon", [])
+
             if isinstance(base_weapons, list) and base_weapons:
                 for weapon in base_weapons:
                     choices.append(format_weapon_option(weapon))
@@ -1612,8 +1667,7 @@ elif st.session_state.page == "army":
 
             st.session_state.unit_selections[unit_key][g_key] = choice
 
-            # Trouver l'option sélectionnée
-            if choice != choices[0]:  # Si ce n'est pas l'arme de base
+            if choice != choices[0]:
                 for opt_label, opt in opt_map.items():
                     if opt_label == choice:
                         weapon_cost += opt["cost"]
@@ -1740,9 +1794,10 @@ elif st.session_state.page == "army":
             group_key = f"group_{unit.get('upgrade_groups', []).index(group)}"
             if st.session_state.unit_selections.get(unit_key, {}).get(group_key):
                 selected_option = st.session_state.unit_selections[unit_key][group_key]
-                if selected_option not in ["Arme de base", "Aucune monture", "Aucun rôle"]:
+                if selected_option not in [format_weapon_option(unit.get("weapon", [{}])[0])] and selected_option != "Aucune monture" and selected_option != "Aucun rôle":
                     for opt in group.get("options", []):
-                        if f"{format_weapon_option(opt.get('weapon', {}))} (+{opt['cost']} pts)" == selected_option and "special_rules" in opt:
+                        weapon = opt.get("weapon", {})
+                        if f"{format_weapon_option(weapon)} (+{opt['cost']} pts)" == selected_option and "special_rules" in opt:
                             all_special_rules.extend(opt["special_rules"])
 
         # Règles spéciales de la monture
@@ -1776,10 +1831,7 @@ elif st.session_state.page == "army":
             if mount_bonus > 0:
                 unit_data["special_rules"].append(f"{mount_name} (Coriace +{mount_bonus})")
 
-        if validate_army_rules([unit_data], st.session_state.points, st.session_state.game):
+        if validate_army_rules(st.session_state.army_list + [unit_data], st.session_state.points, st.session_state.game):
             st.session_state.army_list.append(unit_data)
             st.session_state.army_cost += final_cost
             st.rerun()
-
-
-
