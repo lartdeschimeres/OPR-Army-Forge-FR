@@ -945,8 +945,6 @@ body {{
                 stats_parts.append(f"Qualité {mount_data['quality']}+")
             if 'defense' in mount_data:
                 stats_parts.append(f"Défense {mount_data['defense']}+")
-            if 'coriace_bonus' in mount_data:
-                stats_parts.append(f"Coriace {mount_data['coriace_bonus']}")
 
             if stats_parts:
                 html += f'''
