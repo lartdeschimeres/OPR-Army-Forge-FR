@@ -1552,10 +1552,7 @@ elif st.session_state.page == "army":
         coriace_total = unit.get("coriace", 0)
 
         if mount and "mount" in mount:
-            mount_data = mount["mount"]
-            coriace_total += mount_data.get("coriace_bonus", 0)
-
-        unit_data["coriace"] = coriace_total
+            coriace_total += mount["mount"].get("coriace_bonus", 0)
 
         # Préparation des règles spéciales
         all_special_rules = unit.get("special_rules", []).copy()
@@ -1591,8 +1588,11 @@ elif st.session_state.page == "army":
             "options": selected_options,
             "mount": mount,
             "special_rules": all_special_rules,
+            "coriace": coriace_total   # ✅ Injecté proprement ici
         }
-
+    
+        test_army = st.session_state.army_list + [unit_data]
+        
         # Ajout de la valeur Coriace totale
         if coriace > 0:
             unit_data["coriace"] = coriace
