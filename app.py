@@ -1090,9 +1090,82 @@ def load_factions():
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 # ======================================================
-# PAGE 1 – CONFIGURATION
+# PAGE 1 – CONFIGURATION AVEC IMAGES DE FOND ET IMAGE PAR DÉFAUT
 # ======================================================
 if st.session_state.page == "setup":
+    # Définition des images pour chaque jeu + image par défaut
+    game_images = {
+        "Age of Fantasy": "assets/games/aof_cover.jpg",
+        "Age of Fantasy: Regiments": "assets/games/aofr_cover.jpg",
+        "Grimdark Future": "assets/games/gf_cover.jpg",
+        "Grimdark Future: Firefight": "assets/games/gff_cover.jpg",
+        "Age of Fantasy: Skirmish": "assets/games/aofs_cover.jpg",
+        "__default__": "https://i.imgur.com/DEFAULT_IMAGE.jpg"  # Image par défaut
+    }
+
+    # CSS pour l'image de fond avec fondu
+    current_game = st.session_state.get("game", "__default__")
+    image_url = game_images.get(current_game, game_images["__default__"])
+
+    st.markdown(
+        f"""
+        <style>
+        .game-bg {{
+            background: linear-gradient(to bottom,
+                rgba(0,0,0,0.7) 0%,
+                rgba(0,0,0,0.3) 50%,
+                rgba(0,0,0,0) 100%),
+                url('{image_url}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }}
+
+        .game-bg::before {{
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom,
+                rgba(0,0,0,0.6) 0%,
+                rgba(0,0,0,0) 100%);
+            border-radius: 10px;
+        }}
+
+        .game-bg .content {{
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            text-align: center;
+        }}
+
+        .game-bg h2 {{
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }}
+
+        .game-bg p {{
+            color: rgba(255,255,255,0.9);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Conteneur avec l'image de fond
+    st.markdown('<div class="game-bg"><div class="content">', unsafe_allow_html=True)
+
     st.markdown("## 🛡️ OPR Army Forge")
     st.markdown(
         "<p class='muted'>Construisez, équilibrez et façonnez vos armées pour "
@@ -1100,8 +1173,10 @@ if st.session_state.page == "setup":
         unsafe_allow_html=True
     )
 
+    st.markdown("</div></div>", unsafe_allow_html=True)
     st.markdown("---")
 
+    # [Le reste de votre code existant pour la configuration]
     factions_by_game, games = load_factions()
     if not games:
         st.error("Aucun jeu trouvé")
@@ -1115,7 +1190,8 @@ if st.session_state.page == "setup":
             "Choisissez un système",
             games,
             index=games.index(st.session_state.get("game")) if st.session_state.get("game") in games else 0,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            on_change=lambda: st.rerun()  # Rafraîchir pour changer l'image de fond
         )
 
     with col2:
