@@ -362,13 +362,12 @@ def format_unit_option(u):
 
 def export_army_json():
     return {
+        "list_name": st.session_state.list_name,
+        "army_list": st.session_state.army_list,
+        "exported_at": datetime.now().isoformat(),
         "game": st.session_state.game,
         "faction": st.session_state.faction,
-        "points": st.session_state.points,
-        "list_name": st.session_state.list_name,
-        "army_cost": st.session_state.army_cost,
-        "units": st.session_state.army_list,
-        "exported_at": datetime.now().isoformat()
+        "points": st.session_state.points
     }
 
 # ======================================================
@@ -1252,6 +1251,7 @@ elif st.session_state.page == "army":
         )
 
     with colE3:
+        # Bouton pour importer une liste d'armée - VERSION CORRIGÉE
         uploaded_file = st.file_uploader(
             "📥 Importer une liste d'armée",
             type=["json"],
@@ -1261,25 +1261,52 @@ elif st.session_state.page == "army":
 
         if uploaded_file is not None:
             try:
-                imported_data = json.loads(uploaded_file.getvalue().decode("utf-8"))
+                # Lire le fichier JSON
+                file_content = uploaded_file.getvalue().decode("utf-8")
+                imported_data = json.loads(file_content)
 
-                if all(key in imported_data for key in ["game", "faction", "points", "list_name", "army_list"]):
-                    if (imported_data["game"] == st.session_state.game and
-                        imported_data["faction"] == st.session_state.faction):
+                # Vérifications de base
+                if not isinstance(imported_data, dict):
+                    st.error("Le fichier n'est pas un JSON valide (format inattendu).")
+                    st.stop()
 
-                        st.session_state.list_name = imported_data["list_name"]
-                        st.session_state.points = imported_data["points"]
-                        st.session_state.army_list = imported_data["army_list"]
-                        st.session_state.army_cost = sum(unit["cost"] for unit in imported_data["army_list"])
+                # Vérifier les champs obligatoires (version plus flexible)
+                required_fields = ["army_list"]
+                missing_fields = [field for field in required_fields if field not in imported_data]
 
-                        st.success("Liste d'armée importée avec succès!")
-                        st.rerun()
-                    else:
-                        st.error("Le jeu ou la faction de la liste importée ne correspond pas à la configuration actuelle.")
-                else:
-                    st.error("Fichier JSON invalide. Veuillez importer un fichier de liste d'armée valide.")
+                if missing_fields:
+                    st.error(f"Le fichier est incomplet. Champs manquants: {', '.join(missing_fields)}")
+                    st.stop()
+
+                # Vérifier la structure de army_list
+                if not isinstance(imported_data["army_list"], list):
+                    st.error("La liste d'unités n'est pas valide.")
+                    st.stop()
+
+                # Vérifier chaque unité
+                for unit in imported_data["army_list"]:
+                    if not isinstance(unit, dict):
+                        st.error("Une unité dans la liste n'est pas valide.")
+                        st.stop()
+
+                # Si tout est valide, on peut importer
+                st.session_state.list_name = imported_data.get("list_name", st.session_state.list_name)
+                st.session_state.army_list = imported_data["army_list"]
+
+                # Recalculer le coût total
+                st.session_state.army_cost = sum(unit["cost"] for unit in imported_data["army_list"])
+
+                st.success(f"Liste importée avec succès! ({len(imported_data['army_list'])} unités)")
+                st.rerun()
+
+            except json.JSONDecodeError:
+                st.error("Le fichier n'est pas un JSON valide. Veuillez vérifier le format du fichier.")
+            except UnicodeDecodeError:
+                st.error("Erreur de décodage du fichier. Veuillez vérifier que le fichier est bien encodé en UTF-8.")
             except Exception as e:
-                st.error(f"Erreur lors de l'import: {str(e)}")
+                st.error(f"Erreur inattendue lors de l'import: {str(e)}")
+                if st.button("Voir les détails de l'erreur"):
+                    st.code(f"Type d'erreur: {type(e).__name__}\nMessage: {str(e)}")
 
     st.subheader("📊 Points de l'Armée")
     points_used = st.session_state.army_cost
