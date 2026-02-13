@@ -394,22 +394,6 @@ def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    def calculate_total_tough(unit):
-        """Calcule la valeur totale de Coriace de manière simple et fiable"""
-        tough = 0
-
-        # 1. Valeur de base de l'unité
-        if "coriace" in unit:
-            tough = unit["coriace"]
-
-        # 2. Bonus de la monture (UNIQUEMENT via coriace_bonus)
-        if "mount" in unit and unit["mount"]:
-            mount_data = unit["mount"].get("mount", {})
-            if "coriace_bonus" in mount_data:
-                tough += mount_data["coriace_bonus"]
-
-        return tough
-
     def format_weapon(weapon):
         """Formate une arme pour l'affichage"""
         if not weapon:
@@ -806,7 +790,7 @@ body {{
             unit_size = 1
 
         # Calcul de la valeur de Coriace
-        tough_value = calculate_total_tough(unit)
+        tough_value = unit.get("coriace", 0)
 
         # Récupération des armes
         base_weapons = unit.get("weapon", [])
@@ -945,7 +929,7 @@ body {{
         if mount:
             mount_data = mount.get("mount", {})
             mount_name = esc(mount.get("name", "Monture"))
-            mount_weapons = mount_data.get("weapons", [])
+            mount_weapons = mount_data.get("weapon", [])
 
             html += f'''
   <div class="mount-section">
@@ -1564,18 +1548,14 @@ elif st.session_state.page == "army":
             st.error(f"⛔ Dépassement du format : {st.session_state.army_cost + final_cost} / {st.session_state.points} pts")
             st.stop()
 
-        # Calcul simple de la valeur Coriace
-        coriace = 0
+        # ----- Calcul total Coriace -----
+        coriace_total = unit.get("coriace", 0)
 
-        # 1. Valeur de base de l'unité
-        if "coriace" in unit:
-            coriace = unit["coriace"]
+        if mount and "mount" in mount:
+            mount_data = mount["mount"]
+            coriace_total += mount_data.get("coriace_bonus", 0)
 
-        # 2. Bonus de la monture (UNIQUEMENT via coriace_bonus)
-        if mount:
-            mount_data = mount.get("mount", {})
-            if "coriace_bonus" in mount_data:
-                coriace += mount_data["coriace_bonus"]
+        unit_data["coriace"] = coriace_total
 
         # Préparation des règles spéciales
         all_special_rules = unit.get("special_rules", []).copy()
