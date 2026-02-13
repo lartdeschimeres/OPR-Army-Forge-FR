@@ -1090,7 +1090,7 @@ def load_factions():
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 # ======================================================
-# PAGE 1 – CONFIGURATION AVEC IMAGES DE FOND ET IMAGE PAR DÉFAUT
+# PAGE 1 – CONFIGURATION AVEC IMAGES DE FOND LOCALES (version corrigée)
 # ======================================================
 if st.session_state.page == "setup":
     # Définition des images pour chaque jeu + image par défaut
@@ -1100,13 +1100,26 @@ if st.session_state.page == "setup":
         "Grimdark Future": "assets/games/gf_cover.jpg",
         "Grimdark Future: Firefight": "assets/games/gff_cover.jpg",
         "Age of Fantasy: Skirmish": "assets/games/aofs_cover.jpg",
-        "__default__": "https://i.imgur.com/DEFAULT_IMAGE.jpg"  # Image par défaut
+        "__default__": "https://i.imgur.com/DEFAULT_IMAGE.jpg"  # Image par défaut distante
     }
 
-    # CSS pour l'image de fond avec fondu
-    current_game = st.session_state.get("game", "__default__")
-    image_url = game_images.get(current_game, game_images["__default__"])
+    # Vérification et sélection de l'image actuelle
+    current_game = st.session_state.get("game")
 
+    # Détermination de l'URL de l'image
+    if current_game in game_images:
+        image_path = game_images[current_game]
+        try:
+            if Path(image_path).exists():
+                image_url = f"file/{image_path}"
+            else:
+                image_url = game_images["__default__"]
+        except:
+            image_url = game_images["__default__"]
+    else:
+        image_url = game_images["__default__"]
+
+    # CSS pour l'image de fond avec fondu
     st.markdown(
         f"""
         <style>
@@ -1152,6 +1165,7 @@ if st.session_state.page == "setup":
         .game-bg h2 {{
             color: white;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            margin-bottom: 0.5rem;
         }}
 
         .game-bg p {{
@@ -1176,7 +1190,9 @@ if st.session_state.page == "setup":
     st.markdown("</div></div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # [Le reste de votre code existant pour la configuration]
+    # Solution alternative pour le rafraîchissement sans callback
+    game_key = f"game_select_{len(st.session_state.army_list)}"  # Clé unique
+
     factions_by_game, games = load_factions()
     if not games:
         st.error("Aucun jeu trouvé")
@@ -1191,8 +1207,13 @@ if st.session_state.page == "setup":
             games,
             index=games.index(st.session_state.get("game")) if st.session_state.get("game") in games else 0,
             label_visibility="collapsed",
-            on_change=lambda: st.rerun()  # Rafraîchir pour changer l'image de fond
+            key=game_key  # Utilisation d'une clé unique
         )
+
+        # Mise à jour manuelle de l'état
+        if game != st.session_state.get("game"):
+            st.session_state.game = game
+            st.rerun()  # Rafraîchissement manuel après mise à jour de l'état
 
     with col2:
         st.markdown("<span class='badge'>Faction</span>", unsafe_allow_html=True)
