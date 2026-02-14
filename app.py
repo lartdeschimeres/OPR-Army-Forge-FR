@@ -1577,10 +1577,11 @@ if st.session_state.page == "army":
     # Définir les catégories et leurs types associés
     filter_categories = {
         "Tous": None,
-        "Héros": ["hero", "named_hero"],
-        "Unités": ["unit"],
-        "Légers": ["light_vehicle"],
-        "Véhicules": ["vehicle"],
+        "Héros": ["hero"],
+        "Héros nommés": ["named_hero"],
+        "Unités de base": ["unit"],
+        "Véhicules légers / Petits monstres": ["light_vehicle"],
+        "Véhicules / Monstres": ["vehicle"],
         "Titans": ["titan"]
     }
 
