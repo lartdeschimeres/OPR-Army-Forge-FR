@@ -1359,7 +1359,7 @@ def format_unit_option(u):
     return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète avec filtres)
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète avec filtres et effet halo)
 # ======================================================
 if st.session_state.page == "army":
     # Vérification renforcée des données requises
@@ -1527,22 +1527,24 @@ if st.session_state.page == "army":
 
     st.divider()
 
+    # CSS pour les boutons de filtre avec effet halo
     st.markdown(
         """
         <style>
-        /* Style pour les boutons de filtre */
         .filter-container {
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            justify-content: center;
         }
-    
+
         .filter-button {
             position: relative;
             padding: 0;
+            margin: 5px;
         }
-    
+
         .filter-button button {
             background-color: #f0f2f6;
             color: #333;
@@ -1551,25 +1553,28 @@ if st.session_state.page == "army":
             padding: 8px 15px;
             font-weight: 500;
             width: 100%;
+            height: 100%;
             transition: all 0.3s ease;
             white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-    
+
         .filter-button button:hover {
             background-color: #e9ecef;
             border-color: #ced4da;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-    
+
         /* Effet de halo pour le filtre actif */
         .filter-button.active button {
             background-color: #3498db;
             color: white;
             border-color: #2980b9;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+            box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
             animation: pulse 2s infinite;
         }
-    
+
         @keyframes pulse {
             0% {
                 box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
@@ -1581,22 +1586,25 @@ if st.session_state.page == "army":
                 box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
             }
         }
-    
+
         .unit-count {
             font-size: 0.9em;
             color: #6c757d;
             margin: 10px 0;
             text-align: center;
         }
-    
+
         .unit-selector {
             margin-top: 15px;
         }
-    
-        /* Style pour les colonnes de filtres */
-        @media (min-width: 768px) {
-            .filter-col {
-                min-width: 120px;
+
+        @media (max-width: 768px) {
+            .filter-container {
+                flex-direction: column;
+            }
+            .filter-button {
+                width: 100%;
+                margin: 5px 0;
             }
         }
         </style>
@@ -1604,29 +1612,26 @@ if st.session_state.page == "army":
         unsafe_allow_html=True
     )
 
-# Système de filtres par catégorie avec effet de halo
-st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
-st.subheader("Filtres par type d'unité")
+    # Système de filtres par catégorie avec effet halo
+    st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
+    st.subheader("Filtres par type d'unité")
 
-# Définir les catégories et leurs types associés
-filter_categories = {
-    "Tous": None,
-    "Héros": ["hero", "named_hero"],
-    "Unités": ["unit"],
-    "Légers": ["light_vehicle"],
-    "Véhicules": ["vehicle"],
-    "Titans": ["titan"]
-}
+    # Définir les catégories et leurs types associés
+    filter_categories = {
+        "Tous": None,
+        "Héros": ["hero", "named_hero"],
+        "Unités de base": ["unit"],
+        "Véhicules légers": ["light_vehicle"],
+        "Véhicules/Monstres": ["vehicle"],
+        "Titans": ["titan"]
+    }
 
-# Créer des colonnes pour les boutons de filtre
-cols = st.columns(len(filter_categories))
+    # Créer des boutons de filtre
+    for category, _ in filter_categories.items():
+        # Déterminer si ce filtre est actif
+        button_class = "active" if st.session_state.unit_filter == category else ""
 
-for i, (category, _) in enumerate(filter_categories.items()):
-    with cols[i]:
-        # Déterminer la classe CSS en fonction du filtre actif
-        button_class = "active" if st.session_state.unit_filter == category else "inactive"
-
-        # Créer un conteneur pour le bouton avec la classe appropriée
+        # Créer le bouton avec la classe CSS appropriée
         st.markdown(
             f"""
             <div class='filter-button {button_class}'>
@@ -1646,23 +1651,6 @@ for i, (category, _) in enumerate(filter_categories.items()):
         ):
             st.session_state.unit_filter = category
 
-    # Ajouter un script pour gérer le clic sur les faux boutons
-    st.markdown(
-        """
-        <script>
-        // Gérer le clic sur les faux boutons stylisés
-        document.querySelectorAll('.filter-button button').forEach(button => {
-            button.addEventListener('click', function() {
-                // Trouver le bouton Streamlit correspondant et le cliquer
-                const buttonId = this.getAttribute('onclick').match(/'(.*?)'/)[1];
-                document.getElementById(buttonId.replace('filter_', '') + '-filter_').click();
-            });
-        });
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
-    
     # Filtrer les unités selon le filtre sélectionné
     filtered_units = []
     if st.session_state.unit_filter == "Tous":
@@ -1673,7 +1661,7 @@ for i, (category, _) in enumerate(filter_categories.items()):
             unit for unit in st.session_state.units
             if unit.get('unit_detail') in relevant_types
         ]
-    
+
     # Afficher le nombre d'unités disponibles
     st.markdown(f"""
     <div class='unit-count'>
@@ -1681,7 +1669,7 @@ for i, (category, _) in enumerate(filter_categories.items()):
         Total: {len(st.session_state.units)} unités
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Sélection de l'unité (uniquement parmi les unités filtrées)
