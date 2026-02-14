@@ -140,6 +140,7 @@
     {
       "name": "Maître du Ravage de la Guerre Élu",
       "type": "hero",
+      "detail_unit": "hero",
       "size": 1,
       "base_cost": 65,
       "quality": 3,
@@ -349,6 +350,7 @@
     {
       "name": "Maître du Ravage de la Guerre",
       "type": "hero",
+      "detail_unit": "hero",
       "size": 1,
       "base_cost": 55,
       "quality": 3,
@@ -562,6 +564,7 @@
     {
       "name": "Champion Barbare de la Guerre",
       "type": "hero",
+      "detail_unit": "hero",
       "size": 1,
       "base_cost": 30,
       "quality": 5,
@@ -686,6 +689,7 @@
     {
       "name": "Pillards Barbares de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 10,
       "base_cost": 95,
       "quality": 5,
@@ -761,6 +765,7 @@
     {
       "name": "Pillards Sanguinaires",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 100,
       "quality": 5,
@@ -820,6 +825,7 @@
     {
       "name": "Guerriers de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 80,
       "quality": 3,
@@ -906,6 +912,7 @@
     {
       "name": "Guerriers du Ravage de la Guerre Élus",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 100,
       "quality": 3,
@@ -992,6 +999,7 @@
     {
       "name": "Mutants de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 105,
       "quality": 4,
@@ -1009,6 +1017,7 @@
     {
       "name": "Guerriers Sanguinaires",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 90,
       "quality": 3,
@@ -1086,6 +1095,7 @@
     {
       "name": "Guerriers Moissonneurs de Mort",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 3,
       "base_cost": 170,
       "quality": 3,
@@ -1104,6 +1114,7 @@
     {
       "name": "Guerriers Semeurs de Mort",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 3,
       "base_cost": 200,
       "quality": 3,
@@ -1165,6 +1176,7 @@
     {
       "name": "Chasseurs barbares de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 65,
       "quality": 5,
@@ -1220,6 +1232,7 @@
     {
       "name": "Limiers du Ravage de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 70,
       "quality": 4,
@@ -1257,6 +1270,7 @@
     {
       "name": "Cavaliers barbares de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 80,
       "quality": 3,
@@ -1336,6 +1350,7 @@
     {
       "name": "Chevaliers du Ravage de la Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 5,
       "base_cost": 125,
       "quality": 3,
@@ -1402,6 +1417,7 @@
     {
       "name": "Chevaliers sur Bêtes de Guerre",
       "type": "unit",
+      "detail_unit": "core_unit",
       "size": 3,
       "base_cost": 190,
       "quality": 3,
@@ -1470,6 +1486,7 @@
     {
       "name": "Bête furieuse de la Guerre",
       "type": "unit",
+      "detail_unit": "small_monster",
       "size": 1,
       "base_cost": 135,
       "quality": 3,
@@ -1503,6 +1520,7 @@
     {
       "name": "Char du Ravage de la Guerre",
       "type": "unit",
+      "detail_unit": "small_monster",
       "size": 1,
       "base_cost": 130,
       "quality": 3,
@@ -1561,6 +1579,7 @@
     {
       "name": "Char Bestial de la Guerre",
       "type": "unit",
+      "detail_unit": "small_monster",
       "size": 1,
       "base_cost": 145,
       "quality": 3,
@@ -1601,6 +1620,7 @@
     {
       "name": "Sanctuaire du Ravage de la Guerre",
       "type": "unit",
+      "detail_unit": "monster",
       "size": 1,
       "base_cost": 225,
       "quality": 3,
