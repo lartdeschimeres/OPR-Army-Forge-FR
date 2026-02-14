@@ -1359,7 +1359,7 @@ def format_unit_option(u):
     return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
 
 # ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version finale avec filtres)
+# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète avec filtres)
 # ======================================================
 if st.session_state.page == "army":
     # Vérification renforcée des données requises
@@ -1383,7 +1383,7 @@ if st.session_state.page == "army":
     st.session_state.setdefault("army_cost", 0)
     st.session_state.setdefault("army_list", [])
     st.session_state.setdefault("unit_selections", {})
-    st.session_state.setdefault("unit_filter", "Tous")
+    st.session_state.setdefault("unit_filter", "Tous")  # Filtre par défaut
 
     st.title(f"{st.session_state.list_name} - {st.session_state.army_cost}/{st.session_state.points} pts")
 
@@ -1428,20 +1428,24 @@ if st.session_state.page == "army":
         uploaded_file = st.file_uploader(
             "📥 Importer une liste d'armée",
             type=["json"],
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            accept_multiple_files=False
         )
 
-        if uploaded_file:
+        if uploaded_file is not None:
             try:
                 imported_data = json.loads(uploaded_file.getvalue().decode("utf-8"))
-                if isinstance(imported_data, dict) and "army_list" in imported_data:
-                    st.session_state.list_name = imported_data.get("list_name", st.session_state.list_name)
-                    st.session_state.army_list = imported_data["army_list"]
-                    st.session_state.army_cost = imported_data.get("army_cost", sum(u["cost"] for u in imported_data["army_list"]))
-                    st.success(f"Liste importée avec succès! ({len(imported_data['army_list'])} unités)")
-                    st.rerun()
-                else:
-                    st.error("Fichier JSON invalide.")
+
+                if not isinstance(imported_data, dict) or "army_list" not in imported_data:
+                    st.error("Fichier JSON invalide. Veuillez importer un fichier valide.")
+                    st.stop()
+
+                st.session_state.list_name = imported_data.get("list_name", st.session_state.list_name)
+                st.session_state.army_list = imported_data["army_list"]
+                st.session_state.army_cost = imported_data.get("army_cost", sum(u["cost"] for u in imported_data["army_list"]))
+
+                st.success(f"Liste importée avec succès! ({len(imported_data['army_list'])} unités)")
+                st.rerun()
             except Exception as e:
                 st.error(f"Erreur lors de l'import: {str(e)}")
 
@@ -1488,7 +1492,7 @@ if st.session_state.page == "army":
 
     # Règles spéciales et sorts
     if hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
-        with st.expander("📜 Règles spéciales de la faction"):
+        with st.expander("📜 Règles spéciales de la faction", expanded=False):
             for rule in st.session_state.faction_special_rules:
                 if isinstance(rule, dict):
                     st.markdown(f"**{rule.get('name', 'Règle sans nom')}**: {rule.get('description', '')}")
@@ -1496,7 +1500,7 @@ if st.session_state.page == "army":
                     st.markdown(f"- {rule}")
 
     if hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
-        with st.expander("✨ Sorts de la faction"):
+        with st.expander("✨ Sorts de la faction", expanded=False):
             for spell_name, spell_details in st.session_state.faction_spells.items():
                 if isinstance(spell_details, dict):
                     st.markdown(f"**{spell_name}** ({spell_details.get('cost', '?')} pts): {spell_details.get('description', '')}")
@@ -1523,75 +1527,43 @@ if st.session_state.page == "army":
 
     st.divider()
 
-    # CSS pour les boutons de filtre avec effet halo
+    # CSS pour les boutons de filtre
     st.markdown(
         """
         <style>
         .filter-container {
-            margin: 15px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            margin-bottom: 20px;
         }
-
         .filter-button {
-            position: relative;
-            padding: 0;
-            margin: 5px;
+            margin-bottom: 10px;
         }
-
-        .filter-button button {
+        .filter-button .stButton>button {
             background-color: #f0f2f6;
             color: #333;
             border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 8px 15px;
+            border-radius: 4px;
+            padding: 8px;
             font-weight: 500;
             width: 100%;
             height: 100%;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: pointer;
         }
-
-        .filter-button button:hover {
+        .filter-button .stButton>button:hover {
             background-color: #e9ecef;
             border-color: #ced4da;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-
-        .filter-button.active {
-            background-color: #3498db;
-            color: white;
-            border-color: #2980b9;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+        .filter-button.active .stButton>button {
+            background-color: #3498db !important;
+            color: white !important;
+            border-color: #2980b9 !important;
         }
-
         .unit-count {
             font-size: 0.9em;
             color: #6c757d;
-            margin: 10px 0;
+            margin-bottom: 10px;
             text-align: center;
-            width: 100%;
         }
-
         .unit-selector {
             margin-top: 15px;
-        }
-
-        @media (max-width: 768px) {
-            .filter-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            .filter-button {
-                width: 100%;
-                max-width: 200px;
-                margin: 5px 0;
-            }
         }
         </style>
         """,
@@ -1606,32 +1578,24 @@ if st.session_state.page == "army":
     filter_categories = {
         "Tous": None,
         "Héros": ["hero", "named_hero"],
-        "Unités de base": ["unit"],
-        "Véhicules légers": ["light_vehicle"],
-        "Véhicules/Monstres": ["vehicle"],
+        "Unités": ["unit"],
+        "Légers": ["light_vehicle"],
+        "Véhicules": ["vehicle"],
         "Titans": ["titan"]
     }
 
-    # Créer des boutons de filtre
-    for category, _ in filter_categories.items():
-        button_class = "active" if st.session_state.unit_filter == category else ""
-        if st.button(category, key=f"filter_{category}"):
-            st.session_state.unit_filter = category
-            st.rerun()
+    # Créer une grille de boutons de filtre
+    cols = st.columns(len(filter_categories))
+    for i, (category, _) in enumerate(filter_categories.items()):
+        with cols[i]:
+            # Déterminer si ce filtre est actif
+            button_class = "active" if st.session_state.unit_filter == category else ""
 
-        # Appliquer le style après le bouton
-        st.markdown(
-            f"""
-            <script>
-            document.querySelectorAll('button[kind="primary"]').forEach(btn => {{
-                if (btn.textContent === '{category}') {{
-                    btn.className = 'filter-button {button_class}';
-                }}
-            }});
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
+            # Créer le bouton avec la classe CSS appropriée
+            st.markdown(f"<div class='filter-button {button_class}'>", unsafe_allow_html=True)
+            if st.button(category, key=f"filter_{category}"):
+                st.session_state.unit_filter = category
+            st.markdown("</div>", unsafe_allow_html=True)
 
     # Filtrer les unités selon le filtre sélectionné
     filtered_units = []
@@ -1656,12 +1620,14 @@ if st.session_state.page == "army":
 
     # Sélection de l'unité (uniquement parmi les unités filtrées)
     if filtered_units:
+        st.markdown("<div class='unit-selector'>", unsafe_allow_html=True)
         unit = st.selectbox(
             "Unité disponible",
             filtered_units,
             format_func=format_unit_option,
             key="unit_select",
         )
+        st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.warning(f"Aucune unité {st.session_state.unit_filter.lower()} disponible.")
         st.stop()
