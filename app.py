@@ -903,7 +903,7 @@ body {{
     <div class="rules-title">Règles spéciales:</div>
     <div class="rules-list">
 '''
-            for rule in special_rules:
+            for rule in sorted(special_rules):
                 html += f'<span class="rule-tag">{esc(rule)}</span>'
             html += '''
     </div>
