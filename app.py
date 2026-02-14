@@ -1527,77 +1527,142 @@ if st.session_state.page == "army":
 
     st.divider()
 
-    # CSS pour les boutons de filtre
     st.markdown(
         """
         <style>
+        /* Style pour les boutons de filtre */
         .filter-container {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
+    
         .filter-button {
-            margin-bottom: 10px;
+            position: relative;
+            padding: 0;
         }
-        .filter-button .stButton>button {
+    
+        .filter-button button {
             background-color: #f0f2f6;
             color: #333;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 8px;
+            border-radius: 20px;
+            padding: 8px 15px;
             font-weight: 500;
             width: 100%;
-            height: 100%;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
-        .filter-button .stButton>button:hover {
+    
+        .filter-button button:hover {
             background-color: #e9ecef;
             border-color: #ced4da;
+            transform: translateY(-2px);
         }
-        .filter-button.active .stButton>button {
-            background-color: #3498db !important;
-            color: white !important;
-            border-color: #2980b9 !important;
+    
+        /* Effet de halo pour le filtre actif */
+        .filter-button.active button {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+            animation: pulse 2s infinite;
         }
+    
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+            }
+        }
+    
         .unit-count {
             font-size: 0.9em;
             color: #6c757d;
-            margin-bottom: 10px;
+            margin: 10px 0;
             text-align: center;
         }
+    
         .unit-selector {
             margin-top: 15px;
+        }
+    
+        /* Style pour les colonnes de filtres */
+        @media (min-width: 768px) {
+            .filter-col {
+                min-width: 120px;
+            }
         }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    # Système de filtres par catégorie
-    st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
-    st.subheader("Filtres par type d'unité")
+# Système de filtres par catégorie avec effet de halo
+st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
+st.subheader("Filtres par type d'unité")
 
-    # Définir les catégories et leurs types associés
-    filter_categories = {
-        "Tous": None,
-        "Héros": ["hero"],
-        "Héros nommés": ["named_hero"],
-        "Unités de base": ["unit"],
-        "Véhicules légers / Petits monstres": ["light_vehicle"],
-        "Véhicules / Monstres": ["vehicle"],
-        "Titans": ["titan"]
-    }
+# Définir les catégories et leurs types associés
+filter_categories = {
+    "Tous": None,
+    "Héros": ["hero", "named_hero"],
+    "Unités": ["unit"],
+    "Légers": ["light_vehicle"],
+    "Véhicules": ["vehicle"],
+    "Titans": ["titan"]
+}
 
-    # Créer une grille de boutons de filtre
-    cols = st.columns(len(filter_categories))
-    for i, (category, _) in enumerate(filter_categories.items()):
-        with cols[i]:
-            # Déterminer si ce filtre est actif
-            button_class = "active" if st.session_state.unit_filter == category else ""
+# Créer des colonnes pour les boutons de filtre
+cols = st.columns(len(filter_categories))
 
-            # Créer le bouton avec la classe CSS appropriée
-            st.markdown(f"<div class='filter-button {button_class}'>", unsafe_allow_html=True)
-            if st.button(category, key=f"filter_{category}"):
-                st.session_state.unit_filter = category
-            st.markdown("</div>", unsafe_allow_html=True)
+for i, (category, _) in enumerate(filter_categories.items()):
+    with cols[i]:
+        # Déterminer la classe CSS en fonction du filtre actif
+        button_class = "active" if st.session_state.unit_filter == category else "inactive"
 
+        # Créer un conteneur pour le bouton avec la classe appropriée
+        st.markdown(
+            f"""
+            <div class='filter-button {button_class}'>
+                <button onclick="document.getElementById('filter_{category}').click()">
+                    {category}
+                </button>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Bouton invisible qui déclenche réellement l'action
+        if st.button(
+            f"Filtre {category}",
+            key=f"filter_{category}",
+            label_visibility="collapsed"
+        ):
+            st.session_state.unit_filter = category
+
+    # Ajouter un script pour gérer le clic sur les faux boutons
+    st.markdown(
+        """
+        <script>
+        // Gérer le clic sur les faux boutons stylisés
+        document.querySelectorAll('.filter-button button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Trouver le bouton Streamlit correspondant et le cliquer
+                const buttonId = this.getAttribute('onclick').match(/'(.*?)'/)[1];
+                document.getElementById(buttonId.replace('filter_', '') + '-filter_').click();
+            });
+        });
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+    
     # Filtrer les unités selon le filtre sélectionné
     filtered_units = []
     if st.session_state.unit_filter == "Tous":
@@ -1608,7 +1673,7 @@ if st.session_state.page == "army":
             unit for unit in st.session_state.units
             if unit.get('unit_detail') in relevant_types
         ]
-
+    
     # Afficher le nombre d'unités disponibles
     st.markdown(f"""
     <div class='unit-count'>
@@ -1616,7 +1681,7 @@ if st.session_state.page == "army":
         Total: {len(st.session_state.units)} unités
     </div>
     """, unsafe_allow_html=True)
-
+    
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Sélection de l'unité (uniquement parmi les unités filtrées)
