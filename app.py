@@ -1371,64 +1371,6 @@ def format_weapon_option(weapon):
     name = weapon.get('name', 'Arme')
     attacks = weapon.get('attacks', '?')
     ap = weapon.get('armor_piercing', '?')
-    range_text = weapon.get('range', 'Mêlée')
-
- def format_mount_option(mount):
-    """Formate l'option de monture avec ses armes en premier et sans qua/déf"""
-    if not mount or not isinstance(mount, dict):
-        return "Aucune monture"
-
-    name = mount.get('name', 'Monture')
-    cost = mount.get('cost', 0)
-    mount_data = mount.get('mount', {})
-    special_rules = mount_data.get('special_rules', [])
-    coriace = mount_data.get('coriace_bonus', 0)
-    weapons = mount_data.get('weapon', [])
-
-    # Construction des caractéristiques
-    stats = []
-
-    # 1. Armes en premier
-    weapon_profiles = []
-    if isinstance(weapons, list) and weapons:
-        for weapon in weapons:
-            if isinstance(weapon, dict):
-                attacks = weapon.get('attacks', '?')
-                ap = weapon.get('armor_piercing', '?')
-                special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
-                profile = f"A{attacks}/PA{ap}"
-                if special:
-                    profile += f" ({special})"
-                weapon_profiles.append(profile)
-    elif isinstance(weapons, dict):
-        attacks = weapons.get('attacks', '?')
-        ap = weapons.get('armor_piercing', '?')
-        special = ", ".join(weapons.get('special_rules', [])) if weapons.get('special_rules') else ""
-        profile = f"A{attacks}/PA{ap}"
-        if special:
-            profile += f" ({special})"
-        weapon_profiles.append(profile)
-
-    if weapon_profiles:
-        stats.append("Armes: " + ", ".join(weapon_profiles))
-
-    # 2. Coriace si présent
-    if coriace > 0:
-        stats.append(f"Coriace+{coriace}")
-
-    # 3. Règles spéciales
-    if special_rules:
-        rules_text = ", ".join([r for r in special_rules if not r.startswith(("Griffes", "Sabots"))])
-        if rules_text:
-            stats.append(rules_text)
-
-    # Construction du label final
-    label = f"{name}"
-    if stats:
-        label += f" ({', '.join(stats)})"
-    label += f" (+{cost} pts)"
-
-    return label
 
 # ======================================================
 # FONCTIONS UTILITAIRES MISES À JOUR (version corrigée)
@@ -1866,13 +1808,7 @@ if st.session_state.page == "army":
             if choice != "Aucune monture":
                 mount = opt_map[choice]
                 mount_cost = mount["cost"]
-                    
-            st.session_state.unit_selections[unit_key][g_key] = choice
-        
-            if choice != "Aucune monture":
-                mount = opt_map[choice]
-                mount_cost = mount["cost"]
-                
+                        
         # Création de l'unité
         unit_data = {
             "name": unit["name"],
