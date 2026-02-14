@@ -468,28 +468,82 @@ def export_html(army_list, army_name, army_limit):
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {{
-  --bg-dark: #2e2f2b;
-  --bg-card: #3a3c36;
-  --bg-header: #1f201d;
-  --accent: #60a5fa;
-  --accent-dark: #1f2937;
-  --text-main: #e5e7eb;
-  --text-muted: #9ca3af;
-  --border: #4b4d46;
-  --cost-color: #fbbf24;
-  --tough-color: #f87171;
-  --hero-color: #fbbf24;
-  --unit-color: #60a5fa;
-  --highlight: #8b5cf6;
+  --bg-dark: #f8f9fa;          /* Fond clair pour PDF */
+  --bg-card: #ffffff;          /* Cartes blanches */
+  --bg-header: #e9ecef;        /* En-têtes clairs */
+  --accent: #3498db;           /* Bleu plus foncé */
+  --accent-dark: #2980b9;
+  --text-main: #212529;        /* Noir pour meilleur contraste */
+  --text-muted: #6c757d;       /* Gris plus foncé */
+  --border: #dee2e6;           /* Bordures claires */
+  --cost-color: #ff6b6b;       /* Rouge pour les coûts */
+  --tough-color: #e74c3c;
+  --hero-color: #f39c12;
+  --unit-color: #3498db;
+  --highlight: #8e44ad;
 }}
 
-body {{
-  background: var(--bg-dark);
-  color: var(--text-main);
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 20px;
-  line-height: 1.5;
+@media screen {{
+  body {{
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.5;
+  }}
+}}
+
+@media print {{
+  body {{
+    background: white !important;
+    color: black !important;
+    font-family: 'Inter', Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+    font-size: 12pt;  /* Taille de police augmentée pour PDF */
+  }}
+
+  .unit-card, .army-summary {{
+    background: white !important;
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }}
+
+  .stat-value {{
+    font-size: 14pt !important;  /* Taille augmentée pour les stats */
+    font-weight: bold !important;
+  }}
+
+  .rule-tag {{
+    background: #f0f0f0 !important;
+    color: black !important;
+    border: 1px solid #ddd !important;
+    padding: 4px 8px !important;
+    margin: 2px !important;
+  }}
+
+  .weapon-stats {{
+    font-size: 11pt !important;
+  }}
+
+  .rule-name, .spell-name {{
+    color: #2c3e50 !important;
+    font-weight: bold !important;
+  }}
+
+  h3, .unit-name {{
+    color: #2c3e50 !important;
+    font-size: 14pt !important;
+  }}
+
+  .section-title {{
+    font-size: 12pt !important;
+    font-weight: bold !important;
+    margin: 12px 0 6px 0 !important;
+  }}
 }}
 
 .army {{
@@ -499,12 +553,12 @@ body {{
 
 .army-title {{
   text-align: center;
-  font-size: 24px;
+  font-size: 18pt;  /* Taille augmentée */
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 8px;
 }}
 
 .unit-card {{
@@ -514,6 +568,7 @@ body {{
   margin-bottom: 20px;
   padding: 16px;
   position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }}
 
 .unit-header {{
@@ -524,35 +579,15 @@ body {{
 }}
 
 .unit-name {{
-  font-size: 18px;
+  font-size: 16pt;  /* Taille augmentée */
   font-weight: 600;
   color: var(--text-main);
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}}
-
-.unit-type {{
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}}
-
-.hero-icon {{
-  color: var(--hero-color);
-}}
-
-.unit-icon {{
-  color: var(--unit-color);
 }}
 
 .unit-cost {{
   font-family: monospace;
-  font-size: 18px;
+  font-size: 16pt;  /* Taille augmentée */
   font-weight: bold;
   color: var(--cost-color);
 }}
@@ -565,44 +600,14 @@ body {{
   padding: 12px;
   border-radius: 6px;
   text-align: center;
-  font-size: 12px;
+  font-size: 11pt;  /* Taille augmentée */
   margin: 12px 0;
-}}
-
-.stat-item {{
-  padding: 4px;
-}}
-
-.stat-label {{
-  color: var(--text-muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  margin-bottom: 2px;
 }}
 
 .stat-value {{
   font-weight: bold;
-  font-size: 16px;
+  font-size: 14pt;  /* Taille augmentée */
   color: var(--text-main);
-}}
-
-.tough-value {{
-  color: var(--tough-color);
-}}
-
-.section-title {{
-  font-weight: 600;
-  margin: 15px 0 8px 0;
-  color: var(--text-main);
-  font-size: 14px;
-}}
-
-.weapon-section {{
-  margin-bottom: 15px;
-}}
-
-.weapon-list {{
-  margin-top: 8px;
 }}
 
 .weapon-item {{
@@ -612,80 +617,22 @@ body {{
   margin-bottom: 6px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }}
 
 .weapon-name {{
-  font-weight: 500;
-  color: var(--text-main);
-}}
-
-.weapon-stats {{
-  font-family: monospace;
-  font-size: 12px;
-  color: var(--text-muted);
-}}
-
-.rules-section {{
-  margin: 12px 0;
-}}
-
-.rules-title {{
   font-weight: 600;
-  margin-bottom: 6px;
   color: var(--text-main);
-}}
-
-.rules-list {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  font-size: 11pt;  /* Taille légèrement augmentée */
 }}
 
 .rule-tag {{
   background: var(--bg-header);
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 10pt;  /* Taille légèrement augmentée */
   color: var(--text-main);
-}}
-
-.upgrades-section {{
-  margin: 12px 0;
-}}
-
-.upgrade-item {{
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 12px;
-}}
-
-.upgrade-name {{
-  color: var(--text-main);
-}}
-
-.upgrade-cost {{
-  color: var(--cost-color);
-  font-family: monospace;
-  font-weight: bold;
-}}
-
-.mount-section {{
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 6px;
-  padding: 12px;
-  margin: 12px 0;
-}}
-
-.mount-title {{
-  font-weight: 600;
-  color: var(--highlight);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  margin: 2px;
+  display: inline-block;
 }}
 
 .army-summary {{
@@ -701,68 +648,34 @@ body {{
 
 .summary-cost {{
   font-family: monospace;
-  font-size: 24px;
+  font-size: 18pt;  /* Taille augmentée */
   font-weight: bold;
   color: var(--cost-color);
 }}
 
-.faction-rules {{
-  margin: 40px 0 20px 0;
-  border-top: 1px solid var(--border);
-  padding-top: 20px;
+.faction-rules, .spells-section {{
+  margin: 30px 0;
+  border-top: 2px solid var(--border);
+  padding-top: 15px;
 }}
 
-.rule-column {{
-  flex: 1;
-  min-width: 300px;
-  padding: 0 10px;
-}}
-
-.rule-item {{
+.rule-item, .spell-item {{
   margin-bottom: 12px;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 11pt;  /* Taille augmentée */
+  line-height: 1.5;
 }}
 
-.rule-name {{
+.rule-name, .spell-name {{
   font-weight: bold;
   color: var(--accent);
+  display: block;  /* Pour une meilleure mise en page */
+  margin-bottom: 2px;
 }}
 
-.rule-description {{
+.rule-description, .spell-description {{
   color: var(--text-main);
-}}
-
-.spells-section {{
-  margin-bottom: 20px;
-}}
-
-.spell-item {{
-  margin-bottom: 12px;
-  font-size: 12px;
-  line-height: 1.4;
-}}
-
-.spell-name {{
-  font-weight: bold;
-  color: var(--accent);
-}}
-
-.spell-cost {{
-  color: var(--cost-color);
-  font-family: monospace;
-}}
-
-@media print {{
-  body {{
-    background: white;
-    color: black;
-  }}
-  .unit-card, .army-summary {{
-    background: white;
-    border: 1px solid #ccc;
-    page-break-inside: avoid;
-  }}
+  display: block;
+  margin-bottom: 8px;
 }}
 </style>
 </head>
