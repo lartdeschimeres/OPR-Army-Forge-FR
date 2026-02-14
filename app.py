@@ -1349,7 +1349,7 @@ def format_weapon_option(weapon, cost=0):
     return profile
 
 def format_mount_option(mount):
-    """Formate l'option de monture avec ses armes en premier"""
+    """Formate l'option de monture avec les noms réels des armes"""
     if not mount or not isinstance(mount, dict):
         return "Aucune monture"
 
@@ -1362,29 +1362,31 @@ def format_mount_option(mount):
 
     stats = []
 
-    # 1. Armes en premier
+    # 1. Armes avec leurs noms réels
     weapon_profiles = []
     if isinstance(weapons, list) and weapons:
         for weapon in weapons:
             if isinstance(weapon, dict):
+                weapon_name = weapon.get('name', 'Arme')
                 attacks = weapon.get('attacks', '?')
                 ap = weapon.get('armor_piercing', '?')
                 special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
-                profile = f"A{attacks}/PA{ap}"
+                profile = f"{weapon_name} A{attacks}/PA{ap}"
                 if special:
                     profile += f" ({special})"
                 weapon_profiles.append(profile)
     elif isinstance(weapons, dict):
+        weapon_name = weapons.get('name', 'Arme')
         attacks = weapons.get('attacks', '?')
         ap = weapons.get('armor_piercing', '?')
         special = ", ".join(weapons.get('special_rules', [])) if weapons.get('special_rules') else ""
-        profile = f"A{attacks}/PA{ap}"
+        profile = f"{weapon_name} A{attacks}/PA{ap}"
         if special:
             profile += f" ({special})"
         weapon_profiles.append(profile)
 
     if weapon_profiles:
-        stats.append(f"Armes: {', '.join(weapon_profiles)}")
+        stats.extend(weapon_profiles)  # On utilise extend pour ajouter chaque arme séparément
 
     # 2. Coriace si présent
     if coriace > 0:
