@@ -1848,6 +1848,13 @@ if st.session_state.page == "army":
                 choices,
                 index=choices.index(current) if current in choices else 0,
                 key=f"{unit_key}_{g_key}_mount",
+    )
+
+    st.session_state.unit_selections[unit_key][g_key] = choice
+
+    if choice != "Aucune monture":
+        mount = opt_map[choice]
+        mount_cost = mount["cost"]
             )
         
             st.session_state.unit_selections[unit_key][g_key] = choice
