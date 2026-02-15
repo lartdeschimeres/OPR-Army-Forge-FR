@@ -1532,55 +1532,38 @@ if st.session_state.page == "army":
         """
         <style>
         .filter-container {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin: 15px 0 20px 0;
+            margin-bottom: 20px;
         }
-
         .filter-button {
-            padding: 10px;
-            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .filter-button .stButton>button {
+            background-color: #f0f2f6;
+            color: #333;
             border: 1px solid #ddd;
-            background-color: #f8f9fa;
-            color: #495057;
+            border-radius: 4px;
+            padding: 8px;
             font-weight: 500;
-            text-align: center;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%;
+            height: 100%;
         }
-
-        .filter-button:hover {
+        .filter-button .stButton>button:hover {
             background-color: #e9ecef;
+            border-color: #ced4da;
         }
-
-        .filter-button.active {
-            background-color: #2c3e50;
-            color: white;
-            border-color: #2c3e50;
-            font-weight: 600;
+        .filter-button.active .stButton>button {
+            background-color: #3498db !important;
+            color: white !important;
+            border-color: #2980b9 !important;
         }
-
-        @media (max-width: 1200px) {
-            .filter-container {
-                grid-template-columns: repeat(5, 1fr);
-            }
+        .unit-count {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 10px;
+            text-align: center;
         }
-
-        @media (max-width: 768px) {
-            .filter-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .filter-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .unit-selector {
+            margin-top: 15px;
         }
         </style>
         """,
@@ -1589,6 +1572,7 @@ if st.session_state.page == "army":
 
     # Système de filtres par catégorie
     st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
+    st.subheader("Filtres par type d'unité")
 
     # Définir les catégories et leurs types associés
     filter_categories = {
@@ -1601,32 +1585,18 @@ if st.session_state.page == "army":
         "Titans": ["titan"]
     }
 
-    # Créer les boutons de filtre
-    for category in filter_categories.keys():
-        # Créer un bouton Streamlit normal
-        if st.button(category, key=f"filter_{category}"):
-            st.session_state.unit_filter = category
-            st.rerun()
+    # Créer une grille de boutons de filtre
+    cols = st.columns(len(filter_categories))
+    for i, (category, _) in enumerate(filter_categories.items()):
+        with cols[i]:
+            # Déterminer si ce filtre est actif
+            button_class = "active" if st.session_state.unit_filter == category else ""
 
-    # Appliquer le style actif après les boutons
-    st.markdown(
-        f"""
-        <script>
-        // Appliquer le style actif au bouton correspondant
-        document.querySelectorAll('button').forEach(btn => {{
-            if (btn.textContent === '{st.session_state.unit_filter}') {{
-                btn.style.backgroundColor = '#2c3e50';
-                btn.style.color = 'white';
-                btn.style.fontWeight = '600';
-                btn.style.borderColor = '#2c3e50';
-            }}
-        }});
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+            # Créer le bouton avec la classe CSS appropriée
+            st.markdown(f"<div class='filter-button {button_class}'>", unsafe_allow_html=True)
+            if st.button(category, key=f"filter_{category}"):
+                st.session_state.unit_filter = category
+            st.markdown("</div>", unsafe_allow_html=True)
 
     # Filtrer les unités selon le filtre sélectionné
     filtered_units = []
@@ -1641,21 +1611,26 @@ if st.session_state.page == "army":
 
     # Afficher le nombre d'unités disponibles
     st.markdown(f"""
-    <div style='text-align: center; margin: 10px 0; color: #6c757d;'>
-        {len(filtered_units)} unités disponibles (filtre: {st.session_state.unit_filter})
+    <div class='unit-count'>
+        {len(filtered_units)} unités {st.session_state.unit_filter.lower()} disponibles |
+        Total: {len(st.session_state.units)} unités
     </div>
     """, unsafe_allow_html=True)
 
-    # Sélection de l'unité
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Sélection de l'unité (uniquement parmi les unités filtrées)
     if filtered_units:
+        st.markdown("<div class='unit-selector'>", unsafe_allow_html=True)
         unit = st.selectbox(
             "Unité disponible",
             filtered_units,
             format_func=format_unit_option,
             key="unit_select",
         )
+        st.markdown("</div>", unsafe_allow_html=True)
     else:
-        st.warning(f"Aucune unité disponible pour le filtre '{st.session_state.unit_filter}'.")
+        st.warning(f"Aucune unité {st.session_state.unit_filter.lower()} disponible.")
         st.stop()
 
     # Suite du code existant pour les améliorations
