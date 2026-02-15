@@ -1527,7 +1527,7 @@ if st.session_state.page == "army":
 
     st.divider()
 
-    # CSS pour les boutons de filtre combinés en 7 colonnes
+    # CSS pour les boutons de filtre
     st.markdown(
         """
         <style>
@@ -1546,17 +1546,16 @@ if st.session_state.page == "army":
             color: #495057;
             font-weight: 500;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
             height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .filter-button:hover {
             background-color: #e9ecef;
-            border-color: #ced4da;
         }
 
         .filter-button.active {
@@ -1564,14 +1563,6 @@ if st.session_state.page == "army":
             color: white;
             border-color: #2c3e50;
             font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .unit-count {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin: 10px 0;
-            text-align: center;
         }
 
         @media (max-width: 1200px) {
@@ -1596,7 +1587,7 @@ if st.session_state.page == "army":
         unsafe_allow_html=True
     )
 
-    # Système de filtres par catégorie (7 colonnes)
+    # Système de filtres par catégorie
     st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
 
     # Définir les catégories et leurs types associés
@@ -1610,23 +1601,30 @@ if st.session_state.page == "army":
         "Titans": ["titan"]
     }
 
-    # Créer un bouton combiné pour chaque catégorie
-    for category, types in filter_categories.items():
-        # Créer un bouton HTML qui gère à la fois l'affichage et le clic
-        button_html = f"""
-        <div class='filter-button {"active" if st.session_state.unit_filter == category else ""}'
-             onclick="document.getElementById('filter_{category}').click()">
-            {category}
-        </div>
-        <input type='hidden' id='filter_{category}'>
-        """
-
-        st.markdown(button_html, unsafe_allow_html=True)
-
-        # Gestion du clic via un bouton Streamlit caché
-        if st.button(f"Filtre {category}", key=f"filter_{category}", label_visibility="collapsed"):
+    # Créer les boutons de filtre
+    for category in filter_categories.keys():
+        # Créer un bouton Streamlit normal
+        if st.button(category, key=f"filter_{category}"):
             st.session_state.unit_filter = category
             st.rerun()
+
+    # Appliquer le style actif après les boutons
+    st.markdown(
+        f"""
+        <script>
+        // Appliquer le style actif au bouton correspondant
+        document.querySelectorAll('button').forEach(btn => {{
+            if (btn.textContent === '{st.session_state.unit_filter}') {{
+                btn.style.backgroundColor = '#2c3e50';
+                btn.style.color = 'white';
+                btn.style.fontWeight = '600';
+                btn.style.borderColor = '#2c3e50';
+            }}
+        }});
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1643,7 +1641,7 @@ if st.session_state.page == "army":
 
     # Afficher le nombre d'unités disponibles
     st.markdown(f"""
-    <div class='unit-count'>
+    <div style='text-align: center; margin: 10px 0; color: #6c757d;'>
         {len(filtered_units)} unités disponibles (filtre: {st.session_state.unit_filter})
     </div>
     """, unsafe_allow_html=True)
