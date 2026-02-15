@@ -1527,43 +1527,39 @@ if st.session_state.page == "army":
 
     st.divider()
 
-    # CSS pour les boutons de filtre
+    # CSS simplifié pour les boutons de filtre
     st.markdown(
         """
         <style>
         .filter-container {
-            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
         }
+
         .filter-button {
-            margin-bottom: 10px;
-        }
-        .filter-button .stButton>button {
-            background-color: #f0f2f6;
-            color: #333;
+            padding: 10px 15px;
+            border-radius: 6px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 8px;
+            background-color: #f8f9fa;
+            color: #495057;
             font-weight: 500;
-            width: 100%;
-            height: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .filter-button .stButton>button:hover {
+
+        .filter-button:hover {
             background-color: #e9ecef;
-            border-color: #ced4da;
         }
-        .filter-button.active .stButton>button {
-            background-color: #3498db !important;
-            color: white !important;
-            border-color: #2980b9 !important;
-        }
-        .unit-count {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .unit-selector {
-            margin-top: 15px;
+
+        .filter-button.active {
+            background-color: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.05em;
         }
         </style>
         """,
@@ -1572,7 +1568,6 @@ if st.session_state.page == "army":
 
     # Système de filtres par catégorie
     st.markdown("<div class='filter-container'>", unsafe_allow_html=True)
-    st.subheader("Filtres par type d'unité")
 
     # Définir les catégories et leurs types associés
     filter_categories = {
@@ -1585,20 +1580,34 @@ if st.session_state.page == "army":
         "Titans": ["titan"]
     }
 
-    # Créer une grille de boutons de filtre
-    cols = st.columns(len(filter_categories))
-    for i, (category, _) in enumerate(filter_categories.items()):
-        with cols[i]:
-            # Déterminer si ce filtre est actif
-            button_class = "active" if st.session_state.unit_filter == category else ""
+    # Créer un bouton pour chaque catégorie
+    for category, types in filter_categories.items():
+        # Déterminer si ce filtre est actif
+        is_active = st.session_state.unit_filter == category
+        button_class = "active" if is_active else ""
 
-            # Créer le bouton avec la classe CSS appropriée
-            st.markdown(f"<div class='filter-button {button_class}'>", unsafe_allow_html=True)
-            if st.button(category, key=f"filter_{category}"):
-                st.session_state.unit_filter = category
-            st.markdown("</div>", unsafe_allow_html=True)
+        # Créer un conteneur pour le bouton
+        st.markdown(
+            f"""
+            <div class='filter-button {button_class}'
+                 onclick="document.getElementById('filter_{category}').click()">
+                {category}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Filtrer les unités selon le filtre sélectionné
+        # Bouton Streamlit invisible pour gérer l'action
+        if st.button(
+            f"Filtre {category}",
+            key=f"filter_{category}"
+        ):
+            st.session_state.unit_filter = category
+            st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Filtrer les unités
     filtered_units = []
     if st.session_state.unit_filter == "Tous":
         filtered_units = st.session_state.units
@@ -1609,26 +1618,14 @@ if st.session_state.page == "army":
             if unit.get('unit_detail') in relevant_types
         ]
 
-    # Afficher le nombre d'unités disponibles
-    st.markdown(f"""
-    <div class='unit-count'>
-        {len(filtered_units)} unités {st.session_state.unit_filter.lower()} disponibles |
-        Total: {len(st.session_state.units)} unités
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # Sélection de l'unité (uniquement parmi les unités filtrées)
+    # Sélection de l'unité
     if filtered_units:
-        st.markdown("<div class='unit-selector'>", unsafe_allow_html=True)
         unit = st.selectbox(
             "Unité disponible",
             filtered_units,
             format_func=format_unit_option,
             key="unit_select",
         )
-        st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.warning(f"Aucune unité {st.session_state.unit_filter.lower()} disponible.")
         st.stop()
