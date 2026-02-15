@@ -426,9 +426,8 @@ def export_html(army_list, army_name, army_limit):
 
     def get_special_rules(unit):
         """Extraire et formater les règles spéciales (triées par ordre alphabétique)"""
-        rules = set()  # Utilisation d'un set pour éviter les doublons
+        rules = set()
 
-        # Règles spéciales de base
         if "special_rules" in unit:
             for rule in unit["special_rules"]:
                 if isinstance(rule, dict):
@@ -437,7 +436,6 @@ def export_html(army_list, army_name, army_limit):
                     if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                         rules.add(rule)
 
-        # Règles spéciales des améliorations
         if "options" in unit:
             for group_name, opts in unit["options"].items():
                 if isinstance(opts, list):
@@ -449,7 +447,6 @@ def export_html(army_list, army_name, army_limit):
                             elif isinstance(opt["special_rules"], str):
                                 rules.add(opt["special_rules"])
 
-        # Règles spéciales de la monture
         if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
             if "special_rules" in mount_data:
@@ -457,13 +454,14 @@ def export_html(army_list, army_name, army_limit):
                     if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                         rules.add(rule)
 
-        # Conversion en liste et tri alphabétique
-        sorted_rules = sorted(rules)
-        return sorted_rules
+        return sorted(rules)
 
-    # Mappage des unit_detail vers leur nom français
     def get_french_type(unit):
+        """Retourne le type français basé sur unit_detail et type"""
         unit_detail = unit.get('unit_detail', 'unit')
+        unit_type = unit.get('type', 'unit')
+
+        # Mappage des types
         type_mapping = {
             'hero': 'Héros',
             'named_hero': 'Héros nommé',
@@ -472,11 +470,17 @@ def export_html(army_list, army_name, army_limit):
             'vehicle': 'Véhicule/Monstre',
             'titan': 'Titan'
         }
-        return type_mapping.get(unit_detail, 'Unité')
 
-    # Trier la liste pour afficher les héros en premier
-    sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
-    
+        # Cas particuliers pour les héros
+        if unit_type == "hero":
+            if unit_detail == "named_hero":
+                return "Héros nommé"
+            else:
+                return "Héros"
+        else:
+            # Pour les autres types, utiliser unit_detail
+            return type_mapping.get(unit_detail, 'Unité')
+
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
 
@@ -681,10 +685,10 @@ body {{
         cost = unit.get("cost", 0)
         quality = esc(unit.get("quality", "-"))
         defense = esc(unit.get("defense", "-"))
-        unit_type = get_french_type(unit)
+        unit_type_french = get_french_type(unit)  # Utilisation de la fonction corrigée
         unit_size = unit.get("size", 10)
 
-        if unit_type.lower() == "hero":
+        if unit.get("type") == "hero":
             unit_size = 1
 
         # Calcul de la valeur de Coriace
@@ -695,7 +699,7 @@ body {{
         if not isinstance(base_weapons, list):
             base_weapons = [base_weapons]
 
-        # Récupération des règles spéciales (triées)
+        # Récupération des règles spéciales
         special_rules = get_special_rules(unit)
 
         # Récupération des options et montures
@@ -711,11 +715,12 @@ body {{
         <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
       </h3>
       <div class="unit-type">
-        {"⭐" if unit.get("type") == "hero" else "🛡️"} {unit_type} {unit_type}
+        {"⭐" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
       </div>
     </div>
     <div class="unit-cost">{cost} pts</div>
   </div>
+        '''
 
   <div class="stats-grid">
     <div class="stat-item">
