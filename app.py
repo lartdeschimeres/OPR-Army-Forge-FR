@@ -402,7 +402,6 @@ def export_html(army_list, army_name, army_limit):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     def format_weapon(weapon):
-        def format_weapon(weapon):
         """Formate une arme pour l'affichage, avec gestion des armes combinées et règles spéciales"""
         if not weapon:
             return "Arme non spécifiée"
