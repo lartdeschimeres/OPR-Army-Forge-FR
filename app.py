@@ -399,41 +399,18 @@ def format_weapon_option(weapon):
 # ======================================================
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
-        return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
     def format_weapon(weapon):
-        """Formate une arme ou un groupe d'armes pour l'affichage"""
+        """Formate une arme pour l'affichage"""
         if not weapon:
-            return "Arme non spécifiée"
+            return "Aucune arme"
 
-        # Cas où on a un tableau d'armes (comme pour les armes combinées)
-        if isinstance(weapon, list):
-            result = []
-            for w in weapon:
-                range_text = w.get('range', '-')
-                if range_text == "-" or range_text is None:
-                    range_text = "Mêlée"
-
-                attacks = w.get('attacks', '-')
-                ap = w.get('armor_piercing', '-')
-                special_rules = w.get('special_rules', [])
-
-                weapon_name = w.get('name', 'Arme')
-                weapon_str = f"{weapon_name}: {range_text} | A{attacks}"
-
-                if ap not in ("-", 0, "0", None):
-                    weapon_str += f" | PA{ap}"
-
-                if special_rules:
-                    weapon_str += f" | {', '.join(special_rules)}"
-
-                result.append(weapon_str)
-            return "<br>".join(result)
-
-        # Cas standard pour une seule arme
         range_text = weapon.get('range', '-')
         if range_text == "-" or range_text is None:
             range_text = "Mêlée"
+        else:
+            range_text = f"{range_text}\""
 
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
@@ -523,6 +500,7 @@ def export_html(army_list, army_name, army_limit):
   --text-muted: #6c757d;
   --border: #dee2e6;
   --cost-color: #ff6b6b;
+  --tough-color: #e74c3c;
 }}
 
 body {{
@@ -537,6 +515,27 @@ body {{
 .army {{
   max-width: 800px;
   margin: 0 auto;
+}}
+
+.army-title {{
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}}
+
+.army-summary {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid var(--border);
 }}
 
 .unit-card {{
@@ -572,6 +571,12 @@ body {{
   color: var(--cost-color);
 }}
 
+.unit-type {{
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}}
+
 .stats-grid {{
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -582,6 +587,17 @@ body {{
   text-align: center;
   font-size: 12px;
   margin: 12px 0;
+}}
+
+.stat-item {{
+  padding: 5px;
+}}
+
+.stat-label {{
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
 }}
 
 .stat-value {{
@@ -618,13 +634,6 @@ body {{
   flex: 1;
 }}
 
-.weapon-combined {{
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  align-items: flex-end;
-}}
-
 .rules-section {{
   margin: 12px 0;
 }}
@@ -648,17 +657,6 @@ body {{
   border-radius: 4px;
   font-size: 11px;
   color: var(--text-main);
-}}
-
-.army-summary {{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg-card);
-  padding: 16px;
-  border-radius: 8px;
-  margin: 20px 0;
-  border: 1px solid var(--border);
 }}
 
 .summary-cost {{
@@ -715,9 +713,9 @@ body {{
         tough_value = unit.get("coriace", 0)
 
         # Récupération des armes
-        base_weapons = unit.get("weapon", [])
-        if not isinstance(base_weapons, list):
-            base_weapons = [base_weapons]
+        weapons = unit.get("weapon", [])
+        if not isinstance(weapons, list):
+            weapons = [weapons]
 
         # Récupération des armes améliorées
         weapon_upgrades = unit.get("weapon_upgrades", [])
@@ -776,47 +774,17 @@ body {{
   </div>
 '''
 
-        # Armes de base et améliorées
-        if base_weapons or weapon_upgrades:
+        # Armes
+        if weapons:
             html += '<div class="section-title">Armes:</div>'
 
-            # Afficher les armes de base
-            for weapon in base_weapons:
+            # Afficher toutes les armes de l'unité
+            for weapon in weapons:
                 if weapon:
-                    if isinstance(weapon, list):
-                        # Armes combinées comme Sabots et Attaques de l'équipage
-                        html += f'''
-    <div class="weapon-item">
-      <div class="weapon-name">Armes de base</div>
-      <div class="weapon-stats weapon-combined">{format_weapon(weapon)}</div>
-    </div>
-'''
-                    else:
-                        # Arme simple
-                        html += f'''
+                    html += f'''
     <div class="weapon-item">
       <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
       <div class="weapon-stats">{format_weapon(weapon)}</div>
-    </div>
-'''
-
-            # Afficher les armes améliorées
-            for upgrade in weapon_upgrades:
-                if upgrade:
-                    if isinstance(upgrade, list):
-                        # Armes combinées comme Sabots et Javelots
-                        html += f'''
-    <div class="weapon-item">
-      <div class="weapon-name">{esc(upgrade[0].get('name', 'Arme'))}</div>
-      <div class="weapon-stats weapon-combined">{format_weapon(upgrade)}</div>
-    </div>
-'''
-                    else:
-                        # Arme simple
-                        html += f'''
-    <div class="weapon-item">
-      <div class="weapon-name weapon-upgraded">{esc(upgrade.get('name', 'Amélioration'))}</div>
-      <div class="weapon-stats">{format_weapon(upgrade)}</div>
     </div>
 '''
 
@@ -907,9 +875,7 @@ body {{
   </div>
 '''
 
-        html += '''
-</div>
-'''
+        html += '</div>'
 
     # Légende des règles spéciales de la faction
     if sorted_army_list and hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
@@ -1682,52 +1648,71 @@ if st.session_state.page == "army":
         st.subheader(group.get("group", "Améliorations"))
 
         # ARMES
+        # Dans la section "Remplacement d'armes" du constructeur d'armée
         if group.get("type") == "weapon":
             choices = []
             base_weapons = unit.get("weapon", [])
         
             # Ajouter les armes de base comme première option
             if isinstance(base_weapons, list) and base_weapons:
-                # Pour le Char du Ravage, on veut afficher "Sabots et Attaques de l'équipage"
-                if unit.get("name") == "Char du Ravage de la Guerre":
-                    choices.append("Sabots et Attaques de l'équipage")
+                # Créer un label pour les armes de base
+                base_weapons_labels = []
+                for weapon in base_weapons:
+                    base_weapons_labels.append(weapon.get('name', 'Arme'))
+        
+                if len(base_weapons_labels) == 1:
+                    choices.append(format_weapon_option(base_weapons[0]))
                 else:
-                    # Pour les autres unités, on affiche chaque arme séparément
-                    for weapon in base_weapons:
-                        choices.append(format_weapon_option(weapon))
+                    choices.append(" et ".join(base_weapons_labels))
             elif isinstance(base_weapons, dict):
                 choices.append(format_weapon_option(base_weapons))
         
+            # Ajouter les options de remplacement
             opt_map = {}
             for o in group.get("options", []):
                 weapon = o.get("weapon", {})
                 if isinstance(weapon, list):
-                    # Cas spécial pour les armes combinées comme Sabots et Javelots
-                    label = f"{weapon[0]['name']} et {weapon[1]['name']} (+{o['cost']} pts)"
+                    # Cas spécial pour les armes combinées
+                    weapon_names = [w.get('name', 'Arme') for w in weapon]
+                    label = " et ".join(weapon_names) + f" (+{o['cost']} pts)"
                 else:
                     label = format_weapon_option(weapon, o['cost'])
                 choices.append(label)
                 opt_map[label] = o
         
-            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0] if choices else "Aucune arme")
-            choice = st.radio(
-                "Sélection de l'arme",
-                choices,
-                index=choices.index(current) if current in choices else 0,
-                key=f"{unit_key}_{g_key}_weapon",
-            )
+            # Si on a des choix à afficher
+            if choices:
+                current = st.session_state.unit_selections[unit_key].get(g_key, choices[0] if choices else "Aucune arme")
+                choice = st.radio(
+                    "Sélection de l'arme",
+                    choices,
+                    index=choices.index(current) if current in choices else 0,
+                    key=f"{unit_key}_{g_key}_weapon",
+                )
         
-            st.session_state.unit_selections[unit_key][g_key] = choice
+                st.session_state.unit_selections[unit_key][g_key] = choice
         
-            if choice != choices[0]:
-                for opt_label, opt in opt_map.items():
-                    if opt_label == choice:
-                        weapon_cost += opt["cost"]
-                        if isinstance(opt["weapon"], list):
-                            weapons = opt["weapon"]
-                        else:
-                            weapons = [opt["weapon"]]
-                        break
+                # Gérer le choix de l'utilisateur
+                if choice != choices[0]:
+                    for opt_label, opt in opt_map.items():
+                        if opt_label == choice:
+                            weapon_cost += opt["cost"]
+        
+                            # Si c'est une arme simple
+                            if not isinstance(opt["weapon"], list):
+                                weapons = [opt["weapon"]]
+                            # Si c'est une arme combinée
+                            else:
+                                weapons = opt["weapon"]
+        
+                            # Vérifier si on doit remplacer une arme spécifique
+                            if "replaces" in opt:
+                                # Filtrer les armes de base pour enlever celles à remplacer
+                                weapons = [
+                                    w for w in base_weapons
+                                    if w.get('name') not in opt["replaces"]
+                                ] + weapons
+                            break
 
         # RÔLES
         elif group.get("type") == "role" and unit.get("type") == "hero":
