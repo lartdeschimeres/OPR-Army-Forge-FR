@@ -402,27 +402,43 @@ def export_html(army_list, army_name, army_limit):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     def format_weapon(weapon):
-        """Formate une arme pour l'affichage"""
-        if not weapon:
-            return "Arme non spécifiée"
+    """Formate une arme pour l'affichage, avec gestion des armes combinées"""
+    if not weapon:
+        return "Arme non spécifiée"
 
-        range_text = weapon.get('range', '-')
-        if range_text == "-" or range_text is None:
-            range_text = "Mêlée"
+    range_text = weapon.get('range', '-')
+    if range_text == "-" or range_text is None:
+        range_text = "Mêlée"
 
-        attacks = weapon.get('attacks', '-')
-        ap = weapon.get('armor_piercing', '-')
-        special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
+    # Gestion des armes combinées (format "valeur1/valeur2")
+    attacks = weapon.get('attacks', '-')
+    ap = weapon.get('armor_piercing', '-')
+    special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
 
-        result = f"{range_text} | A{attacks}"
+    # Si c'est une arme combinée (contient "/")
+    if isinstance(attacks, str) and "/" in attacks:
+        attack_parts = attacks.split("/")
+        ap_parts = ap.split("/") if isinstance(ap, str) and "/" in ap else [ap, ap]
 
-        if ap not in ("-", 0, "0", None):
-            result += f" | PA({ap})"
+        # Format spécial pour les armes combinées
+        weapon_names = weapon.get('name', 'Arme').split(" et ")
+        if len(weapon_names) == 2:
+            result = f"{weapon_names[0]}: {range_text} | A{attack_parts[0]} | PA{ap_parts[0]}<br>"
+            result += f"{weapon_names[1]}: {range_text} | A{attack_parts[1]} | PA{ap_parts[1]}"
+            if special:
+                result += f" | {special}"
+            return result
 
-        if special:
-            result += f" | {special}"
+    # Format normal pour les armes simples
+    result = f"{range_text} | A{attacks}"
 
-        return result
+    if ap not in ("-", 0, "0", None):
+        result += f" | PA({ap})"
+
+    if special:
+        result += f" | {special}"
+
+    return result
 
     def get_special_rules(unit):
         """Extraire et formater les règles spéciales"""
@@ -752,7 +768,7 @@ def export_html(army_list, army_name, army_limit):
     </div>
 '''
 
-        # Affichage de la Coriace
+        # Affichage de Coriace
         if tough_value > 0:
             html += f'''
     <div class="stat-item">
@@ -776,21 +792,33 @@ def export_html(army_list, army_name, army_limit):
         # Armes de base
         if base_weapons:
             html += '''
-  <div class="section-title">Armes:</div>
-  <div class="weapon-list">
-'''
+          <div class="section-title">Armes:</div>
+          <div class="weapon-list">
+        '''
             for weapon in base_weapons:
                 if weapon:
-                    html += f'''
-    <div class="weapon-item">
-      <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
-      <div class="weapon-stats">{format_weapon(weapon)}</div>
-    </div>
-'''
+                    # Vérifier si c'est une arme combinée
+                    weapon_name = weapon.get('name', 'Arme')
+                    if " et " in weapon_name:
+                        # Affichage spécial pour les armes combinées
+                        html += f'''
+            <div class="weapon-item">
+              <div class="weapon-name">{esc(weapon_name)}</div>
+              <div class="weapon-stats">{format_weapon(weapon).replace("<br>", "<br style='margin: 2px 0;'>")}</div>
+            </div>
+        '''
+                    else:
+                        # Affichage normal pour les armes simples
+                        html += f'''
+            <div class="weapon-item">
+              <div class="weapon-name">{esc(weapon_name)}</div>
+              <div class="weapon-stats">{format_weapon(weapon)}</div>
+            </div>
+        '''
             html += '''
-  </div>
+          </div>
 '''
-
+            
         # Améliorations d'arme
         if weapon_upgrades:
             html += '''
