@@ -1623,7 +1623,7 @@
         },
         {
           "name": "Piétinement",
-          "range": "Mêlée,
+          "range": "Mêlée",
           "attacks": 4,
           "armor_piercing": 1,
           "special_rules": []
