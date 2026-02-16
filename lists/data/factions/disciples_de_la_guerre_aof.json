@@ -42,7 +42,7 @@
       "description": "Sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
     },
     {
-      "name": "Slam [Éclatement]",
+      "name": "Slam [Eclatement]",
       "description": "Ignore les Couverts, et sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
     },
     {
@@ -78,8 +78,8 @@
       "description": "Cette figurine et son unité obtiennent la règle spéciale Voile fluctuant."
     },
     {
-      "name": "Scout Aura [Aura d'Éclaireur]",
-      "description": "Cette figurine et son unité obtiennent la règle spéciale Éclaireur."
+      "name": "Scout Aura [Aura d'Eclaireur]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Eclaireur."
     },
     {
       "name": "Shred when Shooting Aura [Aura de Lacération au tir]",
@@ -161,7 +161,7 @@
           "type": "role",
           "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
           "options": [
-            {"name": "Conquérant", "cost": 20, "special_rules": ["Aura d'Éclaireur"]},
+            {"name": "Conquérant", "cost": 20, "special_rules": ["Aura d'Eclaireur"]},
             {"name": "Marauder", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
             {"name": "Porteur de la bannière de l'armée", "cost": 30, "special_rules": ["Effrayant (3)"]},
             {"name": "Ensorceleur", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
@@ -371,7 +371,7 @@
           "type": "role",
           "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
           "options": [
-            {"name": "Conquérant", "cost": 20, "special_rules": ["Aura d'Éclaireur"]},
+            {"name": "Conquérant", "cost": 20, "special_rules": ["Aura d'Eclaireur"]},
             {"name": "Marauder", "cost": 30, "special_rules": ["Aura de Combattant imprévisible"]},
             {"name": "Porteur de la bannière de l'armée", "cost": 30, "special_rules": ["Effrayant (3)"]},
             {"name": "Ensorceleur", "cost": 35, "special_rules": ["Aura de Voile fluctuant"]},
@@ -570,7 +570,7 @@
       "quality": 5,
       "defense": 5,
       "coriace": 3,
-      "special_rules": ["Éclaireur", "Furieux", "Guerrier-né", "Héros"],
+      "special_rules": ["Eclaireur", "Furieux", "Guerrier-né", "Héros"],
       "weapon": [
         {
           "name": "Arme à une main",
@@ -664,7 +664,7 @@
                 "range": "18",
                 "attacks": 2,
                 "armor_piercing": 1,
-                "special_rules": ["Éclatement"]
+                "special_rules": ["Eclatement"]
               }
             }
           ]
@@ -694,7 +694,7 @@
       "base_cost": 95,
       "quality": 5,
       "defense": 5,
-      "special_rules": ["Éclaireur", "Furieux", "Guerrier-né"],
+      "special_rules": ["Eclaireur", "Furieux", "Guerrier-né"],
       "weapon": [
         {
           "name": "Armes à une main",
@@ -1181,7 +1181,7 @@
       "base_cost": 65,
       "quality": 5,
       "defense": 5,
-      "special_rules": ["Éclaireur", "Guerrier-né"],
+      "special_rules": ["Eclaireur", "Guerrier-né"],
       "weapon": [
         {
           "name": "Arcs courts",
@@ -1210,7 +1210,7 @@
                 "range": "12",
                 "attacks": 1,
                 "armor_piercing": 1,
-                "special_rules": ["Éclatement"]
+                "special_rules": ["Eclatement"]
               }
             }
           ]
@@ -1259,9 +1259,9 @@
               "special_rules": ["Lacération en mêlée"]
             },
             {
-              "name": "Éclaireur",
+              "name": "Eclaireur",
               "cost": 10,
-              "special_rules": ["Éclaireur"]
+              "special_rules": ["Eclaireur"]
             }
           ]
         }
@@ -1275,7 +1275,7 @@
       "base_cost": 80,
       "quality": 3,
       "defense": 5,
-      "special_rules": ["Éclaireur", "Furieux", "Guerrier-né", "Impact (1)", "Rapide"],
+      "special_rules": ["Eclaireur", "Furieux", "Guerrier-né", "Impact (1)", "Rapide"],
       "weapon": [
         {
           "name": "Armes à une main",
@@ -1328,7 +1328,7 @@
                 "range": "12",
                 "attacks": 1,
                 "armor_piercing": 1,
-                "special_rules": ["Éclatement"]
+                "special_rules": ["Eclatement"]
               }
             }
           ]
@@ -1447,7 +1447,11 @@
                 "range": "-",
                 "attacks": "1/1",
                 "armor_piercing": "1/1",
-                "special_rules": ["Percée"]
+              },
+              "special_rules_description": {
+                "Mance lourde": ["Percée"],
+                "Sabots": []
+              }
               }
             }
           ]
@@ -1540,10 +1544,14 @@
               "cost": 50,
               "weapon": {
                 "name": "Javelots barbelés et Sabots",
-                "range": "12\"",
+                "range": "12\"/-",
                 "attacks": "6/2",
                 "armor_piercing": "1/0",
-                "special_rules": ["Éclatement"]
+                "special_rules": ["Eclatement"]
+              },
+              "special_rules_description": {
+                "Javelots barbelés": ["Eclatement"],
+                "Sabots": []
               }
             }
           ]
