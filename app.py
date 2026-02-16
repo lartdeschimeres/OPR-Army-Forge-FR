@@ -402,32 +402,73 @@ def export_html(army_list, army_name, army_limit):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     def format_weapon(weapon):
-        """Formate une arme pour l'affichage, avec gestion des armes combinées"""
-        if not weapon:
-            return "Arme non spécifiée"
-    
-        range_text = weapon.get('range', '-')
-        if range_text == "-" or range_text is None:
-            range_text = "Mêlée"
-    
-        # Gestion des armes combinées (format "valeur1/valeur2")
-        attacks = weapon.get('attacks', '-')
-        ap = weapon.get('armor_piercing', '-')
-        special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
-    
-        # Si c'est une arme combinée (contient "/")
-        if isinstance(attacks, str) and "/" in attacks:
-            attack_parts = attacks.split("/")
-            ap_parts = ap.split("/") if isinstance(ap, str) and "/" in ap else [ap, ap]
-    
-            # Format spécial pour les armes combinées
-            weapon_names = weapon.get('name', 'Arme').split(" et ")
-            if len(weapon_names) == 2:
-                result = f"{weapon_names[0]}: {range_text} | A{attack_parts[0]} | PA{ap_parts[0]}<br>"
-                result += f"{weapon_names[1]}: {range_text} | A{attack_parts[1]} | PA{ap_parts[1]}"
-                if special:
-                    result += f" | {special}"
-                return result
+        def format_weapon(weapon):
+    """Formate une arme pour l'affichage, avec gestion des armes combinées et règles spéciales"""
+    if not weapon:
+        return "Arme non spécifiée"
+
+    # Gestion des armes combinées
+    weapon_name = weapon.get('name', 'Arme')
+    if " et " in weapon_name:
+        # Séparer les noms des armes
+        names = weapon_name.split(" et ")
+        name1, name2 = names[0], names[1]
+
+        # Gestion des ranges
+        ranges = weapon.get('range', '-').split("/")
+        range1 = ranges[0] if len(ranges) > 0 else "-"
+        range2 = ranges[1] if len(ranges) > 1 else "-"
+        range1 = "Mêlée" if range1 == "-" else range1
+        range2 = "Mêlée" if range2 == "-" else range2
+
+        # Gestion des attaques
+        attacks = weapon.get('attacks', '-').split("/")
+        attack1 = attacks[0] if len(attacks) > 0 else "-"
+        attack2 = attacks[1] if len(attacks) > 1 else "-"
+
+        # Gestion de la pénétration d'armure
+        aps = weapon.get('armor_piercing', '-').split("/")
+        ap1 = aps[0] if len(aps) > 0 else "-"
+        ap2 = aps[1] if len(aps) > 1 else "-"
+
+        # Gestion des règles spéciales
+        special_rules = weapon.get('special_rules', [])
+        special_rules_desc = weapon.get('special_rules_description', {})
+
+        result = f"<div style='margin-bottom: 4px;'><strong>{name1}:</strong> {range1} | A{attack1}"
+        if ap1 not in ("-", 0, "0", None):
+            result += f" | PA({ap1})"
+        if special_rules_desc and name1 in special_rules_desc and special_rules_desc[name1]:
+            result += f" | {', '.join(special_rules_desc[name1])}"
+        result += "</div>"
+
+        result += f"<div style='margin-bottom: 4px;'><strong>{name2}:</strong> {range2} | A{attack2}"
+        if ap2 not in ("-", 0, "0", None):
+            result += f" | PA({ap2})"
+        if special_rules_desc and name2 in special_rules_desc and special_rules_desc[name2]:
+            result += f" | {', '.join(special_rules_desc[name2])}"
+        result += "</div>"
+
+        return result
+
+    # Format normal pour les armes simples
+    range_text = weapon.get('range', '-')
+    if range_text == "-" or range_text is None:
+        range_text = "Mêlée"
+
+    attacks = weapon.get('attacks', '-')
+    ap = weapon.get('armor_piercing', '-')
+    special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
+
+    result = f"{range_text} | A{attacks}"
+
+    if ap not in ("-", 0, "0", None):
+        result += f" | PA({ap})"
+
+    if special:
+        result += f" | {special}"
+
+    return result
     
         # Format normal pour les armes simples
         result = f"{range_text} | A{attacks}"
