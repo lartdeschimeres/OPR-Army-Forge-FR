@@ -1446,7 +1446,7 @@
                 "name": "Lance lourde et Griffes lourdes",
                 "range": "-",
                 "attacks": "1/1",
-                "armor_piercing": "1/1",
+                "armor_piercing": "1/1"
               },
               "special_rules_description": {
                 "Mance lourde": ["Percée"],
