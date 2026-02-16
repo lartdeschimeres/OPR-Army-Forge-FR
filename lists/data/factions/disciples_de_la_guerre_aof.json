@@ -1448,8 +1448,8 @@
           "options": [
             {
               "name": "Griffes lourdes et Lances lourdes",
-              "cost": 5,
-              "weapon":2 [
+              "cost": 25,
+              "weapon": [
                 {
                   "name": "Griffes lourdes",
                   "range": "Mêlée",
