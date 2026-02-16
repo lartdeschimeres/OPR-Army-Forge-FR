@@ -402,68 +402,97 @@ def export_html(army_list, army_name, army_limit):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     def format_weapon(weapon):
-        """Formate une arme pour l'affichage"""
+        """Formate une arme ou un groupe d'armes pour l'affichage"""
         if not weapon:
             return "Arme non spécifiée"
 
+        # Cas où on a un tableau d'armes (comme pour les armes combinées)
+        if isinstance(weapon, list):
+            result = []
+            for w in weapon:
+                range_text = w.get('range', '-')
+                if range_text == "-" or range_text is None:
+                    range_text = "Mêlée"
+
+                attacks = w.get('attacks', '-')
+                ap = w.get('armor_piercing', '-')
+                special_rules = w.get('special_rules', [])
+
+                weapon_name = w.get('name', 'Arme')
+                weapon_str = f"{weapon_name}: {range_text} | A{attacks}"
+
+                if ap not in ("-", 0, "0", None):
+                    weapon_str += f" | PA{ap}"
+
+                if special_rules:
+                    weapon_str += f" | {', '.join(special_rules)}"
+
+                result.append(weapon_str)
+            return "<br>".join(result)
+
+        # Cas standard pour une seule arme
         range_text = weapon.get('range', '-')
         if range_text == "-" or range_text is None:
             range_text = "Mêlée"
 
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
-        special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
+        special_rules = weapon.get('special_rules', [])
 
         result = f"{range_text} | A{attacks}"
 
         if ap not in ("-", 0, "0", None):
-            result += f" | PA({ap})"
+            result += f" | PA{ap}"
 
-        if special:
-            result += f" | {special}"
+        if special_rules:
+            result += f" | {', '.join(special_rules)}"
 
         return result
 
     def get_special_rules(unit):
-        """Extraire et formater les règles spéciales (triées par ordre alphabétique)"""
+        """Extraire toutes les règles spéciales de l'unité"""
         rules = set()
-    
+
+        # 1. Règles spéciales de base
         if "special_rules" in unit:
             for rule in unit["special_rules"]:
-                if isinstance(rule, dict):
-                    rules.add(rule.get("name", ""))
-                elif isinstance(rule, str):
-                    if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
-                        # Normaliser les caractères accentués pour le tri
-                        rules.add(rule)
-    
+                if isinstance(rule, str):
+                    rules.add(rule)
+
+        # 2. Règles spéciales des améliorations
         if "options" in unit:
             for group_name, opts in unit["options"].items():
                 if isinstance(opts, list):
                     for opt in opts:
                         if "special_rules" in opt:
-                            if isinstance(opt["special_rules"], list):
-                                for rule in opt["special_rules"]:
+                            for rule in opt["special_rules"]:
+                                if isinstance(rule, str):
                                     rules.add(rule)
-                            elif isinstance(opt["special_rules"], str):
-                                rules.add(opt["special_rules"])
-    
+
+        # 3. Règles spéciales des armes
+        weapons = unit.get("weapon", [])
+        if not isinstance(weapons, list):
+            weapons = [weapons]
+
+        for weapon in weapons:
+            if isinstance(weapon, dict) and "special_rules" in weapon:
+                for rule in weapon["special_rules"]:
+                    if isinstance(rule, str):
+                        rules.add(rule)
+
+        # 4. Règles spéciales de la monture
         if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
             if "special_rules" in mount_data:
                 for rule in mount_data["special_rules"]:
-                    if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
+                    if isinstance(rule, str):
                         rules.add(rule)
-    
-        # Tri alphabétique en ignorant les accents
-        return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e').replace('ê', 'e'))
+
+        return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
 
     def get_french_type(unit):
-        """Retourne le type français basé sur unit_detail et type"""
+        """Retourne le type français basé sur unit_detail"""
         unit_detail = unit.get('unit_detail', 'unit')
-        unit_type = unit.get('type', 'unit')
-
-        # Mappage des types
         type_mapping = {
             'hero': 'Héros',
             'named_hero': 'Héros nommé',
@@ -472,16 +501,7 @@ def export_html(army_list, army_name, army_limit):
             'vehicle': 'Véhicule/Monstre',
             'titan': 'Titan'
         }
-
-        # Cas particuliers pour les héros
-        if unit_type == "hero":
-            if unit_detail == "named_hero":
-                return "Héros nommé"
-            else:
-                return "Héros"
-        else:
-            # Pour les autres types, utiliser unit_detail
-            return type_mapping.get(unit_detail, 'Unité')
+        return type_mapping.get(unit_detail, 'Unité')
 
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
@@ -499,15 +519,10 @@ def export_html(army_list, army_name, army_limit):
   --bg-card: #ffffff;
   --bg-header: #e9ecef;
   --accent: #3498db;
-  --accent-dark: #1f201d;
   --text-main: #212529;
   --text-muted: #6c757d;
   --border: #dee2e6;
   --cost-color: #ff6b6b;
-  --tough-color: #e74c3c;
-  --hero-color: #f39c12;
-  --unit-color: #3498db;
-  --highlight: #8e44ad;
 }}
 
 body {{
@@ -524,23 +539,12 @@ body {{
   margin: 0 auto;
 }}
 
-.army-title {{
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-}}
-
 .unit-card {{
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 20px;
   padding: 16px;
-  position: relative;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }}
 
@@ -600,12 +604,25 @@ body {{
   margin-bottom: 6px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }}
 
 .weapon-name {{
   font-weight: 500;
   color: var(--text-main);
+  flex: 1;
+}}
+
+.weapon-stats {{
+  text-align: right;
+  white-space: nowrap;
+  flex: 1;
+}}
+
+.weapon-combined {{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
 }}
 
 .rules-section {{
@@ -615,7 +632,8 @@ body {{
 .rules-title {{
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--text-main);
+  color: var(--accent);
+  font-size: 14px;
 }}
 
 .rules-list {{
@@ -687,7 +705,7 @@ body {{
         cost = unit.get("cost", 0)
         quality = esc(unit.get("quality", "-"))
         defense = esc(unit.get("defense", "-"))
-        unit_type_french = get_french_type(unit)  # Utilisation de la fonction corrigée
+        unit_type_french = get_french_type(unit)
         unit_size = unit.get("size", 10)
 
         if unit.get("type") == "hero":
@@ -700,6 +718,9 @@ body {{
         base_weapons = unit.get("weapon", [])
         if not isinstance(base_weapons, list):
             base_weapons = [base_weapons]
+
+        # Récupération des armes améliorées
+        weapon_upgrades = unit.get("weapon_upgrades", [])
 
         # Récupération des règles spéciales
         special_rules = get_special_rules(unit)
@@ -755,37 +776,62 @@ body {{
   </div>
 '''
 
-        # Armes de base
-        if base_weapons:
-            html += '''
-  <div class="section-title">Armes:</div>
-  <div class="weapon-list">
-'''
+        # Armes de base et améliorées
+        if base_weapons or weapon_upgrades:
+            html += '<div class="section-title">Armes:</div>'
+
+            # Afficher les armes de base
             for weapon in base_weapons:
                 if weapon:
-                    html += f'''
+                    if isinstance(weapon, list):
+                        # Armes combinées comme Sabots et Attaques de l'équipage
+                        html += f'''
+    <div class="weapon-item">
+      <div class="weapon-name">Armes de base</div>
+      <div class="weapon-stats weapon-combined">{format_weapon(weapon)}</div>
+    </div>
+'''
+                    else:
+                        # Arme simple
+                        html += f'''
     <div class="weapon-item">
       <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
       <div class="weapon-stats">{format_weapon(weapon)}</div>
     </div>
 '''
-            html += '''
-  </div>
+
+            # Afficher les armes améliorées
+            for upgrade in weapon_upgrades:
+                if upgrade:
+                    if isinstance(upgrade, list):
+                        # Armes combinées comme Sabots et Javelots
+                        html += f'''
+    <div class="weapon-item">
+      <div class="weapon-name">{esc(upgrade[0].get('name', 'Arme'))}</div>
+      <div class="weapon-stats weapon-combined">{format_weapon(upgrade)}</div>
+    </div>
+'''
+                    else:
+                        # Arme simple
+                        html += f'''
+    <div class="weapon-item">
+      <div class="weapon-name weapon-upgraded">{esc(upgrade.get('name', 'Amélioration'))}</div>
+      <div class="weapon-stats">{format_weapon(upgrade)}</div>
+    </div>
 '''
 
-        # Règles spéciales (triées)
+        # Règles spéciales
         if special_rules:
             html += '''
   <div class="rules-section">
     <div class="rules-title">Règles spéciales:</div>
     <div class="rules-list">
 '''
-            # Tri alphabétique en ignorant les accents
-            for rule in sorted(special_rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e').replace('ê', 'e')):
+            for rule in special_rules:
                 html += f'<span class="rule-tag">{esc(rule)}</span>'
             html += '''
-            </div>
-          </div>
+    </div>
+  </div>
 '''
 
         # Améliorations d'unité
@@ -884,7 +930,18 @@ body {{
                 half += 1
 
             html += '<div class="rule-column" style="flex: 1; min-width: 300px; padding-right: 15px;">'
-            for rule in sorted(all_rules, key=lambda x: x.get('name', '')):  # Tri alphabétique des règles de faction
+            for rule in sorted(all_rules[:half], key=lambda x: x.get('name', '').lower().replace('é', 'e').replace('è', 'e')):
+                if isinstance(rule, dict):
+                    html += f'''
+    <div class="rule-item">
+      <div class="rule-name">{esc(rule.get('name', ''))}:</div>
+      <div class="rule-description">{esc(rule.get('description', ''))}</div>
+    </div>
+'''
+            html += '</div>'
+
+            html += '<div class="rule-column" style="flex: 1; min-width: 300px; padding-left: 15px;">'
+            for rule in sorted(all_rules[half:], key=lambda x: x.get('name', '').lower().replace('é', 'e').replace('è', 'e')):
                 if isinstance(rule, dict):
                     html += f'''
     <div class="rule-item">
@@ -913,12 +970,12 @@ body {{
   <div style="display: flex; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 100%;">
 '''
-            for spell in sorted(all_spells, key=lambda x: x['name']):  # Tri alphabétique des sorts
+            for spell in sorted(all_spells, key=lambda x: x['name'].lower().replace('é', 'e').replace('è', 'e')):
                 if isinstance(spell, dict):
                     html += f'''
       <div class="spell-item" style="margin-bottom: 12px;">
         <div>
-          <span class="spell-name">{esc(spell.get('name', ''))}</span>
+          <span class="rule-name">{esc(spell.get('name', ''))}</span>
           <span class="spell-cost"> ({spell.get('details', {}).get('cost', '?')})</span>
         </div>
         <div class="rule-description">{esc(spell.get('details', {}).get('description', ''))}</div>
@@ -1628,21 +1685,30 @@ if st.session_state.page == "army":
         if group.get("type") == "weapon":
             choices = []
             base_weapons = unit.get("weapon", [])
+        
+            # Ajouter les armes de base comme première option
             if isinstance(base_weapons, list) and base_weapons:
-                for weapon in base_weapons:
-                    choices.append(format_weapon_option(weapon))
+                # Pour le Char du Ravage, on veut afficher "Sabots et Attaques de l'équipage"
+                if unit.get("name") == "Char du Ravage de la Guerre":
+                    choices.append("Sabots et Attaques de l'équipage")
+                else:
+                    # Pour les autres unités, on affiche chaque arme séparément
+                    for weapon in base_weapons:
+                        choices.append(format_weapon_option(weapon))
             elif isinstance(base_weapons, dict):
                 choices.append(format_weapon_option(base_weapons))
-            else:
-                choices.append("Aucune arme de base")
-
+        
             opt_map = {}
             for o in group.get("options", []):
                 weapon = o.get("weapon", {})
-                label = format_weapon_option(weapon, o['cost'])
+                if isinstance(weapon, list):
+                    # Cas spécial pour les armes combinées comme Sabots et Javelots
+                    label = f"{weapon[0]['name']} et {weapon[1]['name']} (+{o['cost']} pts)"
+                else:
+                    label = format_weapon_option(weapon, o['cost'])
                 choices.append(label)
                 opt_map[label] = o
-
+        
             current = st.session_state.unit_selections[unit_key].get(g_key, choices[0] if choices else "Aucune arme")
             choice = st.radio(
                 "Sélection de l'arme",
@@ -1650,14 +1716,17 @@ if st.session_state.page == "army":
                 index=choices.index(current) if current in choices else 0,
                 key=f"{unit_key}_{g_key}_weapon",
             )
-
+        
             st.session_state.unit_selections[unit_key][g_key] = choice
-
+        
             if choice != choices[0]:
                 for opt_label, opt in opt_map.items():
                     if opt_label == choice:
                         weapon_cost += opt["cost"]
-                        weapons = [opt["weapon"]] if unit.get("type") == "hero" else [opt["weapon"]]
+                        if isinstance(opt["weapon"], list):
+                            weapons = opt["weapon"]
+                        else:
+                            weapons = [opt["weapon"]]
                         break
 
         # RÔLES
