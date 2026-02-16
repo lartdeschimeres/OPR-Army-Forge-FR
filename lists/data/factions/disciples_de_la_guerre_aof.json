@@ -150,7 +150,7 @@
       "weapon": [
         {
           "name": "Arme à une main lourde",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 3,
           "armor_piercing": 1
         }
@@ -180,7 +180,7 @@
               "cost": 5,
               "weapon": {
                 "name": "Hallebarde lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 1,
                 "special_rules": ["Perforant"]
@@ -191,7 +191,7 @@
               "cost": 15,
               "weapon": {
                 "name": "Paire d'armes à une main lourdes",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 4,
                 "armor_piercing": 1
               }
@@ -201,7 +201,7 @@
               "cost": 15,
               "weapon": {
                 "name": "Grande arme lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 3
               }
@@ -211,7 +211,7 @@
               "cost": 15,
               "weapon": {
                 "name": "Lance lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 1,
                 "special_rules": ["Percée"]
@@ -360,7 +360,7 @@
       "weapon": [
         {
           "name": "Arme à une main lourde",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 3,
           "armor_piercing": 1
         }
@@ -390,7 +390,7 @@
               "cost": 5,
               "weapon": {
                 "name": "Hallebarde lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 1,
                 "special_rules": ["Perforant"]
@@ -401,7 +401,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Paire d'armes à une main lourdes",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 4,
                 "armor_piercing": 1
               }
@@ -411,7 +411,7 @@
               "cost": 15,
               "weapon": {
                 "name": "Grande arme lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 3
               }
@@ -421,7 +421,7 @@
               "cost": 15,
               "weapon": {
                 "name": "Lance lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 1,
                 "special_rules": ["Percée"]
@@ -574,7 +574,7 @@
       "weapon": [
         {
           "name": "Arme à une main",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 3,
           "armor_piercing": "-"
         }
@@ -602,7 +602,7 @@
               "cost": 5,
               "weapon": {
                 "name": "Paire d'armes à une main",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 4,
                 "armor_piercing": "-"
               }
@@ -612,7 +612,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Hallebarde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": "-",
                 "special_rules": ["Perforant"]
@@ -623,7 +623,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Lance",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": "-",
                 "special_rules": ["Percée"]
@@ -634,7 +634,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Grande arme",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 3,
                 "armor_piercing": 2
               }
@@ -698,7 +698,7 @@
       "weapon": [
         {
           "name": "Armes à une main",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": "-"
         }
@@ -714,7 +714,7 @@
               "cost": 20,
               "weapon": {
                 "name": "Fléau",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": []
@@ -725,7 +725,7 @@
               "cost": 35,
               "weapon": {
                 "name": "Pique",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": "-",
                 "special_rules": ["Contre-charge"]
@@ -774,7 +774,7 @@
       "weapon": [
         {
           "name": "Grandes armes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 2
         }
@@ -790,7 +790,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Paire d'armes à une main",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 2,
                 "armor_piercing": "-",
                 "special_rules": []
@@ -834,7 +834,7 @@
       "weapon": [
         {
           "name": "Armes à une main lourdes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 1
         }
@@ -850,7 +850,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Hallebarde lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": ["Perforant"]
@@ -861,7 +861,7 @@
               "cost": 20,
               "weapon": {
                 "name": "Grande arme lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 3,
                 "special_rules": []
@@ -872,7 +872,7 @@
               "cost": 45,
               "weapon": {
                 "name": "Paire d'armes à une main lourdes",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 2,
                 "armor_piercing": 1,
                 "special_rules": []
@@ -921,7 +921,7 @@
       "weapon": [
         {
           "name": "Armes à une main lourdes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 1
         }
@@ -937,7 +937,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Hallebarde lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": ["Perforant"]
@@ -948,7 +948,7 @@
               "cost": 25,
               "weapon": {
                 "name": "Grande arme lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 3,
                 "special_rules": []
@@ -959,7 +959,7 @@
               "cost": 65,
               "weapon": {
                 "name": "Paire d'armes à une main lourdes",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 2,
                 "armor_piercing": 1,
                 "special_rules": []
@@ -1008,7 +1008,7 @@
       "weapon": [
         {
           "name": "Membres mutants",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": "-"
         }
@@ -1027,7 +1027,7 @@
       "weapon": [
         {
           "name": "Armes à une main lourdes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 1
         }
@@ -1043,7 +1043,7 @@
               "cost": 35,
               "weapon": {
                 "name": "Paire d'armes à une main",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 2,
                 "armor_piercing": "-",
                 "special_rules": []
@@ -1061,7 +1061,7 @@
               "cost": 30,
               "weapon": {
                 "name": "Grande arme lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 2,
                 "armor_piercing": 3
               }
@@ -1105,7 +1105,7 @@
       "weapon": [
         {
           "name": "Paire de marteau-fléaux",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": 2
         }
@@ -1124,7 +1124,7 @@
       "weapon": [
         {
           "name": "Paires d'armes ensorcelées",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 4,
           "armor_piercing": "-",
           "special_rules": ["Perforant"]
@@ -1141,7 +1141,7 @@
               "cost": 15,
               "weapon": {
                 "name": "Grande arme ensorcelée",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 4,
                 "armor_piercing": 2,
                 "special_rules": ["Perforant"]
@@ -1191,7 +1191,7 @@
         },
         {
           "name": "Armes à une main",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": "-"
         }
@@ -1241,7 +1241,7 @@
       "weapon": [
         {
           "name": "Griffes perforantes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": "-",
           "special_rules": ["Perforant"]
@@ -1279,7 +1279,7 @@
       "weapon": [
         {
           "name": "Armes à une main",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 0,
           "special_rules": []
@@ -1296,7 +1296,7 @@
               "cost": 10,
               "weapon": {
                 "name": "Fléau",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": []
@@ -1360,7 +1360,7 @@
       "weapon": [
         {
           "name": "Armes à une main lourdes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 1,
           "special_rules": []
@@ -1377,7 +1377,7 @@
               "cost": 25,
               "weapon": {
                 "name": "Lance lourde",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": ["Percée"]
@@ -1427,7 +1427,7 @@
       "weapon": [
         {
           "name": "Griffes lourdes et Armes à une main lourdes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": "1/1",
           "armor_piercing": "1/1",
           "special_rules": []
@@ -1444,7 +1444,7 @@
               "cost": 25,
               "weapon": {
                 "name": "Griffes lourdes et Lances lourdes",
-                "range": "-",
+                "range": "Mêlée",
                 "attacks": "1/1",
                 "armor_piercing": "1/1",
                 "special_rules": ["Percée"]
@@ -1489,7 +1489,7 @@
       "weapon": [
         {
           "name": "Griffes perforantes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 6,
           "armor_piercing": 1,
           "special_rules": ["Perforant"]
@@ -1523,7 +1523,7 @@
       "weapon": [
         {
           "name": "Sabots et Attaques de l'équipage",
-          "range": "-/-",
+          "range": "Mêlée/Mêlée",
           "attacks": "2/2",
           "armor_piercing": "0/2",
           "special_rules": []
@@ -1540,7 +1540,7 @@
               "cost": 50,
               "weapon": {
                 "name": "Sabots et Javelots barbelés",
-                "range": ""\12",
+                "range": "Mêlée/12\"",
                 "attacks": "2/6",
                 "armor_piercing": "0/1",
                 "special_rules": ["Éclatement"]
@@ -1575,14 +1575,14 @@
       "weapon": [
         {
           "name": "Griffes lourdes",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": 1,
           "special_rules": []
         },
         {
           "name": "Attaques lourdes de l'équipage",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": 2,
           "special_rules": []
@@ -1616,14 +1616,14 @@
       "weapon": [
         {
           "name": "Poings géants",
-          "range": "-",
+          "range": "Mêlée",
           "attacks": 8,
           "armor_piercing": 2,
           "special_rules": []
         },
         {
           "name": "Piétinement",
-          "range": "-",
+          "range": "Mêlée,
           "attacks": 4,
           "armor_piercing": 1,
           "special_rules": []
