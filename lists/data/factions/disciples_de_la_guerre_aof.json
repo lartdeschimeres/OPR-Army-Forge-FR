@@ -1523,7 +1523,7 @@
         {
           "name": "Sabots et Attaques de l'équipage",
           "range": "-/-",
-          "attacks": "2/2,
+          "attacks": "2/2",
           "armor_piercing": "0/2",
           "special_rules": []
         }
