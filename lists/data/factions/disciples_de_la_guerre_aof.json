@@ -1448,10 +1448,9 @@
                 "attacks": "1/1",
                 "armor_piercing": "1/1",
                 "special_rules": ["Percée"]
-             }
+              }
+            }
           ]
-        }
-      ] 
         },
         {
           "group": "Améliorations d'unité",
