@@ -405,7 +405,7 @@ def export_html(army_list, army_name, army_limit):
         """Formate une arme ou un groupe d'armes pour l'affichage"""
         if not weapon:
             return "Arme non spécifiée"
-    
+
         # Cas où on a un tableau d'armes (comme pour Sabots et Javelots)
         if isinstance(weapon, list):
             result = ""
@@ -413,26 +413,25 @@ def export_html(army_list, army_name, army_limit):
                 range_text = w.get('range', '-')
                 if range_text == "-" or range_text is None:
                     range_text = "Mêlée"
-    
+
                 attacks = w.get('attacks', '-')
                 ap = w.get('armor_piercing', '-')
                 special_rules = w.get('special_rules', [])
-    
+
                 weapon_name = w.get('name', 'Arme')
                 result += f"<strong>{weapon_name}:</strong> {range_text} | A{attacks}"
-    
+
                 if ap not in ("-", 0, "0", None):
                     result += f" | PA{ap}"
-    
+
                 if special_rules:
                     result += f" | {', '.join(special_rules)}"
-    
+
                 if i < len(weapon) - 1:  # Si ce n'est pas la dernière arme
                     result += "<br>"
             return result
 
-    # Cas standard pour une seule arme
-    else:
+        # Cas standard pour une seule arme
         range_text = weapon.get('range', '-')
         if range_text == "-" or range_text is None:
             range_text = "Mêlée"
@@ -450,17 +449,6 @@ def export_html(army_list, army_name, army_limit):
             result += f" | {', '.join(special_rules)}"
 
         return result
-    
-        # Format normal pour les armes simples
-        result = f"{range_text} | A{attacks}"
-    
-        if ap not in ("-", 0, "0", None):
-            result += f" | PA({ap})"
-    
-        if special:
-            result += f" | {special}"
-    
-        return result
 
     def get_special_rules(unit):
         """Extraire toutes les règles spéciales de l'unité"""
@@ -471,6 +459,8 @@ def export_html(army_list, army_name, army_limit):
             for rule in unit["special_rules"]:
                 if isinstance(rule, str):
                     rules.add(rule)
+                elif isinstance(rule, dict):
+                    rules.add(rule.get("name", ""))
 
         # 2. Règles spéciales des améliorations d'unité
         if "options" in unit:
@@ -481,6 +471,8 @@ def export_html(army_list, army_name, army_limit):
                             for rule in opt["special_rules"]:
                                 if isinstance(rule, str):
                                     rules.add(rule)
+                                elif isinstance(rule, dict):
+                                    rules.add(rule.get("name", ""))
 
         # 3. Règles spéciales des armes
         weapons = unit.get("weapon", [])
@@ -488,18 +480,32 @@ def export_html(army_list, army_name, army_limit):
             weapons = [weapons]
 
         for weapon in weapons:
-            if isinstance(weapon, dict) and "special_rules" in weapon:
-                for rule in weapon["special_rules"]:
-                    if isinstance(rule, str):
-                        rules.add(rule)
+            if isinstance(weapon, dict):
+                if "special_rules" in weapon:
+                    for rule in weapon["special_rules"]:
+                        if isinstance(rule, str):
+                            rules.add(rule)
+                if isinstance(weapon, list):  # Pour les armes combinées
+                    for w in weapon:
+                        if "special_rules" in w:
+                            for rule in w["special_rules"]:
+                                if isinstance(rule, str):
+                                    rules.add(rule)
 
         # 4. Règles spéciales des armes améliorées
         if "weapon_upgrades" in unit:
             for weapon in unit["weapon_upgrades"]:
-                if isinstance(weapon, dict) and "special_rules" in weapon:
-                    for rule in weapon["special_rules"]:
-                        if isinstance(rule, str):
-                            rules.add(rule)
+                if isinstance(weapon, dict):
+                    if "special_rules" in weapon:
+                        for rule in weapon["special_rules"]:
+                            if isinstance(rule, str):
+                                rules.add(rule)
+                    if isinstance(weapon, list):  # Pour les armes combinées
+                        for w in weapon:
+                            if "special_rules" in w:
+                                for rule in w["special_rules"]:
+                                    if isinstance(rule, str):
+                                        rules.add(rule)
 
         # 5. Règles spéciales de la monture
         if "mount" in unit and unit.get("mount"):
@@ -508,6 +514,8 @@ def export_html(army_list, army_name, army_limit):
                 for rule in mount_data["special_rules"]:
                     if isinstance(rule, str):
                         rules.add(rule)
+                    elif isinstance(rule, dict):
+                        rules.add(rule.get("name", ""))
 
         # Convertir en liste et trier alphabétiquement
         return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e').replace('ê', 'e'))
@@ -626,14 +634,17 @@ body {{
   padding: 8px;
   border-radius: 4px;
   margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }}
 
 .weapon-name {{
   font-weight: 500;
   color: var(--text-main);
+}}
+
+.weapon-stats {{
+  font-size: 12px;
+  text-align: right;
+  flex-grow: 1;
 }}
 
 .rules-section {{
@@ -679,23 +690,10 @@ body {{
   color: var(--cost-color);
 }}
 
-.faction-rules h3, .spells-section h3 {{
-  color: var(--accent) !important;
-}}
-
-.rule-name {{
-  color: var(--accent);
-  font-weight: bold;
-}}
-
-.weapon-replaced {{
-  text-decoration: line-through;
-  opacity: 0.6;
-}}
-
-.weapon-upgraded {{
-  font-weight: bold;
-  color: var(--accent);
+.weapon-combined {{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }}
 
 @media print {{
@@ -807,44 +805,53 @@ body {{
 '''
 
         # Armes de base et améliorées
-if base_weapons or weapon_upgrades:
-    html += '''
+        if base_weapons or weapon_upgrades:
+            html += '''
   <div class="section-title">Armes:</div>
   <div class="weapon-list">
 '''
 
-    # Afficher les armes de base
-    for weapon in base_weapons:
-        if weapon:
-            weapon_name = esc(weapon.get('name', 'Arme'))
-            html += f'''
+            # Afficher les armes de base
+            for weapon in base_weapons:
+                if weapon:
+                    if isinstance(weapon, list):
+                        # Cas des armes combinées comme Sabots et Attaques de l'équipage
+                        html += f'''
     <div class="weapon-item">
-      <div class="weapon-name">{weapon_name}</div>
+      <div class="weapon-name">{esc(weapon[0].get('name', 'Arme') + " et " + weapon[1].get('name', 'Arme'))}</div>
+      <div class="weapon-stats weapon-combined">{format_weapon(weapon)}</div>
+    </div>
+'''
+                    else:
+                        # Cas standard pour une seule arme
+                        html += f'''
+    <div class="weapon-item">
+      <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
       <div class="weapon-stats">{format_weapon(weapon)}</div>
     </div>
 '''
 
-    # Afficher les armes améliorées (qui peuvent être un tableau)
-    for upgrade in weapon_upgrades:
-        if upgrade:
-            if isinstance(upgrade, list):
-                # Cas spécial pour les armes combinées comme Sabots et Javelots
-                html += f'''
+            # Afficher les armes améliorées
+            for upgrade in weapon_upgrades:
+                if upgrade:
+                    if isinstance(upgrade, list):
+                        # Cas des armes combinées comme Sabots et Javelots
+                        html += f'''
     <div class="weapon-item">
       <div class="weapon-name">{esc(upgrade[0].get('name', 'Arme') + " et " + upgrade[1].get('name', 'Arme'))}</div>
-      <div class="weapon-stats">{format_weapon(upgrade)}</div>
+      <div class="weapon-stats weapon-combined">{format_weapon(upgrade)}</div>
     </div>
 '''
-            else:
-                # Cas standard pour une seule arme
-                html += f'''
+                    else:
+                        # Cas standard pour une seule arme
+                        html += f'''
     <div class="weapon-item">
-      <div class="weapon-name">{esc(upgrade.get('name', 'Amélioration'))}</div>
+      <div class="weapon-name weapon-upgraded">{esc(upgrade.get('name', 'Amélioration'))}</div>
       <div class="weapon-stats">{format_weapon(upgrade)}</div>
     </div>
 '''
 
-    html += '''
+            html += '''
   </div>
 '''
 
