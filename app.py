@@ -399,7 +399,7 @@ def format_weapon_option(weapon):
 # ======================================================
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
-        return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
     def format_weapon(weapon):
         """Formate une arme ou un groupe d'armes pour l'affichage"""
@@ -411,8 +411,10 @@ def export_html(army_list, army_name, army_limit):
             result = []
             for w in weapon:
                 range_text = w.get('range', '-')
-                if range_text == "-" or range_text is None:
+                if range_text == "-" or range_text == "Mêlée":
                     range_text = "Mêlée"
+                else:
+                    range_text = f"{range_text}\""
 
                 attacks = w.get('attacks', '-')
                 ap = w.get('armor_piercing', '-')
@@ -432,8 +434,10 @@ def export_html(army_list, army_name, army_limit):
 
         # Cas standard pour une seule arme
         range_text = weapon.get('range', '-')
-        if range_text == "-" or range_text is None:
+        if range_text == "-" or range_text == "Mêlée":
             range_text = "Mêlée"
+        else:
+            range_text = f"{range_text}\""
 
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
@@ -486,6 +490,21 @@ def export_html(army_list, army_name, army_limit):
                             for rule in w["special_rules"]:
                                 if isinstance(rule, str):
                                     rules.add(rule)
+
+        # 4. Règles spéciales des armes améliorées
+        if "weapon_upgrades" in unit:
+            for weapon in unit["weapon_upgrades"]:
+                if isinstance(weapon, dict):
+                    if "special_rules" in weapon:
+                        for rule in weapon["special_rules"]:
+                            if isinstance(rule, str):
+                                rules.add(rule)
+                    if isinstance(weapon, list):
+                        for w in weapon:
+                            if "special_rules" in w:
+                                for rule in w["special_rules"]:
+                                    if isinstance(rule, str):
+                                        rules.add(rule)
 
         return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
 
@@ -614,6 +633,7 @@ body {{
 .weapon-stats {{
   text-align: right;
   white-space: nowrap;
+  flex: 1;
 }}
 
 .weapon-combined {{
@@ -855,6 +875,12 @@ body {{
 '''
 
         html += '</div>'
+
+    html += '''
+</div>
+</body>
+</html>
+'''
     return html
     
 # ======================================================
