@@ -1551,7 +1551,7 @@
           "description": "Remplacez les Attaques de l'équipage par des Javelots barbelés",
           "options": [
             {
-              "name": "Sabots et Javelots barbelés",
+              "name": "Javelots barbelés",
               "cost": 50,
               "weapon": {
                   "name": "Javelots barbelés",
