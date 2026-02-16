@@ -1426,17 +1426,10 @@
       "special_rules": ["Guerrier-né", "Impact (2)", "Rapide"],
       "weapon": [
         {
-          "name": "Armes à une main lourdes",
-          "range": "-",
-          "attacks": 1,
-          "armor_piercing": 1,
-          "special_rules": []
-        },
-        {
-          "name": "Griffes lourdes",
-          "range": "-",
-          "attacks": 1,
-          "armor_piercing": 1,
+          "name": "Griffes lourdes et Armes à une main lourdes",
+          "range": "-/-",
+          "attacks": "1/1",
+          "armor_piercing": "1/1",
           "special_rules": []
         }
       ],
@@ -1444,20 +1437,18 @@
         {
           "group": "Remplacement d'armes",
           "type": "weapon",
-          "description": "Remplacez les armes à une main lourdes par des lances lourdes",
+          "description": "Remplacez les Armes à une main lourdes par des Lances lourdes",
           "options": [
             {
-              "name": "Lance lourde",
+              "name": "Griffes lourdes et Lances lourdes",
               "cost": 25,
               "weapon": {
-                "name": "Lance lourde",
-                "range": "-",
-                "attacks": 1,
-                "armor_piercing": 1,
+                "name": "Griffes lourdes et Lances lourdes",
+                "range": "-/-",
+                "attacks": "1/1",
+                "armor_piercing": "1/1",
                 "special_rules": ["Percée"]
-              },
-              "replaces": ["Armes à une main lourdes"]
-            }
+             }
           ]
         },
         {
@@ -1530,17 +1521,10 @@
       "special_rules": ["Guerrier-né", "Impact (4)", "Rapide"],
       "weapon": [
         {
-          "name": "Attaques de l'équipage",
-          "range": "-",
-          "attacks": 2,
-          "armor_piercing": 2,
-          "special_rules": []
-        },
-        {
-          "name": "Sabots",
-          "range": "-",
-          "attacks": 2,
-          "armor_piercing": 0,
+          "name": "Sabots et Attaques de l'équipage",
+          "range": "-/-",
+          "attacks": "2/2,
+          "armor_piercing": "0/2",
           "special_rules": []
         }
       ],
@@ -1551,16 +1535,15 @@
           "description": "Remplacez les attaques de l'équipage par des javelots barbelés",
           "options": [
             {
-              "name": "Javelots barbelés",
+              "name": "Sabots et Javelots barbelés",
               "cost": 50,
               "weapon": {
-                "name": "Javelots barbelés",
+                "name": "Sabots et Javelots barbelés",
                 "range": "12\"",
-                "attacks": 6,
-                "armor_piercing": 1,
+                "attacks": "2/6",
+                "armor_piercing": "0/1",
                 "special_rules": ["Éclatement"]
               },
-              "replaces": ["Attaques de l'équipage"]
             }
           ]
         },
