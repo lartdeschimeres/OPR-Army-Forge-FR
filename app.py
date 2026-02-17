@@ -1948,36 +1948,47 @@ if st.button("➕ Ajouter à l'armée"):
                 if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                     all_special_rules.append(rule)
 
-    # Gestion des armes - CORRECTION POUR LES AMÉLIORATIONS D'ARME
+    # Gestion des armes - CORRECTION PRINCIPALE ICI
     final_weapons = []
-    
+
     # 1. Ajouter les armes de base
     base_weapons = unit.get("weapon", [])
     if not isinstance(base_weapons, list):
         base_weapons = [base_weapons]
     final_weapons.extend(base_weapons)
-    
+
     # 2. Traiter les remplacements d'armes
     for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
         g_key = f"group_{g_idx}"
         if group.get("type") == "weapon" and st.session_state.unit_selections.get(unit_key, {}).get(g_key):
             selected_option = st.session_state.unit_selections[unit_key][g_key]
-            # ... (le code existant pour les remplacements d'armes)
-    
-    # 3. Ajouter les améliorations d'arme (arc, javelot, etc.)
-    for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
-        g_key = f"group_{g_idx}"
-        if group.get("type") == "weapon_upgrades" and st.session_state.unit_selections.get(unit_key, {}).get(g_key):
-            selected_option = st.session_state.unit_selections[unit_key][g_key]
-            if selected_option != "Aucune amélioration d'arme":
-                for opt in group.get("options", []):
-                    if format_weapon_option(opt.get("weapon", {}), opt['cost']) == selected_option:
-                        # Ajouter l'arme d'amélioration
-                        if "weapon" in opt:
-                            final_weapons.append(opt["weapon"])
-                        break
-    
-    # Création de l'unité avec les armes complètes
+
+            # Trouver l'option sélectionnée
+            for opt in group.get("options", []):
+                if isinstance(opt, dict):
+                    # Vérifier si c'est l'option sélectionnée
+                    if group.get("type") == "weapon":
+                        weapon = opt.get("weapon", {})
+                        if isinstance(weapon, list):
+                            label = " | ".join([format_weapon_option(w) for w in weapon]) + f" (+{opt['cost']} pts)"
+                        else:
+                            label = format_weapon_option(weapon, opt['cost'])
+
+                        if label == selected_option:
+                            # Remplacer les armes spécifiées
+                            replaces = opt.get("replaces", [])
+                            if replaces:
+                                # Retirer les armes remplacées
+                                final_weapons = [w for w in final_weapons if w.get('name') not in replaces]
+
+                            # Ajouter les nouvelles armes
+                            if isinstance(weapon, list):
+                                final_weapons.extend(weapon)
+                            else:
+                                final_weapons.append(weapon)
+                            break
+
+    # Création de l'unité avec les armes correctes
     unit_data = {
         "name": unit["name"],
         "type": unit.get("type", "unit"),
@@ -1985,7 +1996,7 @@ if st.button("➕ Ajouter à l'armée"):
         "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
         "quality": unit.get("quality"),
         "defense": unit.get("defense"),
-        "weapon": final_weapons,  # Utilisation des armes complètes
+        "weapon": final_weapons,  # Utilisation des armes corrigées
         "weapon_upgrades": weapon_upgrades,
         "options": selected_options,
         "mount": mount,
