@@ -403,7 +403,7 @@ def export_html(army_list, army_name, army_limit):
 
     def format_weapon(weapon):
         """Formate une arme pour l'affichage"""
-        if not weapon or not isinstance(weapon, dict):
+        if not weapon:
             return "Aucune arme"
 
         range_text = weapon.get('range', '-')
@@ -411,7 +411,7 @@ def export_html(army_list, army_name, army_limit):
         ap = weapon.get('armor_piercing', '-')
         special_rules = weapon.get('special_rules', [])
 
-        if range_text in ("-", None) or range_text.lower() == "mêlée":
+        if range_text == "-" or range_text is None or range_text.lower() == "mêlée":
             range_text = "Mêlée"
         else:
             range_text = range_text.replace('"', '').replace("'", "")
@@ -426,52 +426,15 @@ def export_html(army_list, army_name, army_limit):
 
         return result
 
-    def get_unit_weapons(unit):
-        """Récupère les armes finales de l'unité en tenant compte des remplacements"""
-        # 1. Commencer avec les armes de base
-        weapons = unit.get("weapon", [])
-        if not isinstance(weapons, list):
-            weapons = [weapons] if weapons else []
-
-        # 2. Traiter les remplacements d'armes si l'unité a des upgrade_groups
-        if "upgrade_groups" in unit:
-            for group in unit["upgrade_groups"]:
-                if group.get("type") == "weapon" and "options" in group:
-                    for opt in group["options"]:
-                        if "replaces" in opt and "weapon" in opt:
-                            # Retirer les armes remplacées
-                            replaces = opt.get("replaces", [])
-                            if isinstance(replaces, list):
-                                weapons = [w for w in weapons if w.get('name') not in replaces]
-                            else:
-                                weapons = [w for w in weapons if w.get('name') != replaces]
-
-                            # Ajouter les nouvelles armes
-                            weapon = opt.get("weapon", {})
-                            if isinstance(weapon, list):
-                                weapons.extend(weapon)
-                            else:
-                                weapons.append(weapon)
-
-        # 3. Ajouter les améliorations d'arme si elles existent
-        if "weapon_upgrades" in unit:
-            for upgrade in unit["weapon_upgrades"]:
-                if isinstance(upgrade, dict):
-                    weapons.append(upgrade)
-
-        return weapons
-
-    def get_unit_rules(unit):
-        """Récupère uniquement les règles spéciales sélectionnées"""
+    def get_special_rules(unit):
+        """Extraire toutes les règles spéciales de l'unité"""
         rules = set()
 
-        # 1. Règles de base de l'unité
         if "special_rules" in unit:
             for rule in unit["special_rules"]:
                 if isinstance(rule, str):
                     rules.add(rule)
 
-        # 2. Règles des options sélectionnées
         if "options" in unit:
             for group_name, opts in unit["options"].items():
                 if isinstance(opts, list):
@@ -481,15 +444,16 @@ def export_html(army_list, army_name, army_limit):
                                 if isinstance(rule, str):
                                     rules.add(rule)
 
-        # 3. Règles des armes finales
-        weapons = get_unit_weapons(unit)
+        weapons = unit.get("weapon", [])
+        if not isinstance(weapons, list):
+            weapons = [weapons]
+
         for weapon in weapons:
             if isinstance(weapon, dict) and "special_rules" in weapon:
                 for rule in weapon["special_rules"]:
                     if isinstance(rule, str):
                         rules.add(rule)
 
-        # 4. Règles de la monture
         if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
             if "special_rules" in mount_data:
@@ -497,7 +461,7 @@ def export_html(army_list, army_name, army_limit):
                     if isinstance(rule, str):
                         rules.add(rule)
 
-        return sorted(rules)
+        return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
 
     def get_french_type(unit):
         """Retourne le type français basé sur unit_detail"""
@@ -758,16 +722,11 @@ body {{
             unit_size = 1
 
         tough_value = unit.get("coriace", 0)
-
-        # Récupération des données finales avec gestion des cas manquants
-        weapons = []
-        if "weapon" in unit:
-            weapons = get_unit_weapons(unit)
-
-        rules = []
-        if "special_rules" in unit or "options" in unit or "mount" in unit:
-            rules = get_unit_rules(unit)
-
+        weapons = unit.get("weapon", [])
+        if not isinstance(weapons, list):
+            weapons = [weapons]
+        weapon_upgrades = unit.get("weapon_upgrades", [])
+        special_rules = get_special_rules(unit)
         options = unit.get("options", {})
         mount = unit.get("mount", None)
 
@@ -813,11 +772,10 @@ body {{
   </div>
 '''
 
-        # Armes
         if weapons:
             html += '<div class="section-title">Armes:</div>'
             for weapon in weapons:
-                if weapon and isinstance(weapon, dict):
+                if weapon:
                     html += f'''
     <div class="weapon-item">
       <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
@@ -825,21 +783,19 @@ body {{
     </div>
 '''
 
-        # Règles spéciales
-        if rules:
+        if special_rules:
             html += '''
   <div class="rules-section">
     <div class="rules-title">Règles spéciales:</div>
     <div class="rules-list">
 '''
-            for rule in rules:
+            for rule in special_rules:
                 html += f'<span class="rule-tag"><span class="rule-name">{esc(rule)}</span></span>'
             html += '''
     </div>
   </div>
 '''
 
-        # Améliorations sélectionnées
         if options:
             html += '''
   <div class="upgrades-section">
@@ -864,7 +820,6 @@ body {{
   </div>
 '''
 
-        # Monture
         if mount:
             mount_data = mount.get("mount", {})
             mount_name = esc(mount.get("name", "Monture"))
@@ -976,13 +931,16 @@ body {{
 '''
             for spell in sorted(all_spells, key=lambda x: x['name'].lower().replace('é', 'e').replace('è', 'e')):
                 if isinstance(spell, dict):
+                    spell_name = esc(spell.get('name', ''))
+                    spell_cost = spell.get('details', {}).get('cost', '?')
+                    spell_desc = esc(spell.get('details', {}).get('description', ''))
                     html += f'''
       <div class="spell-item" style="margin-bottom: 12px;">
         <div>
-          <span class="spell-name">{esc(spell.get('name', ''))}</span>
-          <span class="spell-cost"> ({spell.get('details', {}).get('cost', '?')})</span>
+          <span class="spell-name">{spell_name}</span>
+          <span class="spell-cost"> ({spell_cost})</span>
         </div>
-        <div class="rule-description">{esc(spell.get('details', {}).get('description', ''))}</div>
+        <div class="rule-description">{spell_desc}</div>
       </div>
 '''
             html += '''
