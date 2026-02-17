@@ -781,15 +781,26 @@ body {{
         # Armes
         if weapons:
             html += '<div class="section-title">Armes:</div>'
-
-            # Afficher toutes les armes de l'unité
-            for weapon in weapons:
-                if weapon:
+        
+            # Vérifier si on a des armes combinées (tableau)
+            if isinstance(weapons, list) and len(weapons) > 0:
+                if len(weapons) > 1:
+                    # Cas des armes combinées (Sabots + Attaques, Griffes + Armes, etc.)
+                    for weapon in weapons:
+                        if weapon:
+                            html += f'''
+            <div class="weapon-item">
+              <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
+              <div class="weapon-stats">{format_weapon(weapon)}</div>
+            </div>
+        '''
+                else:
+                    # Cas d'une seule arme
                     html += f'''
-    <div class="weapon-item">
-      <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
-      <div class="weapon-stats">{format_weapon(weapon)}</div>
-    </div>
+            <div class="weapon-item">
+              <div class="weapon-name">{esc(weapons[0].get('name', 'Arme'))}</div>
+              <div class="weapon-stats">{format_weapon(weapons[0])}</div>
+            </div>
 '''
 
         # Règles spéciales
