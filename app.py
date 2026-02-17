@@ -1862,43 +1862,41 @@ if st.button("➕ Ajouter à l'armée"):
     if mount and "mount" in mount:
         coriace_total += mount["mount"].get("coriace_bonus", 0)
 
-    # Préparation des règles spéciales
-    all_special_rules = unit.get("special_rules", []).copy()
-
-    # Règles spéciales des améliorations
-    for group in unit.get("upgrade_groups", []):
-        group_key = f"group_{unit.get('upgrade_groups', []).index(group)}"
-        if st.session_state.unit_selections.get(unit_key, {}).get(group_key):
-            selected_option = st.session_state.unit_selections[unit_key][group_key]
-
-            # Trouver l'option sélectionnée
-            for opt in group.get("options", []):
-                if isinstance(opt, dict):
-                    # Vérifier si c'est l'option sélectionnée
-                    if group.get("type") == "weapon":
-                        weapon = opt.get("weapon", {})
-                        if isinstance(weapon, list):
-                            label = " | ".join([format_weapon_option(w) for w in weapon]) + f" (+{opt['cost']} pts)"
-                        else:
-                            label = format_weapon_option(weapon, opt['cost'])
-
-                        if label == selected_option:
-                            if "special_rules" in opt:
-                                all_special_rules.extend(opt["special_rules"])
-                            break
-                    elif "special_rules" in opt:
-                        all_special_rules.extend(opt["special_rules"])
-
-    # Règles spéciales de la monture
-    if mount:
-        mount_data = mount.get("mount", {})
-        if "special_rules" in mount_data:
-            for rule in mount_data["special_rules"]:
-                if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
-                    all_special_rules.append(rule)
-
-    # Gestion des armes - CORRECTION COMPLÈTE
-    final_weapons = []
+    # =========================
+    # Construction finale propre
+    # =========================
+    
+    all_special_rules = set()
+    
+    # 1️⃣ Règles du profil de base
+    for rule in selected_unit.get("special_rules", []):
+        if isinstance(rule, str):
+            all_special_rules.add(rule)
+    
+    # 2️⃣ Règles des armes FINALES uniquement
+    for weapon in final_weapons:
+        if isinstance(weapon, dict):
+            for rule in weapon.get("special_rules", []):
+                if isinstance(rule, str):
+                    all_special_rules.add(rule)
+    
+    # 3️⃣ Règles de la monture sélectionnée
+    if selected_mount:
+        mount_data = selected_mount.get("mount", {})
+        for rule in mount_data.get("special_rules", []):
+            if isinstance(rule, str):
+                all_special_rules.add(rule)
+    
+    # 4️⃣ Règles des options réellement sélectionnées
+    for group_name, group_data in st.session_state.selected_options.items():
+        for opt in group_data.get("selected", []):
+            for rule in opt.get("special_rules", []):
+                if isinstance(rule, str):
+                    all_special_rules.add(rule)
+    
+    all_special_rules = list(all_special_rules)
+        # Gestion des armes - CORRECTION COMPLÈTE
+        final_weapons = []
     
     # 1. Ajouter les armes de base
     base_weapons = unit.get("weapon", [])
