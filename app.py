@@ -426,7 +426,7 @@ def export_html(army_list, army_name, army_limit):
 
         return result
 
-    ddef get_special_rules(unit):
+    def get_special_rules(unit):
         """Utilise uniquement les règles finales déjà calculées"""
         rules = set()
     
