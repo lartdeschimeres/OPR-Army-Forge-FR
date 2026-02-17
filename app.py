@@ -431,13 +431,13 @@ def export_html(army_list, army_name, army_limit):
         # 1. Commencer avec les armes de base
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
-            weapons = [weapons]
+            weapons = [weapons] if weapons else []
 
-        # 2. Traiter les remplacements d'armes
-        if "options" in unit:
+        # 2. Traiter les remplacements d'armes si l'unité a des upgrade_groups
+        if "upgrade_groups" in unit:
             for group in unit["upgrade_groups"]:
-                if group.get("type") == "weapon":
-                    for opt in group.get("options", []):
+                if group.get("type") == "weapon" and "options" in group:
+                    for opt in group["options"]:
                         if "replaces" in opt and "weapon" in opt:
                             # Retirer les armes remplacées
                             replaces = opt.get("replaces", [])
@@ -453,7 +453,7 @@ def export_html(army_list, army_name, army_limit):
                             else:
                                 weapons.append(weapon)
 
-        # 3. Ajouter les améliorations d'arme (arc, javelot, etc.)
+        # 3. Ajouter les améliorations d'arme si elles existent
         if "weapon_upgrades" in unit:
             for upgrade in unit["weapon_upgrades"]:
                 if isinstance(upgrade, dict):
@@ -473,12 +473,13 @@ def export_html(army_list, army_name, army_limit):
 
         # 2. Règles des options sélectionnées
         if "options" in unit:
-            for group in unit["upgrade_groups"]:
-                for opt in group.get("options", []):
-                    if "special_rules" in opt:
-                        for rule in opt["special_rules"]:
-                            if isinstance(rule, str):
-                                rules.add(rule)
+            for group_name, opts in unit["options"].items():
+                if isinstance(opts, list):
+                    for opt in opts:
+                        if "special_rules" in opt:
+                            for rule in opt["special_rules"]:
+                                if isinstance(rule, str):
+                                    rules.add(rule)
 
         # 3. Règles des armes finales
         weapons = get_unit_weapons(unit)
@@ -489,7 +490,7 @@ def export_html(army_list, army_name, army_limit):
                         rules.add(rule)
 
         # 4. Règles de la monture
-        if "mount" in unit and unit["mount"]:
+        if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
             if "special_rules" in mount_data:
                 for rule in mount_data["special_rules"]:
@@ -758,9 +759,15 @@ body {{
 
         tough_value = unit.get("coriace", 0)
 
-        # Récupération des données finales
-        weapons = get_unit_weapons(unit)
-        rules = get_unit_rules(unit)
+        # Récupération des données finales avec gestion des cas manquants
+        weapons = []
+        if "weapon" in unit:
+            weapons = get_unit_weapons(unit)
+
+        rules = []
+        if "special_rules" in unit or "options" in unit or "mount" in unit:
+            rules = get_unit_rules(unit)
+
         options = unit.get("options", {})
         mount = unit.get("mount", None)
 
