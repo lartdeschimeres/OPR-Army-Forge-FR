@@ -1689,7 +1689,7 @@ if st.session_state.page == "army":
             # Pour les armes de base
             if isinstance(base_weapons, list) and base_weapons:
                 if len(base_weapons) > 1:
-                    # Cas des armes combinées comme Sabots et Attaques de l'équipage
+                    # Cas des armes combinées
                     weapon_profiles = []
                     for weapon in base_weapons:
                         profile = format_weapon_option(weapon)
@@ -1704,7 +1704,21 @@ if st.session_state.page == "army":
             opt_map = {}
             for o in group.get("options", []):
                 weapon = o.get("weapon", {})
-                label = format_weapon_option(weapon, o['cost'])
+                option_name = o.get("name", "")
+                cost = o.get("cost", 0)
+                replaces = o.get("replaces", [])
+        
+                # Affichage simplifié qui montre uniquement ce qui change
+                if isinstance(weapon, list):
+                    # On affiche uniquement les nouvelles armes
+                    new_weapons = []
+                    for new_weapon in weapon:
+                        profile = format_weapon_option(new_weapon)
+                        new_weapons.append(profile)
+                    label = " | ".join(new_weapons) + f" (+{cost} pts)"
+                else:
+                    label = format_weapon_option(weapon, cost)
+        
                 choices.append(label)
                 opt_map[label] = o
         
