@@ -426,6 +426,43 @@ def export_html(army_list, army_name, army_limit):
 
         return result
 
+    def get_final_weapons(unit):
+        """Récupère les armes finales en tenant compte des remplacements"""
+        # 1. Commencer avec les armes de base
+        weapons = unit.get("weapon", [])
+        if not isinstance(weapons, list):
+            weapons = [weapons]
+
+        # 2. Traiter les remplacements d'armes
+        if "options" in unit:
+            for group_name, opts in unit["options"].items():
+                if isinstance(opts, list):
+                    for opt in opts:
+                        # Vérifier si c'est une option de remplacement d'arme sélectionnée
+                        if "replaces" in opt and "weapon" in opt:
+                            # Retirer les armes remplacées
+                            replaces = opt.get("replaces", [])
+                            if isinstance(replaces, list):
+                                weapons = [w for w in weapons if w.get('name') not in replaces]
+                            elif isinstance(replaces, str):
+                                weapons = [w for w in weapons if w.get('name') != replaces]
+
+                            # Ajouter les nouvelles armes
+                            weapon = opt.get("weapon", {})
+                            if isinstance(weapon, list):
+                                weapons.extend(weapon)
+                            else:
+                                weapons.append(weapon)
+
+        # 3. Ajouter les améliorations d'arme (arc, javelot, etc.)
+        weapon_upgrades = unit.get("weapon_upgrades", [])
+        if isinstance(weapon_upgrades, list):
+            for upgrade in weapon_upgrades:
+                if isinstance(upgrade, dict):
+                    weapons.append(upgrade)
+
+        return weapons
+
     def get_special_rules(unit):
         """Extraire toutes les règles spéciales de l'unité"""
         rules = set()
@@ -444,11 +481,9 @@ def export_html(army_list, army_name, army_limit):
                                 if isinstance(rule, str):
                                     rules.add(rule)
 
-        weapons = unit.get("weapon", [])
-        if not isinstance(weapons, list):
-            weapons = [weapons]
-
-        for weapon in weapons:
+        # Ajouter les règles spéciales des armes finales
+        final_weapons = get_final_weapons(unit)
+        for weapon in final_weapons:
             if isinstance(weapon, dict) and "special_rules" in weapon:
                 for rule in weapon["special_rules"]:
                     if isinstance(rule, str):
@@ -722,13 +757,12 @@ body {{
             unit_size = 1
 
         tough_value = unit.get("coriace", 0)
-        weapons = unit.get("weapon", [])
-        if not isinstance(weapons, list):
-            weapons = [weapons]
-        weapon_upgrades = unit.get("weapon_upgrades", [])
         special_rules = get_special_rules(unit)
         options = unit.get("options", {})
         mount = unit.get("mount", None)
+
+        # Récupération des armes finales (après remplacements)
+        final_weapons = get_final_weapons(unit)
 
         html += f'''
 <div class="unit-card">
@@ -772,10 +806,11 @@ body {{
   </div>
 '''
 
-        if weapons:
+        # Armes (version corrigée)
+        if final_weapons:
             html += '<div class="section-title">Armes:</div>'
-            for weapon in weapons:
-                if weapon:
+            for weapon in final_weapons:
+                if weapon and isinstance(weapon, dict):
                     html += f'''
     <div class="weapon-item">
       <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
@@ -931,16 +966,13 @@ body {{
 '''
             for spell in sorted(all_spells, key=lambda x: x['name'].lower().replace('é', 'e').replace('è', 'e')):
                 if isinstance(spell, dict):
-                    spell_name = esc(spell.get('name', ''))
-                    spell_cost = spell.get('details', {}).get('cost', '?')
-                    spell_desc = esc(spell.get('details', {}).get('description', ''))
                     html += f'''
       <div class="spell-item" style="margin-bottom: 12px;">
         <div>
-          <span class="spell-name">{spell_name}</span>
-          <span class="spell-cost"> ({spell_cost})</span>
+          <span class="spell-name">{esc(spell.get('name', ''))}</span>
+          <span class="spell-cost"> ({spell.get('details', {}).get('cost', '?')})</span>
         </div>
-        <div class="rule-description">{spell_desc}</div>
+        <div class="rule-description">{esc(spell.get('details', {}).get('description', ''))}</div>
       </div>
 '''
             html += '''
