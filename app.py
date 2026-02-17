@@ -1824,9 +1824,12 @@ if st.session_state.page == "army":
         
             for o in group.get("options", []):
                 # Formatage complet des armes d'amélioration
-                weapon = o.get("weapon", {})
-                if isinstance(weapon, dict):
-                    label = format_weapon_option(weapon, o['cost'])
+                if "weapon" in o:
+                    weapon = o.get("weapon", {})
+                    if isinstance(weapon, dict):
+                        label = format_weapon_option(weapon, o['cost'])
+                    else:
+                        label = f"{o['name']} (+{o['cost']} pts)"
                 else:
                     label = f"{o['name']} (+{o['cost']} pts)"
         
@@ -1846,10 +1849,10 @@ if st.session_state.page == "army":
             if choice != "Aucune amélioration d'arme":
                 opt = opt_map[choice]
                 upgrades_cost += opt["cost"]
-
-        # Ajouter l'arme d'amélioration à la liste des armes
-        if "weapon" in opt:
-            weapon_upgrades.append(opt["weapon"])
+        
+                # Ajouter l'arme d'amélioration à la liste des armes
+                if "weapon" in opt:
+                    weapon_upgrades.append(opt["weapon"])
 
         # MONTURE
         elif group.get("type") == "mount":
@@ -1948,21 +1951,21 @@ if st.button("➕ Ajouter à l'armée"):
                 if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                     all_special_rules.append(rule)
 
-    # Gestion des armes - CORRECTION PRINCIPALE ICI
+    # Gestion des armes - CORRECTION COMPLÈTE
     final_weapons = []
-
+    
     # 1. Ajouter les armes de base
     base_weapons = unit.get("weapon", [])
     if not isinstance(base_weapons, list):
         base_weapons = [base_weapons]
     final_weapons.extend(base_weapons)
-
+    
     # 2. Traiter les remplacements d'armes
     for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
         g_key = f"group_{g_idx}"
         if group.get("type") == "weapon" and st.session_state.unit_selections.get(unit_key, {}).get(g_key):
             selected_option = st.session_state.unit_selections[unit_key][g_key]
-
+    
             # Trouver l'option sélectionnée
             for opt in group.get("options", []):
                 if isinstance(opt, dict):
@@ -1973,20 +1976,33 @@ if st.button("➕ Ajouter à l'armée"):
                             label = " | ".join([format_weapon_option(w) for w in weapon]) + f" (+{opt['cost']} pts)"
                         else:
                             label = format_weapon_option(weapon, opt['cost'])
-
+    
                         if label == selected_option:
                             # Remplacer les armes spécifiées
                             replaces = opt.get("replaces", [])
                             if replaces:
                                 # Retirer les armes remplacées
                                 final_weapons = [w for w in final_weapons if w.get('name') not in replaces]
-
+    
                             # Ajouter les nouvelles armes
                             if isinstance(weapon, list):
                                 final_weapons.extend(weapon)
                             else:
                                 final_weapons.append(weapon)
                             break
+    
+    # 3. Ajouter les améliorations d'arme (arc, javelot, etc.)
+    for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
+        g_key = f"group_{g_idx}"
+        if group.get("type") == "weapon_upgrades" and st.session_state.unit_selections.get(unit_key, {}).get(g_key):
+            selected_option = st.session_state.unit_selections[unit_key][g_key]
+            if selected_option != "Aucune amélioration d'arme":
+                for opt in group.get("options", []):
+                    if format_weapon_option(opt.get("weapon", {}), opt['cost']) == selected_option:
+                        # Ajouter l'arme d'amélioration
+                        if "weapon" in opt:
+                            final_weapons.append(opt["weapon"])
+                        break
 
     # Création de l'unité avec les armes correctes
     unit_data = {
