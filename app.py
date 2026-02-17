@@ -1849,7 +1849,7 @@ if st.session_state.page == "army":
 
         # Ajouter l'arme d'amélioration à la liste des armes
         if "weapon" in opt:
-            weapon_upgrades.append(opt["weapon"]))
+            weapon_upgrades.append(opt["weapon"])
 
         # MONTURE
         elif group.get("type") == "mount":
