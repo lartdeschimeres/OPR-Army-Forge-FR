@@ -1413,7 +1413,7 @@ def format_mount_option(mount):
     return label
 
 def format_unit_option(u):
-    """Formate l'option d'unité avec tous les détails"""
+    """Formate l'option d'unité avec plus de détails"""
     name_part = f"{u['name']}"
     if u.get('type') == "hero":
         name_part += " [1]"
@@ -1426,11 +1426,13 @@ def format_unit_option(u):
     if isinstance(weapons, list):
         for weapon in weapons:
             if isinstance(weapon, dict):
-                profile = format_weapon_profile(weapon)
-                weapon_profiles.append(profile)
+                attacks = weapon.get('attacks', '?')
+                ap = weapon.get('armor_piercing', '?')
+                weapon_profiles.append(f"A{attacks}/PA{ap}")
     elif isinstance(weapons, dict):
-        profile = format_weapon_profile(weapons)
-        weapon_profiles.append(profile)
+        attacks = weapons.get('attacks', '?')
+        ap = weapons.get('armor_piercing', '?')
+        weapon_profiles.append(f"A{attacks}/PA{ap}")
 
     weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune"
 
@@ -1440,17 +1442,17 @@ def format_unit_option(u):
     if isinstance(special_rules, list):
         for rule in special_rules:
             if isinstance(rule, str):
-                if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
-                    rules_text.append(rule)
+                rules_text.append(rule)
             elif isinstance(rule, dict):
                 rules_text.append(rule.get('name', ''))
 
     rules_text = ", ".join(rules_text) if rules_text else "Aucune"
 
-    qua_def = f"Déf {u.get('defense', '?')}+"
+    # Construction du texte final avec Qua X+ avant Déf X+
+    qua_def = f"Qua {u.get('quality', '?')}+ | Déf {u.get('defense', '?')}+"  # Modification ici
     cost = f"{u.get('base_cost', 0)}pts"
 
-    return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
+    return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète avec filtres)
