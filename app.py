@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # ======================================================
-# CSS - MODIFIÉ POUR CORRESPONDRE AU STYLE QUE VOUS AIMEZ
+# CSS - MODIFIÉ
 # ======================================================
 st.markdown(
     """
@@ -428,20 +428,16 @@ def export_html(army_list, army_name, army_limit):
         if not weapon:
             return "Aucune arme"
 
-        # Récupération des données de l'arme
         range_text = weapon.get('range', '-')
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
         special_rules = weapon.get('special_rules', [])
 
-        # Traitement de la portée (suppression des guillemets)
         if range_text == "-" or range_text is None or range_text.lower() == "mêlée":
             range_text = "Mêlée"
         else:
-            # On enlève les guillemets s'ils sont présents
             range_text = range_text.replace('"', '').replace("'", "")
 
-        # Construction du résultat
         result = f"{range_text} | A{attacks}"
 
         if ap not in ("-", 0, "0", None):
@@ -456,13 +452,11 @@ def export_html(army_list, army_name, army_limit):
         """Extraire toutes les règles spéciales de l'unité"""
         rules = set()
 
-        # 1. Règles spéciales de base
         if "special_rules" in unit:
             for rule in unit["special_rules"]:
                 if isinstance(rule, str):
                     rules.add(rule)
 
-        # 2. Règles spéciales des améliorations
         if "options" in unit:
             for group_name, opts in unit["options"].items():
                 if isinstance(opts, list):
@@ -472,7 +466,6 @@ def export_html(army_list, army_name, army_limit):
                                 if isinstance(rule, str):
                                     rules.add(rule)
 
-        # 3. Règles spéciales des armes
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
             weapons = [weapons]
@@ -483,7 +476,6 @@ def export_html(army_list, army_name, army_limit):
                     if isinstance(rule, str):
                         rules.add(rule)
 
-        # 4. Règles spéciales de la monture
         if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
             if "special_rules" in mount_data:
@@ -605,7 +597,7 @@ body {{
 
 .stats-grid {{
   display: grid;
-  grid-template-columns: repeat(3, 1fr);  /* Modifié pour 3 colonnes au lieu de 5 */
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   background: var(--bg-header);
   padding: 12px;
@@ -671,7 +663,7 @@ body {{
 .rules-title {{
   font-weight: 600;
   margin-bottom: 6px;
-  color: #3498db;  /* Modifié pour bleu */
+  color: #3498db;
   font-size: 14px;
 }}
 
@@ -697,7 +689,7 @@ body {{
 }}
 
 .faction-rules h3, .spells-section h3 {{
-  color: #3498db !important;  /* Modifié pour bleu */
+  color: #3498db !important;
 }}
 
 @media print {{
@@ -743,21 +735,14 @@ body {{
         if unit.get("type") == "hero":
             unit_size = 1
 
-        # Calcul de la valeur de Coriace
         tough_value = unit.get("coriace", 0)
 
-        # Récupération des armes
+        # Récupération des données
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
             weapons = [weapons]
-
-        # Récupération des armes améliorées
         weapon_upgrades = unit.get("weapon_upgrades", [])
-
-        # Récupération des règles spéciales
         special_rules = get_special_rules(unit)
-
-        # Récupération des options et montures
         options = unit.get("options", {})
         mount = unit.get("mount", None)
 
@@ -770,7 +755,7 @@ body {{
         <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
       </h3>
       <div class="unit-type">
-        {"⭐" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
+        {"★" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
       </div>
     </div>
     <div class="unit-cost">{cost} pts</div>
@@ -785,24 +770,20 @@ body {{
       <div class="stat-label"><span>🛡️</span> Défense</div>
       <div class="stat-value">{defense}+</div>
     </div>
-"""
+'''
 
-        # Affichage de la Coriace
         if tough_value > 0:
             html += f'''
     <div class="stat-item">
       <div class="stat-label"><span>❤️</span> Coriace</div>
-      <div class="stat-value tough-value">{tough_value}</div>
+      <div class="stat-value" style="color: var(--tough-color);">{tough_value}</div>
     </div>
 '''
 
-        html += '</div>'  # Fermeture du stats-grid SANS coût de base ni taille
+        html += '</div>'  # Fermeture du stats-grid sans coût ni taille
 
-        # Armes
         if weapons:
             html += '<div class="section-title">Armes:</div>'
-
-            # Afficher toutes les armes de l'unité
             for weapon in weapons:
                 if weapon:
                     html += f'''
@@ -812,7 +793,6 @@ body {{
     </div>
 '''
 
-        # Règles spéciales
         if special_rules:
             html += '''
   <div class="rules-section">
@@ -826,7 +806,6 @@ body {{
   </div>
 '''
 
-        # Améliorations d'unité
         if options:
             html += '''
   <div class="upgrades-section">
@@ -848,7 +827,6 @@ body {{
   </div>
 '''
 
-        # Monture
         if mount:
             mount_data = mount.get("mount", {})
             mount_name = esc(mount.get("name", "Monture"))
@@ -862,7 +840,6 @@ body {{
         </div>
 '''
 
-            # Caractéristiques de la monture
             stats_parts = []
             if 'quality' in mount_data:
                 stats_parts.append(f"Qualité {mount_data['quality']}+")
@@ -875,7 +852,6 @@ body {{
     </div>
 '''
 
-            # Armes de la monture
             if mount_weapons:
                 html += '''
     <div style="margin-top: 8px;">
@@ -901,7 +877,6 @@ body {{
 
         html += '</div>'
 
-    # Légende des règles spéciales de la faction
     if sorted_army_list and hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
         faction_rules = st.session_state.faction_special_rules
         all_rules = [rule for rule in faction_rules if isinstance(rule, dict)]
@@ -946,7 +921,6 @@ body {{
 </div>
 '''
 
-    # Légende des sorts de la faction
     if sorted_army_list and hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
         spells = st.session_state.faction_spells
         all_spells = [{"name": name, "details": details} for name, details in spells.items() if isinstance(details, dict)]
@@ -986,7 +960,7 @@ body {{
 </html>
 '''
     return html
-
+    
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
