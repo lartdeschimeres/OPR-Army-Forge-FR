@@ -177,6 +177,28 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+"""
+.stat-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.rules-title {
+    color: #3498db !important;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.faction-rules h3, .spells-section h3 {
+    color: #3498db !important;
+}
+"""
 
 # ======================================================
 # INITIALISATION
@@ -583,7 +605,7 @@ body {{
 
 .stats-grid {{
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);  /* Modifié pour 3 colonnes au lieu de 5 */
   gap: 8px;
   background: var(--bg-header);
   padding: 12px;
@@ -602,6 +624,10 @@ body {{
   font-size: 10px;
   text-transform: uppercase;
   margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }}
 
 .stat-value {{
@@ -645,7 +671,7 @@ body {{
 .rules-title {{
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--accent);
+  color: #3498db;  /* Modifié pour bleu */
   font-size: 14px;
 }}
 
@@ -668,6 +694,10 @@ body {{
   font-size: 24px;
   font-weight: bold;
   color: var(--cost-color);
+}}
+
+.faction-rules h3, .spells-section h3 {{
+  color: #3498db !important;  /* Modifié pour bleu */
 }}
 
 @media print {{
@@ -748,35 +778,25 @@ body {{
 
   <div class="stats-grid">
     <div class="stat-item">
-      <div class="stat-label">Qualité</div>
+      <div class="stat-label"><span>⚔️</span> Qualité</div>
       <div class="stat-value">{quality}+</div>
     </div>
     <div class="stat-item">
-      <div class="stat-label">Défense</div>
+      <div class="stat-label"><span>🛡️</span> Défense</div>
       <div class="stat-value">{defense}+</div>
     </div>
-'''
+"""
 
         # Affichage de la Coriace
         if tough_value > 0:
             html += f'''
     <div class="stat-item">
-      <div class="stat-label">Coriace</div>
+      <div class="stat-label"><span>❤️</span> Coriace</div>
       <div class="stat-value tough-value">{tough_value}</div>
     </div>
 '''
 
-        html += f'''
-    <div class="stat-item">
-      <div class="stat-label">Coût Base</div>
-      <div class="stat-value">{cost} pts</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-label">Taille</div>
-      <div class="stat-value">{unit_size}</div>
-    </div>
-  </div>
-'''
+        html += '</div>'  # Fermeture du stats-grid SANS coût de base ni taille
 
         # Armes
         if weapons:
@@ -889,7 +909,7 @@ body {{
         if all_rules:
             html += '''
 <div class="faction-rules">
-  <h3 style="text-align: center; color: var(--accent); border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
+  <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
     Légende des règles spéciales de la faction
   </h3>
   <div style="display: flex; flex-wrap: wrap;">
@@ -934,7 +954,7 @@ body {{
         if all_spells:
             html += '''
 <div class="spells-section">
-  <h3 style="text-align: center; color: var(--accent); border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
+  <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
     Légende des sorts de la faction
   </h3>
   <div style="display: flex; flex-wrap: wrap;">
