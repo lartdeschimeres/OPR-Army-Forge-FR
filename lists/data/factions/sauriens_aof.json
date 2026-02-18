@@ -4,7 +4,7 @@
     "version": "FR-3.5.2",
     "status": "complete",
     "description": "Les armées de Sauriens sont issues d’une improbable coalition de reptiles humanoïdes, dirigées par des Grenouilles-Mages. Ils combattent aux côtés d'une variété de puissantes créatures ressemblant à des dinosaures provenant des jungles de leur plan astral d’origine. Les Sauriens exécutaient aveuglément les prophéties des Grenouilles-Mages, qui croyaient qu'ils affronteraient les Dieux du Ravage afin de sauver leur monde. Cependant, avec l'ouverture de la Faille, il semblerait qu'ils soient arrivés trop tard. Désormais, ils doivent faire face à l’échec apparent des pouvoirs des Grenouilles-Mages et de leur prophétie",
-    "faction_special_rules": {
+    "faction_special_rules": [
 	{        
 	  "name": "Primal [Primal]"
 	  "description": "Pour chaque jet non modifié de 6 pour toucher lors d'une attaque, cette figurine peut lancer +1 attaque avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées.",
