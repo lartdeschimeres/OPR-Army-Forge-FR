@@ -494,8 +494,8 @@ def format_unit_option(u):
 
     rules_text = ", ".join(rules_text) if rules_text else "Aucune"
 
-    # Construction du texte final
-    qua_def = f"Déf {u.get('defense', '?')}+"
+    # Construction du texte final avec Qua X+ avant Déf X+
+    qua_def = f"Qua {u.get('quality', '?')}+ | Déf {u.get('defense', '?')}+"  # Modification ici
     cost = f"{u.get('base_cost', 0)}pts"
 
     return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
