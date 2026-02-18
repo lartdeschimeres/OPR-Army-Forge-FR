@@ -1798,21 +1798,7 @@ if st.session_state.page == "army":
             if choice != "Aucune amélioration d'arme":
                 opt = opt_map[choice]
                 upgrades_cost += opt["cost"]
-        
-                # Afficher les caractéristiques de l'arme sélectionnée
-                if "weapon" in opt:
-                    weapon = opt["weapon"]
-                    if isinstance(weapon, dict):
-                        st.markdown(f"""
-                        <div style='background: #f0f2f6; padding: 10px; border-radius: 5px; margin: 10px 0;'>
-                            <strong>Caractéristiques de {weapon.get('name', 'Arme')}:</strong><br>
-                            • Portée: {weapon.get('range', 'Mêlée')}<br>
-                            • Attaques: {weapon.get('attacks', '?')}<br>
-                            • PA: {weapon.get('armor_piercing', '-')}<br>
-                            {"• " + ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ''}
-                        </div>
-                        """, unsafe_allow_html=True)
-        
+                
                 weapon_upgrades.append(opt["weapon"])
 
         # MONTURE
