@@ -1420,17 +1420,24 @@ def format_unit_option(u):
     else:
         name_part += f" [{u.get('size', 10)}]"
 
+    # Ajout de la Qualité avant la Défense
+    quality = u.get('quality', '?')
+    defense = u.get('defense', '?')
+    qua_def = f"Qua {quality}+ | Déf {defense}+"  # Format corrigé
+
     # Récupération des armes de base
     weapons = u.get('weapon', [])
     weapon_profiles = []
     if isinstance(weapons, list):
         for weapon in weapons:
             if isinstance(weapon, dict):
-                profile = format_weapon_profile(weapon)
-                weapon_profiles.append(profile)
+                attacks = weapon.get('attacks', '?')
+                ap = weapon.get('armor_piercing', '?')
+                weapon_profiles.append(f"A{attacks}/PA{ap}")
     elif isinstance(weapons, dict):
-        profile = format_weapon_profile(weapons)
-        weapon_profiles.append(profile)
+        attacks = weapons.get('attacks', '?')
+        ap = weapons.get('armor_piercing', '?')
+        weapon_profiles.append(f"A{attacks}/PA{ap}")
 
     weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune"
 
@@ -1446,10 +1453,9 @@ def format_unit_option(u):
                 rules_text.append(rule.get('name', ''))
 
     rules_text = ", ".join(rules_text) if rules_text else "Aucune"
-
-    qua_def = f"Déf {u.get('defense', '?')}+"
     cost = f"{u.get('base_cost', 0)}pts"
 
+    # Retour simple et efficace
     return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
 
 # ======================================================
