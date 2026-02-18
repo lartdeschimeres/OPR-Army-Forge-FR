@@ -36,6 +36,120 @@ st.markdown(
         letter-spacing: 0.04em;
     }
 
+    /* AMÉLIORATIONS POUR LA PAGE 1 */
+
+    /* Conteneurs des éléments de sélection */
+    [data-testid="column"] {
+        padding: 0.75rem;
+        background-color: white;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+    }
+
+    /* Style pour les selectbox et inputs */
+    .stSelectbox > div > div,
+    .stNumberInput > div > div,
+    .stTextInput > div > div {
+        background-color: white !important;
+        border: 1px solid #3498db !important;
+        border-radius: 6px !important;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
+
+    /* Style pour les labels des selectbox */
+    .stSelectbox label,
+    .stNumberInput label,
+    .stTextInput label {
+        color: #2c3e50;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Style amélioré pour les badges */
+    .badge {
+        display: inline-block;
+        padding: 0.3rem 0.75rem;
+        border-radius: 4px;
+        background: #3498db;
+        color: white;
+        font-size: 0.8rem;
+        margin-bottom: 0.75rem;
+        font-weight: bold;
+        box-shadow: 0 1px 2px rgba(52, 152, 219, 0.2);
+    }
+
+    /* Style amélioré pour le bouton primary */
+    button[kind="primary"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        color: white !important;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+        transition: all 0.2s ease;
+        height: auto;
+        min-height: 44px;
+    }
+
+    button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #2980b9, #1e5aa8) !important;
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        transform: translateY(-1px);
+    }
+
+    /* Style pour le conteneur principal de la page 1 */
+    [data-testid="stAppViewContainer"] > div {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Style pour l'image de fond de la bannière */
+    .game-bg {
+        background: linear-gradient(to bottom,
+            rgba(0,0,0,0.7) 0%,
+            rgba(0,0,0,0.4) 50%,
+            rgba(0,0,0,0.1) 100%);
+        background-size: cover;
+        background-position: center;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        position: relative;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .game-bg .content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        text-align: center;
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .game-bg h2 {
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        margin-bottom: 0.5rem;
+        font-size: 1.75rem;
+    }
+
+    .game-bg p {
+        color: rgba(255,255,255,0.9);
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        font-size: 1.1rem;
+    }
+
+    /* Style pour les cartes */
     .card {
         background: #ffffff;
         border: 2px solid #3498db;
@@ -43,35 +157,16 @@ st.markdown(
         padding: 1.2rem;
         transition: all 0.2s ease;
         cursor: pointer;
-        box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
     }
 
     .card:hover {
         border-color: #2980b9;
-        box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
+        box-shadow: 0 4px 16px rgba(52, 152, 219, 0.3);
         transform: translateY(-2px);
     }
 
-    .badge {
-        display: inline-block;
-        padding: 0.25rem 0.6rem;
-        border-radius: 4px;
-        background: #3498db;
-        color: white;
-        font-size: 0.75rem;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-    }
-
-    button[kind="primary"] {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        color: white !important;
-        font-weight: bold;
-        border-radius: 6px;
-        padding: 0.6rem 1rem;
-        border: none;
-    }
-
+    /* Le reste de votre CSS existant */
     .rule-item, .spell-item {
         font-size: 14px;
         margin-bottom: 5px;
@@ -172,6 +267,29 @@ st.markdown(
 
     .tough-value {
         color: #f87171 !important;
+    }
+
+    /* Ajout pour améliorer le contraste des éléments de formulaire */
+    .stTextInput > div > div > input {
+        color: #2c3e50 !important;
+        font-weight: 500;
+    }
+
+    .stSelectbox > div > div > select {
+        color: #2c3e50 !important;
+    }
+
+    .stNumberInput > div > div > input {
+        color: #2c3e50 !important;
+        font-weight: 500;
+    }
+
+    /* Style pour les diviseurs */
+    hr {
+        border: 0;
+        height: 1px;
+        background: #dee2e6;
+        margin: 1.5rem 0;
     }
     </style>
     """,
