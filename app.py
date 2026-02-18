@@ -406,20 +406,16 @@ def export_html(army_list, army_name, army_limit):
         if not weapon:
             return "Aucune arme"
 
-        # Récupération des données de l'arme
         range_text = weapon.get('range', '-')
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
         special_rules = weapon.get('special_rules', [])
 
-        # Traitement de la portée (suppression des guillemets)
         if range_text == "-" or range_text is None or range_text.lower() == "mêlée":
             range_text = "Mêlée"
         else:
-            # On enlève les guillemets s'ils sont présents
             range_text = range_text.replace('"', '').replace("'", "")
 
-        # Construction du résultat
         result = f"{range_text} | A{attacks}"
 
         if ap not in ("-", 0, "0", None):
@@ -434,13 +430,11 @@ def export_html(army_list, army_name, army_limit):
         """Extraire toutes les règles spéciales de l'unité"""
         rules = set()
 
-        # 1. Règles spéciales de base
         if "special_rules" in unit:
             for rule in unit["special_rules"]:
                 if isinstance(rule, str):
                     rules.add(rule)
 
-        # 2. Règles spéciales des améliorations
         if "options" in unit:
             for group_name, opts in unit["options"].items():
                 if isinstance(opts, list):
@@ -450,7 +444,6 @@ def export_html(army_list, army_name, army_limit):
                                 if isinstance(rule, str):
                                     rules.add(rule)
 
-        # 3. Règles spéciales des armes
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
             weapons = [weapons]
@@ -461,7 +454,6 @@ def export_html(army_list, army_name, army_limit):
                     if isinstance(rule, str):
                         rules.add(rule)
 
-        # 4. Règles spéciales de la monture
         if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
             if "special_rules" in mount_data:
@@ -583,7 +575,7 @@ body {{
 
 .stats-grid {{
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   background: var(--bg-header);
   padding: 12px;
@@ -595,6 +587,9 @@ body {{
 
 .stat-item {{
   padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }}
 
 .stat-label {{
@@ -602,6 +597,9 @@ body {{
   font-size: 10px;
   text-transform: uppercase;
   margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }}
 
 .stat-value {{
@@ -716,33 +714,11 @@ body {{
         # Calcul de la valeur de Coriace
         tough_value = unit.get("coriace", 0)
 
-        # Récupération des armes de base et des améliorations
+        # Récupération des armes
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
             weapons = [weapons]
 
-        # Récupération des améliorations d'arme
-        weapon_upgrades = unit.get("weapon_upgrades", [])
-        if not isinstance(weapon_upgrades, list):
-            weapon_upgrades = [weapon_upgrades]
-
-        # Combiner les armes de base et les améliorations
-        all_weapons = weapons.copy()
-        for upgrade in weapon_upgrades:
-            if isinstance(upgrade, dict):
-                all_weapons.append(upgrade)
-
-        # Armes (section modifiée)
-        if all_weapons:
-            html += '<div class="section-title">Armes:</div>'
-            for weapon in all_weapons:
-                if weapon and isinstance(weapon, dict):
-                    html += f'''
-    <div class="weapon-item">
-      <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
-      <div class="weapon-stats">{format_weapon(weapon)}</div>
-    </div>
-'''
         # Récupération des règles spéciales
         special_rules = get_special_rules(unit)
 
@@ -759,7 +735,7 @@ body {{
         <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
       </h3>
       <div class="unit-type">
-        {"⭐" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
+        {"★" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
       </div>
     </div>
     <div class="unit-cost">{cost} pts</div>
@@ -767,11 +743,11 @@ body {{
 
   <div class="stats-grid">
     <div class="stat-item">
-      <div class="stat-label">Qualité</div>
+      <div class="stat-label"><span>⚔️</span> Qualité</div>
       <div class="stat-value">{quality}+</div>
     </div>
     <div class="stat-item">
-      <div class="stat-label">Défense</div>
+      <div class="stat-label"><span>🛡️</span> Défense</div>
       <div class="stat-value">{defense}+</div>
     </div>
 '''
@@ -780,30 +756,18 @@ body {{
         if tough_value > 0:
             html += f'''
     <div class="stat-item">
-      <div class="stat-label">Coriace</div>
-      <div class="stat-value tough-value">{tough_value}</div>
+      <div class="stat-label"><span>❤️</span> Coriace</div>
+      <div class="stat-value" style="color: var(--tough-color);">{tough_value}</div>
     </div>
 '''
 
-        html += f'''
-    <div class="stat-item">
-      <div class="stat-label">Coût Base</div>
-      <div class="stat-value">{cost} pts</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-label">Taille</div>
-      <div class="stat-value">{unit_size}</div>
-    </div>
-  </div>
-'''
+        html += '</div>'  # Fermeture du stats-grid
 
         # Armes
         if weapons:
             html += '<div class="section-title">Armes:</div>'
-
-            # Afficher toutes les armes de l'unité
             for weapon in weapons:
-                if weapon:
+                if weapon and isinstance(weapon, dict):
                     html += f'''
     <div class="weapon-item">
       <div class="weapon-name">{esc(weapon.get('name', 'Arme'))}</div>
@@ -825,7 +789,7 @@ body {{
   </div>
 '''
 
-        # Améliorations d'unité
+        # Améliorations sélectionnées
         if options:
             html += '''
   <div class="upgrades-section">
@@ -861,7 +825,6 @@ body {{
         </div>
 '''
 
-            # Caractéristiques de la monture
             stats_parts = []
             if 'quality' in mount_data:
                 stats_parts.append(f"Qualité {mount_data['quality']}+")
@@ -874,7 +837,6 @@ body {{
     </div>
 '''
 
-            # Armes de la monture
             if mount_weapons:
                 html += '''
     <div style="margin-top: 8px;">
