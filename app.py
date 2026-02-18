@@ -766,6 +766,18 @@ body {{
     </div>
 '''
 
+        html += f'''
+    <div class="stat-item">
+      <div class="stat-label">Coût Base</div>
+      <div class="stat-value">{cost} pts</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Taille</div>
+      <div class="stat-value">{unit_size}</div>
+    </div>
+  </div>
+'''
+
         # Armes
         if weapons:
             html += '<div class="section-title">Armes:</div>'
