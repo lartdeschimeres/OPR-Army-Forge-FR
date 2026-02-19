@@ -823,6 +823,17 @@ body {{
   font-weight: bold;
 }}
 
+.combined-badge {{
+  background-color: #28a745;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  margin-left: 8px;
+  vertical-align: middle;
+  display: inline-block;
+}}
+
 @media print {{
   body {{
     background: white;
@@ -881,22 +892,24 @@ body {{
         options = unit.get("options", {})
         mount = unit.get("mount", None)
 
+        # Déterminer si c'est une unité combinée
+        is_combined = unit.get('type') != 'hero' and unit_size == 20
+
         html += f'''
-        <div class="unit-card">
-          <div class="unit-header">
-            <div>
-              <h3 class="unit-name">
-                {name}
-                <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
-                {'<span class="combined-badge">Unité combinée</span>' if (unit.get('type') != 'hero' and unit_size == 20) else ''}
-              </h3>
-              <div class="unit-type">
-                {"★" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
-              </div>
-            </div>
-            <div class="unit-cost">{cost} pts</div>
-          </div>
-        '''
+<div class="unit-card">
+  <div class="unit-header">
+    <div>
+      <h3 class="unit-name">
+        {name}
+        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
+        {'<span class="combined-badge">Unité combinée</span>' if is_combined else ''}
+      </h3>
+      <div class="unit-type">
+        {"★" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
+      </div>
+    </div>
+    <div class="unit-cost">{cost} pts</div>
+  </div>
 
   <div class="stats-grid">
     <div class="stat-item">
