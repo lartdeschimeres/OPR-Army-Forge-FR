@@ -1648,14 +1648,9 @@ if st.session_state.page == "army":
         combined_status = ""
     
         # Vérification si l'unité est combinée
-        # On considère qu'une unité est combinée si sa taille est le double de la taille de base
-        # Ou si elle a une propriété spécifique (à adapter selon votre logique)
-        base_size = 10  # Taille de base standard pour les unités (à adapter selon vos données)
+        base_size = 10  # Taille de base standard
         if unit_data.get('type') != "hero" and size == base_size * 2:
             combined_status = " | Unité combinée"
-        # Alternative si vous avez une propriété spécifique pour les unités combinées :
-        # if unit_data.get('is_combined', False):
-        #     combined_status = " | Unité combinée"
     
         # Format final: Nom - Coût pts | Armes: ... | Options: ... | Taille: ... [| Unité combinée]
         return f"{name} - {unit_data['cost']} pts | Armes: {weapons_text} | {options_text} | Taille: {size}{combined_status}"
@@ -1664,25 +1659,11 @@ if st.session_state.page == "army":
         st.markdown("Aucune unité ajoutée pour le moment.")
     else:
         for i, unit_data in enumerate(st.session_state.army_list):
-            # Utilisation de la nouvelle fonction de formatage
+            # Utilisation de la fonction de formatage pour le titre
             unit_display = format_army_unit(unit_data)
     
             with st.expander(unit_display, expanded=False):
-                st.markdown(f"**Type :** {unit_data['type']}")
-                st.markdown(f"**Taille :** {unit_data.get('size', '?')}")
-    
-                # Affichage spécifique si unité combinée
-                if unit_data.get('type') != "hero":
-                    base_size = 10  # Taille de base standard
-                    if unit_data.get('size', 0) == base_size * 2:
-                        st.markdown("**Statut :** Unité combinée")
-    
-                st.markdown(f"**Qualité :** {unit_data.get('quality', '?')}+")
-                st.markdown(f"**Défense :** {unit_data.get('defense', '?')}+")
-    
-                if "coriace" in unit_data:
-                    st.markdown(f"**Coriace :** {unit_data.get('coriace', '?')}")
-    
+                # On ne garde que le bouton de suppression
                 if st.button(f"Supprimer {unit_data['name']}", key=f"delete_{i}"):
                     st.session_state.army_cost -= unit_data['cost']
                     st.session_state.army_list.pop(i)
