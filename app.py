@@ -11,12 +11,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ======================================================
-# CSS - MODIFIÉ POUR CORRESPONDRE AU STYLE QUE VOUS AIMEZ
-# ======================================================
 st.markdown(
     """
     <style>
+    /* ====================================================== */
+    /* STREAMLIT GLOBAL */
+    /* ====================================================== */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {background: transparent;}
@@ -36,9 +36,9 @@ st.markdown(
         letter-spacing: 0.04em;
     }
 
-    /* AMÉLIORATIONS POUR LA PAGE 1 */
-
-    /* Conteneurs des éléments de sélection */
+    /* ====================================================== */
+    /* PAGE 1 - ÉLÉMENTS DE SÉLECTION */
+    /* ====================================================== */
     [data-testid="column"] {
         padding: 0.75rem;
         background-color: white;
@@ -48,7 +48,7 @@ st.markdown(
         border: 1px solid #e9ecef;
     }
 
-    /* Style pour les selectbox et inputs */
+    /* Champs de formulaire */
     .stSelectbox > div > div,
     .stNumberInput > div > div,
     .stTextInput > div > div {
@@ -58,7 +58,6 @@ st.markdown(
         box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
     }
 
-    /* Style pour les labels des selectbox */
     .stSelectbox label,
     .stNumberInput label,
     .stTextInput label {
@@ -67,7 +66,13 @@ st.markdown(
         margin-bottom: 0.25rem;
     }
 
-    /* Style amélioré pour les badges */
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input {
+        color: #2c3e50 !important;
+        font-weight: 500;
+    }
+
+    /* Badges */
     .badge {
         display: inline-block;
         padding: 0.3rem 0.75rem;
@@ -80,7 +85,7 @@ st.markdown(
         box-shadow: 0 1px 2px rgba(52, 152, 219, 0.2);
     }
 
-    /* Style amélioré pour le bouton primary */
+    /* Boutons principaux */
     button[kind="primary"] {
         background: linear-gradient(135deg, #3498db, #2980b9) !important;
         color: white !important;
@@ -100,7 +105,7 @@ st.markdown(
         transform: translateY(-1px);
     }
 
-    /* Style pour le conteneur principal de la page 1 */
+    /* Conteneur principal */
     [data-testid="stAppViewContainer"] > div {
         background-color: white;
         padding: 1.5rem;
@@ -109,7 +114,7 @@ st.markdown(
         margin-bottom: 1.5rem;
     }
 
-    /* Style pour l'image de fond de la bannière */
+    /* Image de fond de la bannière */
     .game-bg {
         background: linear-gradient(to bottom,
             rgba(0,0,0,0.7) 0%,
@@ -120,11 +125,24 @@ st.markdown(
         border-radius: 10px;
         margin-bottom: 2rem;
         position: relative;
-        min-height: 200px;
+        min-height: 400px;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .game-bg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom,
+            rgba(0,0,0,0.6) 0%,
+            rgba(0,0,0,0) 100%);
+        border-radius: 10px;
     }
 
     .game-bg .content {
@@ -149,7 +167,7 @@ st.markdown(
         font-size: 1.1rem;
     }
 
-    /* Style pour les cartes */
+    /* Cartes */
     .card {
         background: #ffffff;
         border: 2px solid #3498db;
@@ -166,23 +184,17 @@ st.markdown(
         transform: translateY(-2px);
     }
 
-    /* Le reste de votre CSS existant */
-    .rule-item, .spell-item {
-        font-size: 14px;
-        margin-bottom: 5px;
-        display: flex;
-        align-items: center;
-    }
-    .rule-name, .spell-name {
-        font-weight: bold;
-        color: #bb86fc;
-        margin-right: 10px;
-    }
-    .rule-description, .spell-description {
-        color: #ccc;
+    /* Diviseurs */
+    hr {
+        border: 0;
+        height: 1px;
+        background: #dee2e6;
+        margin: 1.5rem 0;
     }
 
-    /* NOUVEAUX STYLES POUR L'EXPORT HTML */
+    /* ====================================================== */
+    /* EXPORT HTML */
+    /* ====================================================== */
     .stat-badge {
         background: #6e7f6a;
         color: #000;
@@ -269,82 +281,9 @@ st.markdown(
         color: #f87171 !important;
     }
 
-    /* Ajout pour améliorer le contraste des éléments de formulaire */
-    .stTextInput > div > div > input {
-        color: #2c3e50 !important;
-        font-weight: 500;
-    }
-
-    .stSelectbox > div > div > select {
-        color: #2c3e50 !important;
-    }
-
-    .stNumberInput > div > div > input {
-        color: #2c3e50 !important;
-        font-weight: 500;
-    }
-
-    /* Style pour les diviseurs */
-    hr {
-        border: 0;
-        height: 1px;
-        background: #dee2e6;
-        margin: 1.5rem 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-    )
-    """
-    /* Style spécifique pour améliorer l'affichage des options dans les selectbox */
-    .stSelectbox div[role="listbox"] div[role="option"] {
-        white-space: normal !important;
-        line-height: 1.4 !important;
-        padding: 6px 10px !important;
-        min-height: auto !important;
-    }
-    
-    .stSelectbox div[role="option"] {
-        display: block !important;
-        word-break: normal !important;
-    }
-    
-    /* Style pour les options de la selectbox des unités */
-    .selectbox-unit-option {
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        line-height: 1.4;
-        white-space: normal;
-        padding: 4px 0;
-    }
-    .selectbox-unit-name {
-        font-weight: bold;
-        color: #2c3e50;
-        display: block;
-    }
-    .selectbox-unit-weapons {
-        color: #3498db;
-        font-size: 13px;
-        display: block;
-        margin-left: 10px;
-    }
-    .selectbox-unit-options {
-        color: #666;
-        font-size: 12px;
-        display: block;
-        margin-left: 10px;
-    }
-    .selectbox-unit-size {
-        color: #e74c3c;
-        font-weight: bold;
-        display: block;
-        margin-left: 10px;
-    }
-    """
-    st.markdown(
-    """
-    <style>
-    /* Style spécifique pour améliorer l'affichage des options dans les selectbox */
+    /* ====================================================== */
+    /* SELECTBOX AMÉLIORÉES */
+    /* ====================================================== */
     .stSelectbox div[role="listbox"] {
         max-height: 400px !important;
         overflow-y: auto !important;
@@ -358,7 +297,7 @@ st.markdown(
         word-break: break-word !important;
     }
 
-    /* Style pour les options personnalisées */
+    /* Styles pour les options personnalisées dans les selectbox */
     .unit-option-name {
         font-weight: bold;
         color: #2c3e50;
@@ -378,6 +317,17 @@ st.markdown(
         font-size: 12px;
         display: block;
         margin-top: 2px;
+    }
+
+    /* Couleurs spécifiques */
+    .rule-name, .spell-name {
+        font-weight: bold;
+        color: #bb86fc;
+        margin-right: 10px;
+    }
+
+    .rule-description, .spell-description {
+        color: #ccc;
     }
     </style>
     """,
