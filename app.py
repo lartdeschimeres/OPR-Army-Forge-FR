@@ -291,8 +291,8 @@ st.markdown(
         background: #dee2e6;
         margin: 1.5rem 0;
     }
-    )
-    """
+
+    /* Style pour le badge "Unité combinée" */
     .combined-badge {
         background-color: #28a745;
         color: white;
@@ -303,10 +303,10 @@ st.markdown(
         vertical-align: middle;
         display: inline-block;
     }
-    """
     </style>
     """,
     unsafe_allow_html=True
+)
 
 # ======================================================
 # INITIALISATION
