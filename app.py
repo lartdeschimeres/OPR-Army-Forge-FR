@@ -291,18 +291,6 @@ st.markdown(
         background: #dee2e6;
         margin: 1.5rem 0;
     }
-
-    /* Style pour le badge "Unité combinée" */
-    .combined-badge {
-        background-color: #28a745;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-size: 0.7em;
-        margin-left: 8px;
-        vertical-align: middle;
-        display: inline-block;
-    }
     </style>
     """,
     unsafe_allow_html=True
