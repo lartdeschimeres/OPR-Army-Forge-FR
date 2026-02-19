@@ -1643,11 +1643,22 @@ if st.session_state.page == "army":
     
         options_text = ", ".join(options_texts) if options_texts else "Aucune amélioration"
     
-        # 4. Taille
+        # 4. Taille et statut combiné
         size = unit_data.get('size', 10)
+        combined_status = ""
     
-        # Format final: Nom | Armes: ... | Options: ... | Taille: ...
-        return f"{name} - {unit_data['cost']} pts | Armes: {weapons_text} | {options_text} | Taille: {size}"
+        # Vérification si l'unité est combinée
+        # On considère qu'une unité est combinée si sa taille est le double de la taille de base
+        # Ou si elle a une propriété spécifique (à adapter selon votre logique)
+        base_size = 10  # Taille de base standard pour les unités (à adapter selon vos données)
+        if unit_data.get('type') != "hero" and size == base_size * 2:
+            combined_status = " | Unité combinée"
+        # Alternative si vous avez une propriété spécifique pour les unités combinées :
+        # if unit_data.get('is_combined', False):
+        #     combined_status = " | Unité combinée"
+    
+        # Format final: Nom - Coût pts | Armes: ... | Options: ... | Taille: ... [| Unité combinée]
+        return f"{name} - {unit_data['cost']} pts | Armes: {weapons_text} | {options_text} | Taille: {size}{combined_status}"
     
     if not st.session_state.army_list:
         st.markdown("Aucune unité ajoutée pour le moment.")
@@ -1659,6 +1670,13 @@ if st.session_state.page == "army":
             with st.expander(unit_display, expanded=False):
                 st.markdown(f"**Type :** {unit_data['type']}")
                 st.markdown(f"**Taille :** {unit_data.get('size', '?')}")
+    
+                # Affichage spécifique si unité combinée
+                if unit_data.get('type') != "hero":
+                    base_size = 10  # Taille de base standard
+                    if unit_data.get('size', 0) == base_size * 2:
+                        st.markdown("**Statut :** Unité combinée")
+    
                 st.markdown(f"**Qualité :** {unit_data.get('quality', '?')}+")
                 st.markdown(f"**Défense :** {unit_data.get('defense', '?')}+")
     
