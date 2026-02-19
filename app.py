@@ -1688,6 +1688,7 @@ if st.session_state.page == "army":
                     st.session_state.army_list.pop(i)
                     st.rerun()
 
+
     st.divider()
 
     # CSS pour les boutons de filtre avec mise en évidence simple
