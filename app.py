@@ -583,9 +583,13 @@ def export_html(army_list, army_name, army_limit):
 
     def get_french_type(unit):
         """Retourne le type français basé sur unit_detail"""
+        # Si c'est un héros, on retourne toujours "Héros"
+        if unit.get('type') == 'hero':
+            return 'Héros'
+    
         unit_detail = unit.get('unit_detail', 'unit')
         type_mapping = {
-            'hero': 'Héros',
+            'hero': 'Héros',  # Gardé pour compatibilité mais pas utilisé
             'named_hero': 'Héros nommé',
             'unit': 'Unité de base',
             'light_vehicle': 'Véhicule léger',
@@ -859,30 +863,30 @@ body {{
         mount = unit.get("mount", None)
 
         html += f'''
-<div class="unit-card">
-  <div class="unit-header">
-    <div>
-      <h3 class="unit-name">
-        {name}
-        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
-      </h3>
-      <div class="unit-type">
-        {"★" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
-      </div>
-    </div>
-    <div class="unit-cost">{cost} pts</div>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-item">
-      <div class="stat-label"><span>⚔️</span> Qualité</div>
-      <div class="stat-value">{quality}+</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-label"><span>🛡️</span> Défense</div>
-      <div class="stat-value">{defense}+</div>
-    </div>
-'''
+        <div class="unit-card">
+          <div class="unit-header">
+            <div>
+              <h3 class="unit-name">
+                {name}
+                <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{unit_size}]</span>
+              </h3>
+              <div class="unit-type">
+                {"★" if unit.get("type") == "hero" else "🛡️"} {unit_type_french}
+              </div>
+            </div>
+            <div class="unit-cost">{cost} pts</div>
+          </div>
+        
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label"><span>⚔️</span> Qualité</div>
+              <div class="stat-value">{quality}+</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label"><span>🛡️</span> Défense</div>
+              <div class="stat-value">{defense}+</div>
+            </div>
+        '''
 
         # Affichage de la Coriace
         if tough_value > 0:
