@@ -11,12 +11,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ======================================================
+# CSS - MODIFIÉ POUR CORRESPONDRE AU STYLE QUE VOUS AIMEZ
+# ======================================================
 st.markdown(
     """
     <style>
-    /* ====================================================== */
-    /* STREAMLIT GLOBAL */
-    /* ====================================================== */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {background: transparent;}
@@ -36,9 +36,9 @@ st.markdown(
         letter-spacing: 0.04em;
     }
 
-    /* ====================================================== */
-    /* PAGE 1 - ÉLÉMENTS DE SÉLECTION */
-    /* ====================================================== */
+    /* AMÉLIORATIONS POUR LA PAGE 1 */
+
+    /* Conteneurs des éléments de sélection */
     [data-testid="column"] {
         padding: 0.75rem;
         background-color: white;
@@ -48,7 +48,7 @@ st.markdown(
         border: 1px solid #e9ecef;
     }
 
-    /* Champs de formulaire */
+    /* Style pour les selectbox et inputs */
     .stSelectbox > div > div,
     .stNumberInput > div > div,
     .stTextInput > div > div {
@@ -58,6 +58,7 @@ st.markdown(
         box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
     }
 
+    /* Style pour les labels des selectbox */
     .stSelectbox label,
     .stNumberInput label,
     .stTextInput label {
@@ -66,13 +67,7 @@ st.markdown(
         margin-bottom: 0.25rem;
     }
 
-    .stTextInput > div > div > input,
-    .stNumberInput > div > div > input {
-        color: #2c3e50 !important;
-        font-weight: 500;
-    }
-
-    /* Badges */
+    /* Style amélioré pour les badges */
     .badge {
         display: inline-block;
         padding: 0.3rem 0.75rem;
@@ -85,7 +80,7 @@ st.markdown(
         box-shadow: 0 1px 2px rgba(52, 152, 219, 0.2);
     }
 
-    /* Boutons principaux */
+    /* Style amélioré pour le bouton primary */
     button[kind="primary"] {
         background: linear-gradient(135deg, #3498db, #2980b9) !important;
         color: white !important;
@@ -105,7 +100,7 @@ st.markdown(
         transform: translateY(-1px);
     }
 
-    /* Conteneur principal */
+    /* Style pour le conteneur principal de la page 1 */
     [data-testid="stAppViewContainer"] > div {
         background-color: white;
         padding: 1.5rem;
@@ -114,7 +109,7 @@ st.markdown(
         margin-bottom: 1.5rem;
     }
 
-    /* Image de fond de la bannière */
+    /* Style pour l'image de fond de la bannière */
     .game-bg {
         background: linear-gradient(to bottom,
             rgba(0,0,0,0.7) 0%,
@@ -125,24 +120,11 @@ st.markdown(
         border-radius: 10px;
         margin-bottom: 2rem;
         position: relative;
-        min-height: 400px;
+        min-height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .game-bg::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(to bottom,
-            rgba(0,0,0,0.6) 0%,
-            rgba(0,0,0,0) 100%);
-        border-radius: 10px;
     }
 
     .game-bg .content {
@@ -167,7 +149,7 @@ st.markdown(
         font-size: 1.1rem;
     }
 
-    /* Cartes */
+    /* Style pour les cartes */
     .card {
         background: #ffffff;
         border: 2px solid #3498db;
@@ -184,17 +166,23 @@ st.markdown(
         transform: translateY(-2px);
     }
 
-    /* Diviseurs */
-    hr {
-        border: 0;
-        height: 1px;
-        background: #dee2e6;
-        margin: 1.5rem 0;
+    /* Le reste de votre CSS existant */
+    .rule-item, .spell-item {
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .rule-name, .spell-name {
+        font-weight: bold;
+        color: #bb86fc;
+        margin-right: 10px;
+    }
+    .rule-description, .spell-description {
+        color: #ccc;
     }
 
-    /* ====================================================== */
-    /* EXPORT HTML */
-    /* ====================================================== */
+    /* NOUVEAUX STYLES POUR L'EXPORT HTML */
     .stat-badge {
         background: #6e7f6a;
         color: #000;
@@ -281,53 +269,27 @@ st.markdown(
         color: #f87171 !important;
     }
 
-    /* ====================================================== */
-    /* SELECTBOX AMÉLIORÉES */
-    /* ====================================================== */
-    .stSelectbox div[role="listbox"] {
-        max-height: 400px !important;
-        overflow-y: auto !important;
+    /* Ajout pour améliorer le contraste des éléments de formulaire */
+    .stTextInput > div > div > input {
+        color: #2c3e50 !important;
+        font-weight: 500;
     }
 
-    .stSelectbox div[role="option"] {
-        white-space: normal !important;
-        line-height: 1.4 !important;
-        padding: 8px 12px !important;
-        min-height: auto !important;
-        word-break: break-word !important;
+    .stSelectbox > div > div > select {
+        color: #2c3e50 !important;
     }
 
-    /* Styles pour les options personnalisées dans les selectbox */
-    .unit-option-name {
-        font-weight: bold;
-        color: #2c3e50;
-        display: block;
-        margin-bottom: 2px;
+    .stNumberInput > div > div > input {
+        color: #2c3e50 !important;
+        font-weight: 500;
     }
 
-    .unit-option-weapons {
-        color: #3498db;
-        font-size: 13px;
-        display: block;
-        margin: 2px 0;
-    }
-
-    .unit-option-extras {
-        color: #666;
-        font-size: 12px;
-        display: block;
-        margin-top: 2px;
-    }
-
-    /* Couleurs spécifiques */
-    .rule-name, .spell-name {
-        font-weight: bold;
-        color: #bb86fc;
-        margin-right: 10px;
-    }
-
-    .rule-description, .spell-description {
-        color: #ccc;
+    /* Style pour les diviseurs */
+    hr {
+        border: 0;
+        height: 1px;
+        background: #dee2e6;
+        margin: 1.5rem 0;
     }
     </style>
     """,
@@ -1451,52 +1413,50 @@ def format_mount_option(mount):
     return label
 
 def format_unit_option(u):
-    """Formate l'option d'unité pour la selectbox"""
-    # Nom de l'unité
-    name = u['name']
+    """Formate l'option d'unité avec tous les détails"""
+    name_part = f"{u['name']}"
+    if u.get('type') == "hero":
+        name_part += " [1]"
+    else:
+        name_part += f" [{u.get('size', 10)}]"
 
-    # Récupération des armes
+    # Ajout de la Qualité avant la Défense
+    quality = u.get('quality', '?')
+    defense = u.get('defense', '?')
+    qua_def = f"Qua {quality}+ | Déf {defense}+"  # Format corrigé
+
+    # Récupération des armes de base
     weapons = u.get('weapon', [])
-    weapon_texts = []
+    weapon_profiles = []
     if isinstance(weapons, list):
         for weapon in weapons:
             if isinstance(weapon, dict):
-                weapon_name = weapon.get('name', 'Arme')
                 attacks = weapon.get('attacks', '?')
                 ap = weapon.get('armor_piercing', '?')
-                weapon_texts.append(f"{weapon_name} (A{attacks}/PA{ap})")
+                weapon_profiles.append(f"A{attacks}/PA{ap}")
     elif isinstance(weapons, dict):
-        weapon_name = weapons.get('name', 'Arme')
         attacks = weapons.get('attacks', '?')
         ap = weapons.get('armor_piercing', '?')
-        weapon_texts.append(f"{weapon_name} (A{attacks}/PA{ap})")
+        weapon_profiles.append(f"A{attacks}/PA{ap}")
 
-    weapons_text = ", ".join(weapon_texts) if weapon_texts else "Aucune arme"
+    weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune"
 
-    # Récupération des options/améliorations
-    options_texts = []
-    if "upgrade_groups" in u:
-        for group in u["upgrade_groups"]:
-            if group.get("type") == "role" and u.get("type") == "hero":
-                for opt in group.get("options", []):
-                    options_texts.append(f"{opt.get('name', 'Rôle')} (+{opt.get('cost', 0)} pts)")
-            elif group.get("type") == "weapon_upgrades":
-                for opt in group.get("options", []):
-                    if "weapon" in opt and isinstance(opt["weapon"], dict):
-                        options_texts.append(f"{opt['weapon'].get('name', 'Arme')} (+{opt.get('cost', 0)} pts)")
-            elif group.get("type") != "weapon":
-                for opt in group.get("options", []):
-                    options_texts.append(f"{opt.get('name', 'Option')} (+{opt.get('cost', 0)} pts)")
+    # Récupération des règles spéciales
+    special_rules = u.get('special_rules', [])
+    rules_text = []
+    if isinstance(special_rules, list):
+        for rule in special_rules:
+            if isinstance(rule, str):
+                if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
+                    rules_text.append(rule)
+            elif isinstance(rule, dict):
+                rules_text.append(rule.get('name', ''))
 
-    options_text = ", ".join(options_texts) if options_texts else "Aucune amélioration"
+    rules_text = ", ".join(rules_text) if rules_text else "Aucune"
+    cost = f"{u.get('base_cost', 0)}pts"
 
-    # Taille
-    size = u.get('size', 10)
-    if u.get('type') == "hero":
-        size = 1
-
-    # Format simple et efficace pour Streamlit
-    return f"{name} | Armes: {weapons_text} | {options_text} | Taille: {size}"
+    # Retour simple et efficace
+    return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète avec filtres)
@@ -1764,7 +1724,7 @@ if st.session_state.page == "army":
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Filtrer les unités selon le filtre sélectionné
-    filtered_units = []  # Initialisation par défaut
+    filtered_units = []
     if st.session_state.unit_filter == "Tous":
         filtered_units = st.session_state.units
     else:
@@ -1780,26 +1740,14 @@ if st.session_state.page == "army":
         {len(filtered_units)} unités disponibles (filtre: {st.session_state.unit_filter})
     </div>
     """, unsafe_allow_html=True)
-    
-    # Sélection de l'unité - seulement si filtered_units n'est pas vide
-    if filtered_units:  # Maintenant cette vérification est sûre
-        st.markdown(
-            """
-            <style>
-            .stSelectbox div[data-baseweb="select"] {
-                min-height: 200px !important;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-    
+
+    # Sélection de l'unité
+    if filtered_units:
         unit = st.selectbox(
             "Unité disponible",
             filtered_units,
-            format_func=lambda u: format_unit_option(u),
-            key=f"unit_select_{len(filtered_units)}",
-            index=0
+            format_func=format_unit_option,
+            key="unit_select",
         )
     else:
         st.warning(f"Aucune unité disponible pour le filtre '{st.session_state.unit_filter}'.")
