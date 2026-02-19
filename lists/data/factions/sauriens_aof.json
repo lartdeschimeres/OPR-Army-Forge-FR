@@ -645,7 +645,6 @@
             "base_cost": 115,
             "quality": 4,
             "defense": 4,
-            "coriace": null,
             "special_rules": ["Primal", "Sans peur"],
             "weapons": [
                 {
@@ -707,7 +706,6 @@
             "base_cost": 45,
             "quality": 5,
             "defense": 5,
-            "coriace": null,
             "special_rules": ["Arpenteur", "Primal"],
             "weapons": [
                 {
