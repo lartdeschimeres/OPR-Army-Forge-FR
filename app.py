@@ -295,6 +295,52 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+"""
+/* Style spécifique pour améliorer l'affichage des options dans les selectbox */
+.stSelectbox div[role="listbox"] div[role="option"] {
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    padding: 6px 10px !important;
+    min-height: auto !important;
+}
+
+.stSelectbox div[role="option"] {
+    display: block !important;
+    word-break: normal !important;
+}
+
+/* Style pour les options de la selectbox des unités */
+.selectbox-unit-option {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: normal;
+    padding: 4px 0;
+}
+.selectbox-unit-name {
+    font-weight: bold;
+    color: #2c3e50;
+    display: block;
+}
+.selectbox-unit-weapons {
+    color: #3498db;
+    font-size: 13px;
+    display: block;
+    margin-left: 10px;
+}
+.selectbox-unit-options {
+    color: #666;
+    font-size: 12px;
+    display: block;
+    margin-left: 10px;
+}
+.selectbox-unit-size {
+    color: #e74c3c;
+    font-weight: bold;
+    display: block;
+    margin-left: 10px;
+}
+"""
 
 # ======================================================
 # INITIALISATION
@@ -1414,8 +1460,8 @@ def format_mount_option(mount):
 
 def format_unit_option(u):
     """Formate l'option d'unité avec les détails demandés"""
-    # 1. Nom de l'unité (sans la taille)
-    name_part = f"{u['name']}"
+    # 1. Nom de l'unité
+    name = f"<span class='selectbox-unit-name'>{u['name']}</span>"
 
     # 2. Récupération des armes
     weapons = u.get('weapon', [])
@@ -1433,30 +1479,33 @@ def format_unit_option(u):
         ap = weapons.get('armor_piercing', '?')
         weapon_profiles.append(f"{weapon_name} (A{attacks}/PA{ap})")
 
-    weapons_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune arme"
+    weapons_text = f"<span class='selectbox-unit-weapons'>{', '.join(weapon_profiles) if weapon_profiles else 'Aucune arme'}</span>"
 
-    # 3. Récupération des options/améliorations
+    # 3. Récupération des améliorations sélectionnées
     options_texts = []
-    if "upgrade_groups" in u:
-        for group in u.get("upgrade_groups", []):
-            if group.get("type") == "role" and u.get("type") == "hero":
-                for opt in group.get("options", []):
-                    options_texts.append(f"{opt.get('name', 'Rôle')} (+{opt.get('cost', 0)} pts)")
-            elif group.get("type") == "weapon_upgrades":
-                for opt in group.get("options", []):
-                    if "weapon" in opt and isinstance(opt["weapon"], dict):
-                        options_texts.append(f"{opt['weapon'].get('name', 'Arme')} (+{opt.get('cost', 0)} pts)")
-            elif group.get("type") != "weapon":  # On exclut les remplacements d'armes
-                for opt in group.get("options", []):
+    if "options" in u:
+        for group_name, opts in u["options"].items():
+            if isinstance(opts, list):
+                for opt in opts:
                     options_texts.append(f"{opt.get('name', 'Option')} (+{opt.get('cost', 0)} pts)")
 
-    options_text = ", ".join(options_texts) if options_texts else "Aucune amélioration"
+    options_text = f"<span class='selectbox-unit-options'>{', '.join(options_texts) if options_texts else 'Aucune amélioration'}</span>"
 
     # 4. Taille
     size = u.get('size', 10)
     if u.get('type') == "hero":
         size = 1
-    size_text = f"Taille: {size}"
+    size_text = f"<span class='selectbox-unit-size'>Taille: {size}</span>"
+
+    # Retour HTML pour un meilleur affichage
+    return f"""
+    <div class='selectbox-unit-option'>
+        {name}
+        {weapons_text}
+        {options_text}
+        {size_text}
+    </div>
+    """
 
     # Construction du texte final dans l'ordre demandé
     return f"{name_part} | {weapons_text} | {options_text} | {size_text}"
@@ -1744,17 +1793,25 @@ if st.session_state.page == "army":
     </div>
     """, unsafe_allow_html=True)
 
-    # Sélection de l'unité
-    if filtered_units:
-        unit = st.selectbox(
-            "Unité disponible",
-            filtered_units,
-            format_func=format_unit_option,
-            key="unit_select",
-        )
-    else:
-        st.warning(f"Aucune unité disponible pour le filtre '{st.session_state.unit_filter}'.")
-        st.stop()
+f filtered_units:
+    st.markdown(
+        """
+        <style>
+        .stSelectbox div[data-baseweb="select"] {
+            min-height: 200px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    unit = st.selectbox(
+        "Unité disponible",
+        filtered_units,
+        format_func=lambda u: format_unit_option(u),
+        key=f"unit_select_{len(filtered_units)}",  # Clé dynamique
+        index=0
+    )
 
     # Suite du code existant pour les améliorations
     unit_key = f"unit_{unit['name']}"
