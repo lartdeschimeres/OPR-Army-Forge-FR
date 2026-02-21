@@ -1345,12 +1345,13 @@
                         {
                             "name": "Javelots de l’équipage, Autel des Dieux",
                             "cost": 35,
+                            "special_rules": ["Lanceur de sorts (2)"],
                             "weapon": {
                                 "name": "Javelots de l’équipage, Autel des Dieux",
                                 "range": "12\"",
                                 "attacks": 6,
                                 "armor_piercing": 0,
-                                "special_rules": ["Fléau", "Lanceur de sorts (2)"]
+                                "special_rules": ["Fléau"]
                             }
                         }
                     ]
