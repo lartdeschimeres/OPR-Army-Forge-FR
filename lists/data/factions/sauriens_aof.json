@@ -1521,7 +1521,7 @@
                             "coriace_bonus": 6,
                             "special_rules": ["Coriace (+6)"]
                         },
-                        {"name": "Transport redoutable", "cost": 65, "special_rules": ["Coriace (6)", "Transport (21)"]}
+                        {"name": "Transport redoutable", "cost": 65, "coriace_bonus": 6, "special_rules": ["Coriace (+6)", "Transport (21)"]}
                     ]
                 }
             ]
