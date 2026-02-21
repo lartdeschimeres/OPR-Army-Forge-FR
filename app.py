@@ -424,6 +424,60 @@ def export_html(army_list, army_name, army_limit):
 
         return result
 
+    def get_all_rules(unit):
+        """Récupère toutes les règles spéciales de l'unité, y compris celles des rôles et armes"""
+        all_rules = set()
+
+        # 1. Règles spéciales de base de l'unité
+        if "special_rules" in unit:
+            for rule in unit["special_rules"]:
+                if isinstance(rule, str):
+                    all_rules.add(rule)
+
+        # 2. Règles spéciales des armes
+        weapons = unit.get("weapon", [])
+        if not isinstance(weapons, list):
+            weapons = [weapons]
+
+        for weapon in weapons:
+            if isinstance(weapon, dict) and "special_rules" in weapon:
+                for rule in weapon["special_rules"]:
+                    if isinstance(rule, str):
+                        all_rules.add(rule)
+
+        # 3. Règles spéciales des rôles/options
+        if "options" in unit:
+            for group_name, opts in unit["options"].items():
+                if isinstance(opts, list):
+                    for opt in opts:
+                        if "special_rules" in opt:
+                            for rule in opt["special_rules"]:
+                                if isinstance(rule, str):
+                                    all_rules.add(rule)
+                        # Règles spéciales des armes dans les options
+                        if "weapon" in opt:
+                            weapon = opt["weapon"]
+                            if isinstance(weapon, dict) and "special_rules" in weapon:
+                                for rule in weapon["special_rules"]:
+                                    if isinstance(rule, str):
+                                        all_rules.add(rule)
+                            elif isinstance(weapon, list):
+                                for w in weapon:
+                                    if isinstance(w, dict) and "special_rules" in w:
+                                        for rule in w["special_rules"]:
+                                            if isinstance(rule, str):
+                                                all_rules.add(rule)
+
+        # 4. Règles spéciales de la monture
+        if "mount" in unit and unit.get("mount"):
+            mount_data = unit["mount"].get("mount", {})
+            if "special_rules" in mount_data:
+                for rule in mount_data["special_rules"]:
+                    if isinstance(rule, str):
+                        all_rules.add(rule)
+
+        return sorted(all_rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
+
     def get_french_type(unit):
         """Retourne le type français basé sur unit_detail"""
         if unit.get('type') == 'hero':
@@ -703,12 +757,8 @@ body {{
         if not isinstance(weapons, list):
             weapons = [weapons]
 
-        # Récupération des règles spéciales
-        special_rules = []
-        if "special_rules" in unit:
-            for rule in unit["special_rules"]:
-                if isinstance(rule, str):
-                    special_rules.append(rule)
+        # Récupération de TOUTES les règles spéciales
+        all_rules = get_all_rules(unit)
 
         # Récupération des options et montures
         options = unit.get("options", {})
@@ -745,7 +795,7 @@ body {{
             html += f'''
     <div class="stat-item">
       <div class="stat-label"><span>❤️</span> Coriace</div>
-      <div class="stat-value" style="color: var(--tough-color);">{tough_value}</div>
+      <div class="stat-value tough-value">{tough_value}</div>
     </div>
 '''
 
@@ -763,7 +813,7 @@ body {{
     </div>
 '''
 
-        # Rôles (pour les héros et titans) - MODIFICATION MINIMALE POUR AFFICHER LES ARMES DES RÔLES
+        # Rôles (pour les héros et titans) - AFFICHAGE DES ARMES ET RÈGLES DES RÔLES
         if options:
             for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
@@ -777,7 +827,7 @@ body {{
       <div class="role-title">Rôle: {esc(role_name)}</div>
 '''
 
-                            # Armes du rôle - AJOUT MINIMAL POUR AFFICHER LES ARMES DES RÔLES
+                            # Armes du rôle
                             if role_weapons:
                                 if isinstance(role_weapons, list):
                                     for weapon in role_weapons:
@@ -816,14 +866,14 @@ body {{
     </div>
 '''
 
-        # Règles spéciales
-        if special_rules:
+        # Règles spéciales (TOUTES les règles spéciales de l'unité)
+        if all_rules:
             html += '''
   <div class="rules-section">
     <div class="rules-title">Règles spéciales:</div>
     <div class="rules-list">
 '''
-            for rule in special_rules:
+            for rule in all_rules:
                 html += f'<span class="rule-tag">{esc(rule)}</span>'
             html += '''
     </div>
