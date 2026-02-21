@@ -706,6 +706,32 @@ def export_html(army_list, army_name, army_limit):
         }
         return type_mapping.get(unit_detail, 'Unité')
 
+    def calculate_total_coriace(unit):
+        """Calcule la valeur totale de Coriace pour une unité"""
+        # Coriace de base
+        total = unit.get("coriace", 0)
+
+        # Coriace des rôles
+        if "options" in unit:
+            for group_name, opts in unit["options"].items():
+                if isinstance(opts, list):
+                    for opt in opts:
+                        if "special_rules" in opt:
+                            for rule in opt["special_rules"]:
+                                if isinstance(rule, str) and rule.startswith("Coriace("):
+                                    try:
+                                        value = int(rule.split("(")[1].split(")")[0])
+                                        total += value
+                                    except (IndexError, ValueError):
+                                        pass
+
+        # Coriace de la monture
+        if "mount" in unit and unit.get("mount"):
+            mount_data = unit["mount"].get("mount", {})
+            total += mount_data.get("coriace_bonus", 0)
+
+        return total
+
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
 
@@ -840,6 +866,8 @@ body {{
 
 .tough-value {{
   color: var(--tough-color) !important;
+  font-weight: bold;
+  font-size: 18px;
 }}
 
 .section-title {{
@@ -960,8 +988,8 @@ body {{
         if unit.get("type") == "hero":
             unit_size = 1
 
-        # Calcul de la valeur de Coriace
-        tough_value = unit.get("coriace", 0)
+        # Calcul de la valeur totale de Coriace
+        tough_value = calculate_total_coriace(unit)
 
         # Récupération des armes
         weapons = unit.get("weapon", [])
@@ -999,26 +1027,12 @@ body {{
       <div class="stat-label"><span>🛡️</span> Défense</div>
       <div class="stat-value">{defense}+</div>
     </div>
-'''
-
-        # Affichage de la Coriace dans le bandeau de résumé
-        if tough_value > 0:
-            html += f'''
     <div class="stat-item">
       <div class="stat-label"><span>❤️</span> Coriace</div>
-      <div class="stat-value tough-value">{tough_value}</div>
+      <div class="stat-value tough-value">{tough_value if tough_value > 0 else "-"}</div>
     </div>
+  </div>
 '''
-        else:
-            # Si pas de coriace, on ajoute un élément vide pour garder l'alignement
-            html += '''
-    <div class="stat-item">
-      <div class="stat-label"><span>❤️</span> Coriace</div>
-      <div class="stat-value" style="color: var(--text-muted);">-</div>
-    </div>
-'''
-
-        html += '</div>'  # Fermeture du stats-grid
 
         # Armes
         if weapons:
