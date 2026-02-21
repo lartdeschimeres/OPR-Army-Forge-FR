@@ -513,12 +513,12 @@ def format_unit_option(u):
     # Ajouter la valeur de Coriace si elle existe
     coriace_value = u.get('coriace', 0)
     if coriace_value > 0:
-        special_rules.append(f"Coriace({coriace_value})")
+        rules_text.append(f"Coriace({coriace_value})")
 
     if isinstance(special_rules, list):
         for rule in special_rules:
             if isinstance(rule, str):
-                if not rule.startswith(("Griffes", "Sabots")):
+                if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                     rules_text.append(rule)
             elif isinstance(rule, dict):
                 rules_text.append(rule.get('name', ''))
@@ -634,9 +634,6 @@ def extract_coriace_value(rule):
             return 0
     return 0
 
-# ======================================================
-# EXPORT HTML - VERSION COMPLÈTE CORRIGÉE
-# ======================================================
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
@@ -841,6 +838,10 @@ body {{
   color: var(--text-main);
 }}
 
+.tough-value {{
+  color: var(--tough-color) !important;
+}}
+
 .section-title {{
   font-weight: 600;
   margin: 15px 0 8px 0;
@@ -1000,12 +1001,20 @@ body {{
     </div>
 '''
 
-        # Affichage de la Coriace
+        # Affichage de la Coriace dans le bandeau de résumé
         if tough_value > 0:
             html += f'''
     <div class="stat-item">
       <div class="stat-label"><span>❤️</span> Coriace</div>
-      <div class="stat-value" style="color: var(--tough-color);">{tough_value}</div>
+      <div class="stat-value tough-value">{tough_value}</div>
+    </div>
+'''
+        else:
+            # Si pas de coriace, on ajoute un élément vide pour garder l'alignement
+            html += '''
+    <div class="stat-item">
+      <div class="stat-label"><span>❤️</span> Coriace</div>
+      <div class="stat-value" style="color: var(--text-muted);">-</div>
     </div>
 '''
 
@@ -1258,7 +1267,7 @@ body {{
 </html>
 '''
     return html
-
+    
 # ======================================================
 # CHARGEMENT DES FACTIONS
 # ======================================================
