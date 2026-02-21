@@ -471,10 +471,9 @@ def format_unit_option(u):
     defense = u.get('defense', '?')
     qua_def = f"Qua {quality}+ | Déf {defense}+"
 
-    # Récupération des armes de base avec leurs règles spéciales
+    # Récupération des armes de base
     weapons = u.get('weapon', [])
     weapon_profiles = []
-
     if isinstance(weapons, list):
         for weapon in weapons:
             if isinstance(weapon, dict):
@@ -486,11 +485,10 @@ def format_unit_option(u):
                 profile = f"{weapon_name} (A{attacks}"
                 if ap not in ("-", 0, "0", None):
                     profile += f"/PA{ap}"
-
                 if special_rules:
                     profile += f" | {', '.join(special_rules)}"
-
                 profile += ")"
+
                 weapon_profiles.append(profile)
     elif isinstance(weapons, dict):
         weapon_name = weapons.get('name', 'Arme')
@@ -501,22 +499,30 @@ def format_unit_option(u):
         profile = f"{weapon_name} (A{attacks}"
         if ap not in ("-", 0, "0", None):
             profile += f"/PA{ap}"
-
         if special_rules:
             profile += f" | {', '.join(special_rules)}"
-
         profile += ")"
+
         weapon_profiles.append(profile)
 
     weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune arme"
 
-    # Règles spéciales de l'unité (hors armes)
-    special_rules = u.get('special_rules', [])
+    # Règles spéciales de l'unité (hors armes) + Coriace
+    special_rules = u.get('special_rules', []).copy()
     rules_text = []
+
+    # Ajouter la valeur de Coriace si elle existe
+    coriace_value = u.get('coriace', 0)
+    coriace_bonus = u.get('coriace_bonus', 0)
+    total_coriace = coriace_value + coriace_bonus
+
+    if total_coriace > 0:
+        special_rules.append(f"Coriace({total_coriace})")
+
     if isinstance(special_rules, list):
         for rule in special_rules:
             if isinstance(rule, str):
-                if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
+                if not rule.startswith(("Griffes", "Sabots")):
                     rules_text.append(rule)
             elif isinstance(rule, dict):
                 rules_text.append(rule.get('name', ''))
@@ -571,41 +577,33 @@ def export_html(army_list, army_name, army_limit):
         return result
 
     def get_special_rules(unit):
-        """Extraire toutes les règles spéciales de l'unité SAUF celles des armes"""
+        """Extraire toutes les règles spéciales de l'unité INCLUANT la Coriace"""
         rules = set()
-
-        # 1. Règles spéciales de base de l'unité
+    
+        # 1. Règles spéciales de base de l'unité + Coriace
         if "special_rules" in unit:
             for rule in unit["special_rules"]:
                 if isinstance(rule, str):
                     rules.add(rule)
-
+    
+        # Ajouter la valeur de Coriace si elle existe
+        coriace_value = unit.get('coriace', 0)
+        coriace_bonus = unit.get('coriace_bonus', 0)
+        total_coriace = coriace_value + coriace_bonus
+    
+        if total_coriace > 0:
+            rules.add(f"Coriace({total_coriace})")
+    
         # 2. Règles spéciales des améliorations (hors armes)
         if "options" in unit:
             for group_name, opts in unit["options"].items():
                 if isinstance(opts, list):
                     for opt in opts:
-                        # Ajouter les règles spéciales des rôles (mais pas celles des armes)
-                        if "special_rules" in opt:
+                        if "special_rules" in opt and "weapon" not in opt:  # Exclure les rôles avec armes
                             for rule in opt["special_rules"]:
                                 if isinstance(rule, str):
-                                    # Vérifier si cette règle n'est pas déjà dans une arme
-                                    is_weapon_rule = False
-                                    if "weapon" in opt:
-                                        weapons = opt["weapon"]
-                                        if isinstance(weapons, list):
-                                            for weapon in weapons:
-                                                if isinstance(weapon, dict) and "special_rules" in weapon:
-                                                    if rule in weapon["special_rules"]:
-                                                        is_weapon_rule = True
-                                                        break
-                                        elif isinstance(weapons, dict) and "special_rules" in weapons:
-                                            if rule in weapons["special_rules"]:
-                                                is_weapon_rule = True
-
-                                    if not is_weapon_rule:
-                                        rules.add(rule)
-
+                                    rules.add(rule)
+    
         # 3. Règles spéciales de la monture
         if "mount" in unit and unit.get("mount"):
             mount_data = unit["mount"].get("mount", {})
@@ -613,7 +611,12 @@ def export_html(army_list, army_name, army_limit):
                 for rule in mount_data["special_rules"]:
                     if isinstance(rule, str):
                         rules.add(rule)
-
+            # Ajouter la coriace de la monture si elle existe
+            if "coriace_bonus" in mount_data:
+                mount_coriace = mount_data.get("coriace_bonus", 0)
+                if mount_coriace > 0:
+                    rules.add(f"Monture (Coriace +{mount_coriace})")
+    
         return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
 
     def get_french_type(unit):
@@ -1698,7 +1701,7 @@ if st.session_state.page == "army":
         """Formate l'unité pour l'affichage dans la liste de l'armée"""
         # 1. Nom de l'unité
         name = unit_data['name']
-
+    
         # 2. Armes
         weapons = unit_data.get('weapon', [])
         weapon_texts = []
@@ -1714,9 +1717,9 @@ if st.session_state.page == "army":
             attacks = weapons.get('attacks', '?')
             ap = weapons.get('armor_piercing', '?')
             weapon_texts.append(f"{weapon_name} (A{attacks}/PA{ap})")
-
+    
         weapons_text = ", ".join(weapon_texts) if weapon_texts else "Aucune arme"
-
+    
         # 3. Options/Améliorations
         options_texts = []
         options = unit_data.get('options', {})
@@ -1725,14 +1728,18 @@ if st.session_state.page == "army":
                 if isinstance(opts, list):
                     for opt in opts:
                         options_texts.append(f"{opt.get('name', 'Option')} (+{opt.get('cost', 0)} pts)")
-
+    
         options_text = ", ".join(options_texts) if options_texts else "Aucune amélioration"
-
-        # 4. Taille
+    
+        # 4. Taille et Coriace
         size = unit_data.get('size', 10)
-
-        # Format final: Nom - Coût pts | Armes: ... | Options: ... | Taille: ...
-        return f"{name} - {unit_data['cost']} pts | Armes: {weapons_text} | {options_text} | Taille: {size}"
+        coriace = unit_data.get('coriace', 0)
+        size_text = f"Taille: {size}"
+        if coriace > 0:
+            size_text += f" | Coriace: {coriace}"
+    
+        # Format final: Nom - Coût pts | Armes: ... | Options: ... | Taille: ... | Coriace: ...
+        return f"{name} - {unit_data['cost']} pts | Armes: {weapons_text} | {options_text} | {size_text}"
 
     if not st.session_state.army_list:
         st.markdown("Aucune unité ajoutée pour le moment.")
@@ -2145,15 +2152,19 @@ if st.session_state.page == "army":
         if st.session_state.army_cost + final_cost > st.session_state.points:
             st.error(f"⛔ Dépassement du format : {st.session_state.army_cost + final_cost} / {st.session_state.points} pts")
             st.stop()
-
-        # Calcul de la Coriace
+    
+        # Calcul de la Coriace totale
         coriace_total = unit.get("coriace", 0)
         if mount and "mount" in mount:
             coriace_total += mount["mount"].get("coriace_bonus", 0)
-
+    
         # Préparation des règles spéciales
         all_special_rules = unit.get("special_rules", []).copy()
-
+    
+        # Ajouter la valeur de Coriace aux règles spéciales
+        if coriace_total > 0:
+            all_special_rules.append(f"Coriace({coriace_total})")
+    
         # Règles spéciales des améliorations
         for group in unit.get("upgrade_groups", []):
             group_key = f"group_{unit.get('upgrade_groups', []).index(group)}"
@@ -2161,10 +2172,9 @@ if st.session_state.page == "army":
                 selected_option = st.session_state.unit_selections[unit_key][group_key]
                 if selected_option not in [format_weapon_option(unit.get("weapon", [{}])[0])] and selected_option != "Aucune monture" and selected_option != "Aucun rôle":
                     for opt in group.get("options", []):
-                        weapon = opt.get("weapon", {})
-                        if f"{format_weapon_option(weapon)} (+{opt['cost']} pts)" == selected_option and "special_rules" in opt:
+                        if "special_rules" in opt:
                             all_special_rules.extend(opt["special_rules"])
-
+    
         # Règles spéciales de la monture
         if mount:
             mount_data = mount.get("mount", {})
@@ -2172,7 +2182,7 @@ if st.session_state.page == "army":
                 for rule in mount_data["special_rules"]:
                     if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                         all_special_rules.append(rule)
-
+    
         # Création de l'unité
         unit_data = {
             "name": unit["name"],
@@ -2188,14 +2198,14 @@ if st.session_state.page == "army":
             "special_rules": all_special_rules,
             "coriace": coriace_total
         }
-
+    
         # Ajout d'une mention pour la monture si elle apporte de la Coriace
         if mount and "coriace_bonus" in mount.get("mount", {}):
             mount_name = mount.get("name", "Monture")
             mount_bonus = mount.get("mount", {}).get("coriace_bonus", 0)
             if mount_bonus > 0:
                 unit_data["special_rules"].append(f"{mount_name} (Coriace +{mount_bonus})")
-
+    
         if validate_army_rules(st.session_state.army_list + [unit_data], st.session_state.points, st.session_state.game):
             st.session_state.army_list.append(unit_data)
             st.session_state.army_cost += final_cost
