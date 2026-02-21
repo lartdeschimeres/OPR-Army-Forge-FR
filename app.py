@@ -1759,21 +1759,22 @@ if st.session_state.page == "army":
         elif group.get("type") == "role" and unit.get("type") == "hero":
             choices = ["Aucun rôle"]
             opt_map = {}
-
+        
             for o in group.get("options", []):
                 role_name = o.get('name', 'Rôle')
                 cost = o.get('cost', 0)
                 special_rules = o.get('special_rules', [])
-
+        
                 label = f"{role_name}"
                 if special_rules:
                     rules_text = ", ".join(special_rules)
                     label += f" | {rules_text}"
                 label += f" (+{cost} pts)"
-
+        
                 choices.append(label)
                 opt_map[label] = o
-
+        
+            # Utilisation de radio buttons pour les rôles (choix unique)
             current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
             choice = st.radio(
                 "Rôle du héros",
@@ -1781,15 +1782,26 @@ if st.session_state.page == "army":
                 index=choices.index(current) if current in choices else 0,
                 key=f"{unit_key}_{g_key}_role",
             )
-
+        
             st.session_state.unit_selections[unit_key][g_key] = choice
-
+        
             if choice != "Aucun rôle":
                 for opt_label, opt in opt_map.items():
                     if opt_label == choice:
                         upgrades_cost += opt["cost"]
                         selected_options[group.get("group", "Rôle")] = [opt]
+        
+                        # Ajouter les armes du rôle à la liste des armes principales
+                        if "weapon" in opt:
+                            role_weapons = opt.get("weapon", [])
+                            if isinstance(role_weapons, list):
+                                weapons.extend(role_weapons)
+                            elif isinstance(role_weapons, dict):
+                                weapons.append(role_weapons)
                         break
+
+        
+        
 
         # AMÉLIORATIONS D'ARME - SECTION CORRIGÉE
         elif group.get("type") == "weapon_upgrades":
