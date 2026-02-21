@@ -576,48 +576,35 @@ def export_html(army_list, army_name, army_limit):
 
         return result
 
-    def get_special_rules(unit):
-        """Extraire toutes les règles spéciales de l'unité INCLUANT la Coriace"""
-        rules = set()
-    
-        # 1. Règles spéciales de base de l'unité + Coriace
-        if "special_rules" in unit:
-            for rule in unit["special_rules"]:
+def get_special_rules(unit):
+    """Extraire toutes les règles spéciales de l'unité INCLUANT la Coriace"""
+    rules = set()
+
+    # 1. Règles spéciales de base de l'unité
+    if "special_rules" in unit:
+        for rule in unit["special_rules"]:
+            if isinstance(rule, str):
+                rules.add(rule)
+
+    # 2. Règles spéciales des améliorations (y compris rôles)
+    if "options" in unit:
+        for group_name, opts in unit["options"].items():
+            if isinstance(opts, list):
+                for opt in opts:
+                    if "special_rules" in opt:
+                        for rule in opt["special_rules"]:
+                            if isinstance(rule, str):
+                                rules.add(rule)
+
+    # 3. Règles spéciales de la monture
+    if "mount" in unit and unit.get("mount"):
+        mount_data = unit["mount"].get("mount", {})
+        if "special_rules" in mount_data:
+            for rule in mount_data["special_rules"]:
                 if isinstance(rule, str):
                     rules.add(rule)
-    
-        # Ajouter la valeur de Coriace si elle existe
-        coriace_value = unit.get('coriace', 0)
-        coriace_bonus = unit.get('coriace_bonus', 0)
-        total_coriace = coriace_value + coriace_bonus
-    
-        if total_coriace > 0:
-            rules.add(f"Coriace({total_coriace})")
-    
-        # 2. Règles spéciales des améliorations (hors armes)
-        if "options" in unit:
-            for group_name, opts in unit["options"].items():
-                if isinstance(opts, list):
-                    for opt in opts:
-                        if "special_rules" in opt and "weapon" not in opt:  # Exclure les rôles avec armes
-                            for rule in opt["special_rules"]:
-                                if isinstance(rule, str):
-                                    rules.add(rule)
-    
-        # 3. Règles spéciales de la monture
-        if "mount" in unit and unit.get("mount"):
-            mount_data = unit["mount"].get("mount", {})
-            if "special_rules" in mount_data:
-                for rule in mount_data["special_rules"]:
-                    if isinstance(rule, str):
-                        rules.add(rule)
-            # Ajouter la coriace de la monture si elle existe
-            if "coriace_bonus" in mount_data:
-                mount_coriace = mount_data.get("coriace_bonus", 0)
-                if mount_coriace > 0:
-                    rules.add(f"Monture (Coriace +{mount_coriace})")
-    
-        return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
+
+    return sorted(rules, key=lambda x: x.lower().replace('é', 'e').replace('è', 'e'))
 
     def get_french_type(unit):
         """Retourne le type français basé sur unit_detail"""
@@ -2153,15 +2140,34 @@ if st.session_state.page == "army":
             st.error(f"⛔ Dépassement du format : {st.session_state.army_cost + final_cost} / {st.session_state.points} pts")
             st.stop()
     
-        # Calcul de la Coriace totale
+        # Calcul de la Coriace de base
         coriace_total = unit.get("coriace", 0)
+    
+        # Ajouter la Coriace de la monture
         if mount and "mount" in mount:
             coriace_total += mount["mount"].get("coriace_bonus", 0)
+    
+        # Ajouter la Coriace des rôles
+        if "options" in st.session_state.unit_selections[unit_key]:
+            for group_key, selected_option in st.session_state.unit_selections[unit_key].items():
+                if selected_option and selected_option != "Aucun rôle":
+                    for group in unit.get("upgrade_groups", []):
+                        if f"group_{unit.get('upgrade_groups', []).index(group)}" == group_key:
+                            for opt in group.get("options", []):
+                                if "special_rules" in opt:
+                                    for rule in opt["special_rules"]:
+                                        if isinstance(rule, str) and rule.startswith("Coriace("):
+                                            try:
+                                                # Extraire la valeur entre parenthèses
+                                                coriace_value = int(rule.split("(")[1].split(")")[0])
+                                                coriace_total += coriace_value
+                                            except (IndexError, ValueError):
+                                                pass
     
         # Préparation des règles spéciales
         all_special_rules = unit.get("special_rules", []).copy()
     
-        # Ajouter la valeur de Coriace aux règles spéciales
+        # Ajouter la valeur de Coriace totale aux règles spéciales
         if coriace_total > 0:
             all_special_rules.append(f"Coriace({coriace_total})")
     
