@@ -1321,6 +1321,7 @@
                         {
                             "name": "Sarbacane géante",
                             "cost": 5,
+                            "replaces": ["Javelots de l’équipage"],
                             "weapon": {
                                 "name": "Sarbacane géante",
                                 "range": "18\"",
@@ -1332,6 +1333,7 @@
                         {
                             "name": "Baliste",
                             "cost": 35,
+                            "replaces": ["Javelots de l’équipage"],
                             "weapon": {
                                 "name": "Baliste",
                                 "range": "24\"",
@@ -1516,7 +1518,7 @@
                                 "armor_piercing": 1,
                                 "special_rules": ["Explosion (3)"]
                             },
-                            "coriace_bonus": 6
+                            "special_rules": ["Coriace (6)"],
                         },
                         {"name": "Transport redoutable", "cost": 65, "special_rules": ["Coriace (6)", "Transport (21)"]}
                     ]
