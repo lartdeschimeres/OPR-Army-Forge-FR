@@ -1273,7 +1273,7 @@
       "unit_detail": "unit",
       "size": 5,
       "base_cost": 80,
-      "quality": 3,
+      "quality": 5,
       "defense": 5,
       "special_rules": ["Eclaireur", "Furieux", "Guerrier-né", "Impact (1)", "Rapide"],
       "weapon": [
