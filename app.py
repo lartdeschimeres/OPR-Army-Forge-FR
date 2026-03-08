@@ -8,7 +8,7 @@ import math
 st.set_page_config(
     page_title="OPR ArmyBuilder FR",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"f
 )
 
 # ======================================================
@@ -819,7 +819,7 @@ body {{
             weapons = [weapons]
 
         special_rules = get_special_rules(unit)
-        unit_options = unit.get("options", {})  # Renommé pour éviter la confusion
+        unit_options = unit.get("options", {})
         mount = unit.get("mount", None)
 
         html += f'''
@@ -935,8 +935,8 @@ body {{
     </div>
 '''
 
-       # Section des améliorations sélectionnées (CORRIGÉE)
-        if unit_options and isinstance(unit_options, dict):
+        # Section des améliorations sélectionnées
+        if unit_options and isinstance(unit_options, dict) and unit_options:
             html += '''
   <div class="upgrades-section">
     <div class="rules-title">Améliorations sélectionnées:</div>
@@ -1090,45 +1090,6 @@ body {{
 
         html += '</div>'
 
-    # Dans la section des améliorations sélectionnées
-    if options:
-        html += '''
-      <div class="upgrades-section">
-        <div class="rules-title">Améliorations sélectionnées:</div>
-    '''
-        for group_name, opts in options.items():
-            if isinstance(opts, list) and opts:
-                for opt in opts:
-                    # Cas spécial pour les améliorations par figurine
-                    if "total_cost" in opt:
-                        html += f'''
-        <div class="upgrade-item">
-          <div class="upgrade-name">
-            {esc(opt.get("name", ""))} × {opt.get("count", 1)}
-            <span style="color: var(--cost-color); font-weight: bold; margin-left: 10px;">
-              {opt.get("total_cost", 0)} pts
-            </span>
-          </div>
-    '''
-                        if 'special_rules' in opt and opt['special_rules']:
-                            html += f'<div style="font-size: 10px; color: var(--text-muted);">({", ".join(opt["special_rules"])})</div>'
-                        html += '''
-        </div>
-    '''
-                    else:
-                        html += f'''
-        <div class="upgrade-item">
-          <div class="upgrade-name">{esc(opt.get("name", ""))}</div>
-    '''
-                        if 'special_rules' in opt and opt['special_rules']:
-                            html += f'<div style="font-size: 10px; color: var(--text-muted);">({", ".join(opt["special_rules"])})</div>'
-                        html += '''
-        </div>
-    '''
-        html += '''
-      </div>
-    '''
-    
     # Légende des règles spéciales de la faction
     if sorted_army_list and hasattr(st.session_state, 'faction_special_rules') and st.session_state.faction_special_rules:
         faction_rules = st.session_state.faction_special_rules
