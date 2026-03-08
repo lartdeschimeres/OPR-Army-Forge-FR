@@ -868,7 +868,7 @@
         {
           "group": "Remplacement d’arme",
           "type": "weapon",
-          "description": "Remplacer n'importe quel Epée et scpetre par :",
+          "description": "Remplacer n'importe quel Epée et sceptre par :",
           "options": [
             {"name": "Grand sceptre", "cost": 5, "weapon": {"name": "Grand sceptre", "attacks": 2, "armor_piercing": 1, "special_rules": ["Fléau"]}}
           ]
