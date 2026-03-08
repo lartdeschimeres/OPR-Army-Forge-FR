@@ -4,7 +4,7 @@
   "version": "FR-3.5.2",
   "status": "complete",
   "description": "Les Gardiens Éternels sont d'énormes soldats imprégnés de magie, équipés de lourdes armures de combat et d'armes mortelles. Peu nombreux, ils comptent sur leur cuirasse et leurs compétences au combat pour vaincre des ennemis plus nombreux. Originaires de la Cité d'Albâtre, ils voyagent à travers les plans pour capturer des âmes et les offrir à leur Dieu Gardien, afin de maintenir scellée la Grande Porte du Néant.",
-  "special_rules_descriptions": {
+  "faction_special_rules": {
     "Warden [Gardien]": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des tirs ou sont Chargées d’une distance supérieure à 9” et subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0).",
     "Armor (X+) [Armure (X+)]": "Compte comme ayant Défense X+.",
     "Breath Attack [Attaque de souffle]": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6 : sur un résultat de 2+, une unité ennemie dans un rayon de 6” en ligne de mire subit une touche avec Explosion (3) et PA (1).",
