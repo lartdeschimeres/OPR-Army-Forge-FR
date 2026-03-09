@@ -939,6 +939,7 @@
     {
       "name": "Paladins sur Drake-Lion",
       "type": "unit",
+      "unit_detail": "unit",
       "size": 3,
       "base_cost": 200,
       "quality": 4,
