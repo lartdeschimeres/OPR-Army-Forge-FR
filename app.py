@@ -487,22 +487,24 @@ def check_weapon_conditions(unit_key, requirements):
     if unit_key in st.session_state.unit_selections:
         unit_selections = st.session_state.unit_selections[unit_key]
 
-        # Vérifier les tags sélectionnés
-        if "selected_tags" in unit_selections:
-            for req in requirements:
-                if req not in unit_selections["selected_tags"]:
-                    return False
-
-        # Vérifier les armes sélectionnées
+        # Vérifier les armes sélectionnées dans les groupes
         for group_key, selection in unit_selections.items():
             if isinstance(selection, str) and selection != "Aucune amélioration":
-                # Vérifier si l'option sélectionnée a le tag requis
-                for opt_group in unit.get("upgrade_groups", []):
-                    if f"group_{unit.get('upgrade_groups', []).index(opt_group)}" == group_key:
-                        for opt in opt_group.get("options", []):
-                            if format_weapon_option(opt.get("weapon", {}), opt.get("cost", 0)) == selection:
-                                if "tags" in opt and any(req in opt["tags"] for req in requirements):
+                # Parcourir les groupes d'amélioration de l'unité
+                for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
+                    gk = f"group_{g_idx}"
+                    if gk == group_key:
+                        for option in group.get("options", []):
+                            # Vérifier si l'option a des tags qui correspondent aux requirements
+                            if "tags" in option and any(req in option["tags"] for req in requirements):
+                                # Vérifier si cette option a été sélectionnée
+                                option_label = format_weapon_option(option.get("weapon", {}), option.get("cost", 0))
+                                if selection == option_label:
                                     return True
+
+                            # Vérifier aussi si le nom de l'option correspond
+                            if option.get("name") in requirements and selection.startswith(option.get("name")):
+                                return True
 
     return False
 
@@ -2041,42 +2043,34 @@ if st.session_state.page == "army":
 
         # NOUVEAU TYPE : REMPLACEMENT D'ARME CONDITIONNEL
         elif group.get("type") == "conditional_weapon":
-            # Vérifier si les conditions sont remplies
-            conditions_met = True
-            if "options" in group:
-                for option in group["options"]:
-                    if "requires" in option:
-                        for requirement in option["requires"]:
-                            # Vérifier si l'unité a le tag requis
-                            if not any(
-                                selected_opt.get("tags", []).count(requirement) > 0
-                                for selected_group in st.session_state.unit_selections[unit_key].values()
-                                for selected_opt in (selected_group if isinstance(selected_group, list) else [])
-                            ):
-                                conditions_met = False
-                                break
-                        if not conditions_met:
-                            break
-    
-            if not conditions_met:
+            st.subheader(group.get("group", "Améliorations conditionnelles"))
+        
+            # Vérifier les conditions pour chaque option
+            available_options = []
+            for option in group.get("options", []):
+                requires = option.get("requires", [])
+                if not requires or check_weapon_conditions(unit_key, requires):
+                    available_options.append(option)
+        
+            if not available_options:
                 st.markdown(f"""
                 <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
                     {group.get("description", "")} <em>(Non disponible - conditions non remplies)</em>
                 </div>
                 """, unsafe_allow_html=True)
                 continue
-    
-            # Si les conditions sont remplies, afficher normalement
+        
+            # Si des options sont disponibles, les afficher
             choices = ["Aucune amélioration"]
             opt_map = {}
-    
-            for o in group.get("options", []):
+        
+            for o in available_options:
                 weapon = o.get("weapon", {})
                 if isinstance(weapon, dict):
                     label = format_weapon_option(weapon, o.get("cost", 0))
                     choices.append(label)
                     opt_map[label] = o
-    
+        
             current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
             choice = st.radio(
                 group.get("group", "Amélioration conditionnelle"),
@@ -2084,13 +2078,13 @@ if st.session_state.page == "army":
                 index=choices.index(current) if current in choices else 0,
                 key=f"{unit_key}_{g_key}_conditional"
             )
-    
+        
             st.session_state.unit_selections[unit_key][g_key] = choice
-    
+        
             if choice != choices[0]:
                 opt = opt_map[choice]
                 upgrades_cost += opt.get("cost", 0)
-    
+        
                 # Ajouter l'arme d'amélioration
                 if "weapon" in opt:
                     weapon_upgrades.append(opt["weapon"])
