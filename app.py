@@ -494,6 +494,12 @@ def check_weapon_conditions(unit_key, requirements):
     if unit_key in st.session_state.unit_selections:
         unit_selections = st.session_state.unit_selections[unit_key]
 
+        # Vérifier les tags sélectionnés
+        if "selected_tags" in unit_selections:
+            for req in requirements:
+                if req not in unit_selections["selected_tags"]:
+                    return False
+
         # Vérifier les armes sélectionnées dans les groupes
         for group_key, selection in unit_selections.items():
             if isinstance(selection, str) and selection != "Aucune amélioration":
@@ -2030,19 +2036,19 @@ if st.session_state.page == "army":
                     for opt_label, opt in opt_map.items():
                         if opt_label == choice:
                             weapon_cost += opt["cost"]
-            
+        
                             # Ajouter les tags si présents
                             if "tags" in opt:
                                 if "selected_tags" not in st.session_state.unit_selections[unit_key]:
                                     st.session_state.unit_selections[unit_key]["selected_tags"] = []
                                 for tag in opt["tags"]:
                                     if tag not in st.session_state.unit_selections[unit_key]["selected_tags"]:
-                                        st.session_state.unit_selections[unit_key]["selected_tags"].append(tag))
-                            
+                                        st.session_state.unit_selections[unit_key]["selected_tags"].append(tag)
+        
                             # Si c'est une arme simple
                             if not isinstance(opt["weapon"], list):
                                 weapons = [opt["weapon"]]
-                            
+        
                             # Si c'est une arme combinée
                             else:
                                 weapons = opt["weapon"]
