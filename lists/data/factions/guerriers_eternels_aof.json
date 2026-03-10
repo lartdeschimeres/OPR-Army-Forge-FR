@@ -995,7 +995,7 @@
       ],
       "upgrade_groups": [
         {
-          "group": "Remplacement d’arme par figurine",
+          "group": "Remplacement d'Épée et sceptre",
           "type": "variable_weapon_count",
           "description": "Remplacer n'importe quel Epée et sceptre par :",
           "options": [
@@ -1013,7 +1013,8 @@
                 "type": "size_based",
                 "value": 1
               },
-              "min_count": 1
+              "min_count": 0,
+              "replaces": ["Épée et sceptre"]
             }
           ]
         },
