@@ -72,10 +72,27 @@ def check_dependencies(unit_key, requirements):
     if isinstance(requirements, list):
         for required_option in requirements:
             found = False
+            # Parcourir toutes les sélections de l'unité
             for selection in st.session_state.unit_selections[unit_key].values():
-                if isinstance(selection, str) and required_option.lower() in selection.lower():
-                    found = True
-                    break
+                if isinstance(selection, str):
+                    # Vérifier si l'option requise est dans la sélection
+                    if required_option.lower() in selection.lower():
+                        found = True
+                        break
+                    # Cas spécial pour les armes de base (quand rien n'est sélectionné)
+                    if selection == "Aucune amélioration" and required_option.lower() in ["épée", "hache", "lance", "javelot"]:
+                        # Vérifier si l'arme de base correspond
+                        for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
+                            if group.get("type") == "weapon":
+                                base_weapons = unit.get("weapon", [])
+                                if isinstance(base_weapons, list):
+                                    for weapon in base_weapons:
+                                        if isinstance(weapon, dict) and required_option.lower() in weapon.get("name", "").lower():
+                                            found = True
+                                            break
+                                elif isinstance(base_weapons, dict) and required_option.lower() in base_weapons.get("name", "").lower():
+                                    found = True
+                                    break
             if not found:
                 return False
         return True
@@ -1598,33 +1615,39 @@ if st.session_state.page == "army":
 
     for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
         g_key = f"group_{g_idx}"
-        st.subheader(group.get("group", "Améliorations"))
-
+       
         # ARMES (existantes)
         if group.get("type") == "weapon":
             choices = []
             base_weapons = unit.get("weapon", [])
-
+        
+            # Ajouter les armes de base comme première option
             if isinstance(base_weapons, list) and base_weapons:
-                base_weapons_labels = [weapon.get('name', 'Arme') for weapon in base_weapons]
+                base_weapons_labels = []
+                for weapon in base_weapons:
+                    if isinstance(weapon, dict):
+                        base_weapons_labels.append(weapon.get('name', 'Arme'))
+        
                 if len(base_weapons_labels) == 1:
-                    choices.append(format_weapon_option(base_weapons[0]))
+                    choices.append(format_weapon_option(base_weapons[0], 0))  # Coût 0 pour les armes de base
                 else:
                     choices.append(" et ".join(base_weapons_labels))
             elif isinstance(base_weapons, dict):
-                choices.append(format_weapon_option(base_weapons))
-
+                choices.append(format_weapon_option(base_weapons, 0))  # Coût 0 pour les armes de base
+        
+            # Ajouter les options de remplacement
             opt_map = {}
             for o in group.get("options", []):
                 weapon = o.get("weapon", {})
+                cost = o.get("cost", 0)
                 if isinstance(weapon, list):
                     weapon_names = [w.get('name', 'Arme') for w in weapon]
-                    label = " et ".join(weapon_names) + f" (+{o['cost']} pts)"
+                    label = " et ".join(weapon_names) + f" (+{cost} pts)"
                 else:
-                    label = format_weapon_option(weapon, o['cost'])
+                    label = format_weapon_option(weapon, cost)
                 choices.append(label)
                 opt_map[label] = o
-
+        
             if choices:
                 current = st.session_state.unit_selections[unit_key].get(g_key, choices[0] if choices else "Aucune arme")
                 choice = st.radio(
@@ -1633,45 +1656,89 @@ if st.session_state.page == "army":
                     index=choices.index(current) if current in choices else 0,
                     key=f"{unit_key}_{g_key}_weapon",
                 )
-
+        
                 st.session_state.unit_selections[unit_key][g_key] = choice
-
+        
+                # Gérer le choix de l'utilisateur
                 if choice != choices[0]:
                     for opt_label, opt in opt_map.items():
                         if opt_label == choice:
                             weapon_cost += opt["cost"]
-                            st.session_state.unit_selections[unit_key][g_key] = opt["name"]
-
+        
+                            # Enregistrer le NOM de l'option sélectionnée pour les dépendances
+                            option_name = opt.get("name", "")
+                            if isinstance(opt.get("weapon"), dict):
+                                option_name = opt["weapon"].get("name", option_name)
+                            elif isinstance(opt.get("weapon"), list):
+                                option_name = ", ".join([w.get("name", "") for w in opt["weapon"]])
+        
+                            st.session_state.unit_selections[unit_key][g_key] = option_name
+        
+                            # Gérer les armes
                             if not isinstance(opt["weapon"], list):
                                 weapons = [opt["weapon"]]
                             else:
                                 weapons = opt["weapon"]
                             break
+                else:
+                    # Si "Aucune amélioration" est sélectionné, enregistrer le nom de l'arme de base
+                    if isinstance(base_weapons, list) and base_weapons:
+                        base_names = [w.get("name", "") for w in base_weapons if isinstance(w, dict)]
+                        st.session_state.unit_selections[unit_key][g_key] = ", ".join(base_names)
+                    elif isinstance(base_weapons, dict):
+                        st.session_state.unit_selections[unit_key][g_key] = base_weapons.get("name", "")
 
         # REMPLACEMENT D'ARME CONDITIONNEL
         elif group.get("type") == "conditional_weapon":
             st.subheader(group.get("group", "Améliorations conditionnelles"))
-
+        
+            # Récupérer les armes de base pour vérification
+            base_weapons = unit.get("weapon", [])
+            if not isinstance(base_weapons, list):
+                base_weapons = [base_weapons]
+            base_weapon_names = [w.get("name", "").lower() for w in base_weapons if isinstance(w, dict)]
+        
+            # Séparer les options disponibles et non disponibles
             available_options = []
             unavailable_options = []
-
+        
             for option in group.get("options", []):
                 requires = option.get("requires", [])
-                if not requires or check_dependencies(unit_key, requires):
+                option_available = True
+        
+                if requires:
+                    # Vérifier chaque dépendance
+                    for req in requires:
+                        req_found = False
+                        # Vérifier dans les sélections existantes
+                        for selection in st.session_state.unit_selections[unit_key].values():
+                            if isinstance(selection, str) and req.lower() in selection.lower():
+                                req_found = True
+                                break
+                        # Vérifier dans les armes de base si rien n'est sélectionné
+                        if not req_found and req.lower() in base_weapon_names:
+                            req_found = True
+                        if not req_found:
+                            option_available = False
+                            break
+        
+                if option_available:
                     available_options.append(option)
                 else:
                     unavailable_options.append(option)
-
+        
+            # Afficher les options disponibles
             if available_options:
                 choices = ["Aucune amélioration"]
                 opt_map = {}
-
+        
                 for o in available_options:
                     weapon = o.get("weapon", {})
-                    label = format_weapon_option(weapon, o.get("cost", 0))
+                    cost = o.get("cost", 0)
+                    label = format_weapon_option(weapon, cost)
                     choices.append(label)
                     opt_map[label] = o
-
+        
                 current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
                 choice = st.radio(
                     group.get("group", "Amélioration conditionnelle"),
@@ -1679,20 +1746,22 @@ if st.session_state.page == "army":
                     index=choices.index(current) if current in choices else 0,
                     key=f"{unit_key}_{g_key}_conditional"
                 )
-
+        
                 st.session_state.unit_selections[unit_key][g_key] = choice
-
+        
                 if choice != choices[0]:
                     opt = opt_map[choice]
                     upgrades_cost += opt.get("cost", 0)
-
+        
+                    # Ajouter l'arme d'amélioration
                     if "weapon" in opt:
                         weapon_upgrades.append(opt["weapon"])
                         if isinstance(opt["weapon"], dict):
                             weapons.append(opt["weapon"])
                         elif isinstance(opt["weapon"], list):
                             weapons.extend(opt["weapon"])
-
+        
+            # Afficher les options non disponibles
             if unavailable_options:
                 st.markdown("""
                 <div style='margin-top: 10px;'>
@@ -1703,9 +1772,9 @@ if st.session_state.page == "army":
                     requires = ", ".join(opt.get("requires", []))
                     st.markdown(f"""
                     <div style='color: #999; font-size: 0.9em; margin-left: 20px;'>
-                        • {opt['name']} (nécessite : {requires})
+                        • {opt.get('name', 'Option')} (nécessite : {requires})
                     </div>
-                    """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True))
 
         # RÔLES
         elif group.get("type") == "role":
