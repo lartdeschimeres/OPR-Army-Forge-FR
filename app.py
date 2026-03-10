@@ -1896,14 +1896,19 @@ if st.session_state.page == "army":
             if unit.get("type") == "hero":
                 unit_size = 1
         
+            # Récupérer les armes de base pour vérification
+            base_weapons = unit.get("weapon", [])
+            if not isinstance(base_weapons, list):
+                base_weapons = [base_weapons]
+        
             # Préparer les options
             choices = ["Aucun remplacement"]
             opt_map = {}
         
             for o in group.get("options", []):
                 weapon = o.get("weapon", {})
-                cost = o.get("cost_per_unit", 0)
-                label = f"{o['name']} (+{cost} pts/figurine)"
+                cost = o.get("cost", o.get("cost_per_unit", 0))
+                label = f"{o['name']} (+{cost} pts par remplacement)"
         
                 # Ajouter information sur ce qui est remplacé
                 if "replaces" in o:
@@ -1929,6 +1934,15 @@ if st.session_state.page == "army":
                 max_count = calculate_max_count(unit, opt.get("max_count", {"type": "fixed", "value": 1}))
                 min_count = opt.get("min_count", 0)
         
+                # Compter combien d'armes de base peuvent être remplacées
+                replaceable_count = 0
+                for weapon in base_weapons:
+                    if weapon.get("name") in opt.get("replaces", []):
+                        replaceable_count += 1
+        
+                # Limiter le max_count au nombre d'armes remplaçables
+                max_count = min(max_count, replaceable_count)
+        
                 # Créer un slider pour sélectionner le nombre
                 count = st.slider(
                     f"Nombre de {opt['name']} (max: {max_count})",
@@ -1939,39 +1953,42 @@ if st.session_state.page == "army":
                 )
         
                 # Calcul du coût total
-                total_cost = count * opt["cost_per_unit"]
+                total_cost = count * opt.get("cost", opt.get("cost_per_unit", 0))
                 upgrades_cost += total_cost
         
                 # Afficher le coût total
                 st.markdown(f"""
                 <div style='margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;'>
-                    <strong>{opt['name']}</strong> × {count} figurines =
+                    <strong>{opt['name']}</strong> × {count} =
                     <strong style='color: #e74c3c;'>{total_cost} pts</strong>
                 </div>
                 """, unsafe_allow_html=True)
         
                 # Remplacer les armes concernées
                 if "replaces" in opt and count > 0:
-                    # Trouver les armes à remplacer
-                    weapons_to_replace = []
+                    # Compter combien d'armes ont déjà été remplacées
+                    replaced_count = 0
                     for weapon in weapons:
-                        if weapon.get("name") in opt["replaces"]:
-                            weapons_to_replace.append(weapon)
+                        if weapon.get("name") == opt["weapon"]["name"]:
+                            replaced_count += 1
         
-                    # Limiter le nombre de remplacements
-                    weapons_to_replace = weapons_to_replace[:count]
+                    # Calculer combien il reste à remplacer
+                    remaining_to_replace = count - replaced_count
         
-                    # Remplacer les armes
-                    for weapon in weapons_to_replace:
-                        weapons.remove(weapon)
-                        weapons.append(opt["weapon"])
+                    if remaining_to_replace > 0:
+                        # Trouver et remplacer les armes
+                        for weapon in base_weapons[:]:
+                            if weapon.get("name") in opt["replaces"] and remaining_to_replace > 0:
+                                index = weapons.index(weapon)
+                                weapons[index] = opt["weapon"]
+                                remaining_to_replace -= 1
         
                 # Stocker l'information pour l'export
                 selected_options[group.get("group", "Améliorations")] = [
                     {
                         "name": opt["name"],
                         "count": count,
-                        "cost_per_unit": opt["cost_per_unit"],
+                        "cost_per_unit": opt.get("cost", opt.get("cost_per_unit", 0)),
                         "total_cost": total_cost,
                         "weapon": opt.get("weapon"),
                         "replaces": opt.get("replaces", [])
@@ -2149,24 +2166,23 @@ if st.session_state.page == "army":
         for group in unit.get("upgrade_groups", []):
             group_key = f"group_{unit.get('upgrade_groups', []).index(group)}"
             selection = st.session_state.unit_selections[unit_key].get(group_key)
-
-            if selection:
-                if isinstance(selection, dict):
-                    for opt_idx, count in selection.items():
-                        if count > 0:
-                            opt = group.get("options", [])[int(opt_idx)]
-                            if "special_rules" in opt:
-                                all_special_rules.extend(opt["special_rules"] * count)
-
-                            if "weapon" in opt and opt["weapon"]:
-                                weapon = opt["weapon"]
-                                if isinstance(weapon, dict):
-                                    for _ in range(count):
-                                        weapons.append(weapon.copy())
-                                elif isinstance(weapon, list):
-                                    for w in weapon:
-                                        for _ in range(count):
-                                            weapons.append(w.copy())
+        
+            if selection and isinstance(selection, dict):
+                # Gestion des améliorations variables (variable_weapon_count)
+                for opt_idx, data in selection.items():
+                    if isinstance(data, dict) and "count" in data and data["count"] > 0:
+                        opt = group.get("options", [])[int(opt_idx)]
+                        if "special_rules" in opt:
+                            all_special_rules.extend(opt["special_rules"] * data["count"])
+        
+                        # Ajouter les armes si elles existent
+                        if "weapon" in opt and opt["weapon"] and data["count"] > 0:
+                            # Vérifier combien d'armes ont été remplacées
+                            replaced_weapons = [w for w in weapons if w.get("name") == opt["weapon"].get("name")]
+                            if len(replaced_weapons) < data["count"]:
+                                # Ajouter les armes manquantes
+                                for _ in range(data["count"] - len(replaced_weapons)):
+                                    weapons.append(opt["weapon"].copy())
 
                 elif isinstance(selection, str) and selection != "Aucune amélioration":
                     for opt in group.get("options", []):
