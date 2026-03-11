@@ -2053,7 +2053,7 @@ if st.session_state.page == "army":
             "mount": mount,
             "special_rules": all_special_rules,
             "coriace": coriace_total
-        }}
+        }
 
         # Ajout d'une mention pour la monture si elle apporte de la Coriace
         if mount and "coriace_bonus" in mount.get("mount", {}):
