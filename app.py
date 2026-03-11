@@ -434,22 +434,36 @@ def format_weapon_option(weapon, cost=0):
 
     return profile
 
-def format_weapon_profile(weapon):
-    """Formate le profil complet d'une arme avec portée avant Aa"""
-    if not weapon or not isinstance(weapon, dict):
+def format_weapon(weapon):
+    """Formate une arme pour l'affichage avec ses règles spéciales"""
+    if not weapon:
         return "Aucune arme"
 
-    name = weapon.get('name', 'Arme')
-    attacks = weapon.get('attacks', '?')
-    ap = weapon.get('armor_piercing', '?')
-    range_text = weapon.get('range', 'Mêlée')
+    range_text = weapon.get('range', '-')
+    attacks = weapon.get('attacks', '-')
+    ap = weapon.get('armor_piercing', '-')
     special_rules = weapon.get('special_rules', [])
 
-    profile = f"{range_text} A{attacks}/PA{ap}"
-    if special_rules:
-        profile += f" ({', '.join(special_rules)})"
+    # Gérer le cas où range_text est un entier
+    if isinstance(range_text, (int, float)):
+        range_text = str(range_text) + '"'
+    elif range_text == "-" or range_text is None or str(range_text).lower() == "mêlée":
+        range_text = "Mêlée"
 
-    return f"{name} {profile}"
+    result = f"<table><tr><th>RNG</th><th>ATK</th><th>AP</th><th>SPE</th></tr><tr>"
+
+    result += f"<td>{range_text}</td>"
+    result += f"<td>{attacks}</td>"
+    result += f"<td>{ap}</td>"
+
+    if special_rules:
+        result += f"<td>{', '.join(special_rules)}</td>"
+    else:
+        result += "<td>-</td>"
+
+    result += "</tr></table>"
+
+    return result
 
 def format_mount_option(mount):
     """Formate l'option de monture avec les noms réels des armes"""
@@ -896,22 +910,22 @@ body {{
 '''
 
         # Armes (y compris celles des rôles)
-       if weapons:
+        if weapons:
             html += '<div class="section-title">Armes:</div>'
             weapon_counts = {}
             for weapon in weapons:
                 if weapon and isinstance(weapon, dict):
                     weapon_name = weapon.get('name', 'Arme')
                     weapon_counts[weapon_name] = weapon_counts.get(weapon_name, 0) + 1
-            
+        
             for weapon_name, count in weapon_counts.items():
                 weapon = next(w for w in weapons if w.get('name') == weapon_name)
                 html += f'''
             <div class="weapon-item">
-              <div class="weapon-name">{count}x {esc(weapon_name)}</div>
+              <div class="weapon-name">{unit.get('size', 10)}x {esc(weapon_name)}</div>
               <div class="weapon-stats">{format_weapon(weapon)}</div>
             </div>
-            '''
+        '''
 
         # Rôles (pour les héros et titans uniquement)
         if options and unit.get("type") in ["hero", "titan"]:
