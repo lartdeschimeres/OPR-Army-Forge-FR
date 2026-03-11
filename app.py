@@ -375,12 +375,10 @@ def format_unit_option(u):
         for weapon in weapons:
             if isinstance(weapon, dict):
                 weapon_name = weapon.get('name', 'Arme')
-                weapon_unit_size = weapon.get('unit_size', u.get('size', 10))
-                weapon_profiles.append(f"{weapon_unit_size}x {weapon_name}")
+                weapon_profiles.append(f"{u.get('size', 10)}x {weapon_name}")
     elif isinstance(weapons, dict):
         weapon_name = weapons.get('name', 'Arme')
-        weapon_unit_size = weapons.get('unit_size', u.get('size', 10))
-        weapon_profiles.append(f"{weapon_unit_size}x {weapon_name}")
+        weapon_profiles.append(f"{u.get('size', 10)}x {weapon_name}")
 
     weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune"
 
@@ -918,8 +916,7 @@ body {{
             for weapon in weapons:
                 if weapon and isinstance(weapon, dict):
                     weapon_name = weapon.get('name', 'Arme')
-                    weapon_unit_size = weapon.get('unit_size', unit.get('size', 1))
-                    weapon_counts[weapon_name] = weapon_counts.get(weapon_name, 0) + weapon_unit_size
+                    weapon_counts[weapon_name] = weapon_counts.get(weapon_name, 0) + 1
         
             for weapon_name, count in weapon_counts.items():
                 weapon = next(w for w in weapons if w.get('name') == weapon_name)
@@ -1938,12 +1935,10 @@ if st.session_state.page == "army":
                     new_weapon = option["weapon"]
                     if isinstance(new_weapon, dict):
                         new_weapon = new_weapon.copy()
-                        new_weapon["unit_size"] = count
                         base_weapons.append(new_weapon)
                     elif isinstance(new_weapon, list):
                         for w in new_weapon:
                             w = w.copy()
-                            w["unit_size"] = count
                             base_weapons.append(w)
         
                 # Stocker l'information pour l'export
@@ -2011,12 +2006,10 @@ if st.session_state.page == "army":
                         new_weapon = opt["weapon"]
                         if isinstance(new_weapon, dict):
                             new_weapon = new_weapon.copy()
-                            new_weapon["unit_size"] = 1
                             weapons.append(new_weapon)
                         elif isinstance(new_weapon, list):
                             for w in new_weapon:
                                 w = w.copy()
-                                w["unit_size"] = 1
                                 weapons.append(w)
             
         # AMÉLIORATIONS D'UNITÉ
