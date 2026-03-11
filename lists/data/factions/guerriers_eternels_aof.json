@@ -568,7 +568,8 @@
                 "range": 12, 
                 "attacks": 2, 
                 "armor_piercing": 1, 
-                "special_rules": []
+                "special_rules": [],
+                "count": 3
               }
             },
             {
