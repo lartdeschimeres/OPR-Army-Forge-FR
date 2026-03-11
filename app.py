@@ -113,6 +113,46 @@ def format_weapon_option(weapon, cost=0):
     return profile
 
 # ======================================================
+# CHARGEMENT DES FACTIONS (déplacé avant son utilisation)
+# ======================================================
+@st.cache_data
+def load_factions():
+    factions = {}
+    games = set()
+    try:
+        # Chemin par défaut
+        FACTIONS_DIR = Path(__file__).resolve().parent / "frontend" / "public" / "factions"
+
+        # Chemin alternatif si le premier n'existe pas
+        if not FACTIONS_DIR.exists():
+            FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
+
+        # Vérifier que le dossier existe
+        if not FACTIONS_DIR.exists():
+            st.warning("Dossier des factions introuvable")
+            return {}, []
+
+        # Charger les fichiers JSON
+        for fp in FACTIONS_DIR.glob("*.json"):
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    data = json.load(f)
+                    game = data.get("game")
+                    faction = data.get("faction")
+                    if game and faction:
+                        if game not in factions:
+                            factions[game] = {}
+                        factions[game][faction] = data
+                        games.add(game)
+            except Exception as e:
+                st.warning(f"Erreur chargement {fp.name}: {e}")
+    except Exception as e:
+        st.error(f"Erreur chargement factions: {e}")
+        return {}, []
+
+    return factions, sorted(games) if games else []
+
+# ======================================================
 # CSS
 # ======================================================
 st.markdown("""
@@ -193,15 +233,17 @@ if "game" not in st.session_state:
 if "faction" not in st.session_state:
     st.session_state.faction = None
 if "points" not in st.session_state:
-    st.session_state.points = 0
+    st.session_state.points = 1000
 if "list_name" not in st.session_state:
-    st.session_state.list_name = ""
+    st.session_state.list_name = f"Liste_{datetime.now().strftime('%Y%m%d')}"
 if "units" not in st.session_state:
     st.session_state.units = []
 if "faction_special_rules" not in st.session_state:
     st.session_state.faction_special_rules = []
 if "faction_spells" not in st.session_state:
     st.session_state.faction_spells = {}
+if "unit_filter" not in st.session_state:
+    st.session_state.unit_filter = "Tous"
 
 # ======================================================
 # CONFIGURATION DES JEUX OPR
@@ -227,89 +269,64 @@ GAME_CONFIG = {
 if st.session_state.page == "setup":
     st.title("🛡️ OPR ArmyBuilder FR")
 
+    # Charger les factions AVANT de les utiliser
     factions_by_game, games = load_factions()
+
     if not games:
-        st.error("Aucun jeu trouvé")
+        st.error("Aucun jeu trouvé. Vérifiez que le dossier 'factions' existe et contient des fichiers JSON valides.")
         st.stop()
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        game = st.selectbox(
+        st.session_state.game = st.selectbox(
             "Jeu",
             games,
-            index=games.index(st.session_state.get("game")) if st.session_state.get("game") in games else 0
+            index=0 if st.session_state.game not in games else games.index(st.session_state.game)
         )
 
     with col2:
-        faction_options = list(factions_by_game.get(game, {}).keys())
+        faction_options = list(factions_by_game.get(st.session_state.game, {}).keys())
         if not faction_options:
-            st.error("Aucune faction disponible")
+            st.error("Aucune faction disponible pour ce jeu")
             st.stop()
-        faction = st.selectbox("Faction", faction_options)
+
+        st.session_state.faction = st.selectbox(
+            "Faction",
+            faction_options,
+            index=0
+        )
 
     with col3:
-        game_cfg = GAME_CONFIG.get(game, {})
-        points = st.number_input(
+        game_cfg = GAME_CONFIG.get(st.session_state.game, {})
+        st.session_state.points = st.number_input(
             "Points",
             min_value=game_cfg.get("min_points", 250),
             max_value=game_cfg.get("max_points", 10000),
             value=game_cfg.get("default_points", 1000)
         )
 
-    list_name = st.text_input(
+    st.session_state.list_name = st.text_input(
         "Nom de la liste",
-        value=st.session_state.get("list_name", f"Liste_{datetime.now().strftime('%Y%m%d')}")
+        value=st.session_state.list_name
     )
 
     if st.button("Créer l'armée"):
-        st.session_state.game = game
-        st.session_state.faction = faction
-        st.session_state.points = points
-        st.session_state.list_name = list_name
+        # Vérifier que la faction existe bien
+        if st.session_state.game in factions_by_game and st.session_state.faction in factions_by_game[st.session_state.game]:
+            faction_data = factions_by_game[st.session_state.game][st.session_state.faction]
+            st.session_state.units = faction_data.get("units", [])
+            st.session_state.faction_special_rules = faction_data.get("faction_special_rules", [])
+            st.session_state.faction_spells = faction_data.get("spells", {})
 
-        faction_data = factions_by_game[game][faction]
-        st.session_state.units = faction_data.get("units", [])
-        st.session_state.faction_special_rules = faction_data.get("faction_special_rules", [])
-        st.session_state.faction_spells = faction_data.get("spells", {})
+            st.session_state.army_list = []
+            st.session_state.army_cost = 0
+            st.session_state.unit_selections = {}
 
-        st.session_state.army_list = []
-        st.session_state.army_cost = 0
-        st.session_state.unit_selections = {}
-
-        st.session_state.page = "army"
-        st.rerun()
-
-# ======================================================
-# CHARGEMENT DES FACTIONS
-# ======================================================
-@st.cache_data
-def load_factions():
-    factions = {}
-    games = set()
-    try:
-        FACTIONS_DIR = Path(__file__).resolve().parent / "frontend" / "public" / "factions"
-        if not FACTIONS_DIR.exists():
-            FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
-
-        for fp in FACTIONS_DIR.glob("*.json"):
-            try:
-                with open(fp, encoding="utf-8") as f:
-                    data = json.load(f)
-                    game = data.get("game")
-                    faction = data.get("faction")
-                    if game and faction:
-                        if game not in factions:
-                            factions[game] = {}
-                        factions[game][faction] = data
-                        games.add(game)
-            except Exception as e:
-                st.warning(f"Erreur chargement {fp.name}: {e}")
-    except Exception as e:
-        st.error(f"Erreur chargement factions: {e}")
-        return {}, []
-
-    return factions, sorted(games) if games else []
+            st.session_state.page = "army"
+            st.rerun()
+        else:
+            st.error("Faction sélectionnée introuvable")
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
@@ -456,6 +473,7 @@ if st.session_state.page == "army":
         st.session_state.army_list.append(unit_data)
         st.session_state.army_cost += final_cost
         st.rerun()
+        pass
 
 # ======================================================
 # EXPORT HTML (simplifié)
@@ -493,3 +511,4 @@ def export_html(army_list, army_name, army_limit):
     </html>
     """
     return html
+    pass
