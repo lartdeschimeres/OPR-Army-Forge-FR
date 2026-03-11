@@ -983,14 +983,16 @@
           "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": 1,
-          "special_rules": []
+          "special_rules": [],
+          "count": 3
         },
         {
           "name": "Épée et sceptre",
           "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": 0,
-          "special_rules": ["Fléau"]
+          "special_rules": ["Fléau"],
+          "count": 3
         }
       ],
       "upgrade_groups": [
