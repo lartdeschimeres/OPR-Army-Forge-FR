@@ -375,10 +375,12 @@ def format_unit_option(u):
         for weapon in weapons:
             if isinstance(weapon, dict):
                 weapon_name = weapon.get('name', 'Arme')
-                weapon_profiles.append(f"{u.get('size', 10)}x {weapon_name}")
+                weapon_count = weapon.get('count', u.get('size', 10))
+                weapon_profiles.append(f"{weapon_count}x {weapon_name}")
     elif isinstance(weapons, dict):
         weapon_name = weapons.get('name', 'Arme')
-        weapon_profiles.append(f"{u.get('size', 10)}x {weapon_name}")
+        weapon_count = weapons.get('count', u.get('size', 10))
+        weapon_profiles.append(f"{weapon_count}x {weapon_name}")
 
     weapon_text = ", ".join(weapon_profiles) if weapon_profiles else "Aucune"
 
@@ -916,7 +918,8 @@ body {{
             for weapon in weapons:
                 if weapon and isinstance(weapon, dict):
                     weapon_name = weapon.get('name', 'Arme')
-                    weapon_counts[weapon_name] = weapon_counts.get(weapon_name, 0) + 1
+                    weapon_count = weapon.get('count', 1)
+                    weapon_counts[weapon_name] = weapon_counts.get(weapon_name, 0) + weapon_count
         
             for weapon_name, count in weapon_counts.items():
                 weapon = next(w for w in weapons if w.get('name') == weapon_name)
@@ -925,7 +928,7 @@ body {{
               <div class="weapon-name">{count}x {esc(weapon_name)}</div>
               <div class="weapon-stats">{format_weapon(weapon)}</div>
             </div>
-        '''
+'''
 
         # Rôles (pour les héros et titans uniquement)
         if options and unit.get("type") in ["hero", "titan"]:
@@ -1930,7 +1933,14 @@ if st.session_state.page == "army":
                     for _ in range(count):
                         if weapons_to_replace:
                             base_weapons.remove(weapons_to_replace.pop(0))
-                            base_weapons.append(option["weapon"])
+                            new_weapon = option["weapon"].copy()
+                            if isinstance(new_weapon, dict):
+                                new_weapon["count"] = count
+                                base_weapons.append(new_weapon)
+                            elif isinstance(new_weapon, list):
+                                for w in new_weapon:
+                                    w["count"] = count
+                                    base_weapons.append(w)
         
                 # Stocker l'information pour l'export
                 selected_options[group.get("group", "Améliorations")] = [
@@ -1994,11 +2004,15 @@ if st.session_state.page == "army":
                             if weapon.get("name") in opt.get("replaces", []):
                                 weapons.remove(weapon)
                                 break
-                        if isinstance(opt["weapon"], dict):
-                            weapons.append(opt["weapon"])
-                        elif isinstance(opt["weapon"], list):
-                            weapons.extend(opt["weapon"])
-    
+                        new_weapon = opt["weapon"]
+                        if isinstance(new_weapon, dict):
+                            new_weapon["count"] = 1
+                            weapons.append(new_weapon)
+                        elif isinstance(new_weapon, list):
+                            for w in new_weapon:
+                                w["count"] = 1
+                                weapons.append(w)
+            
         # AMÉLIORATIONS D'UNITÉ
         elif group.get("type") == "upgrades":
             for o_idx, o in enumerate(group.get("options", [])):
