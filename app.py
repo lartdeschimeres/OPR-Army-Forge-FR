@@ -393,6 +393,8 @@ def format_weapon_option(weapon):
 # ======================================================
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
+        if txt is None:
+            return ""
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
     def format_weapon(weapon):
@@ -706,7 +708,7 @@ body {{
       {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
     </div>
   </div>
-""",
+"""
 
     for unit in sorted_army_list:
         name = esc(unit.get("name", "Unité"))
@@ -725,7 +727,7 @@ body {{
         # Récupération des armes
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
-            weapons = [weapons]
+            weapons = [weapons] if weapons else []
 
         # Récupération des règles spéciales (sans celles des armes)
         special_rules = get_special_rules(unit)
