@@ -704,7 +704,7 @@ body {{
               <div class="weapon-name">{esc(weapon_name)}</div>
               <div class="weapon-stats">{format_weapon(weapon)}</div>
             </div>
-        ''''
+        '''
 
         if options and unit.get("type") in ["hero", "titan"]:
             for group_name, opts in options.items():
