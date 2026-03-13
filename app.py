@@ -358,68 +358,49 @@ def format_mount_option(mount):
 # ======================================================
 # EXPORT HTML
 # ======================================================
-def get_french_type(unit):
-    """Retourne le type français basé sur unit_detail"""
-    unit_type = unit.get('type', 'unit')
-    unit_detail = unit.get('unit_detail', 'unit')
-
-    # Correction du type pour les héros
-    if unit_type == "hero":
-        return "Héros"
-    elif unit_detail == "titan":
-        return "Titan"
-    elif unit_detail == "named_hero":
-        return "Héros nommé"
-    elif unit_detail == "light_vehicle":
-        return "Véhicule léger"
-    elif unit_detail == "vehicle":
-        return "Véhicule/Monstre"
-    return "Unité de base"
-
-def get_icon_for_unit(unit):
-    """Retourne l'icône appropriée pour le type d'unité"""
-    if unit.get("type") == "hero":
-        return "★"
-    elif unit.get("unit_detail") == "titan":
-        return "🤖"
-    return "🛡️"
-
-def get_roles(unit):
-    """Récupère les rôles sélectionnés pour les héros/titans"""
-    roles = []
-    if "options" in unit:
-        for group_name, options in unit["options"].items():
-            if isinstance(options, list):
-                for opt in options:
-                    if isinstance(opt, dict) and opt.get("type") == "role":
-                        roles.append(opt)
-    return roles
-
-def get_mount_rules(unit):
-    """Récupère les règles spéciales de la monture sans doublons"""
-    rules = set()
-    if unit.get("mount"):
-        mount = unit["mount"].get("mount", {})
-        for r in mount.get("special_rules", []):
-            # Exclure les règles déjà présentes dans l'unité principale
-            if isinstance(r, str) and r not in unit.get("special_rules", []):
-                rules.add(r)
-    return sorted(rules)
-
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
         if txt is None:
             return ""
         return str(txt).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
+    def get_french_type(unit):
+        """Retourne le type français basé sur unit_detail"""
+        unit_type = unit.get('type', 'unit')
+        unit_detail = unit.get('unit_detail', 'unit')
+
+        if unit_type == "hero":
+            return "Héros"
+        elif unit_detail == "titan":
+            return "Titan"
+        elif unit_detail == "named_hero":
+            return "Héros nommé"
+        elif unit_detail == "light_vehicle":
+            return "Véhicule léger"
+        elif unit_detail == "vehicle":
+            return "Véhicule/Monstre"
+        return "Unité de base"
+
+    def get_icon_for_unit(unit):
+        """Retourne l'icône appropriée pour le type d'unité"""
+        if unit.get("type") == "hero":
+            return "★"
+        elif unit.get("unit_detail") == "titan":
+            return "🤖"
+        return "🛡️"
+
     def collect_weapons(unit):
+        """Collecte toutes les armes de l'unité, y compris les améliorations"""
         weapons = []
+
+        # Armes de base
         if "weapon" in unit:
             if isinstance(unit["weapon"], list):
                 weapons.extend(unit["weapon"])
             else:
                 weapons.append(unit["weapon"])
 
+        # Armes des options sélectionnées
         if "options" in unit:
             for group in unit["options"].values():
                 if isinstance(group, list):
@@ -430,6 +411,7 @@ def export_html(army_list, army_name, army_limit):
                             else:
                                 weapons.append(opt["weapon"])
 
+        # Armes de monture
         if unit.get("mount"):
             mount = unit["mount"].get("mount", {})
             if "weapon" in mount:
@@ -437,13 +419,18 @@ def export_html(army_list, army_name, army_limit):
                     weapons.extend(mount["weapon"])
                 else:
                     weapons.append(mount["weapon"])
+
         return weapons
 
     def group_weapons(weapons):
+        """Regroupe les armes identiques et compte leurs occurrences"""
         weapon_map = {}
+
         for w in weapons:
             if not isinstance(w, dict):
                 continue
+
+            # Créer une clé unique pour chaque arme
             name = w.get("name", "Arme")
             rng = w.get("range", "-")
             att = w.get("attacks", "-")
@@ -451,14 +438,21 @@ def export_html(army_list, army_name, army_limit):
             rules = tuple(sorted(w.get("special_rules", [])))
 
             key = (name, rng, att, ap, rules)
+
             if key not in weapon_map:
                 weapon_map[key] = dict(w)
                 weapon_map[key]["count"] = 1
+                # Conserver les informations d'amélioration si elles existent
+                if "_upgraded" in w:
+                    weapon_map[key]["_upgraded"] = True
+                if "_replaces" in w:
+                    weapon_map[key]["_replaces"] = w["_replaces"]
             else:
                 weapon_map[key]["count"] += 1
 
         grouped = list(weapon_map.values())
 
+        # Tri: armes de mêlée en dernier
         def sort_key(w):
             r = w.get("range", "-")
             if r == "-" or str(r).lower() == "mêlée":
@@ -468,13 +462,27 @@ def export_html(army_list, army_name, army_limit):
         grouped.sort(key=sort_key)
         return grouped
 
+    def get_weapon_upgrades(unit):
+        """Récupère les améliorations d'armes appliquées à l'unité"""
+        upgrades = []
+        if "weapon_upgrades" in unit:
+            if isinstance(unit["weapon_upgrades"], list):
+                upgrades.extend(unit["weapon_upgrades"])
+            else:
+                upgrades.append(unit["weapon_upgrades"])
+        return upgrades
+
     def get_rules(unit):
+        """Récupère toutes les règles spéciales de l'unité"""
         rules = set()
+
+        # Règles de base de l'unité
         if "special_rules" in unit:
             for r in unit["special_rules"]:
                 if isinstance(r, str):
                     rules.add(r)
 
+        # Règles des options sélectionnées
         if "options" in unit:
             for group in unit["options"].values():
                 if isinstance(group, list):
@@ -484,11 +492,34 @@ def export_html(army_list, army_name, army_limit):
                                 if isinstance(r, str):
                                     rules.add(r)
 
-        # Ajouter les règles de la monture (sans doublons)
-        mount_rules = get_mount_rules(unit)
-        for r in mount_rules:
-            rules.add(r)
+        # Règles de la monture
+        if unit.get("mount"):
+            mount = unit["mount"].get("mount", {})
+            for r in mount.get("special_rules", []):
+                if isinstance(r, str):
+                    rules.add(r)
 
+        return sorted(rules)
+
+    def get_roles(unit):
+        """Récupère les rôles sélectionnés pour les héros/titans"""
+        roles = []
+        if "options" in unit:
+            for group_name, options in unit["options"].items():
+                if isinstance(options, list):
+                    for opt in options:
+                        if isinstance(opt, dict) and opt.get("type") == "role":
+                            roles.append(opt)
+        return roles
+
+    def get_mount_rules(unit):
+        """Récupère les règles spéciales de la monture sans doublons"""
+        rules = set()
+        if unit.get("mount"):
+            mount = unit["mount"].get("mount", {})
+            for r in mount.get("special_rules", []):
+                if isinstance(r, str) and not r.startswith(("Griffes", "Sabots", "Coriace")):
+                    rules.add(r)
         return sorted(rules)
 
     total = sum(u["cost"] for u in army_list)
@@ -515,6 +546,7 @@ def export_html(army_list, army_name, army_limit):
   --weapon-bg: #f8f9fa;
   --role-bg: #e3f2fd;
   --mount-bg: #f5f5f5;
+  --upgrade-bg: #e8f5e9;
 }}
 
 body {{
@@ -686,6 +718,23 @@ body {{
   font-size: 13px;
 }}
 
+.upgrade-section {{
+  background: var(--upgrade-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 0 0 16px;
+}}
+
+.upgrade-title {{
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}}
+
 .rules-section {{
   margin: 0 0 16px;
 }}
@@ -830,7 +879,7 @@ body {{
         size = unit.get("size", 10)
         coriace = unit.get("coriace", 0)
 
-        # Déterminer l'icône et le type (corrigé pour les héros)
+        # Déterminer l'icône et le type
         unit_icon = get_icon_for_unit(unit)
         unit_type = get_french_type(unit)
 
@@ -862,6 +911,10 @@ body {{
       <div class="stat-item">
         <div class="stat-label">❤️ CORIACE</div>
         <div class="stat-value tough-value">{coriace if coriace > 0 else "-"}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">👥 TAILLE</div>
+        <div class="stat-value">{size}</div>
       </div>
     </div>
 
@@ -915,17 +968,28 @@ body {{
       </div>
 '''
 
-        # Section Armes
+        # Section Armes de base et améliorées
         weapons = collect_weapons(unit)
         grouped_weapons = group_weapons(weapons)
 
-        if grouped_weapons:
+        # Séparer les armes de base et les améliorations
+        base_weapons = []
+        upgraded_weapons = []
+
+        for w in grouped_weapons:
+            if w.get("_upgraded", False):
+                upgraded_weapons.append(w)
+            else:
+                base_weapons.append(w)
+
+        # Afficher d'abord les armes de base
+        if base_weapons:
             html += '''
-      <!-- Section Armes -->
+      <!-- Section Armes de base -->
       <div class="weapons-section">
-        <div class="section-title">⚔️ Armes</div>
+        <div class="section-title">⚔️ Armes de base</div>
 '''
-            for w in grouped_weapons:
+            for w in base_weapons:
                 name = esc(w.get("name", "Arme"))
                 count = w.get("count", 1)
                 name_display = f"{name} ×{count}" if count > 1 else name
@@ -953,7 +1017,48 @@ body {{
       </div>
 '''
 
-        # Section Règles spéciales (sans doublons avec la monture)
+        # Afficher les améliorations d'armes
+        if upgraded_weapons:
+            html += '''
+      <!-- Section Améliorations d'armes -->
+      <div class="upgrade-section">
+        <div class="upgrade-title">🔧 Améliorations d'armes</div>
+'''
+            for w in upgraded_weapons:
+                name = esc(w.get("name", "Amélioration"))
+                count = w.get("count", 1)
+                name_display = f"{name} ×{count}" if count > 1 else name
+
+                rng = w.get("range", "-")
+                if rng == "-" or str(rng).lower() == "mêlée":
+                    rng = "Mêlée"
+                else:
+                    rng = f'{rng}"'
+
+                att = w.get("attacks", "-")
+                ap = w.get("armor_piercing", "-")
+                rules = ", ".join(w.get("special_rules", []))
+                rules_display = f" | {rules}" if rules else ""
+
+                # Afficher quelle arme a été remplacée si disponible
+                replaces = w.get("_replaces", [])
+                replaces_display = ""
+                if replaces:
+                    replaces_display = f" (remplace: {', '.join(replaces)})"
+
+                html += f"""
+        <div class="weapon-item">
+          <div class="weapon-name">{name_display}{replaces_display}</div>
+          <div class="weapon-stats">
+            {rng} | A{att} | PA{ap}{rules_display}
+          </div>
+        </div>
+"""
+            html += '''
+      </div>
+'''
+
+        # Section Règles spéciales
         rules = get_rules(unit)
         if rules:
             html += '''
@@ -1017,6 +1122,21 @@ body {{
           </div>
 """
                     html += '''
+        </div>
+'''
+
+            # Règles spéciales de la monture (sans doublons)
+            mount_rules = get_mount_rules(unit)
+            if mount_rules:
+                html += '''
+        <div style="margin-top: 12px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">Règles spéciales:</div>
+          <div class="rules-container">
+'''
+                for rule in mount_rules:
+                    html += f'<span class="rule-tag">{esc(rule)}</span>'
+                html += '''
+          </div>
         </div>
 '''
 
