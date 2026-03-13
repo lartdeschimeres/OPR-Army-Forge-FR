@@ -360,16 +360,21 @@ def format_mount_option(mount):
 # ======================================================
 def get_french_type(unit):
     """Retourne le type français basé sur unit_detail"""
+    unit_type = unit.get('type', 'unit')
     unit_detail = unit.get('unit_detail', 'unit')
-    type_mapping = {
-        'hero': 'Héros',
-        'named_hero': 'Héros nommé',
-        'unit': 'Unité de base',
-        'light_vehicle': 'Véhicule léger',
-        'vehicle': 'Véhicule/Monstre',
-        'titan': 'Titan'
-    }
-    return type_mapping.get(unit_detail, 'Unité')
+
+    # Correction du type pour les héros
+    if unit_type == "hero":
+        return "Héros"
+    elif unit_detail == "titan":
+        return "Titan"
+    elif unit_detail == "named_hero":
+        return "Héros nommé"
+    elif unit_detail == "light_vehicle":
+        return "Véhicule léger"
+    elif unit_detail == "vehicle":
+        return "Véhicule/Monstre"
+    return "Unité de base"
 
 def get_icon_for_unit(unit):
     """Retourne l'icône appropriée pour le type d'unité"""
@@ -378,6 +383,28 @@ def get_icon_for_unit(unit):
     elif unit.get("unit_detail") == "titan":
         return "🤖"
     return "🛡️"
+
+def get_roles(unit):
+    """Récupère les rôles sélectionnés pour les héros/titans"""
+    roles = []
+    if "options" in unit:
+        for group_name, options in unit["options"].items():
+            if isinstance(options, list):
+                for opt in options:
+                    if isinstance(opt, dict) and opt.get("type") == "role":
+                        roles.append(opt)
+    return roles
+
+def get_mount_rules(unit):
+    """Récupère les règles spéciales de la monture sans doublons"""
+    rules = set()
+    if unit.get("mount"):
+        mount = unit["mount"].get("mount", {})
+        for r in mount.get("special_rules", []):
+            # Exclure les règles déjà présentes dans l'unité principale
+            if isinstance(r, str) and r not in unit.get("special_rules", []):
+                rules.add(r)
+    return sorted(rules)
 
 def export_html(army_list, army_name, army_limit):
     def esc(txt):
@@ -402,6 +429,14 @@ def export_html(army_list, army_name, army_limit):
                                 weapons.extend(opt["weapon"])
                             else:
                                 weapons.append(opt["weapon"])
+
+        if unit.get("mount"):
+            mount = unit["mount"].get("mount", {})
+            if "weapon" in mount:
+                if isinstance(mount["weapon"], list):
+                    weapons.extend(mount["weapon"])
+                else:
+                    weapons.append(mount["weapon"])
         return weapons
 
     def group_weapons(weapons):
@@ -449,25 +484,12 @@ def export_html(army_list, army_name, army_limit):
                                 if isinstance(r, str):
                                     rules.add(r)
 
-        if unit.get("mount"):
-            mount = unit["mount"].get("mount", {})
-            for r in mount.get("special_rules", []):
-                if isinstance(r, str):
-                    rules.add(r)
+        # Ajouter les règles de la monture (sans doublons)
+        mount_rules = get_mount_rules(unit)
+        for r in mount_rules:
+            rules.add(r)
 
         return sorted(rules)
-
-    def get_roles(unit):
-        """Récupère les rôles sélectionnés pour les héros/titans"""
-        roles = []
-        if "options" in unit:
-            for group_name, options in unit["options"].items():
-                if group_name.lower() == "rôle" or group_name.lower() == "roles":
-                    if isinstance(options, list):
-                        for opt in options:
-                            if isinstance(opt, dict) and "name" in opt:
-                                roles.append(opt)
-        return roles
 
     total = sum(u["cost"] for u in army_list)
 
@@ -630,6 +652,9 @@ body {{
   font-size: 14px;
   border-bottom: 1px solid var(--border);
   padding-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }}
 
 .weapons-section {{
@@ -693,11 +718,14 @@ body {{
   font-weight: 600;
   color: var(--accent);
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }}
 
 .role-item {{
-  margin-bottom: 6px;
-  padding-bottom: 6px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
   border-bottom: 1px dashed var(--border);
 }}
 
@@ -726,6 +754,13 @@ body {{
   display: flex;
   align-items: center;
   gap: 6px;
+}}
+
+.mount-weapons {{
+  margin-top: 12px;
+  background: rgba(245, 245, 245, 0.5);
+  border-radius: 6px;
+  padding: 8px;
 }}
 
 .faction-rules, .faction-spells {{
@@ -795,7 +830,7 @@ body {{
         size = unit.get("size", 10)
         coriace = unit.get("coriace", 0)
 
-        # Déterminer l'icône et le type
+        # Déterminer l'icône et le type (corrigé pour les héros)
         unit_icon = get_icon_for_unit(unit)
         unit_type = get_french_type(unit)
 
@@ -828,10 +863,6 @@ body {{
         <div class="stat-label">❤️ CORIACE</div>
         <div class="stat-value tough-value">{coriace if coriace > 0 else "-"}</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-label">👥 TAILLE</div>
-        <div class="stat-value">{size}</div>
-      </div>
     </div>
 
     <div class="section">
@@ -839,7 +870,7 @@ body {{
 
         # Section Rôles (pour héros et titans)
         roles = get_roles(unit)
-        if roles and (unit.get("type") == "hero" or unit.get("unit_detail") == "titan"):
+        if roles and unit.get("type") == "hero":
             html += '''
       <!-- Section Rôles -->
       <div class="role-section">
@@ -849,6 +880,7 @@ body {{
                 role_name = esc(role.get("name", "Rôle"))
                 role_cost = role.get("cost", 0)
                 role_rules = ", ".join(role.get("special_rules", []))
+                role_weapon = role.get("weapon", {})
 
                 html += f'''
         <div class="role-item">
@@ -857,6 +889,24 @@ body {{
                 if role_rules:
                     html += f'''
           <div class="role-stats">Règles: {role_rules}</div>
+'''
+                if role_weapon:
+                    if isinstance(role_weapon, list):
+                        for w in role_weapon:
+                            w_name = esc(w.get("name", "Arme"))
+                            w_range = w.get("range", "Mêlée")
+                            w_att = w.get("attacks", "-")
+                            w_ap = w.get("armor_piercing", "-")
+                            html += f'''
+          <div class="role-stats">Arme: {w_name} ({w_range}, A{w_att}, PA{w_ap})</div>
+'''
+                    else:
+                        w_name = esc(role_weapon.get("name", "Arme"))
+                        w_range = role_weapon.get("range", "Mêlée")
+                        w_att = role_weapon.get("attacks", "-")
+                        w_ap = role_weapon.get("armor_piercing", "-")
+                        html += f'''
+          <div class="role-stats">Arme: {w_name} ({w_range}, A{w_att}, PA{w_ap})</div>
 '''
                 html += '''
         </div>
@@ -903,7 +953,7 @@ body {{
       </div>
 '''
 
-        # Section Règles spéciales
+        # Section Règles spéciales (sans doublons avec la monture)
         rules = get_rules(unit)
         if rules:
             html += '''
@@ -920,20 +970,19 @@ body {{
       </div>
 '''
 
-        # Section Monture (pour héros et unités)
+        # Section Monture
         if "mount" in unit and unit.get("mount"):
             mount = unit["mount"]
             mount_data = mount.get("mount", {})
             mount_name = esc(mount.get("name", "Monture"))
             mount_cost = mount.get("cost", 0)
             mount_coriace = mount_data.get("coriace_bonus", 0)
-            mount_rules = mount_data.get("special_rules", [])
 
             html += f'''
       <!-- Section Monture -->
       <div class="mount-section">
         <div class="mount-title">
-          🐴 {mount_name} {'(+' + str(mount_cost) + ' pts)' if mount_cost > 0 else ''}
+          🐴 {mount_name}{' (+' + str(mount_cost) + ' pts)' if mount_cost > 0 else ''}
         </div>
 '''
 
@@ -942,9 +991,8 @@ body {{
                 mount_weapons = mount_data["weapon"]
                 if isinstance(mount_weapons, list) and mount_weapons:
                     html += '''
-        <div style="margin-top: 12px;">
-          <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Armes de la monture:</div>
-          <div style="background: rgba(245, 245, 245, 0.5); border-radius: 6px; padding: 8px;">
+        <div class="mount-weapons">
+          <div style="font-weight: 600; margin-bottom: 8px;">Armes de la monture:</div>
 '''
                     for weapon in mount_weapons:
                         if isinstance(weapon, dict):
@@ -961,30 +1009,14 @@ body {{
                             rules_display = f" | {rules}" if rules else ""
 
                             html += f"""
-        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
-          <div style="font-weight: 500; font-size: 14px;">{name}</div>
-          <div style="color: var(--text-muted); font-size: 13px;">
-            {rng} | A{att} | PA{ap}{rules_display}
+          <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+            <div style="font-weight: 500; font-size: 14px;">{name}</div>
+            <div style="color: var(--text-muted); font-size: 13px;">
+              {rng} | A{att} | PA{ap}{rules_display}
+            </div>
           </div>
-        </div>
 """
                     html += '''
-          </div>
-        </div>
-'''
-
-            # Règles spéciales de la monture
-            if mount_rules:
-                html += '''
-        <div style="margin-top: 12px;">
-          <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-main);">Règles spéciales:</div>
-          <div class="rules-container">
-'''
-                for rule in mount_rules:
-                    if not rule.startswith(("Griffes", "Sabots", "Coriace")):
-                        html += f'<span class="rule-tag">{esc(rule)}</span>'
-                html += '''
-          </div>
         </div>
 '''
 
