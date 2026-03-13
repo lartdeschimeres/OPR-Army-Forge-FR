@@ -386,20 +386,20 @@ def export_html(army_list, army_name, army_limit):
         """Formate une arme pour l'affichage HTML avec mentions spéciales"""
         if not weapon:
             return ""
-    
+
         weapon_name = esc(weapon.get('name', 'Arme'))
         range_text = weapon.get('range', '-')
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
         special_rules = weapon.get('special_rules', [])
-    
+
         if isinstance(range_text, (int, float)):
             range_text = f'{range_text}"'
         elif range_text == "-" or range_text is None or str(range_text).lower() == "mêlée":
             range_text = "Mêlée"
-    
+
         rules_text = ", ".join(special_rules) if special_rules else "-"
-    
+
         # Ajouter les mentions spéciales
         mention = ""
         if weapon.get("_conditional", False):
@@ -407,7 +407,7 @@ def export_html(army_list, army_name, army_limit):
         elif weapon.get("_upgraded", False):
             count = weapon.get("_count", 1)
             mention = f" ({count} exemplaires)"
-    
+
         return f"{weapon_name}{mention} | {range_text} | A{attacks} | PA{ap} | {esc(rules_text)}"
 
     def format_role_html(role):
@@ -415,47 +415,49 @@ def export_html(army_list, army_name, army_limit):
         if not role or not isinstance(role, dict):
             return ""
 
-        role_name = esc(role.get('name', 'Rôle'))
-        cost = role.get('cost', 0)
+        role_name = esc(role.get('name', ''))
         special_rules = role.get('special_rules', [])
-
-        rules_text = ", ".join(special_rules) if special_rules else "-"
 
         # Formatage des armes du rôle si elles existent
         weapons_html = ""
         if "weapon" in role:
             role_weapons = role.get("weapon", [])
             if isinstance(role_weapons, list):
-                weapons_html = "<div style='margin-top: 8px; margin-left: 15px;'>"
-                weapons_html += "<div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Armes du rôle:</div>"
+                weapons_html = "<div style='margin-top: 8px;'>"
                 for weapon in role_weapons:
                     if isinstance(weapon, dict):
                         weapons_html += f"""
-                        <div style='margin-bottom: 4px; margin-left: 10px;'>
+                        <div style='margin-bottom: 4px;'>
                             {format_weapon_html(weapon)}
                         </div>
                         """
                 weapons_html += "</div>"
             elif isinstance(role_weapons, dict):
-                weapons_html = "<div style='margin-top: 8px; margin-left: 15px;'>"
-                weapons_html += "<div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Arme du rôle:</div>"
+                weapons_html = "<div style='margin-top: 8px;'>"
                 weapons_html += f"""
-                <div style='margin-bottom: 4px; margin-left: 10px;'>
+                <div style='margin-bottom: 4px;'>
                     {format_weapon_html(role_weapons)}
                 </div>
                 """
                 weapons_html += "</div>"
 
+        # Formatage des règles spéciales en rectangles gris
+        rules_html = ""
+        if special_rules:
+            rules_html = "<div style='margin-top: 8px;'>"
+            rules_html += "<div style='display: flex; flex-wrap: wrap; gap: 4px;'>"
+            for rule in special_rules:
+                rules_html += f"<span class='rule-tag'>{esc(rule)}</span>"
+            rules_html += "</div>"
+            rules_html += "</div>"
+
         return f"""
         <div style='margin-top: 10px; margin-bottom: 10px; padding: 8px; background: rgba(240, 248, 255, 0.3); border-radius: 6px; border-left: 3px solid #3498db;'>
             <div style='font-weight: 600; color: #3498db; margin-bottom: 5px;'>
-                Rôle: {role_name}
+                {role_name}
             </div>
             {weapons_html}
-            <div style='margin-top: 8px;'>
-                <div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Règles spéciales:</div>
-                <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
-            </div>
+            {rules_html}
         </div>
         """
 
@@ -784,22 +786,23 @@ body {{
 '''
 
         # Deuxième ligne : Armes
-        if weapons:
+        if weapons and len(weapons) > 0:
             html += '''
           <div class="weapon-list">
             <div style="font-weight: 600; margin-bottom: 5px; color: var(--accent);">Armes :</div>
         '''
-        
+
             # Organiser les armes : d'abord les armes améliorées, puis les armes de base
             upgraded_weapons = []
             base_weapons = []
-        
+
             for weapon in weapons:
-                if weapon.get("_upgraded", False):
-                    upgraded_weapons.append(weapon)
-                else:
-                    base_weapons.append(weapon)
-        
+                if weapon and isinstance(weapon, dict):
+                    if weapon.get("_upgraded", False):
+                        upgraded_weapons.append(weapon)
+                    else:
+                        base_weapons.append(weapon)
+
             # Afficher d'abord les armes améliorées
             for weapon in upgraded_weapons:
                 html += f'''
@@ -807,14 +810,14 @@ body {{
               {format_weapon_html(weapon)}
             </div>
         '''
-        
+
             # Puis afficher les armes de base (si elles existent et n'ont pas toutes été remplacées)
             if base_weapons:
                 for weapon in base_weapons:
                     # Vérifier si cette arme de base a été complètement remplacée
                     weapon_name = weapon.get('name', '')
                     is_replaced = False
-        
+
                     for upgraded_weapon in upgraded_weapons:
                         if weapon_name in upgraded_weapon.get("_replaces", []):
                             # Vérifier si TOUTES les occurrences ont été remplacées
@@ -823,7 +826,7 @@ body {{
                             if replace_count >= unit_size:
                                 is_replaced = True
                                 break
-        
+
                     # N'afficher que si l'arme n'a pas été complètement remplacée
                     if not is_replaced:
                         html += f'''
@@ -831,7 +834,7 @@ body {{
               {format_weapon_html(weapon)}
             </div>
         '''
-        
+
             html += '''
           </div>
         '''
@@ -841,7 +844,7 @@ body {{
             html += """
             <div style='margin-top: 15px;'>
                 <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
-                    Rôles et améliorations:
+                    Améliorations:
                 </div>
             """
 
@@ -849,44 +852,15 @@ body {{
             for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
-                        if "weapon" in opt or "special_rules" in opt:
+                        if isinstance(opt, dict):
                             html += format_role_html(opt)
-
-            # Affichage des autres améliorations (non-rôles)
-            other_upgrades = []
-            for group_name, opts in options.items():
-                if isinstance(opts, list):
-                    for opt in opts:
-                        if "weapon" not in opt and "special_rules" in opt:
-                            other_upgrades.append({
-                                "name": opt.get("name", "Amélioration"),
-                                "rules": opt.get("special_rules", []),
-                                "cost": opt.get("cost", 0)
-                            })
-
-            if other_upgrades:
-                html += """
-                <div style='margin-top: 10px;'>
-                    <div style='font-weight: 600; margin-bottom: 5px; color: var(--text-main);'>
-                        Autres améliorations:
-                    </div>
-                """
-
-                for upgrade in other_upgrades:
-                    rules_text = ", ".join(upgrade["rules"]) if upgrade["rules"] else "Aucune"
-                    html += f"""
-                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
-                        <div style='font-weight: 500; color: var(--text-main);'>{esc(upgrade["name"])}</div>
-                        <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
-                    </div>
-                    """
 
             html += """
             </div>
             """
-            
+
         # Règles spéciales (hors armes et hors règles des rôles déjà affichées)
-        if special_rules:
+        if special_rules and len(special_rules) > 0:
             html += '''
   <div class="rules-section">
     <div class="rules-title">Règles spéciales:</div>
@@ -913,7 +887,7 @@ body {{
     </div>
 '''
 
-            if mount_weapons:
+            if mount_weapons and len(mount_weapons) > 0:
                 html += '''
     <div style="margin-top: 8px;">
       <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Armes de la monture:</div>
@@ -943,7 +917,7 @@ body {{
         faction_rules = st.session_state.faction_special_rules
         all_rules = [rule for rule in faction_rules if isinstance(rule, dict)]
 
-        if all_rules:
+        if all_rules and len(all_rules) > 0:
             html += '''
 <div class="faction-rules">
   <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
@@ -987,34 +961,33 @@ body {{
     if sorted_army_list and hasattr(st.session_state, 'faction_spells') and st.session_state.faction_spells:
         spells = st.session_state.faction_spells
         all_spells = [{"name": name, "details": details} for name, details in spells.items() if isinstance(details, dict)]
-    
-        if all_spells:
+
+        if all_spells and len(all_spells) > 0:
             html += '''
-    <div class="spells-section">
-      <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
-        Légende des sorts de la faction
-      </h3>
-      <div style="display: flex; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 100%;">
-    '''
-    
+<div class="spells-section">
+  <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
+    Légende des sorts de la faction
+  </h3>
+  <div style="display: flex; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 100%;">
+'''
             for spell in sorted(all_spells, key=lambda x: x['name'].lower().replace('é', 'e').replace('è', 'e')):
                 if isinstance(spell, dict):
                     html += f'''
-          <div style="margin-bottom: 12px; padding: 8px; background: rgba(240, 248, 255, 0.2); border-radius: 4px;">
-            <div>
-              <span style="color: #3498db; font-weight: bold; font-size: 16px;">{esc(spell.get('name', ''))}</span>
-            </div>
-            <div style="font-size: 14px; color: var(--text-main); margin-top: 4px;">
-              {esc(spell.get('details', {}).get('description', ''))}
-            </div>
-          </div>
-    '''
-            html += '''
+      <div style="margin-bottom: 12px; padding: 8px; background: rgba(240, 248, 255, 0.2); border-radius: 4px;">
+        <div>
+          <span style="color: #3498db; font-weight: bold; font-size: 16px;">{esc(spell.get('name', ''))}</span>
+        </div>
+        <div style="font-size: 14px; color: var(--text-main); margin-top: 4px;">
+          {esc(spell.get('details', {}).get('description', ''))}
         </div>
       </div>
+'''
+            html += '''
     </div>
-    '''
+  </div>
+</div>
+'''
 
     html += '''
 <div style="text-align: center; margin-top: 30px; font-size: 12px; color: var(--text-muted);">
