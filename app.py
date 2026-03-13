@@ -465,265 +465,265 @@ def export_html(army_list, army_name, army_limit):
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
 
     html = f"""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<title>Liste d'Armée OPR - {esc(army_name)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {{
-  --bg-dark: #f8f9fa;
-  --bg-card: #ffffff;
-  --bg-header: #e9ecef;
-  --accent: #3498db;
-  --text-main: #212529;
-  --text-muted: #6c757d;
-  --border: #dee2e6;
-  --cost-color: #ff6b6b;
-  --tough-color: #e74c3c;
-}}
-
-body {{
-  background: var(--bg-dark);
-  color: var(--text-main);
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 20px;
-  line-height: 1.5;
-}}
-
-.army {{
-  max-width: 800px;
-  margin: 0 auto;
-}}
-
-.army-title {{
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-}}
-
-.army-summary {{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg-card);
-  padding: 16px;
-  border-radius: 8px;
-  margin: 20px 0;
-  border: 1px solid var(--border);
-}}
-
-.unit-card {{
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 20px;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}}
-
-.unit-header {{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}}
-
-.unit-name {{
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-main);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}}
-
-.unit-cost {{
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--cost-color);
-}}
-
-.unit-type {{
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}}
-
-.unit-stats {{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  background: var(--bg-header);
-  padding: 12px;
-  border-radius: 6px;
-  text-align: center;
-  font-size: 12px;
-  margin: 12px 0;
-}}
-
-.stat-item {{
-  padding: 5px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}}
-
-.stat-label {{
-  color: var(--text-muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  margin-bottom: 3px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}}
-
-.stat-value {{
-  font-weight: bold;
-  font-size: 16px;
-  color: var(--text-main);
-}}
-
-.tough-value {{
-  color: var(--tough-color) !important;
-  font-weight: bold;
-  font-size: 18px;
-}}
-
-.section-title {{
-  font-weight: 600;
-  margin: 15px 0 8px 0;
-  color: var(--text-main);
-  font-size: 14px;
-}}
-
-.weapon-item {{
-  background: var(--bg-header);
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-}}
-
-.weapon-name {{
-  font-weight: 500;
-  color: var(--text-main);
-  flex: 1;
-}}
-
-.weapon-stats {{
-  text-align: right;
-  white-space: nowrap;
-  flex: 1;
-}}
-
-.weapon-list {{
-  margin: 10px 0;
-  padding-left: 10px;
-  border-left: 3px solid var(--accent);
-}}
-
-.weapon-entry {{
-  margin-bottom: 5px;
-  font-size: 14px;
-}}
-
-.rules-section {{
-  margin: 12px 0;
-}}
-
-.rules-title {{
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #3498db;
-  font-size: 14px;
-}}
-
-.rules-list {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}}
-
-.rule-tag {{
-  background: var(--bg-header);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  color: var(--text-main);
-}}
-
-.summary-cost {{
-  font-family: monospace;
-  font-size: 24px;
-  font-weight: bold;
-  color: var(--cost-color);
-}}
-
-.role-section {{
-  background: rgba(240, 248, 255, 0.3);
-  padding: 10px;
-  border-radius: 6px;
-  margin: 10px 0;
-  border-left: 3px solid #3498db;
-}}
-
-.role-title {{
-  font-weight: 600;
-  color: #3498db;
-  margin-bottom: 5px;
-  font-size: 14px;
-}}
-
-.mount-section {{
-  background: rgba(150, 150, 150, 0.1);
-  border: 1px solid rgba(150, 150, 150, 0.3);
-  padding: 10px;
-  border-radius: 6px;
-  margin: 15px 0;
-}}
-
-@media print {{
-  body {{
-    background: white;
-    color: black;
-  }}
-  .unit-card, .army-summary {{
-    background: white;
-    border: 1px solid #ccc;
-    page-break-inside: avoid;
-  }}
-}}
-</style>
-</head>
-<body>
-<div class="army">
-  <!-- Titre de la liste -->
-  <div class="army-title">
-    {esc(army_name)} - {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
-  </div>
-
-  <!-- Résumé de l'armée -->
-  <div class="army-summary">
-    <div style="font-size: 14px; color: var(--text-main);">
-      <span style="color: var(--text-muted);">Nombre d'unités:</span>
-      <strong style="margin-left: 8px; font-size: 18px;">{len(sorted_army_list)}</strong>
-    </div>
-    <div class="summary-cost">
-      {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
-    </div>
-  </div>
-"""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+    <meta charset="utf-8">
+    <title>Liste d'Armée OPR - {esc(army_name)}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+    :root {{
+      --bg-dark: #f8f9fa;
+      --bg-card: #ffffff;
+      --bg-header: #e9ecef;
+      --accent: #3498db;
+      --text-main: #212529;
+      --text-muted: #6c757d;
+      --border: #dee2e6;
+      --cost-color: #ff6b6b;
+      --tough-color: #e74c3c;
+    }}
+    
+    body {{
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.5;
+    }}
+    
+    .army {{
+      max-width: 800px;
+      margin: 0 auto;
+    }}
+    
+    .army-title {{
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }}
+    
+    .army-summary {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+    }}
+    
+    .unit-card {{
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }}
+    
+    .unit-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }}
+    
+    .unit-name {{
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    
+    .unit-cost {{
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--cost-color);
+    }}
+    
+    .unit-type {{
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }}
+    
+    .unit-stats {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: var(--bg-header);
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      margin: 12px 0;
+    }}
+    
+    .stat-item {{
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }}
+    
+    .stat-label {{
+      color: var(--text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }}
+    
+    .stat-value {{
+      font-weight: bold;
+      font-size: 16px;
+      color: var(--text-main);
+    }}
+    
+    .tough-value {{
+      color: var(--tough-color) !important;
+      font-weight: bold;
+      font-size: 18px;
+    }}
+    
+    .section-title {{
+      font-weight: 600;
+      margin: 15px 0 8px 0;
+      color: var(--text-main);
+      font-size: 14px;
+    }}
+    
+    .weapon-item {{
+      background: var(--bg-header);
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }}
+    
+    .weapon-name {{
+      font-weight: 500;
+      color: var(--text-main);
+      flex: 1;
+    }}
+    
+    .weapon-stats {{
+      text-align: right;
+      white-space: nowrap;
+      flex: 1;
+    }}
+    
+    .weapon-list {{
+      margin: 10px 0;
+      padding-left: 10px;
+      border-left: 3px solid var(--accent);
+    }}
+    
+    .weapon-entry {{
+      margin-bottom: 5px;
+      font-size: 14px;
+    }}
+    
+    .rules-section {{
+      margin: 12px 0;
+    }}
+    
+    .rules-title {{
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #3498db;
+      font-size: 14px;
+    }}
+    
+    .rules-list {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }}
+    
+    .rule-tag {{
+      background: var(--bg-header);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-main);
+    }}
+    
+    .summary-cost {{
+      font-family: monospace;
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--cost-color);
+    }}
+    
+    .role-section {{
+      background: rgba(240, 248, 255, 0.3);
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border-left: 3px solid #3498db;
+    }}
+    
+    .role-title {{
+      font-weight: 600;
+      color: #3498db;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }}
+    
+    .mount-section {{
+      background: rgba(150, 150, 150, 0.1);
+      border: 1px solid rgba(150, 150, 150, 0.3);
+      padding: 10px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }}
+    
+    @media print {{
+      body {{
+        background: white;
+        color: black;
+      }}
+      .unit-card, .army-summary {{
+        background: white;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+      }}
+    }}
+    </style>
+    </head>
+    <body>
+    <div class="army">
+      <!-- Titre de la liste -->
+      <div class="army-title">
+        {esc(army_name)} - {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
+      </div>
+    
+      <!-- Résumé de l'armée -->
+      <div class="army-summary">
+        <div style="font-size: 14px; color: var(--text-main);">
+          <span style="color: var(--text-muted);">Nombre d'unités:</span>
+          <strong style="margin-left: 8px; font-size: 18px;">{len(sorted_army_list)}</strong>
+        </div>
+        <div class="summary-cost">
+          {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
+        </div>
+      </div>
+    """
 
     for unit in sorted_army_list:
         name = esc(unit.get("name", "Unité"))
@@ -742,7 +742,10 @@ body {{
         if not isinstance(weapons, list):
             weapons = [weapons] if weapons else []
 
-        # Récupération des règles spéciales (sans celles des armes)
+        # Initialisation de weapon_upgrades
+        weapon_upgrades = unit.get("weapon_upgrades", [])
+
+        # Récupération des règles spéciales
         special_rules = get_special_rules(unit)
 
         # Récupération des options et montures
@@ -1674,7 +1677,7 @@ if st.session_state.page == "army":
     
         # Vérifier si le groupe a des options valides
         has_valid_options = False
-        if group.get("type") in ["weapon", "conditional_weapon", "weapon_upgrades"]:
+        if group.get("type") in ["weapon", "conditional_weapon"]:
             has_valid_options = len(group.get("options", [])) > 0
         elif group.get("type") == "role":
             has_valid_options = len(group.get("options", [])) > 0
@@ -1689,9 +1692,9 @@ if st.session_state.page == "army":
         st.subheader(group.get("group", "Améliorations"))
 
     # =============================================
-    # GESTION UNIFIÉE DES AMÉLIORATIONS D'ARME
+    # GESTION DES AMÉLIORATIONS D'ARME
     # =============================================
-    if group.get("type") in ["weapon", "conditional_weapon", "weapon_upgrades"]:
+    if group.get("type") in ["weapon", "conditional_weapon"]:
         available_options = []
         for opt in group.get("options", []):
             requires = opt.get("requires", [])
@@ -1705,16 +1708,12 @@ if st.session_state.page == "army":
             </div>
             """, unsafe_allow_html=True)
         else:
-            # Préparer les choix
-            choices = ["Aucune amélioration d'arme"]
+            choices = ["Aucune amélioration"]
             opt_map = {}
 
             for opt in available_options:
                 weapon = opt.get("weapon", {})
                 if isinstance(weapon, dict):
-                    label = f"{opt.get('name', 'Amélioration')} (+{opt.get('cost', 0)} pts)"
-                elif isinstance(weapon, list):
-                    weapon_names = [w.get('name', 'Arme') for w in weapon]
                     label = f"{opt.get('name', 'Amélioration')} (+{opt.get('cost', 0)} pts)"
                 else:
                     label = f"{opt.get('name', 'Amélioration')} (+{opt.get('cost', 0)} pts)"
@@ -1722,27 +1721,23 @@ if st.session_state.page == "army":
                 choices.append(label)
                 opt_map[label] = opt
 
-            # Affichage des options
             current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
             choice = st.radio(
-                group.get("description", "Sélectionnez une amélioration d'arme"),
+                group.get("description", "Sélectionnez une amélioration"),
                 choices,
                 index=choices.index(current) if current in choices else 0,
-                key=f"{unit_key}_{g_key}_weapon_upgrade"
+                key=f"{unit_key}_{g_key}_weapon"
             )
 
             st.session_state.unit_selections[unit_key][g_key] = choice
 
-            # Traitement du choix
             if choice != choices[0]:
                 opt = opt_map[choice]
                 upgrades_cost += opt.get("cost", 0)
 
-                # =============================================
-                # LOGIQUE DE REMPLACEMENT D'ARME
-                # =============================================
-                if "replaces" in opt:
-                    # Trouver et remplacer l'arme spécifiée
+                # Logique de remplacement d'arme
+                if "replaces" in opt and "weapon" in opt:
+                    # Trouver et remplacer l'arme
                     weapons_to_replace = []
                     for weapon in weapons:
                         if weapon.get("name") in opt.get("replaces", []):
@@ -1751,8 +1746,7 @@ if st.session_state.page == "army":
                     if weapons_to_replace:
                         weapons.remove(weapons_to_replace[0])
 
-                # Ajouter la nouvelle arme
-                if "weapon" in opt:
+                    # Ajouter la nouvelle arme
                     new_weapon = opt.get("weapon", {})
                     if isinstance(new_weapon, dict):
                         new_weapon = new_weapon.copy()
@@ -1989,20 +1983,19 @@ if st.session_state.page == "army":
                         all_special_rules.append(rule)
 
         unit_data = {
-            "name": unit["name"],
-            "type": unit.get("type", "unit"),
-            "cost": final_cost,
-            "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
-            "quality": unit.get("quality"),
-            "defense": unit.get("defense"),
-            "weapon": weapons,
-            "weapon_upgrades": weapon_upgrades,
-            "options": selected_options,
-            "mount": mount,
-            "special_rules": all_special_rules,
-            "coriace": coriace_total,
-            "unit_upgrades": []
-        }
+        "name": unit["name"],
+        "type": unit.get("type", "unit"),
+        "cost": final_cost,
+        "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
+        "quality": unit.get("quality"),
+        "defense": unit.get("defense"),
+        "weapon": weapons,  # Les armes incluent déjà les améliorations
+        "options": selected_options,
+        "mount": mount,
+        "special_rules": all_special_rules,
+        "coriace": coriace_total,
+        "unit_upgrades": []
+    }
 
         # Ajouter les améliorations d'unité sélectionnées
         for group in unit.get("upgrade_groups", []):
