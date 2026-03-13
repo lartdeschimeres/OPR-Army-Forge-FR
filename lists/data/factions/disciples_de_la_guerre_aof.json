@@ -1053,8 +1053,8 @@
         },
         {
           "group": "Améliorations d'arme",
-          "type": "weapon_upgrades",
-          "description": "Remplacer une seule arme à une main lourde par :",
+          "type": "conditionnal_weapon",
+          "description": "Remplacer UNE SEULE arme à une main lourde par :",
           "options": [
             {
               "name": "Grande arme lourde (une seule)",
@@ -1306,7 +1306,7 @@
         },
         {
           "group": "Améliorations d'armes",
-          "type": "weapon_upgrades",
+          "type": "conditionnal_weapon",
           "description": "Améliorer toutes les figurines avec une des options suivantes (un seul choix possible)",
           "options": [
             {
