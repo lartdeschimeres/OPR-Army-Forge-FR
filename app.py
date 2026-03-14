@@ -128,12 +128,22 @@ def format_unit_option(u):
     for w in weapons:
         if isinstance(w, dict):
             sr = w.get("special_rules", [])
-            p = f"{w.get('name','Arme')} (A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}/{w.get('range','Mêlée')}"
+            # Formatage de la portée : entier → 'Xpouces', Mêlée → 'Mêlée'
+            rng = w.get("range", "Mêlée")
+            if rng in (None, "-", "mêlée", "Mêlée") or str(rng).lower() == "mêlée":
+                rng_str = "Mêlée"
+            elif isinstance(rng, (int, float)):
+                rng_str = f'{int(rng)}"'
+            else:
+                s = str(rng).strip()
+                rng_str = s if s.endswith('"') else f'{s}"'
+            p = f"{w.get('name','Arme')} (A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}/{rng_str}"
             p += (f", {', '.join(sr)})" if sr else ")")
             profiles.append(p)
     weapon_text = ", ".join(profiles) if profiles else "Aucune"
     rules_text = ", ".join([r if isinstance(r, str) else r.get("name","") for r in u.get("special_rules", [])]) or "Aucune"
-    return f"{name_part} | Déf {u.get('defense','?')}+ | {weapon_text} | {rules_text} | {u.get('base_cost',0)}pts"
+    # Ajout de Qual X+ devant Déf X+
+    return f"{name_part} | Qual {u.get('quality','?')}+ | Déf {u.get('defense','?')}+ | {weapon_text} | {rules_text} | {u.get('base_cost',0)}pts"
 
 def format_weapon_option(weapon, cost=0):
     if not weapon or not isinstance(weapon, dict): return "Aucune arme"
@@ -677,7 +687,10 @@ if st.session_state.page == "army":
         elif gtype == "upgrades":
             for oi,o in enumerate(group.get("options",[])):
                 ok=f"{unit_key}_{g_key}_{o['name']}_{oi}"
-                chk=st.checkbox(f"{o['name']} (+{o['cost']} pts)",value=st.session_state.unit_selections[unit_key].get(ok,False),key=ok)
+                # Afficher les special_rules entre parenthèses si présentes
+                sr_label = o.get("special_rules", [])
+                sr_str = f" ({', '.join(sr_label)})" if sr_label else ""
+                chk=st.checkbox(f"{o['name']}{sr_str} (+{o['cost']} pts)",value=st.session_state.unit_selections[unit_key].get(ok,False),key=ok)
                 st.session_state.unit_selections[unit_key][ok]=chk
                 if chk: upgrades_cost+=o["cost"]; selected_options.setdefault(group.get("group","Options"),[]).append(o)
 
