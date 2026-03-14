@@ -50,6 +50,8 @@ if "page" not in st.session_state: st.session_state.page = "setup"
 if "army_list" not in st.session_state: st.session_state.army_list = []
 if "army_cost" not in st.session_state: st.session_state.army_cost = 0
 if "unit_selections" not in st.session_state: st.session_state.unit_selections = {}
+if "draft_counter" not in st.session_state: st.session_state.draft_counter = 0
+if "draft_unit_name" not in st.session_state: st.session_state.draft_unit_name = ""
 if "game" not in st.session_state: st.session_state.game = None
 if "faction" not in st.session_state: st.session_state.faction = None
 if "points" not in st.session_state: st.session_state.points = 0
@@ -627,7 +629,12 @@ if st.session_state.page == "army":
     if not unit: st.error("Aucune unité sélectionnée."); st.stop()
     if "upgrade_groups" not in unit: unit["upgrade_groups"] = []
 
-    unit_key = f"unit_{unit['name']}"
+    # Chaque configuration d'unité a un key unique basé sur un compteur.
+    # Quand l'unité change, on incrémente → pas de collision entre deux unités du même nom.
+    if st.session_state.draft_unit_name != unit['name']:
+        st.session_state.draft_counter += 1
+        st.session_state.draft_unit_name = unit['name']
+    unit_key = f"draft_{st.session_state.draft_counter}"
     st.session_state.unit_selections.setdefault(unit_key, {})
     weapons = list(unit.get("weapon",[])); selected_options = {}; mount = None
     weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
@@ -758,4 +765,9 @@ if st.session_state.page == "army":
                 if not r.startswith(("Griffes","Sabots")) and "Coriace" not in r: asr.append(r)
         ud={"name":unit["name"],"type":unit.get("type","unit"),"cost":final_cost,"size":unit.get("size",10)*multiplier if unit.get("type")!="hero" else 1,"quality":unit.get("quality"),"defense":unit.get("defense"),"weapon":weapons,"options":selected_options,"mount":mount,"special_rules":list(set(asr)),"coriace":cor}
         if validate_army_rules(st.session_state.army_list+[ud],st.session_state.points,st.session_state.game):
-            st.session_state.army_list.append(ud); st.session_state.army_cost+=final_cost; st.rerun()
+            st.session_state.army_list.append(ud)
+            st.session_state.army_cost += final_cost
+            # Incrémenter le draft_counter → la prochaine unité (même nom) repart vierge
+            st.session_state.draft_counter += 1
+            st.session_state.draft_unit_name = ""
+            st.rerun()
