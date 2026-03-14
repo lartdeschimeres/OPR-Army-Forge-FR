@@ -369,7 +369,6 @@ def export_html(army_list, army_name, army_limit):
         unit_type = unit.get('type', 'unit')
         unit_detail = unit.get('unit_detail', 'unit')
 
-        # Priorité: 1=Héros, 2=Unités de base, 3=Véhicules légers, 4=Monstres, 5=Titans
         if unit_type == "hero" or unit_detail == "named_hero":
             return 1
         elif unit_detail == "unit":
@@ -411,7 +410,6 @@ def export_html(army_list, army_name, army_limit):
         """Récupère les rôles sélectionnés pour les héros/titans"""
         roles = []
 
-        # Vérifier dans les options
         if "options" in unit and isinstance(unit["options"], dict):
             for group_name, options in unit["options"].items():
                 if isinstance(options, list):
@@ -421,7 +419,6 @@ def export_html(army_list, army_name, army_limit):
                 elif isinstance(options, dict) and options.get("type") == "role":
                     roles.append(options)
 
-        # Vérifier aussi dans les upgrade_groups
         if "upgrade_groups" in unit and isinstance(unit["upgrade_groups"], list):
             for group in unit["upgrade_groups"]:
                 if isinstance(group, dict) and group.get("type") == "role" and "options" in group:
@@ -439,13 +436,16 @@ def export_html(army_list, army_name, army_limit):
             if "special_rules" in role and isinstance(role["special_rules"], list):
                 for rule in role["special_rules"]:
                     if isinstance(rule, str):
+                        # Ajout du nom du rôle dans la règle
+                        role_name = role.get("name", "Rôle")
                         role_rules.append({
-                            "name": f"Règle de rôle: {role.get('name', 'Rôle')}",
+                            "name": f"{role_name}",
                             "range": "-",
                             "attacks": "-",
                             "armor_piercing": "-",
                             "special_rules": [rule],
-                            "_role_rule": True
+                            "_role_rule": True,
+                            "_role_name": role_name
                         })
         return role_rules
 
@@ -497,25 +497,6 @@ def export_html(army_list, army_name, army_limit):
                     else:
                         weapons.append(weapon)
 
-        # Armes de monture
-        if "mount" in unit and unit["mount"]:
-            mount = unit["mount"]
-            if isinstance(mount, dict) and "mount" in mount:
-                mount_data = mount["mount"]
-                if isinstance(mount_data, dict) and "weapon" in mount_data:
-                    weapon = mount_data["weapon"]
-                    if isinstance(weapon, list):
-                        for w in weapon:
-                            w_copy = w.copy() if isinstance(w, dict) else w
-                            if isinstance(w_copy, dict):
-                                w_copy["_mount_weapon"] = True
-                            weapons.append(w_copy)
-                    else:
-                        w_copy = weapon.copy() if isinstance(weapon, dict) else weapon
-                        if isinstance(w_copy, dict):
-                            w_copy["_mount_weapon"] = True
-                        weapons.append(w_copy)
-
         return weapons
 
     def group_weapons(weapons):
@@ -526,7 +507,6 @@ def export_html(army_list, army_name, army_limit):
             if not isinstance(w, dict):
                 continue
 
-            # Créer une clé unique pour chaque arme
             name = w.get("name", "Arme")
             rng = w.get("range", "-")
             att = w.get("attacks", "-")
@@ -536,12 +516,17 @@ def export_html(army_list, army_name, army_limit):
             # Pour les règles de rôle, on veut les garder séparées
             is_role_rule = w.get("_role_rule", False)
             if is_role_rule:
-                key = (name, rng, att, ap, rules, True)
+                role_name = w.get("_role_name", "Rôle")
+                # Utiliser le nom du rôle comme nom d'arme
+                display_name = f"{name} ({role_name})" if name != role_name else role_name
+                key = (display_name, rng, att, ap, rules, True)
             else:
                 key = (name, rng, att, ap, rules, False)
 
             if key not in weapon_map:
                 weapon_map[key] = dict(w)
+                if is_role_rule:
+                    weapon_map[key]["name"] = display_name
                 weapon_map[key]["count"] = w.get("_count", 1)
             else:
                 weapon_map[key]["count"] += w.get("_count", 1)
@@ -571,14 +556,7 @@ def export_html(army_list, army_name, army_limit):
                         if isinstance(r, str):
                             rules.add(r)
 
-        roles = get_roles(unit)
-        for role in roles:
-            if "special_rules" in role and isinstance(role["special_rules"], list):
-                for r in role["special_rules"]:
-                    if isinstance(r, str):
-                        rules.add(r)
-
-        if "mount" in unit and unit["mount"]:
+        if "mount" in unit and unit.get("mount"):
             mount = unit["mount"]
             if isinstance(mount, dict) and "mount" in mount:
                 mount_data = mount["mount"]
@@ -702,12 +680,6 @@ body {{
   font-weight: 600;
   color: var(--text-main);
   margin: 0;
-}}
-
-.unit-size {{
-  font-size: 16px;
-  color: var(--text-muted);
-  margin-left: 8px;
 }}
 
 .unit-cost {{
@@ -936,7 +908,6 @@ body {{
 """
 
     for unit in sorted_units:
-        # Vérification de sécurité pour les données manquantes
         if not isinstance(unit, dict):
             continue
 
@@ -947,7 +918,7 @@ body {{
         size = unit.get("size", 10)
         coriace = unit.get("coriace", 0)
 
-        # Déterminer l'icône et le type
+        # Suppression du [x] après le nom
         unit_icon = get_icon_for_unit(unit)
         unit_type = get_french_type(unit)
 
@@ -956,7 +927,7 @@ body {{
   <div class="unit-header">
     <div class="unit-name-container">
       <div class="unit-name">
-        {name} <span class="unit-size">[{size}]</span>
+        {name}
       </div>
       <div class="unit-cost">{cost} pts</div>
     </div>
@@ -982,8 +953,8 @@ body {{
     </div>
 
     <div class="section">
-        <!-- Tableau des armes et règles de rôle -->
-        <div class="section-title">⚔️ Armes et règles spéciales</div>
+        <!-- Tableau des armes seulement -->
+        <div class="section-title">⚔️ Armes</div>
         <table class="weapon-table">
           <thead>
             <tr>
@@ -1014,7 +985,8 @@ body {{
                 # Style différent pour les règles de rôle
                 is_role_rule = w.get("_role_rule", False)
                 if is_role_rule:
-                    name_display = f'<span class="role-rule">{name_display}</span>'
+                    # Le nom du rôle est déjà intégré dans le nom de l'arme
+                    name_display = f'<span style="font-weight: 600; color: var(--accent);">{name_display}</span>'
 
                 rng = w.get("range", "-")
                 if rng == "-" or str(rng).lower() == "mêlée":
@@ -1237,6 +1209,7 @@ body {{
 </html>
 '''
     return html
+
 
 # ======================================================
 # CHARGEMENT DES FACTIONS
