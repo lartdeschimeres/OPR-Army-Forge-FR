@@ -270,9 +270,21 @@ def export_html(army_list, army_name, army_limit):
     def render_weapon_rows(final_weapons):
         rows = ""
         for w in final_weapons:
-            name = esc(w.get("name","Arme"))
-            cnt = w.get("_display_count", 1) or 1
-            nd = f"{cnt}x {name}" if cnt > 1 else name
+            name    = esc(w.get("name","Arme"))
+            cnt     = w.get("_display_count", 1) or 1
+            upgraded = w.get("_upgraded", False)
+            replaces = w.get("_replaces", [])
+            # Règle d'affichage du préfixe Nx :
+            #   - Arme de base (pas _upgraded) → jamais de Nx
+            #   - _upgraded + _replaces présent + cnt > 1 → "Nx" (slider partiel)
+            #   - _upgraded + pas de _replaces → "1x" (ajout conditionnel pur)
+            #   - _upgraded + _replaces présent + cnt = 1 → sans Nx (remplacement 1-pour-1)
+            if upgraded and replaces and cnt > 1:
+                nd = f"{cnt}x {name}"       # slider partiel : ex "2x Grand sceptre"
+            elif upgraded and not replaces:
+                nd = f"1x {name}"           # ajout conditionnel : ex "1x Javelot des Tempêtes"
+            else:
+                nd = name                   # arme de base ou remplacement total
             rng = fmt_range(w.get("range","Mêlée"))
             att = w.get("attacks","-"); ap = w.get("armor_piercing","-")
             spe = ", ".join(w.get("special_rules",[])) or "-"
