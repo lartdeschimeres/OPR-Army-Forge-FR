@@ -569,32 +569,107 @@ def load_factions():
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 if st.session_state.page == "setup":
-    game_images = {
-        "Age of Fantasy": "assets/games/aof_cover.jpg", "Age of Fantasy Regiments": "assets/games/aofr_cover.jpg",
-        "Grimdark Future": "assets/games/gf_cover.jpg", "Grimdark Future Firefight": "assets/games/gff_cover.jpg",
-        "Age of Fantasy Skirmish": "assets/games/aofs_cover.jpg", "__default__": "https://i.imgur.com/DEFAULT_IMAGE.jpg"
-    }
-    current_game = st.session_state.get("game", "__default__")
-    image_url = game_images.get("__default__")
-    if current_game in game_images and current_game != "__default__":
-        try:
-            ip = game_images[current_game]
-            if Path(ip).exists():
-                with open(ip,"rb") as f: image_url = f"data:image/jpeg;base64,{base64.b64encode(f.read()).decode()}"
-        except Exception: pass
-    st.markdown(f"""<style>.game-bg{{background:linear-gradient(to bottom,rgba(0,0,0,.7) 0%,rgba(0,0,0,0) 100%),url('{image_url}');background-size:cover;background-position:center;padding:2rem;border-radius:10px;margin-bottom:2rem;min-height:200px;display:flex;align-items:center;justify-content:center;}}.game-bg .content{{position:relative;z-index:1;width:100%;text-align:center;}}.game-bg h2{{color:white;text-shadow:1px 1px 3px rgba(0,0,0,.8);}}.game-bg p{{color:rgba(255,255,255,.9);}}</style>""", unsafe_allow_html=True)
-    st.markdown('<div class="game-bg"><div class="content">', unsafe_allow_html=True)
-    st.markdown("## 🛡️ OPR ArmyBuilder FR")
-    st.markdown("<p>Construisez, équilibrez et façonnez vos armées pour Age of Fantasy et Grimdark Future.</p>", unsafe_allow_html=True)
-    st.markdown("</div></div>", unsafe_allow_html=True)
-    st.markdown("---")
     factions_by_game, games = load_factions()
     if not games: st.error("Aucun jeu trouvé"); st.stop()
+
+    # Jeu courant
+    current_game = st.session_state.get("game", games[0] if games else "")
+
+    # ── Couleurs et image par jeu ─────────────────────────────────────────────
+    game_meta = {
+        "Age of Fantasy":            {"color": "#2980b9", "short": "AoF"},
+        "Age of Fantasy: Regiments": {"color": "#8e44ad", "short": "AoF:R"},
+        "Grimdark Future":           {"color": "#c0392b", "short": "GDF"},
+        "Grimdark Future: Firefight":{"color": "#e67e22", "short": "GDF:FF"},
+        "Age of Fantasy: Skirmish":  {"color": "#27ae60", "short": "AoF:S"},
+    }
+    game_images = {
+        "Age of Fantasy":            "assets/games/aof_cover.jpg",
+        "Age of Fantasy: Regiments": "assets/games/aofr_cover.jpg",
+        "Grimdark Future":           "assets/games/gf_cover.jpg",
+        "Grimdark Future: Firefight":"assets/games/gff_cover.jpg",
+        "Age of Fantasy: Skirmish":  "assets/games/aofs_cover.jpg",
+    }
+    meta  = game_meta.get(current_game, {"color": "#2980b9", "short": "OPR"})
+    acc   = meta["color"]
+    short = meta["short"]
+
+    # Image vignette en base64 si disponible
+    vignette_html = ""
+    img_path = game_images.get(current_game, "")
+    if img_path and Path(img_path).exists():
+        try:
+            with open(img_path, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            vignette_html = f'<img src="data:image/jpeg;base64,{b64}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">'
+        except Exception:
+            pass
+    if not vignette_html:
+        # Fallback : icône triangles SVG colorée par jeu
+        vignette_html = f"""<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="32,6 58,54 6,54" stroke="{acc}" stroke-width="2.5" fill="none"/>
+          <polygon points="32,16 50,48 14,48" stroke="{acc}" stroke-width="1.5" fill="{acc}" fill-opacity=".12"/>
+          <polygon points="32,28 42,44 22,44" fill="{acc}" fill-opacity=".7"/>
+        </svg>"""
+
+    # ── Hero banner ───────────────────────────────────────────────────────────
+    # SVG triangles inline (motif géométrique, pas de fichier externe)
+    tri_svg = f"""<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.18;"
+        viewBox="0 0 900 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="tp" x="0" y="0" width="32" height="28" patternUnits="userSpaceOnUse">
+          <polygon points="16,2 30,26 2,26" fill="none" stroke="white" stroke-width="1"/>
+          <polygon points="0,28 14,4 28,28" fill="none" stroke="white" stroke-width=".6" opacity=".5"/>
+        </pattern>
+        <radialGradient id="rfade" cx="65%" cy="45%" r="58%">
+          <stop offset="0%" stop-color="white" stop-opacity="1"/>
+          <stop offset="55%" stop-color="white" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="white" stop-opacity="0"/>
+        </radialGradient>
+        <mask id="tm"><rect width="900" height="220" fill="url(#rfade)"/></mask>
+      </defs>
+      <rect width="900" height="220" fill="url(#tp)" mask="url(#tm)"/>
+    </svg>"""
+
+    st.markdown(f"""
+<div style="background:#1a2332;border-radius:12px 12px 0 0;position:relative;
+            overflow:hidden;height:200px;display:flex;align-items:center;
+            justify-content:center;margin-bottom:0;">
+  {tri_svg}
+  <div style="position:relative;z-index:2;text-align:center;padding:0 2rem;">
+    <div style="font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.2em;
+                text-transform:uppercase;margin-bottom:5px;">OPR</div>
+    <div style="font-size:38px;font-weight:700;color:#fff;letter-spacing:.03em;line-height:1.1;">
+      ArmyBuilder <span style="color:{acc};">FR</span>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.12em;
+                text-transform:uppercase;margin-top:7px;">{current_game}</div>
+    <div style="width:44px;height:3px;background:{acc};border-radius:2px;margin:9px auto 0;"></div>
+  </div>
+</div>
+<div style="background:white;border:1px solid #dee2e6;border-top:none;
+            border-radius:0 0 12px 12px;padding:16px;margin-bottom:1.5rem;">
+  <div style="display:flex;gap:16px;align-items:flex-start;">
+    <div style="flex-shrink:0;width:90px;height:90px;border-radius:8px;
+                overflow:hidden;border:1px solid {acc};
+                display:flex;align-items:center;justify-content:center;
+                background:#1a2332;">
+      {vignette_html}
+    </div>
+    <div style="flex:1;font-size:13px;color:#6c757d;padding-top:4px;line-height:1.6;">
+      Construisez, équilibrez et façonnez vos armées.<br>
+      <strong style="color:#212529;">{short}</strong> — sélectionnez votre faction et votre format ci-dessous.
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ── Formulaire ────────────────────────────────────────────────────────────
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("<span class='badge'>Jeu</span>", unsafe_allow_html=True)
-        game = st.selectbox("Jeu", games, index=games.index(st.session_state.get("game")) if st.session_state.get("game") in games else 0, label_visibility="collapsed")
-        if "game" not in st.session_state or game != st.session_state.game: st.session_state.game = game; st.rerun()
+        game = st.selectbox("Jeu", games, index=games.index(current_game) if current_game in games else 0, label_visibility="collapsed")
+        if game != current_game: st.session_state.game = game; st.rerun()
     with col2:
         st.markdown("<span class='badge'>Faction</span>", unsafe_allow_html=True)
         faction_options = list(factions_by_game.get(game, {}).keys())
@@ -612,7 +687,8 @@ if st.session_state.page == "setup":
         st.markdown("<span class='badge'>Action</span>", unsafe_allow_html=True)
         st.markdown("<p>Prêt à forger votre armée ?</p>", unsafe_allow_html=True)
         if st.button("🔥 Construire l'armée", use_container_width=True, type="primary", disabled=not all([game, faction, points > 0]), key="build_army"):
-            st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points; st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
+            st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points
+            st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
             fd = factions_by_game[game][faction]
             st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{})
             st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
