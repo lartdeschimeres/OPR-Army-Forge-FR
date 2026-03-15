@@ -383,40 +383,66 @@ def export_html(army_list, army_name, army_limit):
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{{--bg:#fff;--hdr:#f8f9fa;--accent:#3498db;--txt:#212529;--muted:#6c757d;--brd:#dee2e6;--red:#e74c3c;--rule:#e9ecef;--mount:#f3e5f5;--badge:#e9ecef;}}
-body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margin:0;padding:20px;line-height:1.5;}}
-.army{{max-width:1000px;margin:0 auto;}}
-.army-title{{text-align:center;font-size:28px;font-weight:700;margin-bottom:20px;border-bottom:2px solid var(--accent);padding-bottom:10px;}}
-.army-summary{{display:flex;justify-content:space-between;align-items:center;background:var(--hdr);padding:16px;border-radius:8px;margin:20px 0;border:1px solid var(--brd);}}
-.summary-cost{{font-family:monospace;font-size:24px;font-weight:bold;color:var(--red);}}
-.unit-card{{background:var(--bg);border:1px solid var(--brd);border-radius:8px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);page-break-inside:avoid;}}
-.unit-header{{padding:16px;background:var(--hdr);border-bottom:1px solid var(--brd);border-radius:8px 8px 0 0;}}
-.unit-name-container{{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}}
-.unit-name{{font-size:20px;font-weight:600;margin:0;}}
-.unit-cost{{font-family:monospace;font-size:18px;font-weight:bold;color:var(--red);}}
-.unit-stats{{display:flex;gap:12px;padding:12px;margin:0 16px 0;border-radius:6px;justify-content:center;flex-wrap:wrap;}}
-.stat-badge{{background:var(--badge);padding:8px 12px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:6px;min-width:100px;justify-content:center;border:1px solid var(--brd);}}
-.stat-value{{font-weight:bold;font-size:16px;}} .stat-label{{font-size:12px;color:var(--muted);}}
-.section{{padding:0 16px 16px;}}
-.section-title{{font-weight:600;margin:16px 0 8px;font-size:15px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--brd);padding-bottom:4px;}}
-.weapon-table{{width:100%;border-collapse:collapse;margin:0 0 12px;background:var(--hdr);border-radius:6px;overflow:hidden;border:1px solid var(--brd);}}
-.weapon-table th{{background:var(--hdr);padding:8px 12px;text-align:left;font-weight:600;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);}}
+*{{box-sizing:border-box;}}
+body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margin:0;padding:12px;line-height:1.3;font-size:12px;}}
+.army{{max-width:210mm;margin:0 auto;}}
+
+/* ── Titre & résumé ── */
+.army-title{{text-align:center;font-size:18px;font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--accent);padding-bottom:6px;}}
+.army-summary{{display:flex;justify-content:space-between;align-items:center;background:var(--hdr);padding:8px 12px;border-radius:6px;margin:8px 0 12px;border:1px solid var(--brd);font-size:12px;}}
+.summary-cost{{font-family:monospace;font-size:16px;font-weight:bold;color:var(--red);}}
+
+/* ── Grille 2 colonnes ── */
+.units-grid{{display:grid;grid-template-columns:1fr 1fr;gap:8px;}}
+
+/* ── Carte unité ── */
+.unit-card{{background:var(--bg);border:1px solid var(--brd);border-radius:6px;break-inside:avoid;page-break-inside:avoid;font-size:11px;}}
+.unit-header{{padding:6px 8px 4px;background:var(--hdr);border-bottom:1px solid var(--brd);border-radius:6px 6px 0 0;}}
+.unit-name-container{{display:flex;justify-content:space-between;align-items:flex-start;}}
+.unit-name{{font-size:13px;font-weight:700;margin:0;line-height:1.2;}}
+.unit-cost{{font-family:monospace;font-size:12px;font-weight:700;color:var(--red);white-space:nowrap;margin-left:6px;}}
+.unit-type{{font-size:10px;color:var(--muted);margin-top:1px;}}
+.unit-stats{{display:flex;gap:6px;padding:4px 0 2px;flex-wrap:wrap;}}
+.stat-badge{{background:var(--badge);padding:2px 7px;border-radius:12px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid var(--brd);}}
+.stat-value{{font-weight:700;font-size:11px;}}
+.stat-label{{font-size:9px;color:var(--muted);}}
+.section{{padding:4px 8px 6px;}}
+.section-title{{font-weight:600;margin:4px 0 3px;font-size:11px;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--brd);padding-bottom:2px;color:var(--accent);}}
+.weapon-table{{width:100%;border-collapse:collapse;margin:0 0 4px;font-size:10px;}}
+.weapon-table th{{background:var(--hdr);padding:2px 5px;text-align:left;font-weight:600;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);font-size:9px;color:var(--muted);}}
 .weapon-table th:last-child{{border-right:none;}}
-.weapon-table td{{padding:8px 12px;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);vertical-align:top;}}
+.weapon-table td{{padding:2px 5px;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);vertical-align:top;line-height:1.3;}}
 .weapon-table td:last-child{{border-right:none;}} .weapon-table tr:last-child td{{border-bottom:none;}}
-.weapon-name{{font-weight:500;}}
-.rules-section{{margin:12px 0 0;}} .rules-title{{font-weight:600;margin-bottom:6px;font-size:14px;}}
-.rule-tag{{background:var(--rule);padding:4px 10px;border-radius:4px;font-size:13px;border:1px solid var(--brd);margin-right:6px;margin-bottom:6px;display:inline-block;}}
-.mount-section{{background:var(--mount);border:1px solid var(--brd);border-radius:6px;padding:12px 16px;margin:12px 0;}}
-.faction-rules{{margin-top:40px;padding:20px;border-radius:8px;border:1px solid var(--brd);}}
-.rule-item{{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid var(--brd);}}
-.rule-name{{color:var(--accent);font-weight:600;margin-bottom:5px;}}
-@media print{{body{{background:white;}} .unit-card{{background:white;border:1px solid #ddd;page-break-inside:avoid;box-shadow:none;}}}}
+.weapon-name{{font-weight:600;}}
+.rules-section{{margin:3px 0 0;}}
+.rules-title{{font-weight:600;margin-bottom:3px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}}
+.rule-tag{{background:var(--rule);padding:1px 6px;border-radius:3px;font-size:9px;border:1px solid var(--brd);margin-right:3px;margin-bottom:3px;display:inline-block;line-height:1.5;}}
+.mount-section{{background:var(--mount);border:1px solid var(--brd);border-radius:4px;padding:4px 8px;margin:4px 0;font-size:10px;}}
+.mount-section .section-title{{font-size:10px;}}
+
+/* ── Page de légende (règles + sorts) ── */
+.legend-page{{page-break-before:always;break-before:page;padding:12px 0;}}
+.faction-rules{{padding:8px;border-radius:6px;border:1px solid var(--brd);}}
+.legend-title{{text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:12px;font-size:14px;font-weight:700;}}
+.rule-item{{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--brd);}}
+.rule-item:last-child{{border-bottom:none;margin-bottom:0;padding-bottom:0;}}
+.rule-name{{color:var(--accent);font-weight:600;font-size:10px;margin-bottom:2px;}}
+.rule-desc{{font-size:9px;line-height:1.4;color:#555;}}
+
+@media print{{
+  body{{padding:6px;}}
+  .army{{max-width:100%;}}
+  .unit-card{{border:0.5px solid #ccc;box-shadow:none;background:white;}}
+  .faction-rules{{border:0.5px solid #ccc;}}
+  .legend-page{{page-break-before:always;}}
+}}
 </style></head><body><div class="army">
-<div class="army-title">{esc(army_name)} - {total_cost}/{army_limit} pts</div>
+<div class="army-title">{esc(army_name)} — {total_cost}/{army_limit} pts</div>
 <div class="army-summary">
-  <div style="font-size:14px;"><span style="color:var(--muted);">Nombre d'unités :</span> <strong style="font-size:18px;">{len(sorted_units)}</strong></div>
+  <div><span style="color:var(--muted);">Unités :</span> <strong>{len(sorted_units)}</strong></div>
   <div class="summary-cost">{total_cost}/{army_limit} pts</div>
 </div>
+<div class="units-grid">
 """
 
     for unit in sorted_units:
@@ -445,51 +471,52 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         }
         detail_label = detail_labels.get(unit.get("unit_detail", unit.get("type","unit")), "")
 
-        html += f"""
-<div class="unit-card">
+        html += f"""<div class="unit-card">
   <div class="unit-header">
     <div class="unit-name-container">
-      <div class="unit-name">{name}{'<div style="font-size:11px;font-weight:400;color:var(--muted);margin-top:2px;">' + detail_label + '</div>' if detail_label else ''}</div>
+      <div class="unit-name">{name}{'<div class="unit-type">' + detail_label + '</div>' if detail_label else ''}</div>
       <div class="unit-cost">{cost} pts</div>
     </div>
     <div class="unit-stats">
       <div class="stat-badge"><span class="stat-label">QUAL</span><span class="stat-value">{quality}+</span></div>
       <div class="stat-badge"><span class="stat-label">DÉF</span><span class="stat-value">{defense}+</span></div>
-      <div class="stat-badge"><span class="stat-label">CORIACE</span><span class="stat-value">{coriace if coriace > 0 else '-'}</span></div>
+      {'<div class="stat-badge"><span class="stat-label">CORIACE</span><span class="stat-value">' + str(coriace) + '</span></div>' if coriace > 0 else ''}
       <div class="stat-badge"><span class="stat-label">TAILLE</span><span class="stat-value">{size}</span></div>
     </div>
   </div>
   <div class="section">
     <div class="rules-section">
       <div class="rules-title">Règles spéciales</div>
-      <div style="margin-bottom:10px;">{rules_html}</div>
+      <div style="margin-bottom:4px;">{rules_html}</div>
       {upgrades_section}
     </div>
     <div class="section-title">⚔️ Armes</div>
     <table class="weapon-table">
       <thead><tr><th>Arme</th><th>Por</th><th>Att</th><th>PA</th><th>Spé</th></tr></thead>
-      <tbody>{weapon_rows}{upgrade_rows}</tbody>
+      <tbody>{weapon_rows}</tbody>
     </table>
     {mount_section}
   </div>
 </div>"""
+
+    html += "</div>\n"  # ferme .units-grid
 
     try:
         faction_rules = st.session_state.get("faction_special_rules", [])
         faction_spells = st.session_state.get("faction_spells", {})
         all_rules = [r for r in faction_rules if isinstance(r, dict)]
         if all_rules or faction_spells:
-            html += """<div class="faction-rules">"""
+            html += """<div class="legend-page"><div class="faction-rules">"""
             # Règles spéciales — texte compact (12px)
             if all_rules:
-                html += """<h3 style="text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:16px;font-size:15px;">📜 Règles spéciales de la faction</h3>"""
+                html += """<div class="legend-title">📜 Règles spéciales de la faction</div>"""
                 html += """<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px;">"""
                 for rule in sorted(all_rules, key=lambda x: x.get("name","").lower()):
-                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(rule.get("name",""))}</div><div style="font-size:11px;line-height:1.4;color:#6c757d;">{esc(rule.get("description",""))}</div></div>'
+                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(rule.get("name",""))}</div><div class="rule-desc">{esc(rule.get("description",""))}</div></div>'
                 html += "</div>"
             # Sorts — même style compact
             if faction_spells:
-                html += """<h3 style="text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:16px;font-size:15px;">✨ Sorts de la faction</h3>"""
+                html += """<div class="legend-title" style="margin-top:20px;">✨ Sorts de la faction</div>"""
                 html += """<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">"""
                 for spell_name, spell_data in faction_spells.items():
                     if isinstance(spell_data, dict):
@@ -497,9 +524,9 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
                         desc = spell_data.get("description","")
                     else:
                         cost = "?"; desc = str(spell_data)
-                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(spell_name)}</div><div style="font-size:11px;line-height:1.4;color:#6c757d;">{esc(desc)}</div></div>'
+                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(spell_name)}</div><div class="rule-desc">{esc(desc)}</div></div>'
                 html += "</div>"
-            html += "</div>"
+            html += "</div></div>"  # ferme faction-rules + legend-page
     except Exception as e:
         html += f'<div style="color:red;padding:10px;">Erreur règles faction : {esc(str(e))}</div>'
 
