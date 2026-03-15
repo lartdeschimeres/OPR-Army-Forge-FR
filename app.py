@@ -160,7 +160,7 @@ def format_unit_option(u):
             else:
                 s = str(rng).strip()
                 rng_str = s if s.endswith('"') else f'{s}"'
-            p = f"{w.get('name','Arme')} (A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}/{rng_str}"
+            p = f"{w.get('name','Arme')} ({rng_str}/A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}"
             p += (f", {', '.join(sr)})" if sr else ")")
             profiles.append(p)
     weapon_text = ", ".join(profiles) if profiles else "Aucune"
@@ -302,20 +302,21 @@ def export_html(army_list, army_name, army_limit):
         return sorted(rules)
 
     def render_weapon_rows(final_weapons, unit_size=1):
-        # Règle simple d'affichage du préfixe Nx :
-        #   _count présent (vient du slider) → "Nx" si N>1, "1x" si N=1
-        #   _upgraded sans _count (conditional_weapon, ajout d'une figurine) → "1x"
-        #   pas de _upgraded (arme de base ou remplacement total) → sans Nx
+        # Règles d'affichage du préfixe :
+        #   slider (_count > 1)                        → "Nx nom"
+        #   conditional unique (_upgraded + _unique)   → "1x nom"  (amélioration d'une figurine)
+        #   tout le reste                              → "nom"
         rows = ""
         for w in final_weapons:
-            name    = esc(w.get("name","Arme"))
-            cnt     = w.get("_display_count", 1) or 1
-            has_count = "_count" in w     # vient du slider uniquement
+            name      = esc(w.get("name","Arme"))
+            cnt       = w.get("_display_count", 1) or 1
+            has_count = "_count" in w
             upgraded  = w.get("_upgraded", False)
+            unique    = w.get("_unique", False)
 
-            if has_count:
-                nd = f"{cnt}x {name}" if cnt > 1 else f"1x {name}"
-            elif upgraded:
+            if has_count and cnt > 1:
+                nd = f"{cnt}x {name}"
+            elif upgraded and unique:
                 nd = f"1x {name}"
             else:
                 nd = name
@@ -451,12 +452,30 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
 
     try:
         faction_rules = st.session_state.get("faction_special_rules", [])
+        faction_spells = st.session_state.get("faction_spells", {})
         all_rules = [r for r in faction_rules if isinstance(r, dict)]
-        if all_rules:
-            html += """<div class="faction-rules"><h3 style="text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:10px;margin-bottom:20px;">📜 Légende des règles spéciales de la faction</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">"""
-            for rule in sorted(all_rules, key=lambda x: x.get("name","").lower()):
-                html += f'<div class="rule-item"><div class="rule-name">{esc(rule.get("name",""))}</div><div style="font-size:14px;line-height:1.4;">{esc(rule.get("description",""))}</div></div>'
-            html += "</div></div>"
+        if all_rules or faction_spells:
+            html += """<div class="faction-rules">"""
+            # Règles spéciales — texte compact (12px)
+            if all_rules:
+                html += """<h3 style="text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:16px;font-size:15px;">📜 Règles spéciales de la faction</h3>"""
+                html += """<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px;">"""
+                for rule in sorted(all_rules, key=lambda x: x.get("name","").lower()):
+                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(rule.get("name",""))}</div><div style="font-size:11px;line-height:1.4;color:#6c757d;">{esc(rule.get("description",""))}</div></div>'
+                html += "</div>"
+            # Sorts — même style compact
+            if faction_spells:
+                html += """<h3 style="text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:16px;font-size:15px;">✨ Sorts de la faction</h3>"""
+                html += """<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">"""
+                for spell_name, spell_data in sorted(faction_spells.items()):
+                    if isinstance(spell_data, dict):
+                        cost = spell_data.get("cost","?")
+                        desc = spell_data.get("description","")
+                    else:
+                        cost = "?"; desc = str(spell_data)
+                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(spell_name)} <span style="font-weight:400;color:#6c757d;">({cost} pts)</span></div><div style="font-size:11px;line-height:1.4;color:#6c757d;">{esc(desc)}</div></div>'
+                html += "</div>"
+            html += "</div>"
     except Exception as e:
         html += f'<div style="color:red;padding:10px;">Erreur règles faction : {esc(str(e))}</div>'
 
@@ -701,11 +720,11 @@ if st.session_state.page == "army":
                 if ch!=choices[0]:
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
-                        # Ne PAS retirer l'arme de base : avec la logique simplifiée,
-                        # la conditional ajoute toujours "1x arme" et l'arme de base
-                        # reste visible sans Nx. Pas de retrait, pas de _replaces.
+                        # conditional_weapon avec "requires" = amélioration d'une seule figurine → _unique=True
+                        # conditional_weapon sans "requires" = toute l'unité → _unique absent
                         nw=opt["weapon"]
                         extra={"_upgraded":True}
+                        if opt.get("requires"): extra["_unique"]=True
                         if isinstance(nw,dict): weapons.append({**nw,**extra})
                         elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
