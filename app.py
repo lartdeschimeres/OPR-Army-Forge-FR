@@ -611,8 +611,8 @@ if st.session_state.page == "setup":
     with colB:
         st.markdown("<span class='badge'>Action</span>", unsafe_allow_html=True)
         st.markdown("<p>Prêt à forger votre armée ?</p>", unsafe_allow_html=True)
-        if st.button("🔥 Construire l'armée", use_container_width=True, type="primary", disabled=not all([game, faction, points > 0, list_name.strip()]), key="build_army"):
-            st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points; st.session_state.list_name = list_name
+        if st.button("🔥 Construire l'armée", use_container_width=True, type="primary", disabled=not all([game, faction, points > 0]), key="build_army"):
+            st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points; st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
             fd = factions_by_game[game][faction]
             st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{})
             st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
