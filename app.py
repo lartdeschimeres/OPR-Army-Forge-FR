@@ -651,33 +651,79 @@ if st.session_state.page == "army":
     if not st.session_state.army_list:
         st.markdown("Aucune unité ajoutée pour le moment.")
     else:
+        def fmt_rng(r):
+            if r in (None,"-","mêlée","Mêlée") or str(r).lower()=="mêlée": return "Mêlée"
+            return f'{int(r)}"' if isinstance(r,(int,float)) else str(r)
+        def fmt_weapon_line(w):
+            if not isinstance(w,dict): return ""
+            sr=", ".join(w.get("special_rules",[])); rng=fmt_rng(w.get("range","Mêlée"))
+            return f"{w.get('name','?')} ({rng}/A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}{', '+sr if sr else ''})"
+
         for i, ud in enumerate(st.session_state.army_list):
-            with st.expander(f"{ud['name']} - {ud['cost']} pts", expanded=False):
-                c1,c2,c3,c4=st.columns(4)
-                with c1: st.markdown(f"**Type :** {ud.get('type','unit')}")
-                with c2: st.markdown(f"**Qualité :** {ud.get('quality','?')}+")
-                with c3: st.markdown(f"**Défense :** {ud.get('defense','?')}+")
-                with c4:
-                    cor=ud.get("coriace",0); st.markdown(f"**Coriace :** {cor if cor > 0 else '-'}"); st.markdown(f"**Taille :** {ud.get('size','?')}")
+            with st.expander(f"{ud['name']} — {ud['cost']} pts", expanded=False):
+                # ── Ligne de stats ──────────────────────────────────────────
+                cor=ud.get("coriace",0)
+                stats_html = (
+                    f"<span style='margin-right:12px;'>Qual <b>{ud.get('quality','?')}+</b></span>"
+                    f"<span style='margin-right:12px;'>Déf <b>{ud.get('defense','?')}+</b></span>"
+                    f"<span style='margin-right:12px;'>Taille <b>{ud.get('size','?')}</b></span>"
+                    + (f"<span>Coriace <b>{cor}</b></span>" if cor else "")
+                )
+                st.markdown(f"<div style='font-size:0.85em;color:#555;margin-bottom:6px;'>{stats_html}</div>", unsafe_allow_html=True)
+
+                # ── Armes ───────────────────────────────────────────────────
                 weapons=ud.get("weapon",[])
-                if weapons:
-                    st.markdown("---"); st.markdown("**Armes :**")
-                    ws=weapons if isinstance(weapons,list) else [weapons]
-                    for w in ws:
-                        if isinstance(w,dict):
-                            rt=w.get("range","-"); rt=f'{rt}"' if isinstance(rt,(int,float)) else rt
-                            st.markdown(f"- {w.get('name','Arme')} | {rt} | A{w.get('attacks','-')} | PA{w.get('armor_piercing','-')} | {', '.join(w.get('special_rules',[])) or '-'}")
+                ws=weapons if isinstance(weapons,list) else [weapons]
+                armes=[fmt_weapon_line(w) for w in ws if isinstance(w,dict)]
+                if armes:
+                    st.markdown(
+                        "<div style='font-size:0.8em;color:#333;margin-bottom:4px;'>"
+                        "<b>Armes :</b> " + " · ".join(armes) + "</div>",
+                        unsafe_allow_html=True)
+
+                # ── Améliorations (rôles, upgrades) ─────────────────────────
+                upgrades_items=[]
+                if "options" in ud and isinstance(ud["options"],dict):
+                    for gopts in ud["options"].values():
+                        opts=gopts if isinstance(gopts,list) else [gopts]
+                        for opt in opts:
+                            if not isinstance(opt,dict): continue
+                            if opt.get("type") in ("upgrade","role"):
+                                sr_upg=", ".join(opt.get("special_rules",[]))
+                                label=opt.get("name","?")
+                                upgrades_items.append(f"{label}" + (f" <span style='color:#888;'>({sr_upg})</span>" if sr_upg else ""))
+                if upgrades_items:
+                    st.markdown(
+                        "<div style='font-size:0.8em;color:#333;margin-bottom:4px;'>"
+                        "<b>Améliorations :</b> " + " · ".join(upgrades_items) + "</div>",
+                        unsafe_allow_html=True)
+
+                # ── Monture ─────────────────────────────────────────────────
                 if ud.get("mount"):
-                    m=ud["mount"]; md=m.get("mount",{}); st.markdown("---"); st.markdown(f"**Monture :** {m.get('name','Monture')}")
-                    mws=md.get("weapon",[]); 
-                    if mws:
-                        st.markdown("**Armes de la monture :**")
-                        if isinstance(mws,dict): mws=[mws]
-                        for w in mws:
-                            if isinstance(w,dict):
-                                rt=w.get("range","-"); rt=f'{rt}"' if isinstance(rt,(int,float)) else rt
-                                st.markdown(f"- {w.get('name','Arme')} | {rt} | A{w.get('attacks','-')} | PA{w.get('armor_piercing','-')} | {', '.join(w.get('special_rules',[])) or '-'}")
-                if st.button(f"Supprimer {ud['name']}", key=f"delete_{i}"):
+                    m=ud["mount"]; md=m.get("mount",{})
+                    mws=md.get("weapon",[]); mws=mws if isinstance(mws,list) else [mws]
+                    marmes=[fmt_weapon_line(w) for w in mws if isinstance(w,dict)]
+                    msr=[r for r in md.get("special_rules",[]) if "Coriace" not in r]
+                    mount_parts=[]
+                    if marmes: mount_parts.append("Armes : "+" · ".join(marmes))
+                    if msr: mount_parts.append(", ".join(msr))
+                    st.markdown(
+                        f"<div style='font-size:0.8em;color:#333;margin-bottom:4px;'>"
+                        f"<b>🐴 {m.get('name','Monture')}</b>"
+                        + (f" — {' | '.join(mount_parts)}" if mount_parts else "")
+                        + "</div>",
+                        unsafe_allow_html=True)
+
+                # ── Règles spéciales ────────────────────────────────────────
+                sr_unit=ud.get("special_rules",[])
+                if sr_unit:
+                    st.markdown(
+                        "<div style='font-size:0.78em;color:#666;margin-bottom:6px;'>"
+                        + ", ".join(sr_unit) + "</div>",
+                        unsafe_allow_html=True)
+
+                # ── Bouton supprimer ────────────────────────────────────────
+                if st.button(f"🗑 Supprimer", key=f"delete_{i}", type="secondary"):
                     st.session_state.army_cost -= ud["cost"]; st.session_state.army_list.pop(i); st.rerun()
 
     st.divider(); st.subheader("Filtres par type d'unité")
