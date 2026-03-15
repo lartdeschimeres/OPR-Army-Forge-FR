@@ -701,14 +701,11 @@ if st.session_state.page == "army":
                 if ch!=choices[0]:
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
-                        # Si "replaces" present : retirer l'ancienne arme d'abord
-                        if "replaces" in opt:
-                            weapons=[w for w in weapons if w.get("name") not in opt.get("replaces",[])]
-                        # Dans tous les cas : ajouter la nouvelle arme
-                        # Conserver "_replaces" pour que render_weapon_rows affiche le bon Nx
+                        # Ne PAS retirer l'arme de base : avec la logique simplifiée,
+                        # la conditional ajoute toujours "1x arme" et l'arme de base
+                        # reste visible sans Nx. Pas de retrait, pas de _replaces.
                         nw=opt["weapon"]
                         extra={"_upgraded":True}
-                        if "replaces" in opt: extra["_replaces"]=opt["replaces"]
                         if isinstance(nw,dict): weapons.append({**nw,**extra})
                         elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
