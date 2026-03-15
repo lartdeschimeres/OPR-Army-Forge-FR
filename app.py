@@ -63,10 +63,10 @@ if "faction_spells" not in st.session_state: st.session_state.faction_spells = {
 
 GAME_CONFIG = {
     "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
-    "Age of Fantasy: Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
     "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
-    "Grimdark Future: Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
-    "Age of Fantasy: Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
+    "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
+    "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
 }
 
 def check_hero_limit(army_list, army_points, game_config):
@@ -578,18 +578,18 @@ if st.session_state.page == "setup":
     # ── Couleurs et image par jeu ─────────────────────────────────────────────
     game_meta = {
         "Age of Fantasy":            {"color": "#2980b9", "short": "AoF"},
-        "Age of Fantasy: Regiments": {"color": "#8e44ad", "short": "AoF:R"},
+        "Age of Fantasy Regiments": {"color": "#8e44ad", "short": "AoF:R"},
         "Grimdark Future":           {"color": "#c0392b", "short": "GDF"},
-        "Grimdark Future: Firefight":{"color": "#e67e22", "short": "GDF:FF"},
-        "Age of Fantasy: Skirmish":  {"color": "#27ae60", "short": "AoF:S"},
+        "Grimdark Future Firefight":{"color": "#e67e22", "short": "GDF:FF"},
+        "Age of Fantasy Skirmish":  {"color": "#27ae60", "short": "AoF:S"},
     }
     _BASE = Path(__file__).resolve().parent
     game_images = {
         "Age of Fantasy":            str(_BASE / "assets/games/aof_cover.jpg"),
-        "Age of Fantasy: Regiments": str(_BASE / "assets/games/aofr_cover.jpg"),
+        "Age of Fantasy Regiments": str(_BASE / "assets/games/aofr_cover.jpg"),
         "Grimdark Future":           str(_BASE / "assets/games/gf_cover.jpg"),
-        "Grimdark Future: Firefight":str(_BASE / "assets/games/gff_cover.jpg"),
-        "Age of Fantasy: Skirmish":  str(_BASE / "assets/games/aofs_cover.jpg"),
+        "Grimdark Future Firefight":str(_BASE / "assets/games/gff_cover.jpg"),
+        "Age of Fantasy Skirmish":  str(_BASE / "assets/games/aofs_cover.jpg"),
     }
     meta  = game_meta.get(current_game, {"color": "#2980b9", "short": "OPR"})
     acc   = meta["color"]
@@ -615,18 +615,12 @@ if st.session_state.page == "setup":
 
     game_subtitles = {
         "Age of Fantasy":             "Construisez vos armées pour les batailles fantastiques",
-        "Age of Fantasy: Regiments":  "Forgez vos régiments pour la guerre des âges",
+        "Age of Fantasy Regiments":  "Forgez vos régiments pour la guerre des âges",
         "Grimdark Future":            "Forgez vos escouades pour les guerres du futur",
-        "Grimdark Future: Firefight": "Constituez vos escouades pour les combats rapprochés",
-        "Age of Fantasy: Skirmish":   "Composez vos bandes pour l'escarmouche fantastique",
+        "Grimdark Future Firefight": "Constituez vos escouades pour les combats rapprochés",
+        "Age of Fantasy Skirmish":   "Composez vos bandes pour l'escarmouche fantastique",
     }
     game_subtitle = game_subtitles.get(current_game, "Construisez et commandez vos armées")
-    # ── Debug vignette (temporaire) ─────────────────────────────────────────
-    from pathlib import Path as _P
-    _dbg_path = game_images.get(current_game, "")
-    _dbg_exists = _P(_dbg_path).exists() if _dbg_path else False
-    st.caption(f"🔍 Debug image : `{_dbg_path}` | existe={_dbg_exists}")
-
     # ── Hero banner ───────────────────────────────────────────────────────────
     # SVG triangles inline (motif géométrique, pas de fichier externe)
     tri_svg = f"""<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.18;"
