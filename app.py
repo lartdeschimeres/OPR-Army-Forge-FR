@@ -847,7 +847,7 @@ if st.session_state.page == "army":
     if st.session_state.faction_spells:
         with st.expander("✨ Sorts de la faction", expanded=False):
             for sn, sd in st.session_state.faction_spells.items():
-                if isinstance(sd, dict): st.markdown(f"**{sn}** ({sd.get('cost','?')} pts): {sd.get('description','')}")
+                if isinstance(sd, dict): st.markdown(f"**{sn}**: {sd.get('description','')}")
 
     st.subheader("Liste de l'Armée")
     if not st.session_state.army_list:
