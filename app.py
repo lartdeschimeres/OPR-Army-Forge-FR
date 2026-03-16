@@ -354,9 +354,8 @@ def export_html(army_list, army_name, army_limit):
                 opts = group_opts if isinstance(group_opts, list) else [group_opts]
                 for opt in opts:
                     if not isinstance(opt, dict): continue
-                    if opt.get("type") in ("upgrade", "role"):
-                        rules = ", ".join(opt.get("special_rules", []))
-                        upgrades.append((opt.get("name","Amélioration"), rules))
+                    rules = ", ".join(opt.get("special_rules", []))
+                    upgrades.append((opt.get("name","Amélioration"), rules))
         if not upgrades: return ""
         items = ""
         for n, r in upgrades:
@@ -908,10 +907,9 @@ if st.session_state.page == "army":
                         opts=gopts if isinstance(gopts,list) else [gopts]
                         for opt in opts:
                             if not isinstance(opt,dict): continue
-                            if opt.get("type") in ("upgrade","role"):
-                                sr_upg=", ".join(opt.get("special_rules",[]))
-                                label=opt.get("name","?")
-                                upgrades_items.append(f"{label}" + (f" <span style='color:#888;'>({sr_upg})</span>" if sr_upg else ""))
+                            sr_upg=", ".join(opt.get("special_rules",[]))
+                            label=opt.get("name","?")
+                            upgrades_items.append(f"{label}" + (f" <span style='color:#888;'>({sr_upg})</span>" if sr_upg else ""))
                 if upgrades_items:
                     st.markdown(
                         "<div style='font-size:0.8em;color:#333;margin-bottom:4px;'>"
@@ -1116,7 +1114,7 @@ if st.session_state.page == "army":
         if mount:
             for r in mount.get("mount",{}).get("special_rules",[]):
                 if not r.startswith(("Griffes","Sabots")) and "Coriace" not in r: asr.append(r)
-        ud={"name":unit["name"],"type":unit.get("type","unit"),"cost":final_cost,"size":unit.get("size",10)*multiplier if unit.get("type")!="hero" else 1,"quality":unit.get("quality"),"defense":unit.get("defense"),"weapon":weapons,"options":selected_options,"mount":mount,"special_rules":list(set(asr)),"coriace":cor}
+        ud={"name":unit["name"],"type":unit.get("type","unit"),"unit_detail":unit.get("unit_detail",unit.get("type","unit")),"cost":final_cost,"size":unit.get("size",10)*multiplier if unit.get("type")!="hero" else 1,"quality":unit.get("quality"),"defense":unit.get("defense"),"weapon":weapons,"options":selected_options,"mount":mount,"special_rules":list(set(asr)),"coriace":cor}
         if validate_army_rules(st.session_state.army_list+[ud],st.session_state.points,st.session_state.game):
             st.session_state.army_list.append(ud)
             st.session_state.army_cost += final_cost
