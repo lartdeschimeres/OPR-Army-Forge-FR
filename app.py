@@ -680,12 +680,14 @@ if st.session_state.page == "setup":
     _cur_faction = st.session_state.get("faction", "")
     _furl = factions_by_game.get(current_game, {}).get(_cur_faction, {}).get("faction_image_url", "")
     if _furl:
+        # Pas de f-string ici : faction_vignette_html sera injecté dans une f-string
+        # Les accolades CSS doivent être échappées {{ }} dans la f-string parente.
+        # Solution : construire la chaîne sans variable Python restante.
+        _faction_border = _acc_color
         faction_vignette_html = (
-            f'<div style="flex-shrink:0;width:min(130px,25vw);height:min(130px,25vw);'
-            f'border-radius:8px;overflow:hidden;border:2px solid {acc};background:#111;">'
-            f'<img src="{_furl}" style="width:100%;height:100%;object-fit:cover;" '
-            f'alt="{_cur_faction}" onerror="this.style.display:none">'
-            f'</div>'
+            f'<div style="flex-shrink:0;width:min(130px,25vw);height:min(130px,25vw);border-radius:8px;overflow:hidden;border:2px solid {_faction_border};background:#111;">'
+            f'<img src="{_furl}" style="width:100%;height:100%;object-fit:cover;" alt="{_cur_faction}">'
+            '</div>'
         )
     else:
         faction_vignette_html = ""
