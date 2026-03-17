@@ -738,6 +738,9 @@ if st.session_state.page == "setup":
     <div style="width:44px;height:3px;background:{acc};border-radius:2px;margin:9px auto 0;"></div>
   </div>
 </div>
+""", unsafe_allow_html=True)
+    # Zone blanche séparée (sans base64 pour éviter les limites de rendu)
+    st.markdown(f"""
 <div style="background:white;border:1px solid #dee2e6;border-top:none;
             border-radius:0 0 12px 12px;padding:16px;margin-bottom:1.5rem;">
   <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
