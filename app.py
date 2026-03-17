@@ -673,10 +673,10 @@ if st.session_state.page == "setup":
 
     game_subtitles = {
         "Age of Fantasy":             "Construisez vos armées pour les batailles fantastiques",
-        "Age of Fantasy Regiments":  "Forgez vos régiments pour la guerre des âges",
+        "Age of Fantasy Regiments":   "Recrutez vos troupes pour de fantastiques batailles rangées",
         "Grimdark Future":            "Forgez vos escouades pour les guerres du futur",
-        "Grimdark Future Firefight": "Constituez vos escouades pour les combats rapprochés",
-        "Age of Fantasy Skirmish":   "Composez vos bandes pour l'escarmouche fantastique",
+        "Grimdark Future Firefight":  "Constituez vos escouades pour des escarmouches à travers la galaxie",
+        "Age of Fantasy Skirmish":    "Composez vos bandes pour des affrontements brutaux",
     }
     game_subtitle = game_subtitles.get(current_game, "Construisez et commandez vos armées")
     # ── Hero banner ───────────────────────────────────────────────────────────
