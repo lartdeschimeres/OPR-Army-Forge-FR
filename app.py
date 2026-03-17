@@ -60,6 +60,11 @@ with st.sidebar:
     faction = st.session_state.get("faction", "—")
     points = st.session_state.get("points", 0)
     army_cost = st.session_state.get("army_cost", 0)
+    # Vignette faction dans la sidebar
+    try:
+        _fimg = load_factions()[0].get(game, {}).get(faction, {}).get("faction_image_url", "")
+        if _fimg: st.markdown(f'<img src="{_fimg}" style="width:100%;border-radius:8px;margin-bottom:8px;object-fit:cover;max-height:110px;">', unsafe_allow_html=True)
+    except Exception: pass
     st.markdown(f"**Jeu :** {game}")
     st.markdown(f"**Faction :** {faction}")
     st.markdown(f"**Format :** {points} pts")
@@ -671,6 +676,20 @@ if st.session_state.page == "setup":
           <polygon points="32,28 42,44 22,44" fill="{acc}" fill-opacity=".7"/>
         </svg>"""
 
+    # ── Vignette faction ──────────────────────────────────────────────────────
+    _cur_faction = st.session_state.get("faction", "")
+    _furl = factions_by_game.get(current_game, {}).get(_cur_faction, {}).get("faction_image_url", "")
+    if _furl:
+        faction_vignette_html = (
+            f'<div style="flex-shrink:0;width:min(130px,25vw);height:min(130px,25vw);'
+            f'border-radius:8px;overflow:hidden;border:2px solid {acc};background:#111;">'
+            f'<img src="{_furl}" style="width:100%;height:100%;object-fit:cover;" '
+            f'alt="{_cur_faction}" onerror="this.style.display:none">'
+            f'</div>'
+        )
+    else:
+        faction_vignette_html = ""
+
     game_subtitles = {
         "Age of Fantasy":             "Construisez vos armées pour les batailles fantastiques",
         "Age of Fantasy Regiments":  "Forgez vos régiments pour la guerre des âges",
@@ -726,6 +745,7 @@ if st.session_state.page == "setup":
                 background:#1a2332;">
       {vignette_html}
     </div>
+    {faction_vignette_html}
     <div style="flex:1;padding-top:6px;line-height:1.7;">
       <div style="font-size:clamp(13px,3vw,15px);font-weight:600;color:#212529;margin-bottom:4px;">{short}</div>
       <div style="font-size:clamp(12px,2.5vw,13px);color:#6c757d;">{game_subtitle}</div>
