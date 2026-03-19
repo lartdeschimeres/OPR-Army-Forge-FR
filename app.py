@@ -6,6 +6,7 @@ from datetime import datetime
 import re
 import math
 import base64
+from repositories import JsonFactionRepository
 
 st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="auto")
 
@@ -639,24 +640,13 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     return html
 
 def load_factions():
-    factions = {}; games = set()
     try:
-        FACTIONS_DIR = Path(__file__).resolve().parent / "frontend" / "public" / "factions"
-        if not FACTIONS_DIR.exists():
-            FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
-        for fp in FACTIONS_DIR.glob("*.json"):
-            try:
-                with open(fp, encoding="utf-8") as f:
-                    data = json.load(f)
-                game = data.get("game"); faction = data.get("faction")
-                if game and faction:
-                    if game not in factions: factions[game] = {}
-                    data.setdefault("faction_special_rules", []); data.setdefault("spells", {}); data.setdefault("units", [])
-                    factions[game][faction] = data; games.add(game)
-            except Exception as e:
-                st.warning(f"Erreur chargement {fp.name}: {e}")
+        repository = JsonFactionRepository(Path(__file__).resolve().parent)
+        factions, games = repository.load_catalog()
     except Exception as e:
         st.error(f"Erreur chargement des factions: {e}"); return {}, []
+    if not factions:
+        st.error("Aucune faction chargee depuis repositories/data/factions.")
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 if st.session_state.page == "setup":
