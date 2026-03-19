@@ -5,110 +5,32 @@
   "status": "complete",
   "description": "Les Sœurs Bénies sont une force d'élite de guerrières religieuses équipées d'armures et d'armes de pointe, qui s'est formée sous la direction de la Reine-Déesse, une humble femme soudainement transformée en symbole d'espoir et de résistance.",
   "faction_special_rules": [
-    {
-      "name": "Devout [Dévotion]",
-      "description": "Lors d'une attaque, les résultats non modifiés de 6 pour toucher infligent une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
-    },
-    {
-      "name": "Casting Debuff [Malus de magie]",
-      "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins du lanceur, qui subit un malus de -1 aux jets de lancement de sort une fois (l'effet s'appliquera la prochaine fois qu'elle devrait s'appliquer)."
-    },
-    {
-      "name": "Courage Buff [Bonus de courage]",
-      "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient un bonus de +1 aux Tests de Moral une fois (la prochaine fois que l'effet s'appliquerait)."
-    },
-    {
-      "name": "Devout Boost [Boost de Dévotion]",
-      "description": "Si cette figurine dispose de la règle spéciale Dévotion, elle inflige des touches supplémentaires sur les résultats réussis non modifiés de 5-6 provenant de Dévotion (au lieu de seulement sur 6)."
-    },
-    {
-      "name": "Fortified [Renforcé]",
-      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0)."
-    },
-    {
-      "name": "Guarded [Protégé]",
-      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle subissent des tirs ou sont chargées à plus de 9\", elles obtiennent un bonus de +1 aux jets de Défense."
-    },
-    {
-      "name": "Guarded Buff [Bonus de Protection]",
-      "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui bénéficie de la règle spéciale Protégé une seule fois (la prochaine fois que l'effet s'appliquerait)."
-    },
-    {
-      "name": "Piercing Assault [Assaut tranchant]",
-      "description": "Cette figurine gagne PA (+1) lorsqu'elle Charge."
-    },
-    {
-      "name": "Piercing Hunter [Chasseur tranchant]",
-      "description": "Lorsque cette figurine tire sur des ennemis situés à 9\" ou plus, ses armes bénéficient d'un bonus de PA (+1)."
-    },
-    {
-      "name": "Point-Blank Piercing [Tranchant à bout portant]",
-      "description": "Cette figurine gagne un bonus de PA (+1) lorsqu'elle tire sur des ennemis à 12\" ou moins."
-    },
-    {
-      "name": "Point-Blank Surge [Surcharge à bout portant]",
-      "description": "Lorsque cette figurine tire sur des ennemis situés à 12\" ou moins, les résultats non modifiés de 6 pour toucher infligent une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
-    },
-    {
-      "name": "Precision Fighter  [Bonus de Combattant précis]",
-      "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
-    },
-    {
-      "name": "Precision Shooter  [Bonus de Tireur précis]",
-      "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui gagne un bonus de +1 aux jets pour toucher lorsqu'elle tire, une seule fois (l'effet s'appliquera la prochaine fois qu'elle devrait tirer)."
-    },
-    {
-      "name": "Precision Target (X) [Cible désignée (X)]",
-      "description": "Une fois par partie, lors de l'activation de cette figurine, choisissez une unité ennemie à 36\" ou moins et dans sa ligne de vue, et placez X marqueurs dessus. Les unités amies obtiennent +X aux jets pour toucher lorsqu'elles l'attaquent."
-    },
-    {
-      "name": "Purge [Purge]",
-      "description": "Ignore la Régénération, et contre les unités dont la plupart des figurines possèdent une Défense comprise entre 2+ et 4+, cette arme gagne un bonus de PA (+1)."
-    },
-    {
-      "name": "Shielded [Blindé]",
-      "description": "Les unités dont toutes les figurines possèdent cette règle spéciale obtiennent un bonus de +1 aux jets de Défense contre les touches qui ne proviennent pas de sorts."
-    },
-    {
-      "name": "Shred [Lacération]",
-      "description": "Sur des résultats non modifiés de 1 pour bloquer des touches, cette arme inflige une blessure supplémentaire."
-    },
-    {
-      "name": "Spell Conduit [Canalisateur de sort]",
-      "description": "Les Lanceurs de sorts situés à 12\" appartenant à d'autres unités amies peuvent lancer des sorts comme s'ils se trouvaient à la position de cette figurine, et bénéficient d'un bonus de +1 aux jets de lancement."
-    },
-    {
-      "name": "Courage Aura [Aura Courage]",
-      "description": "Cette figurine et son unité gagne un bonus de +1 aux Tests de Moral."
-    },
-    {
-      "name": "Devout Boost Aura [Aura Boost de Dévotion]",
-      "description": "Cette figurine et son unité gagne la règle spéciale Boost de Dévotion."
-    },
-    {
-      "name": "Fast Aura [Aura Rapidité]",
-      "description": "Cette figurine et son unité gagne un bonus de +2\" lorsqu'elles Avancent et +4\" lorsqu'elles Courent ou Chargent."
-    },
-    {
-      "name": "Fortified Aura [Aura Renforcement]",
-      "description": "Cette figurine et son unité gagne la règle spéciale Renforcé."
-    },
-    {
-      "name": "Increased Shooting Range Aura [Aura d'Augmentation de la portée de tir]",
-      "description": "Cette figurine et son unité gagnent un bonus de +6\" de portée lorsqu'ils tirent."
-    },
-    {
-      "name": "Point-Blank Piercing Aura [Aura Tranchant à bout portant]",
-      "description": "Cette figurine et son unité gagne la règle spéciale Tranchant à bout portant."
-    },
-    {
-      "name": "Regeneration Aura [Aura Régénération]",
-      "description": "Cette figurine et son unité gagne la règle spéciale Régénération."
-    },
-    {
-      "name": "Shred in Melee Aura [Aura Lacération en mêlée]",
-      "description": "Cette figurine et son unité gagne la règle spéciale Lacération en mêlée."
-    }
+    "Devout [Dévotion]",
+    "Casting Debuff [Malus de magie]",
+    "Courage Buff [Bonus de courage]",
+    "Devout Boost [Boost de Dévotion]",
+    "Fortified [Renforcé]",
+    "Guarded [Protégé]",
+    "Guarded Buff [Bonus de Protection]",
+    "Piercing Assault [Assaut tranchant]",
+    "Piercing Hunter [Chasseur tranchant]",
+    "Point-Blank Piercing [Tranchant à bout portant]",
+    "Point-Blank Surge [Surcharge à bout portant]",
+    "Precision Fighter  [Bonus de Combattant précis]",
+    "Precision Shooter  [Bonus de Tireur précis]",
+    "Precision Target (X) [Cible désignée (X)]",
+    "Purge [Purge]",
+    "Shielded [Blindé]",
+    "Shred [Lacération]",
+    "Spell Conduit [Canalisateur de sort]",
+    "Courage Aura [Aura Courage]",
+    "Devout Boost Aura [Aura Boost de Dévotion]",
+    "Fast Aura [Aura Rapidité]",
+    "Fortified Aura [Aura Renforcement]",
+    "Increased Shooting Range Aura [Aura d'Augmentation de la portée de tir]",
+    "Point-Blank Piercing Aura [Aura Tranchant à bout portant]",
+    "Regeneration Aura [Aura Régénération]",
+    "Shred in Melee Aura [Aura Lacération en mêlée]"
   ],
   "spells": {
     "Burn the Heretic [Brulez les hérétiques] (1)": {
@@ -450,7 +372,9 @@
             {
               "name": "Épée énergétique",
               "cost": 20,
-              "replaces": ["ACC"],
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -464,7 +388,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 30,
-              "replaces": ["ACC"],
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -478,7 +404,9 @@
             {
               "name": "Masse lourde",
               "cost": 30,
-              "replaces": ["ACC"],
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Masse lourde",
                 "range": "Mêlée",
@@ -492,7 +420,9 @@
             {
               "name": "Poing énergétique",
               "cost": 35,
-              "replaces": ["ACC"],
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -626,7 +556,9 @@
             {
               "name": "Pistolet lance-flamme",
               "cost": 10,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Pistolet lance-flamme",
                 "range": 6,
@@ -641,7 +573,9 @@
             {
               "name": "Pistolet lourd de maître",
               "cost": 15,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Pistolet lourd de maître",
                 "range": 12,
@@ -653,7 +587,9 @@
             {
               "name": "Pistolet à fusion",
               "cost": 15,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Pistolet à fusion",
                 "range": 6,
@@ -667,7 +603,9 @@
             {
               "name": "Pistolet lacérateur de maître",
               "cost": 25,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Pistolet lacérateur de maître",
                 "range": 9,
@@ -681,7 +619,9 @@
             {
               "name": "Fusil à pompe de maître",
               "cost": 25,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Fusil à pompe de maître",
                 "range": 12,
@@ -693,7 +633,9 @@
             {
               "name": "Pistolet à plasma de maître",
               "cost": 30,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma de maître",
                 "range": 12,
@@ -705,7 +647,9 @@
             {
               "name": "Fusil lourd de maître",
               "cost": 35,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Fusil lourd de maître",
                 "range": 24,
@@ -717,7 +661,9 @@
             {
               "name": "Fusil à plasma de maître",
               "cost": 60,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Fusil à plasma de maître",
                 "range": 24,
@@ -729,7 +675,9 @@
             {
               "name": "Fusil sniper lance-flamme de maître",
               "cost": 65,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Fusil sniper lance-flamme de maître",
                 "range": 18,
@@ -745,7 +693,9 @@
             {
               "name": "Fusil Tempête de maître",
               "cost": 70,
-              "requires": ["Bouclier de combat"],
+              "requires": [
+                "Bouclier de combat"
+              ],
               "weapon": {
                 "name": "Fusil Tempête de maître",
                 "range": 24,
@@ -764,7 +714,9 @@
             {
               "name": "Module lance-flamme",
               "cost": 10,
-              "requires": ["Fusil lourd de maître"],
+              "requires": [
+                "Fusil lourd de maître"
+              ],
               "weapon": {
                 "name": "Module lance-flamme",
                 "range": 12,
@@ -780,7 +732,9 @@
             {
               "name": "Module lance-plasma",
               "cost": 10,
-              "requires": ["Fusil lourd de maître"],
+              "requires": [
+                "Fusil lourd de maître"
+              ],
               "weapon": {
                 "name": "Module lance-plasma",
                 "range": 24,
@@ -794,7 +748,9 @@
             {
               "name": "Module arbalète",
               "cost": 10,
-              "requires": ["Fusil lourd de maître"],
+              "requires": [
+                "Fusil lourd de maître"
+              ],
               "weapon": {
                 "name": "Module arbalète",
                 "range": 24,
@@ -810,7 +766,9 @@
             {
               "name": "Module fusion",
               "cost": 15,
-              "requires": ["Fusil lourd de maître"],
+              "requires": [
+                "Fusil lourd de maître"
+              ],
               "weapon": {
                 "name": "Module fusion",
                 "range": 12,
@@ -832,7 +790,9 @@
             {
               "name": "Épée énergétique",
               "cost": 10,
-              "requires": ["ACC"],
+              "requires": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -846,7 +806,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 20,
-              "requires": ["ACC"],
+              "requires": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -860,7 +822,9 @@
             {
               "name": "Masse lourde",
               "cost": 20,
-              "requires": ["ACC"],
+              "requires": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Masse lourde",
                 "range": "Mêlée",
@@ -874,7 +838,9 @@
             {
               "name": "Poing énergétique",
               "cost": 20,
-              "requires": ["ACC"],
+              "requires": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -886,7 +852,9 @@
             {
               "name": "Epée de Procession",
               "cost": 20,
-              "requires": ["ACC"],
+              "requires": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Epée de Procession",
                 "range": "Mêlée",

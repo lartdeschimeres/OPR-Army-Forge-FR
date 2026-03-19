@@ -1,0 +1,418 @@
+[
+  {
+    "title": "Warbound [Guerrier-né]",
+    "description": "Les ennemis qui lancent les dés pour bloquer les touches infligées par les armes de cette figurine subissent une blessure supplémentaire pour chaque résultat non modifié de 1 obtenu."
+  },
+  {
+    "title": "Bloodthirsty Fighter [Combattant sanguinaire]",
+    "description": "Pour chaque résultat de 1 non modifié obtenu par les ennemis lorsqu'ils bloquent les touches portées par les armes de cette figurine en mêlée, cette figurine peut effectuer un jet d'attaque supplémentaire avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées."
+  },
+  {
+    "title": "Break [Dislocation]",
+    "description": "Ignore la Régénération, et sur les résultats non modifiés de 6 pour toucher, ces coups obtiennent PA (+2)."
+  },
+  {
+    "title": "Breath Attack [Attaque de souffle]",
+    "description": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6 : sur un résultat de 2+, une unité ennemie dans un rayon de 6\" en ligne de mire subit une touche avec Explosion (3) et PA (1)."
+  },
+  {
+    "title": "Melee Evasion [Esquive en mêlée]",
+    "description": "Les ennemis subissent un malus de -1 aux jets d'attaque en mêlée lorsqu'ils attaquent des unités dont toutes les figurines possèdent cette règle."
+  },
+  {
+    "title": "Piercing Assault [Assaut tranchant]",
+    "description": "Cette figurine gagne PA (+1) lorsqu'elle charge."
+  },
+  {
+    "title": "Precision Fighter Buff [Bonus de combattant précis]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Ranger Shrouding [Voile fluctuant]",
+    "description": "Les ennemis ont une portée réduite de 6\" lorsqu'ils tentent de tirer sur des unités dont toutes les figurines possèdent cette règle."
+  },
+  {
+    "title": "Shred [Lacération]",
+    "description": "Sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
+  },
+  {
+    "title": "Slam [Eclatement]",
+    "description": "Ignore les Couverts, et sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
+  },
+  {
+    "title": "Steadfast [Inébranlable]",
+    "description": "Si une unité dont toutes les figurines possèdent cette règle est Ébranlée au début du round, lancez un dé. Sur un résultat de 4+, elle cesse d'être Ébranlée."
+  },
+  {
+    "title": "Steadfast Buff [Bonus d'Inébranlable]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient Inébranlable une fois (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Unpredictable [Imprévisible]",
+    "description": "Lors d'une attaque, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
+  },
+  {
+    "title": "Unpredictable Fighter [Combattant imprévisible]",
+    "description": "En mêlée, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
+  },
+  {
+    "title": "Versatile Attack [Attaque versatile]",
+    "description": "Lorsque cette unité est activée, choisissez un effet : jusqu'à la fin de l'activation, toutes les figurines bénéficiant de cette règle obtiennent soit PA (+1) lorsqu'elles attaquent, soit +1 aux jets pour toucher lorsque elles attaquent."
+  },
+  {
+    "title": "Versatile Defense [Défense versatile]",
+    "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle est déployée ou activée, choisissez un effet : lorsqu'on lui tire dessus ou lorsqu'elle est chargée à plus de 9\", l'unité gagne +1 aux jets de Défense, ou les unités ennemies subissent -1 aux jets pour la toucher. Cet effet dure jusqu'à la prochaine activation de l'unité."
+  },
+  {
+    "title": "Warbound Boost [Boost de Guerrier-né]",
+    "description": "Si cette figurine dispose de la règle spéciale Guerrier-né, les ennemis qui subissent des blessures de sa part subissent des blessures supplémentaires sur les jets de Défense ratés de 1-2 issues de Guerrier-né (au lieu de seulement sur 1)."
+  },
+  {
+    "title": "Ranged Shrouding Aura [Aura de Voile fluctuant]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Voile fluctuant."
+  },
+  {
+    "title": "Scout Aura [Aura d'Eclaireur]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Eclaireur."
+  },
+  {
+    "title": "Shred when Shooting Aura [Aura de Lacération au tir]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Lacération lorsqu'elles tirent."
+  },
+  {
+    "title": "Unpredictable Fighter Aura [Aura de Combattant imprévisible]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
+  },
+  {
+    "title": "Versatile Defense Aura [Aura de Défense Versatile]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Défense versatile."
+  },
+  {
+    "title": "Warbound Boost Aura [Aura de Boost de Guerrier-né]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né."
+  },
+  {
+    "title": "Warden [Gardien]",
+    "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des tirs ou sont Chargées d'une distance supérieure à 9\" et subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0)."
+  },
+  {
+    "title": "Armor (X+) [Armure (X+)]",
+    "description": "Compte comme ayant Défense X+."
+  },
+  {
+    "title": "Infiltrate [Infiltration]",
+    "description": "Compte comme ayant la règle spéciale Embuscade, mais peut être déployé jusqu'à 1\" des unités ennemies."
+  },
+  {
+    "title": "Melee Slayer [Tueur en mêlée]",
+    "description": "Les armes de mêlée de cette figurine bénéficient d'un bonus de PA (+2) contre les unités dont la plupart des figurines possèdent Coriace (3) ou plus."
+  },
+  {
+    "title": "Piercing Target (X) [Perforation de la cible (X)]",
+    "description": "Une fois par partie, lors de l'activation de cette figurine, choisissez une unité ennemie à 36\" ou moins dans sa ligne de vue, et placez X marqueurs dessus. Les unités amies obtiennent +PA (X) lorsqu'elles l'attaquent."
+  },
+  {
+    "title": "Re-Deployment [Redéploiement]",
+    "description": "Une fois toutes les autres unités déployées (à l'exception des unités mises de côté), vous pouvez retirer jusqu'à deux unités amies de la table et les redéployer. Les joueurs placent les unités de redéploiement à tour de rôle, en commençant par le joueur qui s'active ensuite."
+  },
+  {
+    "title": "Re-Position Artillery [Repositionnement de l'artillerie]",
+    "description": "Une fois par activation, choisissez une figurine amie à 6\" ou moins avec la règle spéciale Artillerie, qui peut immédiatement se déplacer jusqu'à 9\"."
+  },
+  {
+    "title": "Repel Ambushers [Chasse à l'Embuscade]",
+    "description": "Les unités ennemies utilisant la règle spéciale Embuscade doivent être placées à plus de 12\" de l'unité de cette figurine."
+  },
+  {
+    "title": "Smash [Fracas]",
+    "description": "Ignore la règle spéciale Régénération, et contre les unités dont la plupart des figurines ont une Défense comprise entre 5+ et 6+, cette arme obtient Explosion (3)."
+  },
+  {
+    "title": "Unstoppable Shooting Mark [Marque de tir Imparable]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins. Les unités amies obtiennent la règle spéciale Imparable une seule fois lorsqu'elles tirent sur cette unité (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Warden Boost [Bosst de Gardien]",
+    "description": "Si toutes les figurines de cette unité possèdent la règle spéciale Gardien, les tirs ennemis comptent toujours comme ayant PA (-1) grâce à la règle spéciale Gardien (au lieu de seulement lorsqu'ils sont chargés ou qu'on leur tire dessus à plus de 9\")."
+  },
+  {
+    "title": "Bane when Shooting Aura [Aura de Fléau au tir]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Fléau au tir."
+  },
+  {
+    "title": "Stealth Aura [Aura de Furtivité]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Furtif."
+  },
+  {
+    "title": "Unstoppable in Melee Aura [Aura Imparable en mêlée]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Imparable en mêlée."
+  },
+  {
+    "title": "Warden Boost Aura [Aura de Boost de Gardien]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Boost de Gardien."
+  },
+  {
+    "title": "Empyrean Spirit [Esprit empyréen]",
+    "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des tirs ou sont chargées d'une distance supérieure à 9\", les unités ennemies subissent un malus de -1 aux jets pour toucher."
+  },
+  {
+    "title": "Ethereal [Éthéré]",
+    "description": "Une fois par activation, avant d'attaquer, déplacez cette figurine n'importe où à 6\" ou moins de sa position. Cette figurine se déplace de -6\" lorsqu'elle Avance, et de -6\" lorsqu'elle Court ou Charge."
+  },
+  {
+    "title": "Armor (X) [Armure (X)]",
+    "description": "Compte comme ayant Défense X+."
+  },
+  {
+    "title": "Bane Mark [Marque de Fléau]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins. Les unités amies obtiennent la règle spéciale Fléau une seule fois lorsqu'elles l'attaquent (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Crossing Attack (X) [Attaque croisée (X)]",
+    "description": "Une fois par activation, lorsque cette figurine traverse des unités ennemies, choisissez-en une et lancez X dés. Pour chaque 6+, elle subit une touche."
+  },
+  {
+    "title": "Empyrean Spirit Boost [Boost de l'Esprit empyréen]",
+    "description": "Si toutes les figurines de cette unité possèdent la règle spéciale Esprit empyréen, les ennemis qui les attaquent subissent toujours un malus de -1 aux jets pour toucher à cause de la règle spéciale Esprit empyréen (au lieu de seulement lorsqu'ils lui tirent dessus ou la Chargent à plus de 9\")."
+  },
+  {
+    "title": "No Retreat [Pas de retraite]",
+    "description": "Lorsqu'une unité dont la plupart des figurines possèdent cette règle spéciale échoue à un Test de Moral qui la rend Ébranlée ou En déroute, le test est considéré comme réussi. Lancez ensuite autant de dés que le nombre de blessures nécessaires pour la détruire entièrement, et pour chaque résultat de 1 à 3, l'unité subit une blessure qui ne peut être ignorée."
+  },
+  {
+    "title": "Precision Feat [Précision extraordinaire]",
+    "description": "Une fois par partie, lorsque cette unité attaque et que toutes ses figurines possèdent cette règle spéciale, vous pouvez l'utiliser pour qu'ils obtiennent un bonus de +2 aux jets pour toucher."
+  },
+  {
+    "title": "Reap [Fauchage]",
+    "description": "Contre les unités dont la plupart des figurines possèdent une Défense de 2+ à 3+, cette arme gagne un bonus de PA (+2)."
+  },
+  {
+    "title": "Resistance [Résistance]",
+    "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle spéciale subit des blessures, lancez un dé pour chacune d'entre elles. Sur un résultat de 6+, la blessure est ignorée. Si les blessures proviennent d'un sort, elles sont alors ignorées sur un résultat de 2+ à la place."
+  },
+  {
+    "title": "Shielded [Blindé]",
+    "description": "Les unités dont toutes les figurines possèdent cette règle spéciale obtiennent un bonus de +1 aux jets de Défense contre les blessures qui ne proviennent pas de sorts."
+  },
+  {
+    "title": "Surge [Surcharge]",
+    "description": "Sur les résultats non modifiés de 6 pour toucher, cette arme inflige une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
+  },
+  {
+    "title": "Transversal [Transversant]",
+    "description": "Peut se déplacer à travers des unités amies ou ennemies."
+  },
+  {
+    "title": "Empyrean Spirit Boost Aura [Aura Boost de l'Esprit empyréen]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Boost d'Esprit empyréen."
+  },
+  {
+    "title": "No Retreat Aura [Aura Pas de retraite]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Pas de retraite."
+  },
+  {
+    "title": "Precision Feat Aura [Aura Précision extraordinaire]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Précision extraordinaire."
+  },
+  {
+    "title": "Relentless Aura [Aura Implacable]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Implacable."
+  },
+  {
+    "title": "Scout Aura [Aura Éclaireur]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Éclaireur."
+  },
+  {
+    "title": "Shielded Aura [Aura Blindé]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Blindé."
+  },
+  {
+    "title": "Unpredictable Fighter Aura [Aura Combattant imprévisible]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
+  },
+  {
+    "title": "Primal [Primal]",
+    "description": "Pour chaque jet non modifié de 6 pour toucher lors d'une attaque, cette figurine peut lancer +1 attaque avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées."
+  },
+  {
+    "title": "Bounding [Bond]",
+    "description": "Lorsque cette unité est activée, vous pouvez placer toutes les figurines possédant cette règle spéciale n'importe où dans un rayon de D3+1\" autour de leur position."
+  },
+  {
+    "title": "Counter-Attack [Contre-attaque]",
+    "description": "Frappe en premier lorsqu'elle est Chargée."
+  },
+  {
+    "title": "Crossing Barrage (X) [Bombardement croisé (X)]",
+    "description": "Une fois par activation, lorsque cette figurine traverse des unités ennemies, choisissez-en une et lancez X dés. Pour chaque résultat de 4+, elle subit trois touches avec PA (1)."
+  },
+  {
+    "title": "Crossing Strike (X) [Frappe croisée (X)]",
+    "description": "Une fois par partie, lors de son activation, lorsque cette figurine traverse des unités ennemies, choisissez-en une et lancez X dés. Pour chaque résultat de 4+, elle inflige trois blessures avec PA (1)."
+  },
+  {
+    "title": "Disentegrate [Désintégration]",
+    "description": "Ignore la règle spéciale Régénération, et contre les unités dont la plupart des figurines possèdent une Défense comprise entre 2+ et 3+, cette arme gagne PA (+2)."
+  },
+  {
+    "title": "Evasive [Esquive]",
+    "description": "Les ennemis subissent un malus de -1 au jets pour toucher lorsqu'ils attaquent des unités dont toutes les figurines possèdent cette règle."
+  },
+  {
+    "title": "Fortified [Blindé]",
+    "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des dégâts, ces dégâts comptent comme ayant une PA (-1), avec un minimum de PA (0)."
+  },
+  {
+    "title": "Good shot [Bon tireur]",
+    "description": "Cette figurine gagne +1 pour toucher lorsqu'elle tire."
+  },
+  {
+    "title": "Heavy Impact [Impact lourd]",
+    "description": "Les touches d'Impact de cette figurine gagne PA (1)."
+  },
+  {
+    "title": "Hit & Run [Frappe en mouvement]",
+    "description": "Une fois par round, les unités dont toutes les figurines possèdent cette règle peuvent se déplacer jusqu'à 3\" après avoir tiré ou avoir été en mêlée."
+  },
+  {
+    "title": "Hit & Run Shooter [Tir en mouvement]",
+    "description": "Une fois par round, les unités dont toutes les figurines possèdent cette règle peuvent se déplacer jusqu'à 3\" après avoir tiré."
+  },
+  {
+    "title": "Mend [Guérison]",
+    "description": "Une fois par activation, choisissez une figurine amie à 3\" ou moins doté de la caractéristique Coriace et retirez 1D3 blessures de celle-ci."
+  },
+  {
+    "title": "Precision Target (X) [Cible désignée (X)]",
+    "description": "Une fois par partie, lors de l'activation de cette figurine, choisissez une unité ennemie à 36\" ou moins et dans sa ligne de vue, et placez X marqueurs dessus. Les unités amies obtiennent +X aux jets pour toucher lorsqu'elles l'attaquent."
+  },
+  {
+    "title": "Primal Boost [Boost de Primal]",
+    "description": "Si cette figurine possède la règle spéciale Primal, elle obtient des attaques supplémentaires sur les résultats pour toucher réussis non modifiés de 5-6 grâce à Primal (au lieu de seulement sur 6)."
+  },
+  {
+    "title": "Primal Boost Buff [Bonus de Boost de Primal]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui bénéficie une fois de Boost de Primal (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Protection Feat [Protection extraordinaire]",
+    "description": "Une fois par partie, lorsque cette unité subit des blessures et que toutes ses figurines possèdent cette règle spéciale, vous pouvez l'utiliser et lancer un dé par blessure. Sur un résultat de 4+, la blessure est ignorée."
+  },
+  {
+    "title": "Ravage (X) [Ravage (X)]",
+    "description": "Lorsque cette figurine attaque au corps à corps, lancez X dés. Pour chaque résultat de 6+, la cible subit une blessure."
+  },
+  {
+    "title": "Shred Mark [Marque de Lacération]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins. Les unités amies obtiennent Marque de Lacération une seule fois lorsqu'elles l'attaquent (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Spawn (X) [Génération (X)]",
+    "description": "Une fois par partie, lorsque cette figurine est activée, vous pouvez placer une nouvelle unité de X entièrement à 6\" ou moins d'elle."
+  },
+  {
+    "title": "Counter-Attack Aura [Aura de Contre-attaque]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Contre-attaque."
+  },
+  {
+    "title": "Hit & Run Shooter Aura [Aura de Tir en mouvement]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Tir en Mouvement."
+  },
+  {
+    "title": "Rapid Charge Aura [Aura de Charge véloce]",
+    "description": "Cette figurine et son unité se déplace de +4\" lorsqu'elles Chargent."
+  },
+  {
+    "title": "Rending in Melee Aura [Aura de Perforation en mêlée]",
+    "description": "Cette figurine et son unité obtiennent la règle spéciale Perforant en mêlée."
+  },
+  {
+    "title": "Devout [Dévotion]",
+    "description": "Lors d'une attaque, les résultats non modifiés de 6 pour toucher infligent une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
+  },
+  {
+    "title": "Casting Debuff [Malus de magie]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins du lanceur, qui subit un malus de -1 aux jets de lancement de sort une fois (l'effet s'appliquera la prochaine fois qu'elle devrait s'appliquer)."
+  },
+  {
+    "title": "Courage Buff [Bonus de courage]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient un bonus de +1 aux Tests de Moral une fois (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Devout Boost [Boost de Dévotion]",
+    "description": "Si cette figurine dispose de la règle spéciale Dévotion, elle inflige des touches supplémentaires sur les résultats réussis non modifiés de 5-6 provenant de Dévotion (au lieu de seulement sur 6)."
+  },
+  {
+    "title": "Fortified [Renforcé]",
+    "description": "Lorsque des unités dont toutes les figurines possèdent cette règle subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0)."
+  },
+  {
+    "title": "Guarded [Protégé]",
+    "description": "Lorsque des unités dont toutes les figurines possèdent cette règle subissent des tirs ou sont chargées à plus de 9\", elles obtiennent un bonus de +1 aux jets de Défense."
+  },
+  {
+    "title": "Guarded Buff [Bonus de Protection]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui bénéficie de la règle spéciale Protégé une seule fois (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Piercing Hunter [Chasseur tranchant]",
+    "description": "Lorsque cette figurine tire sur des ennemis situés à 9\" ou plus, ses armes bénéficient d'un bonus de PA (+1)."
+  },
+  {
+    "title": "Point-Blank Piercing [Tranchant à bout portant]",
+    "description": "Cette figurine gagne un bonus de PA (+1) lorsqu'elle tire sur des ennemis à 12\" ou moins."
+  },
+  {
+    "title": "Point-Blank Surge [Surcharge à bout portant]",
+    "description": "Lorsque cette figurine tire sur des ennemis situés à 12\" ou moins, les résultats non modifiés de 6 pour toucher infligent une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
+  },
+  {
+    "title": "Precision Fighter  [Bonus de Combattant précis]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
+  },
+  {
+    "title": "Precision Shooter  [Bonus de Tireur précis]",
+    "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui gagne un bonus de +1 aux jets pour toucher lorsqu'elle tire, une seule fois (l'effet s'appliquera la prochaine fois qu'elle devrait tirer)."
+  },
+  {
+    "title": "Purge [Purge]",
+    "description": "Ignore la Régénération, et contre les unités dont la plupart des figurines possèdent une Défense comprise entre 2+ et 4+, cette arme gagne un bonus de PA (+1)."
+  },
+  {
+    "title": "Spell Conduit [Canalisateur de sort]",
+    "description": "Les Lanceurs de sorts situés à 12\" appartenant à d'autres unités amies peuvent lancer des sorts comme s'ils se trouvaient à la position de cette figurine, et bénéficient d'un bonus de +1 aux jets de lancement."
+  },
+  {
+    "title": "Courage Aura [Aura Courage]",
+    "description": "Cette figurine et son unité gagne un bonus de +1 aux Tests de Moral."
+  },
+  {
+    "title": "Devout Boost Aura [Aura Boost de Dévotion]",
+    "description": "Cette figurine et son unité gagne la règle spéciale Boost de Dévotion."
+  },
+  {
+    "title": "Fast Aura [Aura Rapidité]",
+    "description": "Cette figurine et son unité gagne un bonus de +2\" lorsqu'elles Avancent et +4\" lorsqu'elles Courent ou Chargent."
+  },
+  {
+    "title": "Fortified Aura [Aura Renforcement]",
+    "description": "Cette figurine et son unité gagne la règle spéciale Renforcé."
+  },
+  {
+    "title": "Increased Shooting Range Aura [Aura d'Augmentation de la portée de tir]",
+    "description": "Cette figurine et son unité gagnent un bonus de +6\" de portée lorsqu'ils tirent."
+  },
+  {
+    "title": "Point-Blank Piercing Aura [Aura Tranchant à bout portant]",
+    "description": "Cette figurine et son unité gagne la règle spéciale Tranchant à bout portant."
+  },
+  {
+    "title": "Regeneration Aura [Aura Régénération]",
+    "description": "Cette figurine et son unité gagne la règle spéciale Régénération."
+  },
+  {
+    "title": "Shred in Melee Aura [Aura Lacération en mêlée]",
+    "description": "Cette figurine et son unité gagne la règle spéciale Lacération en mêlée."
+  }
+]

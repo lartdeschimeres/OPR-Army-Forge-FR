@@ -2,7 +2,7 @@
 
 **Un outil complet pour créer et gérer vos listes d'armées pour les jeux One Page Rules (OPR)**
 
-*Auteur : Simon Joinville Fouquet*
+_Auteur : Simon Joinville Fouquet_
 
 ---
 
@@ -40,6 +40,7 @@ git clone https://github.com/votre-utilisateur/opr-army-forge-fr.git
 ```bash
 cd opr-army-forge-fr
 ```
+
 2. Installez les dépendances :
 
 ```bash
@@ -50,6 +51,12 @@ pip install -r requirements.txt
 
 ```bash
 streamlit run app.py
+```
+
+4. (optionnel) Lancez les tests unitaires avec :
+
+```bash
+python -m unittest discover -s tests -v
 ```
 
 ---
@@ -72,12 +79,15 @@ opr-army-forge-fr/
 ## 🎮 Utilisation pas à pas
 
 Créez un compte (ou connectez-vous si vous en avez déjà un)
+
 1. Configurez une nouvelle liste :
+
 - Sélectionnez un jeu (Age of Fantasy, etc.)
 - Choisissez une faction
 - Définissez le format de points
 
 2. Composez votre armée :
+
 - Ajoutez des unités avec leurs options
 - Visualisez les statistiques en temps réel
 - Vérifiez la validation des règles
@@ -89,6 +99,7 @@ Créez un compte (ou connectez-vous si vous en avez déjà un)
 ---
 
 ## 📜 Règles spécifiques implémentées
+
 Pour Age of Fantasy :
 
 - 1 héros par tranche de 375 pts
@@ -107,11 +118,13 @@ Pour Age of Fantasy :
 ---
 
 ## 🤝 Contribution
+
 Les contributions sont bienvenues ! Pour contribuer veuillez nous conctacer ;)
 
 ---
 
 ## 📜 Licence
+
 Ce projet est sous licence MIT.
 
 ---
@@ -122,7 +135,6 @@ Ce projet est sous licence MIT.
 - À tous les testeurs et contributeurs
 - Dernière mise à jour : 11/01/2026
 - Version : 1.0
-
 
 ```bash
 pip install streamlit
