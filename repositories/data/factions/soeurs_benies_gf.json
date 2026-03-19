@@ -4779,7 +4779,8 @@
           "armor_piercing": 1,
           "special_rules": [
             "Explosion (3)"
-          ]
+          ],
+          "count": 2
         },
         {
           "name": "Piétinement",
@@ -5014,7 +5015,8 @@
           "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 1,
-          "special_rules": []
+          "special_rules": [],
+          "count": 2
         },
         {
           "name": "Piétinement",
