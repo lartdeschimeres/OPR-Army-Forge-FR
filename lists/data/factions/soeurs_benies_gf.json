@@ -418,7 +418,11 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             },
             {
               "name": "Fusil Tempête rapide + ACC",
@@ -429,7 +433,10 @@
                 "attacks": 6,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Bouclier de combat"
+              ]
             }
           ]
         },
@@ -591,7 +598,11 @@
                 "attacks": 4,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             },
             {
               "name": "Sainte lance",
@@ -604,7 +615,11 @@
                 "special_rules": [
                   "Fiable"
                 ]
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             }
           ]
         },
@@ -958,7 +973,11 @@
                 "attacks": 4,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             },
             {
               "name": "Sainte lance",
@@ -971,7 +990,11 @@
                 "special_rules": [
                   "Fiable"
                 ]
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             }
           ]
         },
@@ -1381,7 +1404,10 @@
                 "special_rules": [
                   "Mortel (3)"
                 ]
-              }
+              },
+              "replaces": [
+                "Paire de fouets de choc"
+              ]
             },
             {
               "name": "Paire de fouets plasma",
@@ -1392,7 +1418,10 @@
                 "attacks": 2,
                 "armor_piercing": 4,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Paire de fouets de choc"
+              ]
             },
             {
               "name": "Épée tronçonneuse supérieure",
@@ -1405,7 +1434,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Paire de fouets de choc"
+              ]
             }
           ]
         },
@@ -1521,7 +1553,11 @@
                 "attacks": 4,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             },
             {
               "name": "Sainte lance",
@@ -1534,7 +1570,11 @@
                 "special_rules": [
                   "Fiable"
                 ]
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             }
           ]
         },
@@ -1875,7 +1915,10 @@
                 "attacks": 1,
                 "armor_piercing": 0,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Paires d'ACC"
+              ]
             },
             {
               "name": "Pistolet + ACC",
@@ -1886,7 +1929,10 @@
                 "attacks": 1,
                 "armor_piercing": 0,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Paires d'ACC"
+              ]
             },
             {
               "name": "Grande arme",
@@ -1897,7 +1943,10 @@
                 "attacks": 2,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Paires d'ACC"
+              ]
             }
           ]
         },
@@ -1990,7 +2039,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Épées tronçonneuses"
+              ]
             }
           ]
         },
@@ -2322,7 +2374,10 @@
                 "attacks": 2,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Fusils lourds"
+              ]
             }
           ]
         },
@@ -2610,7 +2665,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Lances"
+              ]
             },
             {
               "name": "Masse",
@@ -2621,7 +2679,10 @@
                 "attacks": 2,
                 "armor_piercing": 2,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Lances"
+              ]
             }
           ]
         },
@@ -3370,7 +3431,11 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "ACC",
+                "Bouclier de combat"
+              ]
             },
             {
               "name": "Fusil Tempête + ACC",
@@ -3381,7 +3446,10 @@
                 "attacks": 3,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Bouclier de combat"
+              ]
             }
           ]
         },
@@ -3581,7 +3649,11 @@
                 "attacks": 1,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Pistolets lourds",
+                "ACC"
+              ]
             },
             {
               "name": "Lance énergétique (Percée)",
@@ -3594,7 +3666,11 @@
                 "special_rules": [
                   "Percée"
                 ]
-              }
+              },
+              "replaces": [
+                "Pistolets lourds",
+                "ACC"
+              ]
             }
           ]
         },
@@ -3901,6 +3977,9 @@
               },
               "special_rules": [
                 "Bonus de Combattant précis"
+              ],
+              "replaces": [
+                "Explosions enflammées de la Statue Sacrée"
               ]
             }
           ]
@@ -3992,7 +4071,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Masse énergétique"
+              ]
             },
             {
               "name": "Masse énergétique lourde",
@@ -4005,7 +4087,10 @@
                 "special_rules": [
                   "Explosion (3)"
                 ]
-              }
+              },
+              "replaces": [
+                "Masse énergétique"
+              ]
             },
             {
               "name": "Épée énergétique lourde",
@@ -4018,7 +4103,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Masse énergétique"
+              ]
             }
           ]
         },
@@ -4157,7 +4245,10 @@
                 "special_rules": [
                   "Mortel (3)"
                 ]
-              }
+              },
+              "replaces": [
+                "Lance-flammes béni jumelé"
+              ]
             },
             {
               "name": "Mitrailleuse lourde jumelée",
@@ -4168,7 +4259,10 @@
                 "attacks": 6,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Lance-flammes béni jumelé"
+              ]
             },
             {
               "name": "Canon lance-flamme béni jumelé",
@@ -4183,7 +4277,10 @@
                   "Fiable",
                   "Purge"
                 ]
-              }
+              },
+              "replaces": [
+                "Lance-flammes béni jumelé"
+              ]
             }
           ]
         },
@@ -4402,7 +4499,10 @@
                   "Explosion (3)",
                   "Indirect"
                 ]
-              }
+              },
+              "replaces": [
+                "Lance-missiles orgue lourd"
+              ]
             }
           ]
         },
@@ -4515,7 +4615,10 @@
                 "special_rules": [
                   "Explosion (3)"
                 ]
-              }
+              },
+              "replaces": [
+                "Canon anti-char"
+              ]
             },
             {
               "name": "Autocanon jumelé",
@@ -4526,7 +4629,10 @@
                 "attacks": 6,
                 "armor_piercing": 2,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Canon anti-char"
+              ]
             }
           ]
         },
