@@ -7,31 +7,31 @@ import re
 import math
 import base64
 
-st.set_page_config(page_title=“OPR ArmyBuilder FR”, layout=“wide”, initial_sidebar_state=“auto”)
+st.set_page_config(page_title="OPR ArmyBuilder FR", layout=“wide", initial_sidebar_state=“auto")
 
 # URL de l’app (pour le QR code de partage)
 
-APP_URL = “https://opr-armybuilder-fr.streamlit.app/”
+APP_URL = “https://opr-armybuilder-fr.streamlit.app/"
 
 # Couleur d’accent par jeu
 
 _GAME_COLORS = {
-“Age of Fantasy”:            “#2980b9”,
-“Age of Fantasy Regiments”:  “#8e44ad”,
-“Grimdark Future”:           “#c0392b”,
-“Grimdark Future Firefight”: “#e67e22”,
-“Age of Fantasy Skirmish”:   “#27ae60”,
+“Age of Fantasy":            “#2980b9",
+“Age of Fantasy Regiments":  “#8e44ad",
+“Grimdark Future":           “#c0392b",
+“Grimdark Future Firefight": “#e67e22",
+“Age of Fantasy Skirmish":   “#27ae60",
 }
-_acc_color = _GAME_COLORS.get(st.session_state.get(“game”,””), “#2980b9”)
+_acc_color = _GAME_COLORS.get(st.session_state.get(“game",""), “#2980b9")
 
-st.markdown(f”””<style>
+st.markdown(f"""<style>
 :root {{–acc: {_acc_color};}}
 #MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{background: transparent;}}
 .stApp {{background: #e9ecef; color: #212529;}}
-section[data-testid=“stSidebar”] {{background: #dee2e6; border-right: 1px solid #adb5bd; box-shadow: 2px 0 5px rgba(0,0,0,0.1);}}
+section[data-testid=“stSidebar"] {{background: #dee2e6; border-right: 1px solid #adb5bd; box-shadow: 2px 0 5px rgba(0,0,0,0.1);}}
 h1, h2, h3 {{color: #202c45; letter-spacing: 0.04em; font-weight: 600;}}
 .stSelectbox, .stNumberInput, .stTextInput {{background-color: white; border-radius: 6px; border: 1px solid #ced4da;}}
-button[kind=“primary”] {{background: var(–acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
+button[kind=“primary"] {{background: var(–acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
 .badge {{display: inline-block; padding: 0.35rem 0.75rem; border-radius: 4px; background: var(–acc); color: white; font-size: clamp(0.7rem,2vw,0.8rem); margin-bottom: 0.75rem; font-weight: 600;}}
 .stButton>button {{background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 6px; padding: 0.5rem 1rem; color: #212529; font-weight: 500; min-height: 44px;}}
 .stProgress > div > div > div {{background-color: var(–acc) !important;}}
@@ -41,120 +41,120 @@ button[kind=“primary”] {{background: var(–acc) !important; color: white !i
 @media (max-width: 640px) {{
 .stApp {{font-size: 14px;}}
 /* Colonnes Streamlit empilées sur mobile */
-[data-testid=“column”] {{width: 100% !important; flex: 1 1 100% !important; min-width: 100% !important;}}
+[data-testid=“column"] {{width: 100% !important; flex: 1 1 100% !important; min-width: 100% !important;}}
 /* Boutons pleine largeur sur mobile */
 .stButton>button {{width: 100%; min-height: 48px; font-size: 15px;}}
 /* Agrandir les labels de formulaire */
 .stSelectbox label, .stNumberInput label, .stTextInput label {{font-size: 14px !important;}}
 /* Supprimer les shadows lourdes sur mobile */
-section[data-testid=“stSidebar”] {{box-shadow: none;}}
+section[data-testid=“stSidebar"] {{box-shadow: none;}}
 }}
 @media (max-width: 480px) {{
 h1 {{font-size: clamp(1.2rem, 5vw, 1.8rem) !important;}}
 h2 {{font-size: clamp(1rem, 4vw, 1.4rem) !important;}}
 h3 {{font-size: clamp(0.9rem, 3.5vw, 1.2rem) !important;}}
 }}
-</style>”””, unsafe_allow_html=True)
+</style>""", unsafe_allow_html=True)
 
 with st.sidebar:
-st.markdown(”<div style='height:1px;'></div>”, unsafe_allow_html=True)
+st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-st.title(“🛡️ OPR ArmyBuilder FR”)
-st.subheader(“📋 Armée”)
-game = st.session_state.get(“game”, “—”)
-faction = st.session_state.get(“faction”, “—”)
-points = st.session_state.get(“points”, 0)
-army_cost = st.session_state.get(“army_cost”, 0)
-st.markdown(f”**Jeu :** {game}”)
-st.markdown(f”**Faction :** {faction}”)
-st.markdown(f”**Format :** {points} pts”)
+st.title(“🛡️ OPR ArmyBuilder FR")
+st.subheader(“📋 Armée")
+game = st.session_state.get(“game", “—")
+faction = st.session_state.get(“faction", “—")
+points = st.session_state.get(“points", 0)
+army_cost = st.session_state.get(“army_cost", 0)
+st.markdown(f"**Jeu :** {game}")
+st.markdown(f"**Faction :** {faction}")
+st.markdown(f"**Format :** {points} pts")
 if points > 0:
 st.progress(min(army_cost / points, 1.0))
-st.markdown(f”**Coût :** {army_cost} / {points} pts”)
+st.markdown(f"**Coût :** {army_cost} / {points} pts")
 if army_cost > points:
-st.error(“⚠️ Dépassement de points”)
-if st.session_state.get(“page”) == “army” and “army_list” in st.session_state:
+st.error(“⚠️ Dépassement de points")
+if st.session_state.get(“page") == “army" and “army_list" in st.session_state:
 units_cap = math.floor(points / 150)
 heroes_cap = math.floor(points / 375)
-units_now = len([u for u in st.session_state.army_list if u.get(“type”) != “hero”])
-heroes_now = len([u for u in st.session_state.army_list if u.get(“type”) == “hero”])
-st.markdown(f”**Unités :** {units_now} / {units_cap}”)
-st.markdown(f”**Héros :** {heroes_now} / {heroes_cap}”)
+units_now = len([u for u in st.session_state.army_list if u.get(“type") != “hero"])
+heroes_now = len([u for u in st.session_state.army_list if u.get(“type") == “hero"])
+st.markdown(f"**Unités :** {units_now} / {units_cap}")
+st.markdown(f"**Héros :** {heroes_now} / {heroes_cap}")
 st.divider()
 
-if “page” not in st.session_state: st.session_state.page = “setup”
-if “army_list” not in st.session_state: st.session_state.army_list = []
-if “army_cost” not in st.session_state: st.session_state.army_cost = 0
-if “unit_selections” not in st.session_state: st.session_state.unit_selections = {}
-if “draft_counter” not in st.session_state: st.session_state.draft_counter = 0
-if “draft_unit_name” not in st.session_state: st.session_state.draft_unit_name = “”
+if “page" not in st.session_state: st.session_state.page = “setup"
+if “army_list" not in st.session_state: st.session_state.army_list = []
+if “army_cost" not in st.session_state: st.session_state.army_cost = 0
+if “unit_selections" not in st.session_state: st.session_state.unit_selections = {}
+if “draft_counter" not in st.session_state: st.session_state.draft_counter = 0
+if “draft_unit_name" not in st.session_state: st.session_state.draft_unit_name = “"
 
 # ── Lecture du paramètre ?list= (QR code de partage) ────────────────────────
 
-# Déclenché une seule fois par session via “_qr_loaded”
+# Déclenché une seule fois par session via “_qr_loaded"
 
-if not st.session_state.get(”_qr_loaded”):
-st.session_state[”_qr_loaded”] = True
+if not st.session_state.get("_qr_loaded"):
+st.session_state["_qr_loaded"] = True
 try:
-_qp = st.query_params.get(“list”, “”)
+_qp = st.query_params.get(“list", “")
 if _qp:
 import zlib as _z, base64 as _b64q, urllib.parse as _uq
-_raw   = _b64q.urlsafe_b64decode(_uq.unquote(_qp).encode() + b”==”)
+_raw   = _b64q.urlsafe_b64decode(_uq.unquote(_qp).encode() + b"==")
 _data  = json.loads(_z.decompress(_raw).decode())
 # Pré-remplir la session avec les infos de la liste partagée
-st.session_state[”_qr_faction”] = _data.get(“faction”, “”)
-st.session_state[”_qr_pts”]     = _data.get(“pts”, 1000)
-st.session_state[”_qr_units”]   = _data.get(“units”, [])
-st.session_state[”_qr_pending”] = True
+st.session_state["_qr_faction"] = _data.get(“faction", “")
+st.session_state["_qr_pts"]     = _data.get(“pts", 1000)
+st.session_state["_qr_units"]   = _data.get(“units", [])
+st.session_state["_qr_pending"] = True
 # Effacer le paramètre de l’URL pour éviter une boucle
 st.query_params.clear()
 except Exception:
 pass  # paramètre invalide → ignorer silencieusement
-if “game” not in st.session_state: st.session_state.game = None
-if “faction” not in st.session_state: st.session_state.faction = None
-if “points” not in st.session_state: st.session_state.points = 0
-if “list_name” not in st.session_state: st.session_state.list_name = “”
-if “units” not in st.session_state: st.session_state.units = []
-if “faction_special_rules” not in st.session_state: st.session_state.faction_special_rules = []
-if “faction_spells” not in st.session_state: st.session_state.faction_spells = {}
+if “game" not in st.session_state: st.session_state.game = None
+if “faction" not in st.session_state: st.session_state.faction = None
+if “points" not in st.session_state: st.session_state.points = 0
+if “list_name" not in st.session_state: st.session_state.list_name = “"
+if “units" not in st.session_state: st.session_state.units = []
+if “faction_special_rules" not in st.session_state: st.session_state.faction_special_rules = []
+if “faction_spells" not in st.session_state: st.session_state.faction_spells = {}
 
 GAME_CONFIG = {
-“Age of Fantasy”: {“min_points”: 250, “max_points”: 10000, “default_points”: 1000, “hero_limit”: 375, “unit_copy_rule”: 750, “unit_max_cost_ratio”: 0.35, “unit_per_points”: 150},
-“Age of Fantasy Regiments”: {“min_points”: 500, “max_points”: 20000, “default_points”: 2000, “hero_limit”: 500, “unit_copy_rule”: 1000, “unit_max_cost_ratio”: 0.4, “unit_per_points”: 200},
-“Grimdark Future”: {“min_points”: 250, “max_points”: 10000, “default_points”: 1000, “hero_limit”: 375, “unit_copy_rule”: 750, “unit_max_cost_ratio”: 0.35, “unit_per_points”: 150},
-“Grimdark Future Firefight”: {“min_points”: 150, “max_points”: 1000, “default_points”: 300, “hero_limit”: 300, “unit_copy_rule”: 300, “unit_max_cost_ratio”: 0.6, “unit_per_points”: 100},
-“Age of Fantasy Skirmish”: {“min_points”: 150, “max_points”: 1000, “default_points”: 300, “hero_limit”: 300, “unit_copy_rule”: 300, “unit_max_cost_ratio”: 0.6, “unit_per_points”: 100}
+“Age of Fantasy": {“min_points": 250, “max_points": 10000, “default_points": 1000, “hero_limit": 375, “unit_copy_rule": 750, “unit_max_cost_ratio": 0.35, “unit_per_points": 150},
+“Age of Fantasy Regiments": {“min_points": 500, “max_points": 20000, “default_points": 2000, “hero_limit": 500, “unit_copy_rule": 1000, “unit_max_cost_ratio": 0.4, “unit_per_points": 200},
+“Grimdark Future": {“min_points": 250, “max_points": 10000, “default_points": 1000, “hero_limit": 375, “unit_copy_rule": 750, “unit_max_cost_ratio": 0.35, “unit_per_points": 150},
+“Grimdark Future Firefight": {“min_points": 150, “max_points": 1000, “default_points": 300, “hero_limit": 300, “unit_copy_rule": 300, “unit_max_cost_ratio": 0.6, “unit_per_points": 100},
+“Age of Fantasy Skirmish": {“min_points": 150, “max_points": 1000, “default_points": 300, “hero_limit": 300, “unit_copy_rule": 300, “unit_max_cost_ratio": 0.6, “unit_per_points": 100}
 }
 
 def check_hero_limit(army_list, army_points, game_config):
-max_heroes = math.floor(army_points / game_config[“hero_limit”])
-hero_count = sum(1 for unit in army_list if unit.get(“type”) == “hero”)
+max_heroes = math.floor(army_points / game_config[“hero_limit"])
+hero_count = sum(1 for unit in army_list if unit.get(“type") == “hero")
 if hero_count > max_heroes:
-st.error(f”Limite de héros dépassée! Max: {max_heroes} (1 héros/{game_config[‘hero_limit’]} pts)”)
+st.error(f"Limite de héros dépassée! Max: {max_heroes} (1 héros/{game_config[‘hero_limit’]} pts)")
 return False
 return True
 
 def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
-max_cost = army_points * game_config[“unit_max_cost_ratio”]
+max_cost = army_points * game_config[“unit_max_cost_ratio"]
 for unit in army_list:
-if unit[“cost”] > max_cost:
-st.error(f”Unité {unit[‘name’]} dépasse {int(max_cost)} pts (35% du total)”)
+if unit[“cost"] > max_cost:
+st.error(f"Unité {unit[‘name’]} dépasse {int(max_cost)} pts (35% du total)")
 return False
 if new_unit_cost and new_unit_cost > max_cost:
-st.error(f”Cette unité dépasse {int(max_cost)} pts (35% du total)”)
+st.error(f"Cette unité dépasse {int(max_cost)} pts (35% du total)")
 return False
 return True
 
 def check_unit_copy_rule(army_list, army_points, game_config):
-x_value = math.floor(army_points / game_config[“unit_copy_rule”])
+x_value = math.floor(army_points / game_config[“unit_copy_rule"])
 max_copies = 1 + x_value
 unit_counts = {}
 for unit in army_list:
-name = unit[“name”]
+name = unit[“name"]
 unit_counts[name] = unit_counts.get(name, 0) + 1
 for unit_name, count in unit_counts.items():
 if count > max_copies:
-st.error(f”Trop de copies de {unit_name}! Max: {max_copies}”)
+st.error(f"Trop de copies de {unit_name}! Max: {max_copies}")
 return False
 return True
 
@@ -165,13 +165,13 @@ check_unit_max_cost(army_list, army_points, game_config) and
 check_unit_copy_rule(army_list, army_points, game_config))
 
 def check_weapon_conditions(unit_key, requires, unit=None):
-“””
+“""
 Vérifie si les conditions d’une option sont remplies.
 Prend en compte :
 - Les sélections explicites dans session_state (armes de remplacement choisies)
 - Les armes de BASE de l’unité, actives quand aucun groupe type=weapon
 n’a de sélection explicite (= le joueur garde choices[0])
-“””
+“""
 if not requires:
 return True
 current_weapons = []
@@ -203,66 +203,66 @@ return True
 ```
 
 def format_unit_option(u):
-name_part = u[“name”] + (” [1]” if u.get(“type”) == “hero” else f” [{u.get(‘size’, 10)}]”)
-weapons = u.get(“weapon”, [])
+name_part = u[“name"] + (" [1]" if u.get(“type") == “hero" else f" [{u.get(‘size’, 10)}]")
+weapons = u.get(“weapon", [])
 if isinstance(weapons, dict): weapons = [weapons]
 profiles = []
 for w in weapons:
 if isinstance(w, dict):
-sr = w.get(“special_rules”, [])
+sr = w.get(“special_rules", [])
 # Formatage de la portée : entier → ‘Xpouces’, Mêlée → ‘Mêlée’
-rng = w.get(“range”, “Mêlée”)
-if rng in (None, “-”, “mêlée”, “Mêlée”) or str(rng).lower() == “mêlée”:
-rng_str = “Mêlée”
+rng = w.get(“range", “Mêlée")
+if rng in (None, “-", “mêlée", “Mêlée") or str(rng).lower() == “mêlée":
+rng_str = “Mêlée"
 elif isinstance(rng, (int, float)):
-rng_str = f’{int(rng)}”’
+rng_str = f’{int(rng)}"’
 else:
 s = str(rng).strip()
-rng_str = s if s.endswith(’”’) else f’{s}”’
-p = f”{w.get(‘name’,‘Arme’)} ({rng_str}/A{w.get(‘attacks’,’?’)}/PA{w.get(‘armor_piercing’,’?’)}”
-p += (f”, {’, ‘.join(sr)})” if sr else “)”)
+rng_str = s if s.endswith(’"’) else f’{s}"’
+p = f"{w.get(‘name’,‘Arme’)} ({rng_str}/A{w.get(‘attacks’,’?’)}/PA{w.get(‘armor_piercing’,’?’)}"
+p += (f", {’, ‘.join(sr)})" if sr else “)")
 profiles.append(p)
-weapon_text = “, “.join(profiles) if profiles else “Aucune”
-rules_text = “, “.join([r if isinstance(r, str) else r.get(“name”,””) for r in u.get(“special_rules”, [])]) or “Aucune”
+weapon_text = “, “.join(profiles) if profiles else “Aucune"
+rules_text = “, “.join([r if isinstance(r, str) else r.get(“name","") for r in u.get(“special_rules", [])]) or “Aucune"
 # Ajout de Qual X+ devant Déf X+
-return f”{name_part} | Qual {u.get(‘quality’,’?’)}+ | Déf {u.get(‘defense’,’?’)}+ | {weapon_text} | {rules_text} | {u.get(‘base_cost’,0)}pts”
+return f"{name_part} | Qual {u.get(‘quality’,’?’)}+ | Déf {u.get(‘defense’,’?’)}+ | {weapon_text} | {rules_text} | {u.get(‘base_cost’,0)}pts"
 
 def format_weapon_option(weapon, cost=0):
-if not weapon or not isinstance(weapon, dict): return “Aucune arme”
-rng = weapon.get(“range”,“Mêlée”)
-if rng in (None,”-”,“mêlée”,“Mêlée”) or str(rng).lower()==“mêlée”: rng_str=“Mêlée”
-elif isinstance(rng,(int,float)): rng_str=f’{int(rng)}”’
-else: s=str(rng).strip(); rng_str=s if s.endswith(’”’) else f’{s}”’
-sr = weapon.get(“special_rules”,[])
-profile_inner = f”{rng_str}/A{weapon.get(‘attacks’,’?’)}/PA{weapon.get(‘armor_piercing’,’?’)}”
-if sr: profile_inner += f”, {’, ’.join(sr)}”
-profile = f”{weapon.get(‘name’,‘Arme’)} ({profile_inner})”
-if cost > 0: profile += f” (+{cost} pts)”
+if not weapon or not isinstance(weapon, dict): return “Aucune arme"
+rng = weapon.get(“range",“Mêlée")
+if rng in (None,"-",“mêlée",“Mêlée") or str(rng).lower()==“mêlée": rng_str=“Mêlée"
+elif isinstance(rng,(int,float)): rng_str=f’{int(rng)}"’
+else: s=str(rng).strip(); rng_str=s if s.endswith(’"’) else f’{s}"’
+sr = weapon.get(“special_rules",[])
+profile_inner = f"{rng_str}/A{weapon.get(‘attacks’,’?’)}/PA{weapon.get(‘armor_piercing’,’?’)}"
+if sr: profile_inner += f", {’, ’.join(sr)}"
+profile = f"{weapon.get(‘name’,‘Arme’)} ({profile_inner})"
+if cost > 0: profile += f" (+{cost} pts)"
 return profile
 
 def format_mount_option(mount):
-if not mount or not isinstance(mount, dict): return “Aucune monture”
-name = mount.get(“name”, “Monture”)
-cost = mount.get(“cost”, 0)
-mount_data = mount.get(“mount”, {})
-weapons = mount_data.get(“weapon”, [])
+if not mount or not isinstance(mount, dict): return “Aucune monture"
+name = mount.get(“name", “Monture")
+cost = mount.get(“cost", 0)
+mount_data = mount.get(“mount", {})
+weapons = mount_data.get(“weapon", [])
 if isinstance(weapons, dict): weapons = [weapons]
-coriace = mount_data.get(“coriace_bonus”, 0)
+coriace = mount_data.get(“coriace_bonus", 0)
 stats = []
 for w in weapons:
 if isinstance(w, dict):
-p = f”{w.get(‘name’,‘Arme’)} A{w.get(‘attacks’,’?’)}/PA{w.get(‘armor_piercing’,’?’)}”
-sp = “, “.join(w.get(“special_rules”, []))
-if sp: p += f” ({sp})”
+p = f"{w.get(‘name’,‘Arme’)} A{w.get(‘attacks’,’?’)}/PA{w.get(‘armor_piercing’,’?’)}"
+sp = “, “.join(w.get(“special_rules", []))
+if sp: p += f" ({sp})"
 stats.append(p)
-if coriace > 0: stats.append(f”Coriace+{coriace}”)
-sr = mount_data.get(“special_rules”, [])
+if coriace > 0: stats.append(f"Coriace+{coriace}")
+sr = mount_data.get(“special_rules", [])
 if sr:
-rt = “, “.join([r for r in sr if not r.startswith((“Griffes”, “Sabots”))])
+rt = “, “.join([r for r in sr if not r.startswith((“Griffes", “Sabots"))])
 if rt: stats.append(rt)
 label = name
-if stats: label += f” ({’, ’.join(stats)})”
-return label + f” (+{cost} pts)”
+if stats: label += f" ({’, ’.join(stats)})"
+return label + f" (+{cost} pts)"
 
 # ======================================================
 
@@ -436,7 +436,7 @@ def render_mount_section(unit):
     return f"""<div class="mount-section"><div class="section-title">🐴 {mname} (+{mcost} pts)</div>
 ```
 
-{(’<div style="margin-bottom:8px;">’ + rhtml + ‘</div>’) if rhtml else “”}
+{(’<div style="margin-bottom:8px;">’ + rhtml + ‘</div>’) if rhtml else “"}
 
 <table class="weapon-table"><thead><tr><th>Arme</th><th>Por</th><th>Att</th><th>PA</th><th>Spé</th></tr></thead><tbody>{wrows}</tbody></table></div>"""
 
@@ -660,25 +660,25 @@ return html
 def load_factions():
 factions = {}; games = set()
 try:
-FACTIONS_DIR = Path(**file**).resolve().parent / “repositories” / “data” / “factions”
-for fp in FACTIONS_DIR.glob(”*.json”):
+FACTIONS_DIR = Path(**file**).resolve().parent / “repositories" / “data" / “factions"
+for fp in FACTIONS_DIR.glob("*.json"):
 try:
-with open(fp, encoding=“utf-8”) as f:
+with open(fp, encoding=“utf-8") as f:
 data = json.load(f)
-game = data.get(“game”); faction = data.get(“faction”)
+game = data.get(“game"); faction = data.get(“faction")
 if game and faction:
 if game not in factions: factions[game] = {}
-data.setdefault(“faction_special_rules”, []); data.setdefault(“spells”, {}); data.setdefault(“units”, [])
+data.setdefault(“faction_special_rules", []); data.setdefault(“spells", {}); data.setdefault(“units", [])
 factions[game][faction] = data; games.add(game)
 except Exception as e:
-st.warning(f”Erreur chargement {fp.name}: {e}”)
+st.warning(f"Erreur chargement {fp.name}: {e}")
 except Exception as e:
-st.error(f”Erreur chargement des factions: {e}”); return {}, []
+st.error(f"Erreur chargement des factions: {e}"); return {}, []
 return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
-if st.session_state.page == “setup”:
+if st.session_state.page == “setup":
 factions_by_game, games = load_factions()
-if not games: st.error(“Aucun jeu trouvé”); st.stop()
+if not games: st.error(“Aucun jeu trouvé"); st.stop()
 
 ```
 # ── Bandeau liste partagée reçue via QR ──────────────────────────────────
@@ -842,15 +842,15 @@ with colB:
         st.session_state.page = "army"; st.rerun()
 ```
 
-if st.session_state.page == “army”:
-required_keys = [“game”,“faction”,“points”,“list_name”,“units”,“faction_special_rules”,“faction_spells”]
+if st.session_state.page == “army":
+required_keys = [“game",“faction",“points",“list_name",“units",“faction_special_rules",“faction_spells"]
 if not all(k in st.session_state for k in required_keys):
-st.error(“Configuration incomplète.”)
-if st.button(“Retour”, key=“back1”): st.session_state.page = “setup”; st.rerun()
+st.error(“Configuration incomplète.")
+if st.button(“Retour", key=“back1"): st.session_state.page = “setup"; st.rerun()
 st.stop()
 if not st.session_state.units:
-st.error(“Aucune unité disponible pour cette faction.”)
-if st.button(“Retour”, key=“back2”): st.session_state.page = “setup”; st.rerun()
+st.error(“Aucune unité disponible pour cette faction.")
+if st.button(“Retour", key=“back2"): st.session_state.page = “setup"; st.rerun()
 st.stop()
 
 ```
