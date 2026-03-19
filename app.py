@@ -212,6 +212,25 @@ def check_weapon_conditions(unit_key, requires, unit=None):
                                 current_weapons.add(w2.get("name", ""))
                     break
 
+    # ── 2b. Ajouter les armes choisies via variable_weapon_count ────────────
+    # (ex: "Frappe" ajoutée avec le Lance-flamme béni rapide sur les marcheurs)
+    # Les number_input sont stockés dans st.session_state sous la clé du widget
+    if unit is not None:
+        for gi, g in enumerate(unit.get("upgrade_groups", [])):
+            if g.get("type") != "variable_weapon_count":
+                continue
+            for oi, option in enumerate(g.get("options", [])):
+                widget_key = f"{unit_key}_group_{gi}_cnt_{oi}"
+                cnt_val = st.session_state.get(widget_key, 0)
+                if cnt_val and cnt_val > 0:
+                    nw = option.get("weapon", {})
+                    if isinstance(nw, dict) and nw:
+                        current_weapons.add(nw.get("name", ""))
+                    elif isinstance(nw, list):
+                        for w2 in nw:
+                            if isinstance(w2, dict):
+                                current_weapons.add(w2.get("name", ""))
+
     # ── 3. Collecter les noms d'options choisies ───────────────────────────
     # Pour les requires du type "Pistolet lourd de sergent + Épée énergétique"
     selected_option_names = set()
@@ -1053,27 +1072,48 @@ if st.session_state.page == "army":
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
                         nw=opt["weapon"]
+                        opt_replaces=opt.get("replaces",[])
+                        # Retirer les armes remplacées de la liste weapons
+                        if opt_replaces:
+                            weapons=[w for w in weapons if isinstance(w,dict) and w.get("name") not in opt_replaces]
                         extra={"_upgraded":True}
-                        if opt.get("requires"): extra["_unique"]=True
+                        if opt.get("requires") and not opt_replaces: extra["_unique"]=True
                         if isinstance(nw,dict): weapons.append({**nw,**extra})
-                        elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
+                        elif isinstance(nw,list): weapons.extend({**w2,**extra} for w2 in nw)
 
         elif gtype == "variable_weapon_count":
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
             bw=copy.deepcopy(list(unit.get("weapon",[])) if isinstance(unit.get("weapon"),list) else [unit.get("weapon",{})])
             for oi,option in enumerate(group.get("options",[])):
-                st.markdown(f"<h4 style='color:#3498db;'>{option['name']}</h4>",unsafe_allow_html=True)
                 req=option.get("requires",[])
                 if req and not check_weapon_conditions(unit_key,req,unit): st.markdown(f"<div style='color:#999;font-size:.9em;'>{option['name']} <em>(Non disponible)</em></div>",unsafe_allow_html=True); continue
-                mc=unit.get("size",1)
-                if "max_count" in option: mc=min(option["max_count"].get("value",mc),unit.get("size",1))
+                st.markdown(f"<h4 style='color:#3498db;'>{option['name']}</h4>",unsafe_allow_html=True)
+                # max_count : "fixed" = valeur absolue, "size_based" = min(value, size)
+                mc_cfg=option.get("max_count",{})
+                if mc_cfg.get("type") == "fixed":
+                    mc=mc_cfg.get("value",1)
+                elif mc_cfg.get("type") == "size_based":
+                    mc=min(mc_cfg.get("value", unit.get("size",1)), unit.get("size",1))
+                else:
+                    mc=unit.get("size",1)
                 cnt=st.number_input(f"Nombre de {option['name']} (0 – {mc})",min_value=option.get("min_count",0),max_value=mc,value=option.get("min_count",0),step=1,key=f"{unit_key}_{g_key}_cnt_{oi}")
                 tc=cnt*option["cost"]; upgrades_cost+=tc
                 st.markdown(f"<div style='margin:10px 0;padding:8px;background:#f8f9fa;border-radius:4px;'><strong>{option['name']}</strong> × {cnt} = <strong style='color:#e74c3c;'>{tc} pts</strong></div>",unsafe_allow_html=True)
                 if cnt > 0:
                     fw=bw.copy(); nw=option["weapon"]
-                    if isinstance(nw,dict): fw.append({**nw,"_count":cnt,"_replaces":option.get("replaces",[]),"_upgraded":True})
-                    elif isinstance(nw,list): fw.extend({**w,"_count":cnt,"_replaces":option.get("replaces",[]),"_upgraded":True} for w in nw)
+                    opt_replaces=option.get("replaces",[])
+                    # Retirer les armes remplacées (proportionnellement au count)
+                    if opt_replaces:
+                        removed=0
+                        new_fw=[]
+                        for w in fw:
+                            if isinstance(w,dict) and w.get("name") in opt_replaces and removed < cnt:
+                                removed+=1
+                            else:
+                                new_fw.append(w)
+                        fw=new_fw
+                    if isinstance(nw,dict): fw.append({**nw,"_count":cnt,"_replaces":opt_replaces,"_upgraded":True})
+                    elif isinstance(nw,list): fw.extend({**w2,"_count":cnt,"_replaces":opt_replaces,"_upgraded":True} for w2 in nw)
                     weapons=fw
 
         elif gtype == "role":
