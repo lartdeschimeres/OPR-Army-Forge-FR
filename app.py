@@ -10,7 +10,7 @@ import base64
 st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="auto")
 
 # URL de l'app (pour le QR code de partage)
-APP_URL = "https://opr-armybuilder-fr.streamlit.app/"
+APP_URL = "https://armybuilder-fra.streamlit.app/"
 
 # Couleur d'accent par jeu
 _GAME_COLORS = {
