@@ -476,10 +476,10 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
 .legend-page{{page-break-before:always;break-before:page;padding:12px 0;}}
 .faction-rules{{padding:8px;border-radius:6px;border:1px solid var(--brd);}}
 .legend-title{{text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:12px;font-size:14px;font-weight:700;}}
-.rule-item{{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--brd);}}
+.rule-item{{margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--brd);}}
 .rule-item:last-child{{border-bottom:none;margin-bottom:0;padding-bottom:0;}}
-.rule-name{{color:var(--accent);font-weight:600;font-size:9px;margin-bottom:1px;}}
-.rule-desc{{font-size:8.5px;line-height:1.35;color:#555;}}
+.rule-name{{color:var(--accent);font-weight:600;font-size:8px;margin-bottom:1px;}}
+.rule-desc{{font-size:7.5px;line-height:1.28;color:#555;}}
 
 @media print{{
   body{{padding:6px;}}
@@ -563,7 +563,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
             # chaque colonne avant d'en créer une nouvelle → s'adapte à n'importe quel volume.
             html += """<div class="legend-page"><div class="faction-rules">"""
             html += """<div class="legend-title">📜 Règles spéciales &amp; Sorts</div>"""
-            html += """<div style="columns:2;column-gap:16px;column-rule:1px solid #dee2e6;">"""
+            html += """<div style="columns:3;column-gap:12px;column-rule:1px solid #dee2e6;font-size:9px;">"""
 
             if all_rules:
                 if faction_spells:
