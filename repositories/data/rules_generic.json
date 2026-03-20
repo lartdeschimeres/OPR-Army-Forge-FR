@@ -1,0 +1,102 @@
+{
+  "version": "FR-1.0",
+  "description": "Règles spéciales génériques OPR — valables pour tous les jeux",
+  "rules": [
+    {
+      "name": "Ambush [Embuscade]",
+      "description": "Cette unité peut être mise en réserve au lieu d'être déployée normalement. Elle peut entrer en jeu à partir du tour 2, en étant placée à plus de 9\" de toute unité ennemie."
+    },
+    {
+      "name": "Blast (X) [Explosion (X)]",
+      "description": "Lors d'une attaque avec cette arme, lancez X dés supplémentaires et conservez les X meilleurs résultats."
+    },
+    {
+      "name": "Counter-charge [Contre-charge]",
+      "description": "Cette unité peut effectuer une réaction de contre-charge lorsqu'elle est chargée, en effectuant une attaque de mêlée avant l'attaquant."
+    },
+    {
+      "name": "Deadly (X) [Mortel (X)]",
+      "description": "Les blessures infligées par cette arme comptent comme X blessures pour déterminer si l'unité cible est retirée."
+    },
+    {
+      "name": "Fast [Rapide]",
+      "description": "Cette unité peut Avancer de 9\" au lieu de 6\", et Courir ou Charger de 18\" au lieu de 12\"."
+    },
+    {
+      "name": "Fear (X) [Effrayant (X)]",
+      "description": "Les ennemis qui affrontent cette unité subissent un malus de -X à leurs Tests de Moral."
+    },
+    {
+      "name": "Fearless [Sans peur]",
+      "description": "Cette unité réussit automatiquement ses Tests de Moral."
+    },
+    {
+      "name": "Flying [Volant]",
+      "description": "Cette unité peut se déplacer en ligne droite en ignorant les terrains et les unités. Elle ne peut pas terminer son déplacement dans un terrain infranchissable ou sur une unité."
+    },
+    {
+      "name": "Furious [Assaut tranchant]",
+      "description": "Cette unité gagne PA (+1) lorsqu'elle Charge."
+    },
+    {
+      "name": "Hero [Héros]",
+      "description": "Cette figurine peut rejoindre une unité amie au début de la partie. Elle ne peut pas rejoindre d'autres héros. Lorsqu'elle rejoint une unité, elle en fait partie jusqu'à sa mort."
+    },
+    {
+      "name": "Impact (X) [Impact (X)]",
+      "description": "Lorsque cette unité Charge, elle inflige automatiquement X touches à l'unité ennemie avant les jets d'attaque."
+    },
+    {
+      "name": "Indirect [Indirect]",
+      "description": "Cette arme peut cibler des unités hors ligne de vue. Les attaques indirectes subissent un malus de -1 aux jets pour toucher."
+    },
+    {
+      "name": "Limited [Limité]",
+      "description": "Cette arme ne peut être utilisée qu'une seule fois par partie."
+    },
+    {
+      "name": "Lock-On [Imparable]",
+      "description": "Les touches infligées par cette arme ne peuvent pas être sauvegardées."
+    },
+    {
+      "name": "Regeneration [Régénération]",
+      "description": "À la fin de chaque round, cette unité peut tenter de récupérer une blessure sur un jet de 5+."
+    },
+    {
+      "name": "Reliable [Fiable]",
+      "description": "Cette arme touche toujours sur 2+ au lieu de la valeur de Qualité de l'unité."
+    },
+    {
+      "name": "Scout [Éclaireur]",
+      "description": "Après le déploiement de toutes les unités, cette unité peut effectuer un déplacement de 9\" avant le début de la partie."
+    },
+    {
+      "name": "Scouting [Arpenteur]",
+      "description": "Cette unité ignore les terrains difficiles lors de ses déplacements."
+    },
+    {
+      "name": "Slow [Lent]",
+      "description": "Cette unité ne peut Avancer que de 3\" au lieu de 6\", et Courir ou Charger de 6\" au lieu de 12\"."
+    },
+    {
+      "name": "Sniper [Élimination]",
+      "description": "Cette arme peut cibler des figurines individuelles dans une unité au lieu de l'unité entière."
+    },
+    {
+      "name": "Strider [Arpenteur]",
+      "description": "Cette unité ignore les terrains difficiles lors de ses déplacements."
+    },
+    {
+      "name": "Tough (X) [Coriace (X)]",
+      "description": "Cette unité peut subir X blessures avant d'être retirée. Notez les blessures au fur et à mesure."
+    },
+    {
+      "name": "Transport (X) [Transport (X)]",
+      "description": "Ce véhicule peut transporter jusqu'à X figurines. Les figurines à l'intérieur ne peuvent pas agir tant qu'elles n'en sont pas sorties."
+    },
+    {
+      "name": "Unique [Unique]",
+      "description": "Vous ne pouvez inclure qu'une seule copie de cette unité dans votre armée."
+    }
+  ]
+}
