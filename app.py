@@ -221,6 +221,23 @@ def format_unit_option(u):
     # Ajout de Qual X+ devant Déf X+
     return f"{name_part} | Qual {u.get('quality','?')}+ | Déf {u.get('defense','?')}+ | {weapon_text} | {rules_text} | {u.get('base_cost',0)}pts"
 
+def weapon_profile_md(weapon):
+    """Retourne une ligne de profil lisible pour l'UI : Mêlée | A2 | PA1 | Règles"""
+    if not weapon or not isinstance(weapon, dict): return ""
+    rng = weapon.get("range", "Mêlée")
+    if rng in (None, "-", "mêlée", "Mêlée") or str(rng).lower() == "mêlée":
+        rng_str = "Mêlée"
+    elif isinstance(rng, (int, float)):
+        rng_str = f'{int(rng)}"'
+    else:
+        s = str(rng).strip(); rng_str = s if s.endswith('"') else f'{s}"'
+    att = weapon.get("attacks", "?")
+    ap  = weapon.get("armor_piercing", "?")
+    sr  = weapon.get("special_rules", [])
+    parts = [f"{rng_str} | A{att} | PA{ap}"]
+    if sr: parts.append(", ".join(sr))
+    return " | ".join(parts)
+
 def format_weapon_option(weapon, cost=0):
     if not weapon or not isinstance(weapon, dict): return "Aucune arme"
     rng = weapon.get("range","Mêlée")
@@ -1124,7 +1141,15 @@ if st.session_state.page == "army":
                 req=option.get("requires",[])
                 if req and not check_weapon_conditions(unit_key,req,unit):
                     st.markdown(f"<div style='color:#999;font-size:.9em;'>{option['name']} <em>(Non disponible)</em></div>",unsafe_allow_html=True); continue
-                st.markdown(f"<h4 style='color:#3498db;'>{option['name']}</h4>",unsafe_allow_html=True)
+                # Profil(s) de l'arme sous le titre
+                _opt_nw = option.get("weapon", {})
+                _profiles = []
+                if isinstance(_opt_nw, list):
+                    _profiles = [f"⚔️ **{_w.get('name','')}** — {weapon_profile_md(_w)}" for _w in _opt_nw if isinstance(_w, dict)]
+                elif isinstance(_opt_nw, dict) and _opt_nw:
+                    _profiles = [f"⚔️ **{_opt_nw.get('name','')}** — {weapon_profile_md(_opt_nw)}"]
+                _profile_label = "  \n".join(_profiles)
+                st.markdown(f"**{option['name']}**" + (f"  \n{_profile_label}" if _profile_label else ""))
                 # ── BUG 1 FIX : max_count selon le type ──────────────────────
                 mc_cfg  = option.get("max_count", {})
                 mc_type = mc_cfg.get("type","size_based") if isinstance(mc_cfg,dict) else "size_based"
