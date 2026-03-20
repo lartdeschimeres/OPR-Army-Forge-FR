@@ -51,3 +51,17 @@ class CommonRulesRepository:
         raise FileNotFoundError(
             "Aucun fichier de regles communes trouve dans repositories/data/common-rules/common-rules.json."
         )
+    def load_generic_rules() -> dict[str, str]:
+    """Charge _generic_rules.json et retourne un dict {title: description}."""
+    path = Path(__file__).parent / "_generic_rules.json"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Fichier _generic_rules.json introuvable dans {path.parent}"
+        )
+    with path.open(encoding="utf-8") as f:
+        data = json.load(f)
+    return {
+        str(rule["title"]): str(rule.get("description", ""))
+        for rule in data
+        if isinstance(rule, dict) and rule.get("title")
+    }
