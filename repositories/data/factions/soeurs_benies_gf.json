@@ -844,6 +844,7 @@
             },
             {
               "name": "Ailes bénies",
+              "coriace_bonus": 3,
               "cost": 60,
               "special_rules": [
                 "Coriace (+3)",
@@ -854,6 +855,7 @@
             {
               "name": "Moto de combat",
               "cost": 80,
+              "coriace_bonus": 3,
               "special_rules": [
                 "Coriace (+3)",
                 "Rapide"
@@ -1294,6 +1296,7 @@
             {
               "name": "Ailes bénies",
               "cost": 50,
+              "coriace_bonus": 3,
               "special_rules": [
                 "Coriace (+3)",
                 "Embuscade",
@@ -1303,6 +1306,7 @@
             {
               "name": "Moto de combat",
               "cost": 65,
+              "coriace_bonus": 3,
               "special_rules": [
                 "Coriace (+3)",
                 "Rapide"
@@ -4006,6 +4010,7 @@
             {
               "name": "Sœur supérieure angélique",
               "cost": 120,
+              "coriace_bonus": 3,
               "special_rules": [
                 "Coriace (+3)"
               ],
