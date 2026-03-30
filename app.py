@@ -1,4 +1,3 @@
-
 import json
 import copy
 import streamlit as st
@@ -260,6 +259,23 @@ def format_weapon_option(weapon, cost=0):
     if cost > 0: profile += f" (+{cost} pts)"
     return profile
 
+def format_mobility_option(opt):
+    """Formate une option de mobilité GDF (données à la racine de l'option)."""
+    if not opt or not isinstance(opt, dict): return "Aucune option"
+    name = opt.get("name", "Option")
+    cost = opt.get("cost", 0)
+    sr = [s for s in opt.get("special_rules", []) if "Coriace" not in s]
+    coriace = opt.get("coriace_bonus", 0)
+    stats = []
+    if coriace > 0: stats.append(f"Coriace+{coriace}")
+    w = opt.get("weapon")
+    if w and isinstance(w, dict):
+        stats.append(f"{w.get('name','Arme')} A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}")
+    if sr: stats.extend(sr)
+    label = name
+    if stats: label += f" ({', '.join(stats)})"
+    return label + f" (+{cost} pts)"
+
 def format_mount_option(mount):
     if not mount or not isinstance(mount, dict): return "Aucune monture"
     name = mount.get("name", "Monture")
@@ -453,6 +469,11 @@ def export_html(army_list, army_name, army_limit):
 {('<div style="margin-bottom:8px;">' + rhtml + '</div>') if rhtml else ""}
 <table class="weapon-table"><thead><tr><th>Arme</th><th>Por</th><th>Att</th><th>PA</th><th>Spé</th></tr></thead><tbody>{wrows}</tbody></table></div>"""
 
+    # Dictionnaire nom → description pour les tooltips (génériques + faction)
+    # Utilise le champ "key" pour le matching VF
+    _rules_dict = dict(load_generic_rules())  # génériques en base
+    _rules_dict.update(load_faction_rules_dict())  # faction par-dessus
+
     sorted_units = sorted(army_list, key=get_priority)
     total_cost = sum(u.get("cost",0) for u in sorted_units)
 
@@ -494,7 +515,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
 .weapon-name{{font-weight:600;}}
 .rules-section{{margin:3px 0 0;}}
 .rules-title{{font-weight:600;margin-bottom:3px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}}
-.rule-tag{{background:var(--rule);padding:1px 6px;border-radius:3px;font-size:9px;border:1px solid var(--brd);margin-right:3px;margin-bottom:3px;display:inline-block;line-height:1.5;}}
+.rule-tag{{background:var(--rule);padding:1px 6px;border-radius:3px;font-size:9px;border:1px solid var(--brd);margin-right:3px;margin-bottom:3px;display:inline-block;line-height:1.5;cursor:pointer;}}#opr-tooltip{{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;color:#fff;padding:12px 16px;border-radius:8px;font-size:11px;line-height:1.6;max-width:300px;white-space:pre-wrap;z-index:9999;text-align:left;box-shadow:0 4px 24px rgba(0,0,0,.5);}}#opr-overlay{{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.2);cursor:pointer;}}
 .mount-section{{background:var(--mount);border:1px solid var(--brd);border-radius:4px;padding:4px 8px;margin:4px 0;font-size:10px;}}
 .mount-section .section-title{{font-size:10px;}}
 
@@ -530,7 +551,23 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         size = unit.get("size",10); coriace = unit.get("coriace",0)
 
         rules = get_rules(unit)
-        rules_html = " ".join(f'<span class="rule-tag">{esc(r)}</span>' for r in rules) if rules else '<span class="rule-tag">Aucune</span>'
+        def _get_rule_desc(r, rd):
+            d = rd.get(r, "")
+            if not d:  # matching partiel pour Coriace (9) → Coriace
+                for k, v in rd.items():
+                    if r.startswith(k + " ") or r.startswith(k + "("):
+                        return v
+            return d
+        def _safe_tip(txt):
+            """Encode la description pour data-tip."""
+            return txt.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&#34;").replace("'", "&#39;")
+        def _rule_tag(r):
+            desc = _get_rule_desc(r, _rules_dict)
+            if desc:
+                return (f'<span class="rule-tag" data-tip="{_safe_tip(desc)}"'
+                        f' onclick="showTip(this)">{esc(r)}</span>')
+            return f'<span class="rule-tag">{esc(r)}</span>'
+        rules_html = " ".join(_rule_tag(r) for r in rules) if rules else '<span class="rule-tag">Aucune</span>'
 
         weapons = collect_weapons(unit)
         final_weapons = group_weapons(weapons, unit_size=size)
@@ -589,7 +626,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
             # chaque colonne avant d'en créer une nouvelle → s'adapte à n'importe quel volume.
             html += """<div class="legend-page"><div class="faction-rules">"""
             html += """<div class="legend-title">📜 Règles spéciales &amp; Sorts</div>"""
-            html += """<div style="columns:3;column-gap:8px;column-rule:1px solid #dee2e6;font-size:7.5px;">"""
+            html += """<div style="columns:3;column-gap:12px;column-rule:1px solid #dee2e6;font-size:9px;">"""
 
             if all_rules:
                 if faction_spells:
@@ -661,8 +698,57 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         + _qr_img_tag +
         '</div>'
     )
+    html += '''<div id="opr-overlay" onclick="hideTip()"></div>
+<div id="opr-tooltip"></div>
+<script>
+function showTip(el){
+  var tip=document.getElementById("opr-tooltip");
+  var ov=document.getElementById("opr-overlay");
+  tip.textContent=el.getAttribute("data-tip");
+  tip.style.display="block";
+  ov.style.display="block";
+}
+function hideTip(){
+  document.getElementById("opr-tooltip").style.display="none";
+  document.getElementById("opr-overlay").style.display="none";
+}
+</script>'''
     html += f'<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">Généré par OPR ArmyBuilder FRA — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
     return html
+
+@st.cache_data
+def load_generic_rules():
+    """Charge les règles génériques OPR indexées par le champ 'key' (ou 'name' si absent)."""
+    try:
+        _BASE = Path(__file__).resolve().parent
+        for _p in [
+            _BASE / "repositories" / "data" / "generic_rules.json",
+            _BASE / "generic_rules.json",
+        ]:
+            if _p.exists():
+                with open(_p, encoding="utf-8") as f:
+                    data = json.load(f)
+                result = {}
+                for r in data.get("rules", []):
+                    if "name" not in r: continue
+                    desc = r.get("description", "")
+                    for k in r.get("key", [r["name"]]):
+                        result[k] = desc
+                return result
+    except Exception:
+        pass
+    return {}
+
+def load_faction_rules_dict():
+    """Retourne un dict {clé VF: description} depuis les règles de la faction courante.
+    Utilise le champ 'key' si présent, sinon 'name'."""
+    result = {}
+    for r in st.session_state.get("faction_special_rules", []):
+        if not isinstance(r, dict): continue
+        desc = r.get("description", "")
+        for k in r.get("key", [r.get("name", "")]):
+            if k: result[k] = desc
+    return result
 
 @st.cache_data
 def load_factions():
@@ -1074,6 +1160,20 @@ if st.session_state.page == "army":
     if not unit: st.error("Aucune unité sélectionnée."); st.stop()
     if "upgrade_groups" not in unit: unit["upgrade_groups"] = []
 
+    # ── Profil des armes de base de l'unité ───────────────────────────────
+    _base_weapons = unit.get("weapon", [])
+    if isinstance(_base_weapons, dict): _base_weapons = [_base_weapons]
+    if _base_weapons:
+        _wp_lines = [f"⚔️ **{w.get('name','')}** — {weapon_profile_md(w)}"
+                     for w in _base_weapons if isinstance(w, dict)]
+        if _wp_lines:
+            st.markdown(
+                "<div style='font-size:13px;color:#444;margin-bottom:8px;'>"
+                + " &nbsp;|&nbsp; ".join(_wp_lines)
+                + "</div>",
+                unsafe_allow_html=True
+            )
+
     # Chaque configuration d'unité a un key unique basé sur un compteur.
     # Quand l'unité change, on incrémente → pas de collision entre deux unités du même nom.
     if st.session_state.draft_unit_name != unit['name']:
@@ -1081,12 +1181,44 @@ if st.session_state.page == "army":
         st.session_state.draft_unit_name = unit['name']
     unit_key = f"draft_{st.session_state.draft_counter}"
     st.session_state.unit_selections.setdefault(unit_key, {})
+
+    # ── Règles spéciales de l'unité avec popover ──────────────────────────────
+    _unit_sr = unit.get("special_rules", [])
+    if _unit_sr:
+        _generic_rules = load_generic_rules()
+        _faction_rules_dict = load_faction_rules_dict()
+        st.markdown("<div style='margin-bottom:4px;font-size:12px;color:#6c757d;'>Règles spéciales :</div>", unsafe_allow_html=True)
+        for _si, _sr in enumerate(_unit_sr):
+            _sr_name = _sr if isinstance(_sr, str) else _sr.get("name", "")
+            # Lookup exact d'abord, puis matching partiel (pour Coriace (9) → Coriace)
+            _sr_desc = (_faction_rules_dict.get(_sr_name)
+                        or _generic_rules.get(_sr_name, ""))
+            if not _sr_desc:
+                for _k, _d in {**_generic_rules, **_faction_rules_dict}.items():
+                    if _sr_name.startswith(_k + " ") or _sr_name.startswith(_k + "("):
+                        _sr_desc = _d; break
+            if _sr_desc:
+                with st.popover(f"📖 {_sr_name}", use_container_width=False):
+                    st.markdown(f"**{_sr_name}**")
+                    st.caption(_sr_desc)
+            else:
+                st.markdown(f"• `{_sr_name}`")
+
     weapons = copy.deepcopy(list(unit.get("weapon",[]))); selected_options = {}; mount = None
     weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
 
     for g_idx, group in enumerate(unit.get("upgrade_groups",[])):
         g_key = f"group_{g_idx}"
         gtype = group.get("type","")
+        # requires au niveau du groupe
+        group_requires = group.get("requires", [])
+        if group_requires and not check_weapon_conditions(unit_key, group_requires, unit): continue
+        # requires_not au niveau du groupe (ex: Sœurs Protectrices)
+        group_requires_not = group.get("requires_not", [])
+        if group_requires_not and any(
+            check_weapon_conditions(unit_key, [rn], unit)
+            for rn in group_requires_not
+        ): continue
         hvo = (bool(group.get("options")) if gtype != "conditional_weapon"
                else any(not o.get("requires") or check_weapon_conditions(unit_key, o.get("requires",[]), unit) for o in group.get("options",[])))
         if not hvo: continue
@@ -1108,13 +1240,6 @@ if st.session_state.page == "army":
                 cur=st.session_state.unit_selections[unit_key].get(g_key,choices[0])
                 ch=st.radio("Sélection de l'arme",choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_weapon")
                 st.session_state.unit_selections[unit_key][g_key]=ch
-                if ch != choices[0] and ch in opt_map:
-                    _ow = opt_map[ch].get("weapon", {})
-                    if isinstance(_ow, list):
-                        for _w in _ow:
-                            if isinstance(_w, dict): st.caption(f"⚔️ {_w.get('name','')} — {weapon_profile_md(_w)}")
-                    elif isinstance(_ow, dict) and _ow:
-                        st.caption(f"⚔️ {_ow.get('name','')} — {weapon_profile_md(_ow)}")
                 if ch!=choices[0]:
                     for ol,o in opt_map.items():
                         if ol==ch: weapon_cost+=o["cost"]; weapons=copy.deepcopy(o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]]); break
@@ -1134,13 +1259,6 @@ if st.session_state.page == "army":
                 cur=st.session_state.unit_selections[unit_key].get(g_key,choices[0])
                 ch=st.radio(group.get("description","Sélectionnez une amélioration"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_cond")
                 st.session_state.unit_selections[unit_key][g_key]=ch
-                if ch != choices[0] and ch in opt_map:
-                    _ow = opt_map[ch].get("weapon", {})
-                    if isinstance(_ow, list):
-                        for _w in _ow:
-                            if isinstance(_w, dict): st.caption(f"⚔️ {_w.get('name','')} — {weapon_profile_md(_w)}")
-                    elif isinstance(_ow, dict) and _ow:
-                        st.caption(f"⚔️ {_ow.get('name','')} — {weapon_profile_md(_ow)}")
                 if ch!=choices[0]:
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
@@ -1242,6 +1360,21 @@ if st.session_state.page == "army":
                 chk=st.checkbox(f"{o['name']}{sr_str} (+{o['cost']} pts)",value=st.session_state.unit_selections[unit_key].get(ok,False),key=ok)
                 st.session_state.unit_selections[unit_key][ok]=chk
                 if chk: upgrades_cost+=o["cost"]; selected_options.setdefault(group.get("group","Options"),[]).append(o)
+
+        elif gtype == "mobility":
+            # Mobilité GDF : comme une monture mais données à la racine de l'option
+            choices=["Aucune option de mobilité"]; opt_map={}
+            for o in group.get("options",[]): lbl=format_mobility_option(o); choices.append(lbl); opt_map[lbl]=o
+            cur=st.session_state.unit_selections[unit_key].get(g_key,choices[0])
+            ch=st.radio(group.get("description","Mobilité"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_mobility")
+            st.session_state.unit_selections[unit_key][g_key]=ch
+            if ch!=choices[0]:
+                mob_opt=opt_map[ch]; mount_cost=mob_opt["cost"]
+                # Construire un objet mount compatible avec le reste du code
+                mount={"name":mob_opt["name"],"cost":mob_opt["cost"],
+                       "mount":{"weapon":mob_opt.get("weapon",[]) if not isinstance(mob_opt.get("weapon"),dict) else [mob_opt["weapon"]],
+                                "special_rules":mob_opt.get("special_rules",[]),
+                                "coriace_bonus":mob_opt.get("coriace_bonus",0)}}
 
         elif gtype == "mount":
             choices=["Aucune monture"]; opt_map={}
