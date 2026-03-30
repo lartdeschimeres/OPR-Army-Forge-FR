@@ -823,7 +823,7 @@
         },
         {
           "group": "Mobilité",
-          "type": "upgrades",
+          "type": "mobility",
           "description": "Améliorer avec une des options suivantes (un seul choix possible)",
           "options": [
             {
@@ -1274,7 +1274,7 @@
         },
         {
           "group": "Mobilité",
-          "type": "upgrades",
+          "type": "mobility",
           "description": "Améliorer avec une des options suivantes (un seul choix possible)",
           "options": [
             {
