@@ -319,7 +319,9 @@ def export_html(army_list, army_name, army_limit):
                 # _count ne doit exister que sur les armes ajoutées via slider.
                 # Un résidu de cache ou de JSON corrompu sur une arme de base
                 # fausserait le calcul de replaced_count dans group_weapons.
-                if not wc.get("_upgraded") and "_count" in wc:
+                # Purger _count uniquement si = 1 (arme simple sans exemplaires multiples)
+                # Garder _count > 1 (ex: Griffes lourdes x3 des Paladins sur Drake-Lion)
+                if not wc.get("_upgraded") and "_count" in wc and wc["_count"] <= 1:
                     del wc["_count"]
                 result.append(wc)
         # Armes de monture uniquement
@@ -397,10 +399,12 @@ def export_html(army_list, army_name, army_limit):
             upgraded  = w.get("_upgraded", False)
             unique    = w.get("_unique", False)
 
-            if has_count and cnt > 1:
+            if cnt > 1:
                 nd = f"{cnt}x {name}"
             elif upgraded and unique:
                 nd = f"1x {name}"
+            elif unit_size > 1 and not has_count and not upgraded:
+                nd = f"{unit_size}x {name}"
             else:
                 nd = name
 
@@ -1249,11 +1253,20 @@ if st.session_state.page == "army":
                 if ch!=choices[0]:
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
-                        # conditional_weapon avec "requires" = amélioration d'une seule figurine → _unique=True
-                        # conditional_weapon sans "requires" = toute l'unité → _unique absent
                         nw=opt["weapon"]
                         extra={"_upgraded":True}
                         if opt.get("requires"): extra["_unique"]=True
+                        # Si "replaces" → retirer les armes remplacées avant d'ajouter
+                        _cond_replaces = opt.get("replaces", [])
+                        if _cond_replaces:
+                            _replaced_names = set()
+                            _kept_weapons = []
+                            for _w in weapons:
+                                if isinstance(_w,dict) and _w.get("name") in _cond_replaces and _w.get("name") not in _replaced_names:
+                                    _replaced_names.add(_w.get("name"))
+                                else:
+                                    _kept_weapons.append(_w)
+                            weapons = _kept_weapons
                         if isinstance(nw,dict): weapons.append({**nw,**extra})
                         elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
