@@ -1205,10 +1205,12 @@ if st.session_state.page == "army":
                     for ol,o in opt_map.items():
                         if ol==ch:
                             weapon_cost+=o["cost"]
-                            # Préserver les armes de monture (_mount_weapon) lors du remplacement
-                            _mount_weapons = [w for w in weapons if isinstance(w,dict) and w.get("_mount_weapon")]
+                            # Préserver les armes avec "count" (bêtes/montures intégrées)
+                            # et les armes _mount_weapon lors du remplacement
+                            _kept = [w for w in weapons if isinstance(w,dict)
+                                     and (w.get("count") or w.get("_mount_weapon"))]
                             _new_ws = copy.deepcopy(o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]])
-                            weapons = _new_ws + _mount_weapons
+                            weapons = _new_ws + _kept
                             break
 
         elif gtype == "conditional_weapon":
