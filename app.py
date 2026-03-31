@@ -1203,7 +1203,13 @@ if st.session_state.page == "army":
                 st.session_state.unit_selections[unit_key][g_key]=ch
                 if ch!=choices[0]:
                     for ol,o in opt_map.items():
-                        if ol==ch: weapon_cost+=o["cost"]; weapons=copy.deepcopy(o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]]); break
+                        if ol==ch:
+                            weapon_cost+=o["cost"]
+                            # Préserver les armes de monture (_mount_weapon) lors du remplacement
+                            _mount_weapons = [w for w in weapons if isinstance(w,dict) and w.get("_mount_weapon")]
+                            _new_ws = copy.deepcopy(o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]])
+                            weapons = _new_ws + _mount_weapons
+                            break
 
         elif gtype == "conditional_weapon":
             ao=[o for o in group.get("options",[]) if not o.get("requires") or check_weapon_conditions(unit_key,o.get("requires",[]),unit)]
