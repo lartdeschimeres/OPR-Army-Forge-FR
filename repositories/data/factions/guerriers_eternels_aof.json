@@ -1692,7 +1692,7 @@
       ],
       "weapon": [
         {
-          "name": "Arme à une main",
+          "name": "Armes à une main",
           "range": "Mêlée",
           "attacks": 2,
           "armor_piercing": 0,
@@ -1740,38 +1740,56 @@
                 ]
               },
               "replaces": [
-                "Arme à une main"
+                "Armes à une main"
               ]
             },
             {
               "name": "Pistolet arbalète",
               "cost": 20,
-              "weapon": {
-                "name": "Pistolet arbalète",
-                "range": 12,
-                "attacks": 2,
-                "armor_piercing": 0,
-                "special_rules": [
-                  "Perforant"
-                ]
-              },
+              "weapon": [
+                {
+                  "name": "Pistolet arbalète",
+                  "range": 12,
+                  "attacks": 2,
+                  "armor_piercing": 0,
+                  "special_rules": [
+                    "Perforant"
+                  ]
+                },
+                {
+                  "name": "Dague",
+                  "range": "Mêlée",
+                  "attacks": 1,
+                  "armor_piercing": 0,
+                  "special_rules": []
+                }
+              ],
               "replaces": [
-                "Arme à une main"
+                "Armes à une main"
               ]
             },
             {
               "name": "Javelot",
               "cost": 20,
               "replaces": [
-                "Arme à une main"
+                "Armes à une main"
               ],
-              "weapon": {
-                "name": "Javelot",
-                "range": 12,
-                "attacks": 2,
-                "armor_piercing": 1,
-                "special_rules": []
-              }
+              "weapon": [
+                {
+                  "name": "Javelot",
+                  "range": 12,
+                  "attacks": 2,
+                  "armor_piercing": 1,
+                  "special_rules": []
+                },
+                {
+                  "name": "Dague",
+                  "range": "Mêlée",
+                  "attacks": 1,
+                  "armor_piercing": 0,
+                  "special_rules": []
+                }
+              ]
             }
           ]
         }
