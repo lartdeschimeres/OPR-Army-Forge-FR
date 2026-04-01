@@ -387,25 +387,46 @@ def export_html(army_list, army_name, army_limit):
         return sorted(rules)
 
     def render_weapon_rows(final_weapons, unit_size=1):
-        # Règles d'affichage du préfixe :
-        #   slider (_count > 1)                        → "Nx nom"
-        #   conditional unique (_upgraded + _unique)   → "1x nom"  (amélioration d'une figurine)
-        #   tout le reste                              → "nom"
         rows = ""
         for w in final_weapons:
             name      = esc(w.get("name","Arme"))
             cnt       = w.get("_display_count", 1) or 1
-            has_count = "_count" in w
+            # On vérifie si l'arme a un compteur explicite (cas des sliders ou armes multiples)
+            has_count = "_count" in w or "_display_count" in w
             upgraded  = w.get("_upgraded", False)
             unique    = w.get("_unique", False)
+            is_mount  = w.get("_mount_weapon", False)
 
+            # LOGIQUE D'AFFICHAGE CORRIGÉE
             if cnt > 1:
+                # Cas 1 : Plusieurs exemplaires (ex: 3x Griffes, 2x Épées)
                 nd = f"{cnt}x {name}"
-            elif upgraded and unique:
-                nd = f"1x {name}"
-            elif unit_size > 1 and not has_count and not upgraded:
-                nd = f"{unit_size}x {name}"
+            elif cnt == 1:
+                # Cas 2 : Un seul exemplaire
+                if has_count:
+                    # Si l'arme a un compteur explicite (même si c'est 1), c'est qu'elle vient d'un slider
+                    # ou d'une option spécifique. On affiche "1x" pour être clair (ex: 1x Champion).
+                    nd = f"1x {name}"
+                elif upgraded and unique:
+                    # Cas historique : Amélioration unique marquée comme telle (Héros)
+                    nd = f"1x {name}"
+                elif unit_size > 1 and not is_mount:
+                    # Cas important : Unité multiple, arme unique sans compteur explicite ?
+                    # Cela peut arriver si une arme de base a été décrémentée à 1 mais a perdu son flag.
+                    # Par sécurité, si l'unité fait >1 et qu'on a une arme "upgraded", on met "1x".
+                    if upgraded:
+                        nd = f"1x {name}"
+                    else:
+                        # Arme de base standard pour une unité multiple (sous-entendu "toutes" ou "reste")
+                        # Si c'est un reste (ex: 2 griffes restantes), le cnt sera > 1 et on sera au Cas 1.
+                        # Si on arrive ici avec cnt=1 et unit_size>1 sans has_count, c'est ambigu.
+                        # Mais fidèle à ta logique : on n'affiche pas de préfixe pour le "standard".
+                        nd = name
+                else:
+                    # Héros ou arme unique par défaut
+                    nd = name
             else:
+                # Fallback (ne devrait pas arriver grâce au filtrage > 0)
                 nd = name
 
             rng = fmt_range(w.get("range","Mêlée"))
