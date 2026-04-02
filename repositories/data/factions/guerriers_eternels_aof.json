@@ -1451,7 +1451,10 @@
                 "special_rules": [
                   "Fracas"
                 ]
-              }
+              },
+              "replaces": [
+                "Arc"
+              ]
             },
             {
               "name": "Arbalète lourde rapide",
@@ -1464,7 +1467,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Arc"
+              ]
             },
             {
               "name": "Arbalète lourde à répétition",
@@ -1477,7 +1483,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Arc"
+              ]
             }
           ]
         },
@@ -1562,9 +1571,9 @@
           ]
         },
         {
-          "name": "Arme à une main",
+          "name": "Dague",
           "range": "Mêlée",
-          "attacks": 2,
+          "attacks": 1,
           "armor_piercing": 0,
           "special_rules": []
         }
@@ -1588,7 +1597,10 @@
                   "Fiable",
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Arbalète Cyclone"
+              ]
             }
           ]
         },
