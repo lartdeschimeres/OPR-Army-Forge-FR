@@ -57,7 +57,7 @@ button[kind="primary"] {{background: var(--acc) !important; color: white !import
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("OPR ArmyBuilder FRA")
+    st.title("🛡️ OPR ArmyBuilder FR")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
@@ -173,7 +173,8 @@ def check_weapon_conditions(unit_key, requires, unit=None):
     Vérifie si les conditions d'une option sont remplies.
     Prend en compte :
     - Les sélections explicites dans session_state (armes choisies, options nommées)
-    - Les armes de BASE de l'unité, actives sauf si remplacées par un groupe type=weapon
+    - Les armes de BASE de l'unité, actives sauf si remplacées par type=weapon
+    - Les armes de BASE retirées par un conditional_weapon avec replaces
     """
     if not requires:
         return True
@@ -186,24 +187,43 @@ def check_weapon_conditions(unit_key, requires, unit=None):
                                              "Aucune monture", "Aucune option de mobilité"):
             current_weapons.append({"name": v.split(" (")[0]})
 
-    # 2. Armes de BASE — toujours actives, SAUF si un groupe type=weapon
-    #    a une sélection explicite (= l'utilisateur a remplacé les armes de base)
+    # 2. Armes de BASE — actives sauf si remplacées
     if unit is not None:
-        # Trouver les groupes type=weapon qui ont une sélection active
+        # a) Un groupe type=weapon actif → armes de base remplacées en bloc
         replaced_by_weapon_group = False
         for gi, g in enumerate(unit.get("upgrade_groups", [])):
             if g.get("type") != "weapon":
                 continue
             g_key = f"group_{gi}"
             if g_key in selections:
-                # Une sélection explicite → les armes de base sont remplacées
                 replaced_by_weapon_group = True
                 break
 
         if not replaced_by_weapon_group:
-            # Aucun groupe type=weapon actif → les armes de base sont toutes actives
+            # b) Reconstruire les armes retirées par les conditional_weapon actifs
+            removed_by_conditional = set()
+            for gi, g in enumerate(unit.get("upgrade_groups", [])):
+                if g.get("type") != "conditional_weapon":
+                    continue
+                g_key = f"group_{gi}"
+                sel_label = selections.get(g_key, "")
+                if not sel_label or sel_label in ("Aucune amélioration",):
+                    continue
+                # Retrouver l'option sélectionnée
+                for o in g.get("options", []):
+                    w = o.get("weapon", {})
+                    if isinstance(w, dict) and w:
+                        lbl = format_weapon_option(w, o.get("cost", 0))
+                    else:
+                        lbl = f"{o.get('name','Amélioration')} (+{o.get('cost',0)} pts)"
+                    if lbl == sel_label:
+                        for rname in o.get("replaces", []):
+                            removed_by_conditional.add(rname)
+                        break
+
+            # Ajouter les armes de base NON retirées
             for w in unit.get("weapon", []):
-                if isinstance(w, dict):
+                if isinstance(w, dict) and w.get("name") not in removed_by_conditional:
                     current_weapons.append(w)
 
     for req in requires:
