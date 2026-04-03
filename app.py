@@ -57,7 +57,7 @@ button[kind="primary"] {{background: var(--acc) !important; color: white !import
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("🛡️ OPR ArmyBuilder FR")
+    st.title("OPR ArmyBuilder FRA")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
