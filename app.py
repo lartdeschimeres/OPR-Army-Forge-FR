@@ -57,7 +57,7 @@ button[kind="primary"] {{background: var(--acc) !important; color: white !import
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("OPR ArmyBuilder FRA")
+    st.title("🛡️ OPR ArmyBuilder FR")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
@@ -1289,6 +1289,10 @@ if st.session_state.page == "army":
                         elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
         elif gtype == "variable_weapon_count":
+            # Vérifier le requires du GROUPE (pas de l'option)
+            group_requires = group.get("requires", [])
+            if group_requires and not check_weapon_conditions(unit_key, group_requires, unit):
+                continue  # Groupe masqué si condition non remplie
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
             for oi,option in enumerate(group.get("options",[])):
                 req=option.get("requires",[])
