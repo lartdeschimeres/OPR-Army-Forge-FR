@@ -27,7 +27,7 @@
     },
     {
       "name": "Redéploiement",
-      "description": "Une fois que toutes les autres unités ont été déployées (à l'exception de celles qui ont été mises de côté), vous pouvez retirer jusqu'à deux unités amies de la table et les redéployer. Les joueurs placent leurs unités de redéploiement alternativement, en commençant par celui qui doit s'activer en premier."
+      "description": "Une fois que toutes les autres unités ont été déployées (à l'exception de celles qui ont été mises de côté), vous pouvez retirer jusqu'à deux unités amies de la table et les redéployer."
     },
     {
       "name": "Repositionnement d'artillerie",
@@ -47,7 +47,7 @@
     },
     {
       "name": "Marque Imparable au tir",
-      "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie située à 18\" ou moins ; les unités amies obtiennent une seule fois la règle spéciale Imparable lorsqu'elles lui tirent dessus (la prochaine fois que l'effet s'appliquerait)."
+      "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie située à 18\" ou moins ; les unités amies obtiennent une seule fois la règle spéciale Imparable lorsqu'elles lui tirent dessus."
     },
     {
       "name": "Attaque versatile",
@@ -88,19 +88,19 @@
   ],
   "spells": {
     "Vision accrue (1)": {
-      "description": "Choisissez une unité ennemie située à 18\" ou moins ; les unités amies obtiennent la règle spéciale Imparable une fois lorsqu'elles lui tirent dessus (la prochaine fois que l'effet s'appliquerait)."
+      "description": "Choisissez une unité ennemie située à 18\" ou moins ; les unités amies obtiennent la règle spéciale Imparable une fois lorsqu'elles lui tirent dessus."
     },
     "Traumatisme cérébral (1)": {
       "description": "Choisissez une unité ennemie située à 18\" ou moins, qui subit une touche avec Fracas."
     },
     "Munitions bénies (2)": {
-      "description": "Choisissez jusqu'à deux unités amies situées à 12\" ou moins ; celles-ci bénéficient de la règle spéciale Lacération lors d'un tir (la prochaine fois que cet effet s'appliquerait)."
+      "description": "Choisissez jusqu'à deux unités amies situées à 12\" ou moins ; celles-ci bénéficient de la règle spéciale Lacération lors d'un tir."
     },
     "Brouillard fulgurant (2)": {
       "description": "Choisissez jusqu'à deux unités ennemies situées à 9\" ou moins ; chacune subit quatre touches."
     },
     "Dôme protecteur (3)": {
-      "description": "Choisissez jusqu'à trois unités amies situées à 12\" ou moins ; celles-ci bénéficient une seule fois de la règle spéciale Esquive (la prochaine fois que l'effet s'appliquerait)."
+      "description": "Choisissez jusqu'à trois unités amies situées à 12\" ou moins ; celles-ci bénéficient une seule fois de la règle spéciale Esquive."
     },
     "Terreur psychique (3)": {
       "description": "Choisissez une unité ennemie située à 6\" ou moins, qui subit neuf touches avec Fléau."
@@ -254,6 +254,9 @@
             {
               "name": "Marteau énergétique",
               "cost": 5,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Marteau énergétique",
                 "range": "Mêlée",
@@ -267,6 +270,9 @@
             {
               "name": "Épée énergétique",
               "cost": 15,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -280,6 +286,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 30,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -293,6 +302,9 @@
             {
               "name": "Poing énergétique",
               "cost": 35,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -540,6 +552,9 @@
             {
               "name": "Pistolet lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet lance-flammes",
                 "range": 6,
@@ -554,6 +569,9 @@
             {
               "name": "Pistolet lourd de maître",
               "cost": 10,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet lourd de maître",
                 "range": 12,
@@ -565,6 +583,9 @@
             {
               "name": "Pistolet à fusion",
               "cost": 10,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet à fusion",
                 "range": 6,
@@ -578,6 +599,9 @@
             {
               "name": "Pistolet à plasma de maître",
               "cost": 25,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma de maître",
                 "range": 12,
@@ -589,6 +613,9 @@
             {
               "name": "Fusil lourd de maître",
               "cost": 30,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil lourd de maître",
                 "range": 24,
@@ -600,6 +627,9 @@
             {
               "name": "Fusil Tempête de maître",
               "cost": 75,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil Tempête de maître",
                 "range": 24,
@@ -687,6 +717,9 @@
             {
               "name": "Marteau énergétique",
               "cost": 5,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Marteau énergétique",
                 "range": "Mêlée",
@@ -700,6 +733,9 @@
             {
               "name": "Épée énergétique",
               "cost": 10,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -713,6 +749,9 @@
             {
               "name": "Poing énergétique",
               "cost": 20,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -724,6 +763,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 20,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -884,6 +926,9 @@
             {
               "name": "Pistolet lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet lance-flammes",
                 "range": 6,
@@ -898,6 +943,9 @@
             {
               "name": "Pistolet lourd de maître",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet lourd de maître",
                 "range": 12,
@@ -909,6 +957,9 @@
             {
               "name": "Pistolet à fusion",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet à fusion",
                 "range": 6,
@@ -922,6 +973,9 @@
             {
               "name": "Pistolet à plasma de maître",
               "cost": 15,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma de maître",
                 "range": 12,
@@ -933,6 +987,9 @@
             {
               "name": "Fusil lourd de maître",
               "cost": 20,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil lourd de maître",
                 "range": 24,
@@ -944,6 +1001,9 @@
             {
               "name": "Fusil Tempête de maître",
               "cost": 50,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil Tempête de maître",
                 "range": 24,
@@ -1031,6 +1091,9 @@
             {
               "name": "Marteau énergétique",
               "cost": 5,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Marteau énergétique",
                 "range": "Mêlée",
@@ -1044,6 +1107,9 @@
             {
               "name": "Épée énergétique",
               "cost": 10,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -1057,6 +1123,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 15,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -1070,6 +1139,9 @@
             {
               "name": "Poing énergétique",
               "cost": 15,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -1274,6 +1346,9 @@
             {
               "name": "Fusil à pompe de maître",
               "cost": 10,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil à pompe de maître",
                 "range": 12,
@@ -1285,6 +1360,9 @@
             {
               "name": "Fusil de sniper de maître",
               "cost": 55,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil de sniper de maître",
                 "range": 30,
@@ -1299,6 +1377,9 @@
             {
               "name": "Pistolet lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet lance-flammes",
                 "range": 6,
@@ -1313,6 +1394,9 @@
             {
               "name": "Pistolet lourd de maître",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet lourd de maître",
                 "range": 12,
@@ -1324,6 +1408,9 @@
             {
               "name": "Pistolet à fusion",
               "cost": 5,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet à fusion",
                 "range": 6,
@@ -1337,6 +1424,9 @@
             {
               "name": "Pistolet à plasma de maître",
               "cost": 15,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma de maître",
                 "range": 12,
@@ -1348,6 +1438,9 @@
             {
               "name": "Fusil lourd de maître",
               "cost": 15,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil lourd de maître",
                 "range": 24,
@@ -1359,6 +1452,9 @@
             {
               "name": "Fusil Tempête de maître",
               "cost": 35,
+              "replaces": [
+                "Pistolet antigrav"
+              ],
               "weapon": {
                 "name": "Fusil Tempête de maître",
                 "range": 24,
@@ -1446,6 +1542,9 @@
             {
               "name": "Marteau énergétique",
               "cost": 5,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Marteau énergétique",
                 "range": "Mêlée",
@@ -1459,6 +1558,9 @@
             {
               "name": "Épée énergétique",
               "cost": 5,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -1472,6 +1574,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 10,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -1485,6 +1590,9 @@
             {
               "name": "Poing énergétique",
               "cost": 15,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -1586,10 +1694,16 @@
           "group": "Remplacement un Pistolet lourd",
           "type": "conditional_weapon",
           "description": "Remplacer un Pistolet lourd par :",
+          "requires": [
+            "Pistolets lourds"
+          ],
           "options": [
             {
               "name": "Fusil antigrav",
               "cost": 10,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Fusil antigrav",
                 "range": 18,
@@ -1603,6 +1717,9 @@
             {
               "name": "Fusil à plasma",
               "cost": 15,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Fusil à plasma",
                 "range": 24,
@@ -1614,6 +1731,9 @@
             {
               "name": "Lance-flammes",
               "cost": 15,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Lance-flammes",
                 "range": 12,
@@ -1628,6 +1748,9 @@
             {
               "name": "Mitrailleuse lourde",
               "cost": 30,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Mitrailleuse lourde",
                 "range": 30,
@@ -1639,6 +1762,9 @@
             {
               "name": "Lance-missiles",
               "cost": 40,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Lance-missiles",
                 "range": 30,
@@ -1650,9 +1776,6 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Pistolets lourds"
           ]
         },
         {
@@ -1763,6 +1886,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -1776,6 +1902,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -1797,6 +1926,9 @@
             {
               "name": "Poing énergétique",
               "cost": 5,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -1870,10 +2002,16 @@
           "group": "Remplacement un Fusil lourd",
           "type": "conditional_weapon",
           "description": "Remplacer un Fusil lourd par :",
+          "requires": [
+            "Fusils lourds"
+          ],
           "options": [
             {
               "name": "Fusil antigrav",
               "cost": 5,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil antigrav",
                 "range": 18,
@@ -1887,6 +2025,9 @@
             {
               "name": "Lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Lance-flammes",
                 "range": 12,
@@ -1901,6 +2042,9 @@
             {
               "name": "Fusil à plasma",
               "cost": 10,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil à plasma",
                 "range": 24,
@@ -1912,6 +2056,9 @@
             {
               "name": "Lance-flammes lourd",
               "cost": 15,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Lance-flammes lourd",
                 "range": 12,
@@ -1926,6 +2073,9 @@
             {
               "name": "Canon antigrav",
               "cost": 15,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Canon antigrav",
                 "range": 24,
@@ -1939,6 +2089,9 @@
             {
               "name": "Fusil à fusion",
               "cost": 20,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil à fusion",
                 "range": 12,
@@ -1952,6 +2105,9 @@
             {
               "name": "Mitrailleuse lourde",
               "cost": 35,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Mitrailleuse lourde",
                 "range": 30,
@@ -1963,6 +2119,9 @@
             {
               "name": "Fusil à fusion lourd",
               "cost": 35,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil à fusion lourd",
                 "range": 18,
@@ -1976,6 +2135,9 @@
             {
               "name": "Lance-missiles",
               "cost": 45,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Lance-missiles",
                 "range": 30,
@@ -1990,6 +2152,9 @@
             {
               "name": "Canon laser",
               "cost": 60,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Canon laser",
                 "range": 36,
@@ -2003,6 +2168,9 @@
             {
               "name": "Canon à plasma",
               "cost": 65,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Canon à plasma",
                 "range": 30,
@@ -2013,9 +2181,6 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Fusils lourds"
           ]
         },
         {
@@ -2062,6 +2227,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -2075,6 +2243,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -2096,6 +2267,9 @@
             {
               "name": "Poing énergétique",
               "cost": 10,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -2195,10 +2369,16 @@
           "group": "Remplacement un Pistolet lourd",
           "type": "conditional_weapon",
           "description": "Remplacer un Pistolet lourd par :",
+          "requires": [
+            "Pistolets lourds"
+          ],
           "options": [
             {
               "name": "Lance-flammes",
               "cost": 15,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Lance-flammes",
                 "range": 12,
@@ -2210,15 +2390,16 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Pistolets lourds"
           ]
         },
         {
           "group": "Remplacement Pistolet lourd et ACC lourde",
           "type": "conditional_weapon",
           "description": "Remplacer un Pistolet lourd et une ACC lourde par :",
+          "requires": [
+            "Pistolets lourds",
+            "ACC lourdes"
+          ],
           "options": [
             {
               "name": "Pistolet lourd + Marteau énergétique",
@@ -2240,6 +2421,10 @@
                     "Explosion (3)"
                   ]
                 }
+              ],
+              "replaces": [
+                "Pistolets lourds",
+                "ACC lourdes"
               ]
             },
             {
@@ -2262,6 +2447,10 @@
                     "Perforant"
                   ]
                 }
+              ],
+              "replaces": [
+                "Pistolets lourds",
+                "ACC lourdes"
               ]
             },
             {
@@ -2297,12 +2486,12 @@
                   "armor_piercing": 4,
                   "special_rules": []
                 }
+              ],
+              "replaces": [
+                "Pistolets lourds",
+                "ACC lourdes"
               ]
             }
-          ],
-          "requires": [
-            "Pistolets lourds",
-            "ACC lourdes"
           ]
         },
         {
@@ -2364,6 +2553,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -2377,6 +2569,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -2398,6 +2593,9 @@
             {
               "name": "Poing énergétique",
               "cost": 10,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -2511,6 +2709,10 @@
                     "Blindé"
                   ]
                 }
+              ],
+              "replaces": [
+                "Pistolets lourds",
+                "Boucliers de combat"
               ]
             },
             {
@@ -2531,6 +2733,10 @@
                   "armor_piercing": 1,
                   "special_rules": []
                 }
+              ],
+              "replaces": [
+                "Pistolets lourds",
+                "Boucliers de combat"
               ]
             },
             {
@@ -2571,10 +2777,16 @@
           "group": "Remplacement n'importe quel Pistolet lourd",
           "type": "conditional_weapon",
           "description": "Remplacer n'importe quel Pistolet lourd par :",
+          "requires": [
+            "Pistolets lourds"
+          ],
           "options": [
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -2588,6 +2800,9 @@
             {
               "name": "Pistolet lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Pistolet lance-flammes",
                 "range": 6,
@@ -2602,6 +2817,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolets lourds"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -2610,19 +2828,22 @@
                 "special_rules": []
               }
             }
-          ],
-          "requires": [
-            "Pistolets lourds"
           ]
         },
         {
           "group": "Remplacement n'importe quelle ACC lourde",
           "type": "conditional_weapon",
           "description": "Remplacer n'importe quelle ACC lourde par :",
+          "requires": [
+            "ACC lourde"
+          ],
           "options": [
             {
               "name": "Épée énergétique",
               "cost": 5,
+              "replaces": [
+                "ACC lourde"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -2636,6 +2857,9 @@
             {
               "name": "Poing énergétique",
               "cost": 15,
+              "replaces": [
+                "ACC lourde"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -2644,9 +2868,6 @@
                 "special_rules": []
               }
             }
-          ],
-          "requires": [
-            "ACC lourde"
           ]
         },
         {
@@ -2708,6 +2929,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -2721,6 +2945,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -2742,6 +2969,9 @@
             {
               "name": "Poing énergétique",
               "cost": 10,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -2816,10 +3046,16 @@
           "group": "Remplacement n'importe quel Fusil lourd",
           "type": "conditional_weapon",
           "description": "Remplacer n'importe quel Fusil lourd par :",
+          "requires": [
+            "Fusils lourds"
+          ],
           "options": [
             {
               "name": "Fusil antigrav",
               "cost": 5,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil antigrav",
                 "range": 18,
@@ -2833,6 +3069,9 @@
             {
               "name": "Lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Lance-flammes",
                 "range": 12,
@@ -2847,6 +3086,9 @@
             {
               "name": "Fusil à plasma",
               "cost": 15,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil à plasma",
                 "range": 24,
@@ -2858,6 +3100,9 @@
             {
               "name": "Lance-flammes lourd",
               "cost": 15,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Lance-flammes lourd",
                 "range": 12,
@@ -2872,6 +3117,9 @@
             {
               "name": "Canon antigrav",
               "cost": 20,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Canon antigrav",
                 "range": 24,
@@ -2885,6 +3133,9 @@
             {
               "name": "Fusil à fusion",
               "cost": 25,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil à fusion",
                 "range": 12,
@@ -2898,6 +3149,9 @@
             {
               "name": "Fusil à fusion lourd",
               "cost": 45,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Fusil à fusion lourd",
                 "range": 18,
@@ -2911,6 +3165,9 @@
             {
               "name": "Mitrailleuse lourde",
               "cost": 55,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Mitrailleuse lourde",
                 "range": 30,
@@ -2922,6 +3179,9 @@
             {
               "name": "Lance-missiles",
               "cost": 65,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Lance-missiles",
                 "range": 30,
@@ -2936,6 +3196,9 @@
             {
               "name": "Canon laser",
               "cost": 80,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Canon laser",
                 "range": 36,
@@ -2949,6 +3212,9 @@
             {
               "name": "Canon à plasma",
               "cost": 85,
+              "replaces": [
+                "Fusils lourds"
+              ],
               "weapon": {
                 "name": "Canon à plasma",
                 "range": 30,
@@ -2959,9 +3225,6 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Fusils lourds"
           ]
         },
         {
@@ -3095,6 +3358,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -3108,6 +3374,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -3129,6 +3398,9 @@
             {
               "name": "Poing énergétique",
               "cost": 10,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -3178,10 +3450,16 @@
           "group": "Remplacement n'importe quel Lance-flammes lourd",
           "type": "conditional_weapon",
           "description": "Remplacer n'importe quel Lance-flammes lourd par :",
+          "requires": [
+            "Lance-flammes lourds"
+          ],
           "options": [
             {
               "name": "Canon antigrav",
               "cost": 5,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Canon antigrav",
                 "range": 24,
@@ -3195,6 +3473,9 @@
             {
               "name": "Mitrailleuse lourde",
               "cost": 25,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Mitrailleuse lourde",
                 "range": 30,
@@ -3206,6 +3487,9 @@
             {
               "name": "Fusil à fusion lourd",
               "cost": 25,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Fusil à fusion lourd",
                 "range": 18,
@@ -3219,6 +3503,9 @@
             {
               "name": "Lance-missiles",
               "cost": 40,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Lance-missiles",
                 "range": 30,
@@ -3233,6 +3520,9 @@
             {
               "name": "Canon laser",
               "cost": 55,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Canon laser",
                 "range": 36,
@@ -3246,6 +3536,9 @@
             {
               "name": "Canon à plasma",
               "cost": 65,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Canon à plasma",
                 "range": 30,
@@ -3256,9 +3549,6 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Lance-flammes lourds"
           ]
         }
       ]
@@ -3388,6 +3678,9 @@
             {
               "name": "Canon d'assaut",
               "cost": 15,
+              "replaces": [
+                "Fusil Tempête"
+              ],
               "weapon": {
                 "name": "Canon d'assaut",
                 "range": 24,
@@ -3399,6 +3692,9 @@
             {
               "name": "Lance-flammes lourd jumelé",
               "cost": 15,
+              "replaces": [
+                "Fusil Tempête"
+              ],
               "weapon": {
                 "name": "Lance-flammes lourd jumelé",
                 "range": 12,
@@ -3413,6 +3709,9 @@
             {
               "name": "Missiles cyclone + Fusil Tempête",
               "cost": 55,
+              "replaces": [
+                "Fusil Tempête"
+              ],
               "weapon": [
                 {
                   "name": "Missiles cyclone",
@@ -3446,6 +3745,9 @@
             {
               "name": "Marteau énergétique",
               "cost": 0,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Marteau énergétique",
                 "range": "Mêlée",
@@ -3459,6 +3761,9 @@
             {
               "name": "Poing tronçonneur",
               "cost": 10,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -3472,6 +3777,9 @@
             {
               "name": "Épée énergétique",
               "cost": 15,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -3485,6 +3793,9 @@
             {
               "name": "Poing énergétique",
               "cost": 25,
+              "replaces": [
+                "ACC"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -3539,13 +3850,19 @@
       ],
       "upgrade_groups": [
         {
-          "group": "Remplacement n'importe quel Lance-grenades",
+          "group": "Remplacement Lance-grenades",
           "type": "conditional_weapon",
           "description": "Remplacer n'importe quel Lance-grenades par :",
+          "requires": [
+            "Lance-grenades"
+          ],
           "options": [
             {
               "name": "Fusil lourd jumelé",
               "cost": 5,
+              "replaces": [
+                "Lance-grenades"
+              ],
               "weapon": {
                 "name": "Fusil lourd jumelé",
                 "range": 24,
@@ -3554,9 +3871,6 @@
                 "special_rules": []
               }
             }
-          ],
-          "requires": [
-            "Lance-grenades"
           ]
         },
         {
@@ -3648,6 +3962,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -3661,6 +3978,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -3682,6 +4002,9 @@
             {
               "name": "Poing énergétique",
               "cost": 5,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -3767,10 +4090,16 @@
           "group": "Remplacement un Fusil lourd jumelé",
           "type": "conditional_weapon",
           "description": "Remplacer un Fusil lourd jumelé par :",
+          "requires": [
+            "Fusils lourds jumelés"
+          ],
           "options": [
             {
               "name": "Fusil antigrav",
               "cost": 5,
+              "replaces": [
+                "Fusils lourds jumelés"
+              ],
               "weapon": {
                 "name": "Fusil antigrav",
                 "range": 18,
@@ -3784,6 +4113,9 @@
             {
               "name": "Lance-flammes",
               "cost": 5,
+              "replaces": [
+                "Fusils lourds jumelés"
+              ],
               "weapon": {
                 "name": "Lance-flammes",
                 "range": 12,
@@ -3798,6 +4130,9 @@
             {
               "name": "Fusil à plasma",
               "cost": 10,
+              "replaces": [
+                "Fusils lourds jumelés"
+              ],
               "weapon": {
                 "name": "Fusil à plasma",
                 "range": 24,
@@ -3809,6 +4144,9 @@
             {
               "name": "Fusil à fusion",
               "cost": 20,
+              "replaces": [
+                "Fusils lourds jumelés"
+              ],
               "weapon": {
                 "name": "Fusil à fusion",
                 "range": 12,
@@ -3819,9 +4157,6 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Fusils lourds jumelés"
           ]
         },
         {
@@ -3868,6 +4203,9 @@
             {
               "name": "Pistolet antigrav",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet antigrav",
                 "range": 9,
@@ -3881,6 +4219,9 @@
             {
               "name": "Pistolet à plasma",
               "cost": 5,
+              "replaces": [
+                "Pistolet lourd de sergent"
+              ],
               "weapon": {
                 "name": "Pistolet à plasma",
                 "range": 12,
@@ -3902,6 +4243,9 @@
             {
               "name": "Poing énergétique",
               "cost": 10,
+              "replaces": [
+                "Épée énergétique"
+              ],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -4414,10 +4758,16 @@
           "group": "Remplacement un Lance-flammes lourd",
           "type": "conditional_weapon",
           "description": "Remplacer un Lance-flammes lourd par :",
+          "requires": [
+            "Lance-flammes lourds"
+          ],
           "options": [
             {
               "name": "Lance-missiles Ouragan jumelé",
               "cost": 60,
+              "replaces": [
+                "Lance-flammes lourds"
+              ],
               "weapon": {
                 "name": "Lance-missiles Ouragan jumelé",
                 "range": 24,
@@ -4428,9 +4778,6 @@
                 ]
               }
             }
-          ],
-          "requires": [
-            "Lance-flammes lourds"
           ]
         },
         {
