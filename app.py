@@ -57,7 +57,7 @@ button[kind="primary"] {{background: var(--acc) !important; color: white !import
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("OPR ArmyBuilder FRA")
+    st.title("🛡️ OPR ArmyBuilder FR")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
@@ -107,7 +107,7 @@ if not st.session_state.get("_qr_loaded"):
             # Stocker pour le bandeau info
             st.session_state["_qr_game"]    = _data.get("game", "")
             st.session_state["_qr_faction"] = _data.get("faction", "")
-            st.session_state["_qr_pts"]     = _data.get("pts", 2000)
+            st.session_state["_qr_pts"]     = _data.get("pts", 1000)
             st.session_state["_qr_units"]   = _data.get("units", [])
             st.session_state["_qr_pending"] = True
             st.query_params.clear()
@@ -123,9 +123,9 @@ if "faction_special_rules" not in st.session_state: st.session_state.faction_spe
 if "faction_spells" not in st.session_state: st.session_state.faction_spells = {}
 
 GAME_CONFIG = {
-    "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1500, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
+    "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 2000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
+    "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
     "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
 }
@@ -1261,7 +1261,8 @@ if st.session_state.page == "army":
                         if opt.get("requires"): extra["_unique"]=True
                         # Si "replaces" → décrémenter ou retirer les armes remplacées
                         _cond_replaces = opt.get("replaces", [])
-                        _unit_sz = unit.get("size", 1)
+                        _multiplier_eff = 2 if st.session_state.get(f"{unit_key}_combined") else 1
+                        _unit_sz = unit.get("size", 1) * _multiplier_eff
                         if _cond_replaces:
                             _replaced_names = set()
                             _kept_weapons = []
@@ -1289,6 +1290,10 @@ if st.session_state.page == "army":
                         elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
         elif gtype == "variable_weapon_count":
+            # Vérifier le requires du GROUPE (pas de l'option)
+            group_requires = group.get("requires", [])
+            if group_requires and not check_weapon_conditions(unit_key, group_requires, unit):
+                continue  # Groupe masqué si condition non remplie
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
             for oi,option in enumerate(group.get("options",[])):
                 req=option.get("requires",[])
