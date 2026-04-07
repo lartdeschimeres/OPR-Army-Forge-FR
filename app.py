@@ -1272,7 +1272,11 @@ if st.session_state.page == "army":
                                     # Si arme sans _count → count implicite = unit_size
                                     # Décrémenter de 1 plutôt que retirer entièrement
                                     _implicit = "_count" not in _w and "count" not in _w
-                                    if _implicit and _unit_sz > 1:
+                                    if _implicit and _w.get("_upgraded"):
+                                        # Arme _upgraded : count réel = 1 → retirer complètement
+                                        pass
+                                    elif _implicit and _unit_sz > 1:
+                                        # Arme de base portée par toutes les figurines → décrémenter
                                         _wc = _w.copy()
                                         _wc["_count"] = _unit_sz - 1
                                         _kept_weapons.append(_wc)
