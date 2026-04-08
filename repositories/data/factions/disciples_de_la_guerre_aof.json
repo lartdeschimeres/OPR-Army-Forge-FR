@@ -7,6 +7,7 @@
   "faction_special_rules": [
     {
       "name": "Warbound [Guerrier-né]",
+      "detail": "Règle spéciale de l'armée",
       "description": "Les ennemis qui lancent les dés pour bloquer les touches infligées par les armes de cette figurine subissent une blessure supplémentaire pour chaque résultat non modifié de 1 obtenu."
     },
     {
