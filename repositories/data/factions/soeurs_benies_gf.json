@@ -9,106 +9,132 @@
   "faction_special_rules": [
     {
       "name": "Devout [Dévotion]",
+      "detail": "Règle spéciale de l'armée",
       "description": "Lors d'une attaque, les résultats non modifiés de 6 pour toucher infligent une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
     },
     {
       "name": "Casting Debuff [Malus de magie]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins du lanceur, qui subit un malus de -1 aux jets de lancement de sort une fois (l'effet s'appliquera la prochaine fois qu'elle devrait s'appliquer)."
     },
     {
       "name": "Courage Buff [Bonus de courage]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient un bonus de +1 aux Tests de Moral une fois (la prochaine fois que l'effet s'appliquerait)."
     },
     {
       "name": "Devout Boost [Boost de Dévotion]",
+      "detail": "Règles spéciales",
       "description": "Si cette figurine dispose de la règle spéciale Dévotion, elle inflige des touches supplémentaires sur les résultats réussis non modifiés de 5-6 provenant de Dévotion (au lieu de seulement sur 6)."
     },
     {
       "name": "Fortified [Renforcé]",
+      "detail": "Règles spéciales",
       "description": "Lorsque des unités dont toutes les figurines possèdent cette règle subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0)."
     },
     {
       "name": "Guarded [Protégé]",
+      "detail": "Règles spéciales",
       "description": "Lorsque des unités dont toutes les figurines possèdent cette règle subissent des tirs ou sont chargées à plus de 9\", elles obtiennent un bonus de +1 aux jets de Défense."
     },
     {
       "name": "Guarded Buff [Bonus de Protection]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui bénéficie de la règle spéciale Protégé une seule fois (la prochaine fois que l'effet s'appliquerait)."
     },
     {
       "name": "Piercing Assault [Assaut tranchant]",
+      "detail": "Règles spéciales",
       "description": "Cette figurine gagne PA (+1) lorsqu'elle Charge."
     },
     {
       "name": "Piercing Hunter [Chasseur tranchant]",
+      "detail": "Règles spéciales",
       "description": "Lorsque cette figurine tire sur des ennemis situés à 9\" ou plus, ses armes bénéficient d'un bonus de PA (+1)."
     },
     {
       "name": "Point-Blank Piercing [Tranchant à bout portant]",
+      "detail": "Règles spéciales",
       "description": "Cette figurine gagne un bonus de PA (+1) lorsqu'elle tire sur des ennemis à 12\" ou moins."
     },
     {
       "name": "Point-Blank Surge [Surcharge à bout portant]",
+      "detail": "Règles spéciales",
       "description": "Lorsque cette figurine tire sur des ennemis situés à 12\" ou moins, les résultats non modifiés de 6 pour toucher infligent une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
     },
     {
       "name": "Precision Fighter Buff [Bonus de Combattant précis]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
     },
     {
       "name": "Precision Shooter Buff [Bonus de Tireur précis]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui gagne un bonus de +1 aux jets pour toucher lorsqu'elle tire, une seule fois (l'effet s'appliquera la prochaine fois qu'elle devrait tirer)."
     },
     {
       "name": "Precision Target (X) [Cible désignée (X)]",
+      "detail": "Règles spéciales",
       "description": "Une fois par partie, lors de l'activation de cette figurine, choisissez une unité ennemie à 36\" ou moins et dans sa ligne de vue, et placez X marqueurs dessus. Les unités amies obtiennent +X aux jets pour toucher lorsqu'elles l'attaquent."
     },
     {
       "name": "Purge [Purge]",
+      "detail": "Règles spéciales",
       "description": "Ignore la Régénération, et contre les unités dont la plupart des figurines possèdent une Défense comprise entre 2+ et 4+, cette arme gagne un bonus de PA (+1)."
     },
     {
       "name": "Shielded [Blindé]",
+      "detail": "Règles spéciales",
       "description": "Les unités dont toutes les figurines possèdent cette règle spéciale obtiennent un bonus de +1 aux jets de Défense contre les touches qui ne proviennent pas de sorts."
     },
     {
       "name": "Shred [Lacération]",
+      "detail": "Règles spéciales",
       "description": "Sur des résultats non modifiés de 1 pour bloquer des touches, cette arme inflige une blessure supplémentaire."
     },
     {
       "name": "Spell Conduit [Canalisateur de sort]",
+      "detail": "Règles spéciales",
       "description": "Les Lanceurs de sorts situés à 12\" appartenant à d'autres unités amies peuvent lancer des sorts comme s'ils se trouvaient à la position de cette figurine, et bénéficient d'un bonus de +1 aux jets de lancement."
     },
     {
       "name": "Courage Aura [Aura Courage]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne un bonus de +1 aux Tests de Moral."
     },
     {
       "name": "Devout Boost Aura [Aura Boost de Dévotion]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne la règle spéciale Boost de Dévotion."
     },
     {
       "name": "Fast Aura [Aura Rapidité]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne un bonus de +2\" lorsqu'elles Avancent et +4\" lorsqu'elles Courent ou Chargent."
     },
     {
       "name": "Fortified Aura [Aura Renforcement]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne la règle spéciale Renforcé."
     },
     {
       "name": "Increased Shooting Range Aura [Aura d'Augmentation de la portée de tir]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagnent un bonus de +6\" de portée lorsqu'ils tirent."
     },
     {
       "name": "Point-Blank Piercing Aura [Aura Tranchant à bout portant]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne la règle spéciale Tranchant à bout portant."
     },
     {
       "name": "Regeneration Aura [Aura Régénération]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne la règle spéciale Régénération."
     },
     {
       "name": "Shred in Melee Aura [Aura Lacération en mêlée]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité gagne la règle spéciale Lacération en mêlée."
     }
   ],
