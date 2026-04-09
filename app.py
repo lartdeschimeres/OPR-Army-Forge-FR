@@ -730,7 +730,7 @@ function hideTip(){
     return html
 
 @st.cache_data
-def export_faction_html(data):
+def export_faction_html(_data):
     """Génère un HTML complet de la fiche de faction (toutes unités, règles, sorts)."""
     def esc(t):
         if t is None: return ""
