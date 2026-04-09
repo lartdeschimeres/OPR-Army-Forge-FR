@@ -464,7 +464,31 @@ def generate_faction_pdf(data, output_path, history=""):
     def rule_row(r):
         return [Paragraph(f"<b>{r['name']}</b> : {r['description']}", ST['rule_txt'])]
 
-    story.append(_rules_3col(rules, rule_row, cw3, GAP))
+    # Catégoriser les règles en 3 sous-groupes
+    _army_rules  = []
+    _aura_rules  = []
+    _other_rules = []
+    for _r in rules:
+        _n = _r.get('name', '').lower()
+        if not _army_rules and 'aura' not in _n:
+            _army_rules.append(_r)  # première règle non-aura = règle d'armée
+        elif 'aura' in _n:
+            _aura_rules.append(_r)
+        else:
+            _other_rules.append(_r)
+
+    # Afficher chaque sous-section avec son sous-titre si elle contient des règles
+    def _sub_section(title, rule_list, dark=True):
+        if not rule_list:
+            return
+        story.append(_banner(title, FW, dark=dark))
+        story.append(Spacer(1, 2))
+        story.append(_rules_3col(rule_list, rule_row, cw3, GAP))
+        story.append(Spacer(1, 4))
+
+    _sub_section("RÈGLE SPÉCIALE DE L'ARMÉE", _army_rules, dark=True)
+    _sub_section("RÈGLES SPÉCIALES",          _other_rules, dark=False)
+    _sub_section("RÈGLES SPÉCIALES D'AURA",   _aura_rules,  dark=False)
 
     if spells:
         story.append(Spacer(1, 6))
