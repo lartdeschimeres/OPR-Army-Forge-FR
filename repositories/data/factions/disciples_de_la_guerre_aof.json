@@ -3,7 +3,7 @@
   "game": "Age of Fantasy",
   "version": "FR-3.5.2",
   "status": "complete",
-  "description": "Les Disciples de la Guerre sont une faction brutale et impitoyable, composée de guerriers fanatiques et de monstres déchaînés.",
+  "description": "Les Disciples du Ravage sont des guerriers qui ont embrassé un Dieu du Ravage en particulier. Chaque dieu confère à ses disciples des avantages et des pouvoirs uniques. En conséquence, leurs troupes sont spécialisées, et sont façonnées pour refléter les caprices de leur dieu.\n\nAbandonnées par l'Empire, les tribus du Nord furent approchées par différents dieux qui leur offrirent une chance de survie en échange d'un culte. Chaque dieu donna ainsi des pouvoirs à ses disciples respectifs, les transformant selon leur volonté. Après leur défaite dans les Guerre du Ravage, les Disciples ont été séparés de leurs anciens protecteurs, mais avec l'ouverture de la Faille, ils sont désireux de renouer leurs pactes après de nombreuses années passées dans un amer exil."
   "faction_special_rules": [
     {
       "name": "Warbound [Guerrier-né]",
