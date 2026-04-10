@@ -72,6 +72,7 @@ def export_faction_html(data):
     game    = data.get("game","")
     version = data.get("version","")
     desc    = data.get("description","")
+    history = data.get("history","")
 
     def fmt_r(r):
         s = str(r) if r is not None else "-"
@@ -186,8 +187,8 @@ def export_faction_html(data):
         if not rule_list: return ""
         items = ""
         for r in rule_list:
-            items += f"<p class='ri'><b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}</p>"
-        return f"<div class='rs'><div class='rsh' style='background:{color}'>{esc(title)}</div>{items}</div>"
+            items += f"<span class='ri'><b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}</span> "
+        return f"<div class='rs-inline'><span class='rsh-inline' style='color:{color}'>{esc(title)} — </span>{items}</div>"
 
     spells_html = ""
     if spells:
@@ -210,11 +211,17 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 .main-title{background:#1a1a2e;color:#fff;text-align:center;padding:14px 8px 8px;font-size:20px;font-weight:700;letter-spacing:1px;}
 .main-sub{background:#16213e;color:#aab4d4;text-align:center;padding:3px;font-size:9px;}
 .intro{padding:8px 4px;font-size:10px;color:#444;border-bottom:1px solid #dee2e6;margin-bottom:8px;}
+/* Intro 2 colonnes */
+.section-hdr{font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.8px;
+  color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:3px;margin-bottom:5px;}
+.intro-txt{font-size:8px;color:#333;line-height:1.45;margin:0;}
 /* Règles */
 .rules-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
 .rs{border:1px solid #dee2e6;border-radius:4px;overflow:hidden;}
 .rsh{color:#fff;font-weight:700;font-size:9px;padding:3px 6px;text-transform:uppercase;letter-spacing:.5px;}
-.ri{margin:4px 6px;font-size:8px;line-height:1.35;}
+.ri{font-size:7.5px;line-height:1.35;margin-right:6px;}
+.rs-inline{margin:2px 0 4px;font-size:7.5px;line-height:1.5;}
+.rsh-inline{font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.5px;}
 /* Récap */
 .recap-wrap{margin-bottom:8px;}
 .recap-banner{background:#2c3e7a;color:#fff;font-weight:700;font-size:9px;padding:3px 6px;margin-top:4px;}
@@ -286,8 +293,17 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 <style>{css}</style></head><body><div class="page">
 <div class="main-title">{esc(faction.upper())}</div>
 <div class="main-sub">{esc(game)} — v{esc(version)}</div>
-{f'<div class="intro">{esc(desc)}</div>' if desc else ""}
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;">
+{f'''<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 10px;">
+  <div>
+    <div class="section-hdr">Introduction</div>
+    <div class="intro-txt">{esc(desc)}</div>
+  </div>
+  <div>
+    <div class="section-hdr">Histoire de la faction</div>
+    <div class="intro-txt">{esc(history).replace(chr(10)+chr(10), "</p><p class=\'intro-txt\'>")}</div>
+  </div>
+</div>''' if desc or history else ""}
+<div style="display:grid;grid-template-columns:1fr;gap:4px;margin:8px 0;">
 {rules_section("Règle spéciale de l'armée", army_rules)}
 {rules_section("Règles spéciales", other_rules, "#2c3e7a")}
 {rules_section("Règles spéciales d'aura", aura_rules, "#555")}
@@ -302,7 +318,7 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("OPR ArmyBuilder FRA")
+    st.title("🛡️ OPR ArmyBuilder FR")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
@@ -382,9 +398,9 @@ if "faction_special_rules" not in st.session_state: st.session_state.faction_spe
 if "faction_spells" not in st.session_state: st.session_state.faction_spells = {}
 
 GAME_CONFIG = {
-    "Age of Fantasy": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
     "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
 }
