@@ -32,8 +32,54 @@ _acc_color = _GAME_COLORS.get(st.session_state.get("game",""), "#2980b9")
 st.markdown(f"""<style>
 :root {{--acc: {_acc_color};}}
 #MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{background: transparent;}}
-.stApp {{background: #e9ecef; color: #212529;}}
-section[data-testid="stSidebar"] {{background: #dee2e6; border-right: 1px solid #adb5bd; box-shadow: 2px 0 5px rgba(0,0,0,0.1);}}
+
+/* ── Forcer mode clair sur toute l'app ── */
+html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {{
+  color-scheme: light !important;
+  background-color: #e9ecef !important;
+  color: #212529 !important;
+}}
+
+/* ── Sidebar : toujours fond clair, texte foncé ── */
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] > div,
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {{
+  background-color: #dee2e6 !important;
+  color: #212529 !important;
+  border-right: 1px solid #adb5bd;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}}
+
+/* Textes dans la sidebar */
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div,
+section[data-testid="stSidebar"] strong,
+section[data-testid="stSidebar"] .stMarkdown {{
+  color: #212529 !important;
+}}
+
+/* Titres sidebar */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {{
+  color: #202c45 !important;
+}}
+
+/* Boutons sidebar */
+section[data-testid="stSidebar"] .stButton > button {{
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+  border: 1px solid #ced4da !important;
+}}
+
+/* Zone principale */
+[data-testid="stMain"], [data-testid="stMainBlockContainer"] {{
+  background-color: #e9ecef !important;
+  color: #212529 !important;
+}}
+
 h1, h2, h3 {{color: #202c45; letter-spacing: 0.04em; font-weight: 600;}}
 .stSelectbox, .stNumberInput, .stTextInput {{background-color: white; border-radius: 6px; border: 1px solid #ced4da;}}
 button[kind="primary"] {{background: var(--acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
@@ -184,11 +230,12 @@ def export_faction_html(data):
             other_rules.append(r)
 
     def rules_section(title, rule_list, color="#1a1a2e"):
+        """Retourne une colonne de règles (titre + items) pour la grille 3 colonnes."""
         if not rule_list: return ""
         items = ""
         for r in rule_list:
-            items += f"<span class='ri'><b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}</span> "
-        return f"<div class='rs-inline'><span class='rsh-inline' style='color:{color}'>{esc(title)} — </span>{items}</div>"
+            items += f"<p class='ri'><b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}</p>"
+        return f"<div class='rs'><div class='rsh' style='background:{color}'>{esc(title)}</div>{items}</div>"
 
     spells_html = ""
     if spells:
@@ -303,7 +350,7 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
     <div class="intro-txt">{esc(history).replace(chr(10)+chr(10), "</p><p class=\'intro-txt\'>")}</div>
   </div>
 </div>''' if desc or history else ""}
-<div style="display:grid;grid-template-columns:1fr;gap:4px;margin:8px 0;">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;">
 {rules_section("Règle spéciale de l'armée", army_rules)}
 {rules_section("Règles spéciales", other_rules, "#2c3e7a")}
 {rules_section("Règles spéciales d'aura", aura_rules, "#555")}
