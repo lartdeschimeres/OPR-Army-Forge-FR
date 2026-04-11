@@ -213,7 +213,9 @@ def export_faction_html(data):
                     det = ", ".join(parts)
                 elif osr:
                     det = esc(osr)
-                label = oname if not det else f"{oname} ({det})"
+                # det peut déjà contenir des parenthèses (profil arme) ou non (montures/SR)
+                label = oname if not det else (
+                    f"{oname} {det}" if det.startswith("(") else f"{oname} ({det})")
                 html += (f"<div class='ol'>{label}"
                          f"<span class='oc'>{esc(cost_s)}</span></div>")
         html += "</div>"
@@ -273,7 +275,7 @@ def export_faction_html(data):
         cat_units = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
         if not cat_units: continue
         cards = "".join(unit_card(u) for u in cat_units)
-        units_html += f"<div class='cat-banner'>{esc(cat_name)}</div><div class='grid'>{cards}</div>"
+        units_html += f"<div class='cat-banner'>{esc(cat_name)}</div><div class='grid'>{cards}</div><div class='page-gap'></div>"
 
     css = """
 body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;background:#fff;color:#212529;font-size:11px;}
@@ -321,7 +323,25 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 .og{font-size:7.5px;font-weight:700;padding:2px 5px 1px;background:#f8f9fa;border-top:1px solid #dee2e6;margin-top:1px;}
 .ol{font-size:7px;padding:1px 5px 1px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f0f0f0;}
 .oc{color:#c0392b;font-weight:700;white-space:nowrap;margin-left:4px;}
-@media print{body{margin:0;padding:6px;}.cat-banner{page-break-before:auto;}}
+@media print{
+  body{margin:0;padding:4px;}
+  .page{max-width:100%;}
+  /* Chaque catégorie commence sur une nouvelle page */
+  .cat-banner{page-break-before:always;break-before:page;}
+  /* Sauf la première bannière (Héros) : elle suit le récap sur la même page */
+  .cat-banner:first-of-type{page-break-before:always;break-before:page;}
+  /* Les cartes d'unités ne se coupent pas */
+  .uc{page-break-inside:avoid;break-inside:avoid;}
+  /* La grille 2 colonnes se coupe entre les cartes uniquement */
+  .grid{page-break-inside:auto;}
+  /* Zone règles + sorts = page 1 complète */
+  .rules-cols,.spells-section,.recap-wrap{page-break-inside:avoid;}
+  /* Éviter les coupures dans les titres */
+  .main-title,.main-sub{page-break-after:avoid;}
+  .page-gap{page-break-after:always;break-after:page;height:0;}
+  /* Ne pas sauter de page après la dernière catégorie */
+  .page-gap:last-child{page-break-after:auto;break-after:auto;}
+}
 """
 
     # Tableau récapitulatif
