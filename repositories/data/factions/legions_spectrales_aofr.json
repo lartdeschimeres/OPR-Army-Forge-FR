@@ -4,122 +4,146 @@
   "version": "FR-3.5.2",
   "status": "complete",
   "description": "Les Légions Spectrales sont des êtres intangibles qui s'aventurent sur Tyria depuis le Plan Empyréen. Leurs armées sont composées de lignes de guerriers fantomatiques maniant des armes rouillées, soutenus par des banshees et des spectres, poussés par leurs geôliers spectraux.",
+  "history": "Les Légions Spectrales pénètrent sur Tyria depuis le Plan Empyréen, que certains considèrent comme l'au-delà, régi par un panthéon de dieux de la mort. En réalité, les dieux de ce plan tirent leur énergie des âmes de ceux qui y vivent, drainant progressivement leurs souvenirs, leurs pensées et leurs personnalités, jusqu'à ce qu'il ne reste plus que l'ombre de leur esprit.\n\nLes dieux des Légions Spectrales règnent chacun sur leur propre domaine du Plan Empyréen, où ceux qui y sont piégés perçoivent le monde qui les entoure selon la volonté de leur dieu : qu'il s'agisse d'un magnifique et céleste royaume, d'un paradis pour les guerriers ou d'un lieu de souffrance et de torture. Les rares mortels qui se sont rendus sur ces étranges contrées et qui s'en sont échappés racontent ce qu'ils ont vu : quelque chose de complètement irréel. Ils en sont revenus avec des récits d'esprits rampants qui rôdent sur des ruines désolées, jouant avec la vie de mortels depuis longtemps perdues. Nombre de ces esprits ont complètement oublié leur vie de mortel, tandis que d'autres ne se souviennent que de fragments.\n\nLes Légions Spectrales sont parfois envoyées sur d'autres plans par leurs dieux, à la recherche d'âmes à récolter. Les esprits ne comprennent que partiellement leur mission, certains pensent qu'ils recherchent des âmes dignes pour les récompenser, d'autres croient qu'ils sont venus apporter le châtiment divin sur les ennemis de leurs dieux. Les Légions Spectrales savent seulement qu'ils ne reviendront qu'une fois qu'ils auront collectés suffisamment d'âmes pour satisfaire leurs maîtres.\n\nLorsque les Légions Spectrales errent à l'extérieur du Plan Empyréen, l'emprise de leurs dieux se dissipe peu à peu et ils prennent alors conscience de leur véritable apparence et de ce qui les entoure. De nombreux êtres éthérés sont alors horrifiés lorsqu'ils sont confrontés à leur véritable nature, les conduisant à une folie furieuse, où ils perdent toute notion d'eux-mêmes et qui s'en prennent furieusement à toutes les créatures vivantes. D'autres se convainquent qu'ils ont été piégés dans une illusion, en guise de punition pour avoir déplu à leur dieu d'une manière ou d'une autre, et cherchant désespérément à se racheter pour pouvoir retourner dans le Plan Empyréen.\n\nLes Légions Spectrales commencèrent à affluer sur Tyria depuis que la Faille ouvrit de nombreuses Portes du Néant autrefois cachées. Jadis considérés comme de simples légendes, il n'est pas rare de voir de grands cortèges de Légions Spectrales rôder dans les franges oubliées de Tyria, cherchant à s'emparer de ceux qui se sont éloignés de leur foyer. Parfois, ils marchandent avec les mortels de Tyria qui peuvent leur offrir magie, âmes ou toute un moyen de retourner chez eux.\n\nComment allez-vous vous frayer un chemin à travers les plans mortels ?",
   "faction_special_rules": [
     {
-      "name": "Empyrean Spirit [Esprit empyréen]",
-      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciales subissent des tirs ou sont chargées d’une distance supérieure à 9\", les unités ennemies subissent un malus de -1 aux jets pour toucher."
+      "name": "Esprit empyréen",
+      "detail": "Règle spéciale de l'armée",
+      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciales subissent des tirs ou sont chargées d'une distance supérieure à 9\", les unités ennemies subissent un malus de -1 aux jets pour toucher."
     },
     {
-      "name": "Ethereal [Éthéré]",
+      "name": "Éthéré",
+      "detail": "Règle spéciale de l'armée",
       "description": "Une fois par activation, avant d'attaquer, déplacez cette figurine n'importe où à 6\" ou moins de sa position. Cette figurine se déplace de -6\" lorsqu'elle Avance, et de -6\" lorsqu'elle Cours ou Charge."
     },
     {
-      "name": "Armor (X) [Armure (X)]",
+      "name": "Armure (X)",
+      "detail": "Règles spéciales",
       "description": "Compte comme ayant Défense X+."
     },
     {
-      "name": "Bane Mark [Marque de Fléau]",
+      "name": "Marque de Fléau",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins. Les unités amies obtiennent la règle spéciale Fléau une seule fois lorsqu'elles l'attaquent (la prochaine fois que l'effet s'appliquerait)."
     },
     {
-      "name": "Crossing Attack (X) [Attaque croisée (X)]",
+      "name": "Attaque croisée (X)",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, lorsque cette figurine traverse des unités ennemies, choisissez-en une et lancez X dés. Pour chaque 6+, elle subit une touche."
     },
     {
-      "name": "Empyrean Spirit Boost [Boost de l'Esprit empyréen]",
+      "name": "Boost de l'Esprit empyréen",
+      "detail": "Règles spéciales",
       "description": "Si toutes les figurines de cette unité possèdent la règle spéciale Esprit empyréen, les ennemis qui les attaquent subissent toujours un malus de -1 aux jets pour toucher à cause de la règle spéciale Esprit empyréen (au lieu de seulement lorsqu'ils lui tirent dessus ou la Chargent à plus de 9\")."
     },
     {
-      "name": "No Retreat [Pas de retraite]",
+      "name": "Pas de retraite",
+      "detail": "Règles spéciales",
       "description": "Lorsqu'une unité dont la plupart des figurines possèdent cette règle spéciale échoue à un Test de Moral qui la rend Ébranlée ou En déroute, le test est considéré comme réussi. Lancez ensuite autant de dés que le nombre de blessures nécessaires pour la détruire entièrement, et pour chaque résultat de 1 à 3, l'unité subit une blessure qui ne peut être ignorée."
     },
     {
-      "name": "Precision Feat [Précision extraordinaire]",
-      "description": "Une fois par partie, lorsque cette unité attaque et que toutes ses figurines possèdent cette règle spéciale, vous pouvez l’utiliser pour qu'ils obtiennent un bonus de +2 aux jets pour toucher."
+      "name": "Précision extraordinaire",
+      "detail": "Règles spéciales",
+      "description": "Une fois par partie, lorsque cette unité attaque et que toutes ses figurines possèdent cette règle spéciale, vous pouvez l'utiliser pour qu'ils obtiennent un bonus de +2 aux jets pour toucher."
     },
     {
-      "name": "Reap [Fauchage]",
+      "name": "Fauchage",
+      "detail": "Règles spéciales",
       "description": "Contre les unités dont la plupart des figurines possèdent une Défense de 2+ à 3+, cette arme gagne un bonus de PA (+2)."
     },
     {
-      "name": "Repel Ambushers [Chasse à l'Embuscade]",
+      "name": "Chasse à l'Embuscade",
+      "detail": "Règles spéciales",
       "description": "Les unités ennemies utilisant la règle spéciale Embuscade doivent être placées à plus de 12\" de l'unité de cette figurine."
     },
     {
-      "name": "Resistance [Résistance]",
+      "name": "Résistance",
+      "detail": "Règles spéciales",
       "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle spéciale subit des blessures, lancez un dé pour chacune d'entre elles. Sur un résultat de 6+, la blessure est ignorée. Si les blessures proviennent d'un sort, elles sont alors ignorées sur un résultat de 2+ à la place."
     },
     {
-      "name": "Shielded [Blindé]",
+      "name": "Blindé",
+      "detail": "Règles spéciales",
       "description": "Les unités dont toutes les figurines possèdent cette règle spéciale obtiennent un bonus de +1 aux jets de Défense contre les blessures qui ne proviennent pas de sorts."
     },
     {
-      "name": "Surge [Surcharge]",
+      "name": "Surcharge",
+      "detail": "Règles spéciales",
       "description": "Sur les résultats non modifiés de 6 pour toucher, cette arme inflige une touche supplémentaire (seul la touche initiale compte comme un 6 pour les règles spéciales)."
     },
     {
-      "name": "Transversal [Transversant]",
+      "name": "Transversant",
+      "detail": "Règles spéciales",
       "description": "Peut se déplacer à travers des unités amies ou ennemies."
     },
     {
-      "name": "Unpredictable [Imprévisible]",
+      "name": "Imprévisible",
+      "detail": "Règles spéciales",
       "description": "Lors d'une attaque, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
     },
     {
-      "name": "Unpredictable Fighter [Combattant imprévisible]",
+      "name": "Combattant imprévisible",
+      "detail": "Règles spéciales",
       "description": "En mêlée, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
     },
     {
-      "name": "Empyrean Spirit Boost Aura [Aura Boost de l'Esprit empyréen]",
-      "description": "Cette figurine et son unité obtiennent la règle spéciale Bosst d’Esprit empyréen."
+      "name": "Aura Boost de spirituel empyréen",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Boost d'Esprit empyréen."
     },
     {
-      "name": "No Retreat Aura [Aura Pas de retraite]",
+      "name": "Aura Pas de retraite",
+      "detail": "Règles spéciales d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Pas de retraite."
     },
     {
-      "name": "Precision Feat Aura [Aura Précision extraordinaire]",
+      "name": "Aura Précision extraordinaire",
+      "detail": "Règles spéciales d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Précision extraordinaire."
     },
     {
-      "name": "Relentless Aura [Aura Implacable]",
+      "name": "Aura Implacable",
+      "detail": "Règles spéciales d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Implacable."
     },
     {
-      "name": "Scout Aura [Aura Éclaireur]",
+      "name": "Aura Éclaireur",
+      "detail": "Règles spéciales d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Éclaireur."
     },
     {
-      "name": "Shielded Aura [Aura Blindé]",
+      "name": "Aura Blindé",
+      "detail": "Règles spéciales d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Blindé."
     },
     {
-      "name": "Unpredictable Fighter Aura [Aura Combattant imprévisible]",
+      "name": "Aura Combattant imprévisible",
+      "detail": "Règles spéciales d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
     }
   ],
   "spells": {
-    "Ethereal Warding [Protection éthérée] (1)": {
+    "Protection éthérée (1)": {
       "cost": 1,
       "description": "Choisissez une unité amie à 12\" ou moins, qui bénéficie une seule fois de l'effet Esprit empyréen (la prochaine fois que cet effet s'appliquerait)."
     },
-    "Dread Shriek [Cri terrifiant] (1)": {
+    "Cri terrifiant (1)": {
       "cost": 1,
       "description": "Choisissez une unité ennemie à 12\" ou moins, qui subit deux touches avec PA (1) et Surcharge. Lancez autant de dés que de touches pour voir si l'effet « sur un résultat de 6 » se déclenche."
     },
-    "Irresistible Grief [Chagrin irrésistible] (2)": {
+    "Chagrin irrésistible (2)": {
       "cost": 2,
       "description": "Choisissez jusqu'à deux unités ennemies à 18\" ou moins, contre lesquelles les unités amies obtiennent une seule fois la règle spéciale Fléau lorsqu'elles les attaquent (la prochaine fois que l'effet s'appliquerait)."
     },
-    "Reaping Terror [Terreur faucheuse] (2)": {
+    "Terreur faucheuse (2)": {
       "cost": 2,
       "description": "Choisissez une unité ennemie à 12\" ou moins, qui subit quatre touches avec Fauchage."
     },
-    "Vicious Spirits [Esprits vicieux] (3)": {
+    "Esprits vicieux (3)": {
       "cost": 3,
-      "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui obtiennent un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
+      "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui obtiennent un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois, l'effet s'appliquerait)."
     },
-    "Eat Soul [Mange-âmes] (3)": {
+    "Mange-âmes (3)": {
       "cost": 3,
       "description": "Choisissez une unité ennemie à 18\" ou moins, qui subit six touches."
     }
@@ -160,7 +184,7 @@
         {
           "group": "Améliorations de rôle",
           "type": "role",
-          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
               "name": "Gardien",
@@ -180,7 +204,7 @@
               "name": "Chevalier",
               "cost": 25,
               "special_rules": [
-                "Aura Boost de l'Esprit empyréen"
+                "Aura Boost de spirituel empyréen"
               ]
             },
             {
@@ -232,7 +256,7 @@
         {
           "group": "Améliorations de rôle",
           "type": "role",
-          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
               "name": "Gardien",
@@ -245,7 +269,7 @@
               "name": "Chevalier",
               "cost": 25,
               "special_rules": [
-                "Aura Boost de l'Esprit empyréen"
+                "Aura Boost de spirituel empyréen"
               ]
             },
             {
@@ -295,7 +319,7 @@
         {
           "group": "Améliorations de rôle",
           "type": "role",
-          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
               "name": "Gardien",
@@ -315,7 +339,7 @@
               "name": "Chevalier",
               "cost": 25,
               "special_rules": [
-                "Aura Boost de l'Esprit empyréen"
+                "Aura Boost de spirituel empyréen"
               ]
             },
             {
@@ -440,7 +464,6 @@
               "cost": 55,
               "mount": {
                 "name": "Trône du monarque",
-                "coriace_bonus": 3,
                 "weapon": [
                   {
                     "name": "Hérault",
@@ -450,6 +473,7 @@
                     "special_rules": []
                   }
                 ],
+                "coriace_bonus": 3,
                 "special_rules": [
                   "Armure (4)",
                   "Effrayant (1)"
@@ -461,7 +485,6 @@
               "cost": 70,
               "mount": {
                 "name": "Grand destrier",
-                "coriace_bonus": 3,
                 "weapon": [
                   {
                     "name": "Cornes",
@@ -473,6 +496,7 @@
                     ]
                   }
                 ],
+                "coriace_bonus": 3,
                 "special_rules": [
                   "Armure (4)",
                   "Impact (2)",
@@ -486,10 +510,10 @@
         {
           "group": "Améliorations d'unité",
           "type": "upgrades",
-          "description": "Améliorer avec :",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
-              "name": "Esprits enchainés",
+              "name": "Esprits enchaînés",
               "cost": 10,
               "special_rules": [
                 "Chasse à l'Embuscade"
@@ -526,7 +550,7 @@
         {
           "group": "Améliorations de rôle",
           "type": "role",
-          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
               "name": "Gardien",
@@ -637,9 +661,9 @@
           ]
         },
         {
-          "group": "Ajout d'une arme de tir",
+          "group": "Armes à distance",
           "type": "conditional_weapon",
-          "description": "Améliorer avec une des options suivantes (un seul choix possible)",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
               "name": "Arbalète des âmes",
@@ -673,10 +697,10 @@
         {
           "group": "Améliorations d'unité",
           "type": "upgrades",
-          "description": "Améliorer avec :",
+          "description": "Améliorer avec une des options suivantes :",
           "options": [
             {
-              "name": "Esprits enchainés",
+              "name": "Esprits enchaînés",
               "cost": 10,
               "special_rules": [
                 "Chasse à l'Embuscade"
@@ -744,7 +768,7 @@
         {
           "group": "Améliorations d'unité",
           "type": "upgrades",
-          "description": "Améliorations disponibles pour l'unité",
+          "description": "Améliorer une figurine avec :",
           "options": [
             {
               "name": "Dévoreur d'âmes",
@@ -804,6 +828,9 @@
             {
               "name": "Cloche mortuaire",
               "cost": 10,
+              "replaces": [
+                "Faux"
+              ],
               "weapon": {
                 "name": "Cloche mortuaire",
                 "range": "Mêlée",
@@ -851,13 +878,7 @@
             {
               "name": "Hurlement",
               "cost": 30,
-              "weapon": {
-                "name": "Hurlement",
-                "range": 12,
-                "attacks": 1,
-                "armor_piercing": 1,
-                "special_rules": []
-              }
+              "special_rules": []
             }
           ]
         }
@@ -1031,10 +1052,10 @@
           "description": "Remplacer toutes les Arbalètes des âmes par :",
           "options": [
             {
-              "name": "Arbalète",
+              "name": "Arbalètes",
               "cost": 5,
               "weapon": {
-                "name": "Arbalète",
+                "name": "Arbalètes",
                 "range": 24,
                 "attacks": 1,
                 "armor_piercing": 0,
@@ -1048,7 +1069,7 @@
         {
           "group": "Améliorations d'unité",
           "type": "upgrades",
-          "description": "Améliorations disponibles pour l'unité",
+          "description": "Améliorer une figurine avec :",
           "options": [
             {
               "name": "Dévoreur d'âmes",
@@ -1191,7 +1212,7 @@
         {
           "group": "Améliorations d'unité",
           "type": "upgrades",
-          "description": "Améliorations disponibles pour l'unité",
+          "description": "Améliorer une figurine avec :",
           "options": [
             {
               "name": "Dévoreur d'âmes",
@@ -1277,7 +1298,7 @@
       ],
       "weapon": [
         {
-          "name": "Arme à une main lourde",
+          "name": "Armes à une main lourdes",
           "range": "Mêlée",
           "attacks": 1,
           "armor_piercing": 1,
@@ -1322,7 +1343,7 @@
           "name": "Faux lourde de l'équipage",
           "range": "Mêlée",
           "attacks": 2,
-          "armor_piercing": 3,
+          "armor_piercing": 2,
           "special_rules": [
             "Fauchage"
           ]
@@ -1349,7 +1370,7 @@
         "Esprit empyréen",
         "Éthéré",
         "Impact (4)",
-        "Lanceur de sorts (2)",
+        "Lanceurs de sorts (2)",
         "Rapide",
         "Résistance"
       ],
@@ -1397,4 +1418,3 @@
     }
   ]
 }
-
