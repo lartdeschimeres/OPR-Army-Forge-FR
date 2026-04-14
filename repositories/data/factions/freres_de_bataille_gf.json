@@ -61,15 +61,88 @@
       "defense": 3,
       "base_cost": 65,
       "special_rules": ["Attaque versatile","Blindé","Coriace (3)","Guerrier né","Héros","Sans peur"],
-      "weapon": [{"name": "ACC","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": []}],
+      "weapon": [
+        {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]},
+        {"name": "ACC","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": []}
+      ],
       "upgrade_groups": [
-        {"group": "Équipement de base","type": "upgrades","description": "Équipement inclus :","options": [{"name": "Bouclier de combat","cost": 0,"special_rules": ["Blindé"]}]},
-        {"group": "Rôle","type": "upgrades","description": "Améliorer avec une des options suivantes :","options": [{"name": "Commandant","cost": 15,"special_rules": ["Aura Fougue"]},{"name": "Artilleur","cost": 15,"special_rules": ["Repositionnement d'artillerie"]},{"name": "Prêcheur","cost": 30,"special_rules": ["Aura Fléau en mêlée"]},{"name": "Archiviste","cost": 35,"special_rules": ["Lanceur de sorts (2)"]},{"name": "Ingénieur","cost": 40,"special_rules": ["Guérison"]},{"name": "Capitaine","cost": 40,"special_rules": ["Aura Fléau au tir"]},{"name": "Lieutenant","cost": 45,"special_rules": ["Redéploiement"]},{"name": "Maître archiviste","cost": 55,"special_rules": ["Lanceur de sorts (3)"]}]},
-        {"group": "Mobilité","type": "upgrades","description": "Améliorer avec une des options suivantes :","options": [{"name": "Réacteur dorsal","cost": 15,"special_rules": ["Embuscade","Volant"]},{"name": "Moto de combat","cost": 110,"special_rules": ["Rapide","Coriace (3)"],"weapon": {"name": "Fusil lourd jumelé","range": 24,"attacks": 2,"armor_piercing": 1,"special_rules": []}}]},
-        {"group": "Remplacement Bouclier de combat et ACC","type": "weapon","description": "Remplacer le Bouclier de combat et l'ACC par :","options": [{"name": "Pistolet antigrav + ACC","cost": 5,"replaces": ["Bouclier de combat"],"weapon": [{"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]},{"name": "ACC","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": []}]},{"name": "Pistolet antigrav + Bouclier de combat","cost": 5,"replaces": ["ACC"],"weapon": [{"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]},{"name": "Bouclier de combat (Frappe)","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": ["Blindé"]}]},{"name": "Paire de griffes énergétiques","cost": 15,"replaces": ["ACC","Bouclier de combat"],"weapon": {"name": "Paire de griffes énergétiques","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": ["Perforant"]}},{"name": "Épée tronçonneuse lourde","cost": 20,"replaces": ["ACC","Bouclier de combat"],"weapon": {"name": "Épée tronçonneuse lourde","range": "Mêlée","attacks": 4,"armor_piercing": 1,"special_rules": []}}]},
-        {"group": "Remplacement Pistolet antigrav","type": "conditional_weapon","description": "Remplacer le Pistolet antigrav par :","requires": ["Pistolet antigrav"],"options": [{"name": "Pistolet lance-flammes","cost": 5,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet lance-flammes","range": 6,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},{"name": "Pistolet lourd de maître","cost": 10,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet lourd de maître","range": 12,"attacks": 2,"armor_piercing": 1,"special_rules": []}},{"name": "Pistolet à fusion","cost": 10,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet à fusion","range": 6,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},{"name": "Pistolet à plasma de maître","cost": 25,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet à plasma de maître","range": 12,"attacks": 2,"armor_piercing": 4,"special_rules": []}},{"name": "Fusil lourd de maître","cost": 30,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Fusil lourd de maître","range": 24,"attacks": 2,"armor_piercing": 1,"special_rules": []}},{"name": "Fusil Tempête de maître","cost": 75,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Fusil Tempête de maître","range": 24,"attacks": 4,"armor_piercing": 1,"special_rules": []}}]},
-        {"group": "Modules sur Fusil lourd de maître","type": "conditional_weapon","description": "Ajouter un module au Fusil lourd de maître :","requires": ["Fusil lourd de maître"],"options": [{"name": "Module antigrav","cost": 10,"weapon": {"name": "Module antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas","Limité"]}},{"name": "Module lance-flammes","cost": 10,"weapon": {"name": "Module lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable","Limité"]}},{"name": "Module plasma","cost": 10,"weapon": {"name": "Module plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": ["Limité"]}},{"name": "Module fusion","cost": 15,"weapon": {"name": "Module fusion","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)","Limité"]}}]},
-        {"group": "Remplacement ACC","type": "conditional_weapon","description": "Remplacer l'ACC par :","requires": ["ACC"],"options": [{"name": "Marteau énergétique","cost": 5,"replaces": ["ACC"],"weapon": {"name": "Marteau énergétique","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)"]}},{"name": "Épée énergétique","cost": 10,"replaces": ["ACC"],"weapon": {"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}},{"name": "Poing énergétique","cost": 20,"replaces": ["ACC"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}},{"name": "Poing tronçonneur","cost": 20,"replaces": ["ACC"],"weapon": {"name": "Poing tronçonneur","range": "Mêlée","attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)"]}}]}
+        {
+          "group": "Équipement de base",
+          "type": "upgrades",
+          "description": "Équipement inclus :",
+          "options": [{"name": "Bouclier de combat","cost": 0,"special_rules": ["Blindé"]}]
+        },
+        {
+          "group": "Rôle",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {"name": "Commandant","cost": 15,"special_rules": ["Aura Fougue"]},
+            {"name": "Artilleur","cost": 15,"special_rules": ["Repositionnement d'artillerie"]},
+            {"name": "Prêcheur","cost": 30,"special_rules": ["Aura Fléau en mêlée"]},
+            {"name": "Archiviste","cost": 35,"special_rules": ["Lanceur de sorts (2)"]},
+            {"name": "Ingénieur","cost": 40,"special_rules": ["Guérison"]},
+            {"name": "Capitaine","cost": 40,"special_rules": ["Aura Fléau au tir"]},
+            {"name": "Lieutenant","cost": 45,"special_rules": ["Redéploiement"]},
+            {"name": "Maître archiviste","cost": 55,"special_rules": ["Lanceur de sorts (3)"]}
+          ]
+        },
+        {
+          "group": "Mobilité",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {"name": "Réacteur dorsal","cost": 15,"special_rules": ["Embuscade","Volant"]},
+            {"name": "Moto de combat","cost": 110,"special_rules": ["Rapide","Coriace (3)"],"weapon": {"name": "Fusil lourd jumelé","range": 24,"attacks": 2,"armor_piercing": 1,"special_rules": []}}
+          ]
+        },
+        {
+          "group": "Remplacement Pistolet antigrav et ACC",
+          "type": "weapon",
+          "description": "Remplacer le Pistolet antigrav et l'ACC par :",
+          "options": [
+            {"name": "Paire de griffes énergétiques","cost": 15,"replaces": ["Pistolet antigrav","ACC"],"weapon": {"name": "Paire de griffes énergétiques","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": ["Perforant"]}},
+            {"name": "Épée tronçonneuse lourde","cost": 20,"replaces": ["Pistolet antigrav","ACC"],"weapon": {"name": "Épée tronçonneuse lourde","range": "Mêlée","attacks": 4,"armor_piercing": 1,"special_rules": []}}
+          ]
+        },
+        {
+          "group": "Remplacement Pistolet antigrav",
+          "type": "conditional_weapon",
+          "description": "Remplacer le Pistolet antigrav par :",
+          "requires": ["Pistolet antigrav"],
+          "options": [
+            {"name": "Pistolet lance-flammes","cost": 5,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet lance-flammes","range": 6,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},
+            {"name": "Pistolet lourd de maître","cost": 10,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet lourd de maître","range": 12,"attacks": 2,"armor_piercing": 1,"special_rules": []}},
+            {"name": "Pistolet à fusion","cost": 10,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet à fusion","range": 6,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},
+            {"name": "Pistolet à plasma de maître","cost": 25,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Pistolet à plasma de maître","range": 12,"attacks": 2,"armor_piercing": 4,"special_rules": []}},
+            {"name": "Fusil lourd de maître","cost": 30,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Fusil lourd de maître","range": 24,"attacks": 2,"armor_piercing": 1,"special_rules": []}},
+            {"name": "Fusil Tempête de maître","cost": 75,"replaces": ["Pistolet antigrav"],"weapon": {"name": "Fusil Tempête de maître","range": 24,"attacks": 4,"armor_piercing": 1,"special_rules": []}}
+          ]
+        },
+        {
+          "group": "Modules sur Fusil lourd de maître",
+          "type": "conditional_weapon",
+          "description": "Ajouter un module au Fusil lourd de maître :",
+          "requires": ["Fusil lourd de maître"],
+          "options": [
+            {"name": "Module antigrav","cost": 10,"weapon": {"name": "Module antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas","Limité"]}},
+            {"name": "Module lance-flammes","cost": 10,"weapon": {"name": "Module lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable","Limité"]}},
+            {"name": "Module plasma","cost": 10,"weapon": {"name": "Module plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": ["Limité"]}},
+            {"name": "Module fusion","cost": 15,"weapon": {"name": "Module fusion","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)","Limité"]}}
+          ]
+        },
+        {
+          "group": "Remplacement ACC",
+          "type": "conditional_weapon",
+          "description": "Remplacer l'ACC par :",
+          "requires": ["ACC"],
+          "options": [
+            {"name": "Marteau énergétique","cost": 5,"replaces": ["ACC"],"weapon": {"name": "Marteau énergétique","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)"]}},
+            {"name": "Épée énergétique","cost": 10,"replaces": ["ACC"],"weapon": {"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}},
+            {"name": "Poing énergétique","cost": 20,"replaces": ["ACC"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}},
+            {"name": "Poing tronçonneur","cost": 20,"replaces": ["ACC"],"weapon": {"name": "Poing tronçonneur","range": "Mêlée","attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)"]}}
+          ]
+        }
       ]
     },
     {
@@ -122,14 +195,82 @@
       "special_rules": ["Arpenteur","Guerrier né","Sans peur"],
       "weapon": [{"name": "Pistolets lourds","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "ACC","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": []}],
       "upgrade_groups": [
-        {"group": "Remplacement tous Pistolets lourds et ACC","type": "weapon","description": "Remplacer tous les Pistolets lourds et ACC par :","options": [{"name": "Fusil lourd + ACC (A1)","cost": 10,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Fusil lourd","range": 24,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "ACC (A1)","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}]},{"name": "Fusil à pompe + ACC (A1)","cost": 10,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Fusil à pompe","range": 12,"attacks": 2,"armor_piercing": 1,"special_rules": []},{"name": "ACC (A1)","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}]}]},
-        {"group": "Remplacement un Pistolet lourd","type": "conditional_weapon","description": "Remplacer un Pistolet lourd par :","requires": ["Pistolets lourds"],"options": [{"name": "Fusil antigrav","cost": 10,"replaces": ["Pistolets lourds"],"weapon": {"name": "Fusil antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Fusil à plasma","cost": 15,"replaces": ["Pistolets lourds"],"weapon": {"name": "Fusil à plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": []}},{"name": "Lance-flammes","cost": 15,"replaces": ["Pistolets lourds"],"weapon": {"name": "Lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},{"name": "Mitrailleuse lourde","cost": 30,"replaces": ["Pistolets lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},{"name": "Lance-missiles","cost": 40,"replaces": ["Pistolets lourds"],"weapon": {"name": "Lance-missiles","range": 30,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Imparable"]}}]},
-        {"group": "Remplacement jusqu'à trois Fusils lourds","type": "variable_weapon_count","description": "Remplacer jusqu'à trois Fusils lourds par :","requires": ["Fusil lourd"],"options": [{"name": "Fusil de sniper","cost": 20,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusil lourd"],"weapon": {"name": "Fusil de sniper","range": 30,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fiable","Élimination"]}}]},
-        {"group": "Améliorations d'unité","type": "upgrades","description": "Améliorer toutes les figurines avec n'importe lesquelles :","options": [{"name": "Capes de camouflage","cost": 10,"special_rules": ["Furtivité"]},{"name": "Sentinelles avancées","cost": 10,"special_rules": ["Éclaireur"]}]},
-        {"group": "Amélioration figurine spéciale","type": "upgrades","description": "Améliorer une figurine avec :","options": [{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]},
-        {"group": "Sergent","type": "conditional_weapon","description": "Remplacer un Pistolet lourd et une ACC par :","options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 5,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]},
-        {"group": "Remplacement Pistolet lourd de sergent","type": "conditional_weapon","description": "Remplacer le Pistolet lourd de sergent par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}]},
-        {"group": "Remplacement Épée énergétique","type": "conditional_weapon","description": "Remplacer l'Épée énergétique par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Poing énergétique","cost": 5,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]}
+        {
+          "group": "Remplacement tous Pistolets lourds et ACC",
+          "type": "weapon",
+          "description": "Remplacer tous les Pistolets lourds et ACC par :",
+          "options": [
+            {"name": "Fusil lourd + ACC (A1)","cost": 10,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Fusil lourd","range": 24,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "ACC (A1)","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}]},
+            {"name": "Fusil à pompe + ACC (A1)","cost": 10,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Fusil à pompe","range": 12,"attacks": 2,"armor_piercing": 1,"special_rules": []},{"name": "ACC (A1)","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}]}
+          ]
+        },
+        {
+          "group": "Remplacement un Pistolet lourd",
+          "type": "conditional_weapon",
+          "description": "Remplacer un Pistolet lourd par :",
+          "requires": ["Pistolets lourds"],
+          "options": [
+            {"name": "Fusil antigrav","cost": 10,"replaces": ["Pistolets lourds"],"weapon": {"name": "Fusil antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},
+            {"name": "Fusil à plasma","cost": 15,"replaces": ["Pistolets lourds"],"weapon": {"name": "Fusil à plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": []}},
+            {"name": "Lance-flammes","cost": 15,"replaces": ["Pistolets lourds"],"weapon": {"name": "Lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},
+            {"name": "Mitrailleuse lourde","cost": 30,"replaces": ["Pistolets lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},
+            {"name": "Lance-missiles","cost": 40,"replaces": ["Pistolets lourds"],"weapon": {"name": "Lance-missiles","range": 30,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Imparable"]}}
+          ]
+        },
+        {
+          "group": "Remplacement Fusils lourds par Fusils de sniper",
+          "type": "variable_weapon_count",
+          "description": "Remplacer jusqu'à trois Fusils lourds par :",
+          "requires": ["Fusil lourd"],
+          "options": [
+            {
+              "name": "Fusil de sniper",
+              "cost": 20,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Fusil lourd"],
+              "weapon": {"name": "Fusil de sniper","range": 30,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fiable","Élimination"]}
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer toutes les figurines avec n'importe lesquelles :",
+          "options": [
+            {"name": "Capes de camouflage","cost": 10,"special_rules": ["Furtivité"]},
+            {"name": "Sentinelles avancées","cost": 10,"special_rules": ["Éclaireur"]}
+          ]
+        },
+        {
+          "group": "Amélioration figurine spéciale",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec :",
+          "options": [{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]
+        },
+        {
+          "group": "Sergent",
+          "type": "conditional_weapon",
+          "description": "Remplacer un Pistolet lourd et une ACC par :",
+          "options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 5,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]
+        },
+        {
+          "group": "Remplacement Pistolet lourd de sergent",
+          "type": "conditional_weapon",
+          "description": "Remplacer le Pistolet lourd de sergent par :",
+          "requires": ["Pistolet lourd de sergent + Épée énergétique"],
+          "options": [
+            {"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},
+            {"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}
+          ]
+        },
+        {
+          "group": "Remplacement Épée énergétique",
+          "type": "conditional_weapon",
+          "description": "Remplacer l'Épée énergétique par :",
+          "requires": ["Pistolet lourd de sergent + Épée énergétique"],
+          "options": [{"name": "Poing énergétique","cost": 5,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]
+        }
       ]
     },
     {
@@ -180,17 +321,158 @@
       "defense": 3,
       "base_cost": 95,
       "special_rules": ["Attaque versatile","Blindé","Guerrier né","Sans peur"],
-      "weapon": [{"name": "Pistolets lourds","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Frappes","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}],
+      "weapon": [
+        {"name": "Pistolets lourds","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},
+        {"name": "Frappes","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}
+      ],
       "upgrade_groups": [
-        {"group": "Équipement de base","type": "upgrades","description": "Équipement inclus :","options": [{"name": "Boucliers de combat","cost": 0,"special_rules": ["Blindé"]}]},
-        {"group": "Améliorations d'unité","type": "upgrades","description": "Améliorer une figurine avec une des options suivantes :","options": [{"name": "Bannière de détachement","cost": 5,"special_rules": ["Aura Courage"]},{"name": "Bannière du Père Fondateur","cost": 15,"special_rules": ["Aura Portée variable"]},{"name": "Entraînement médical","cost": 30,"special_rules": ["Aura Régénération"]}]},
-        {"group": "Remplacement Pistolet lourd et Bouclier de combat","type": "conditional_weapon","description": "Remplacer n'importe quel Pistolet lourd et Bouclier de combat par :","requires": ["Boucliers de combat"],"options": [{"name": "ACC lourde + Bouclier de combat","cost": 5,"replaces": ["Pistolets lourds","Boucliers de combat"],"weapon": [{"name": "ACC lourde","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": []},{"name": "Bouclier de combat","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": ["Blindé"]}]},{"name": "Pistolet lourd + ACC lourde","cost": 10,"replaces": ["Pistolets lourds","Boucliers de combat"],"weapon": [{"name": "Pistolet lourd","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "ACC lourde","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": []}]},{"name": "Paire de griffes énergétiques","cost": 20,"replaces": ["Pistolets lourds","Boucliers de combat"],"weapon": {"name": "Paire de griffes énergétiques","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": ["Perforant"]}},{"name": "Épée tronçonneuse lourde","cost": 25,"replaces": ["Pistolets lourds","Boucliers de combat"],"weapon": {"name": "Épée tronçonneuse lourde","range": "Mêlée","attacks": 4,"armor_piercing": 1,"special_rules": []}}]},
-        {"group": "Remplacement n'importe quel Pistolet lourd","type": "conditional_weapon","description": "Remplacer n'importe quel Pistolet lourd par :","requires": ["Pistolets lourds"],"options": [{"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolets lourds"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Pistolet lance-flammes","cost": 5,"replaces": ["Pistolets lourds"],"weapon": {"name": "Pistolet lance-flammes","range": 6,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},{"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolets lourds"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}]},
-        {"group": "Remplacement n'importe quelle ACC lourde","type": "conditional_weapon","description": "Remplacer n'importe quelle ACC lourde par :","requires": ["ACC lourde"],"options": [{"name": "Épée énergétique","cost": 5,"replaces": ["ACC lourde"],"weapon": {"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}},{"name": "Poing énergétique","cost": 15,"replaces": ["ACC lourde"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]},
-        {"group": "Réacteurs dorsaux","type": "upgrades","description": "Améliorer toutes les figurines avec :","options": [{"name": "Réacteurs dorsaux","cost": 15,"special_rules": ["Embuscade","Volant"]}]},
-        {"group": "Sergent","type": "conditional_weapon","description": "Remplacer un Pistolet lourd et une ACC lourde par :","options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 15,"replaces": ["Pistolets lourds","Boucliers de combat"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]},
-        {"group": "Remplacement Pistolet lourd de sergent","type": "conditional_weapon","description": "Remplacer le Pistolet lourd de sergent par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}]},
-        {"group": "Remplacement Épée énergétique","type": "conditional_weapon","description": "Remplacer l'Épée énergétique par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Poing énergétique","cost": 10,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]}
+        {
+          "group": "Équipement de base",
+          "type": "upgrades",
+          "description": "Équipement inclus :",
+          "options": [{"name": "Boucliers de combat","cost": 0,"special_rules": ["Blindé"]}]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec une des options suivantes :",
+          "options": [
+            {"name": "Bannière de détachement","cost": 5,"special_rules": ["Aura Courage"]},
+            {"name": "Bannière du Père Fondateur","cost": 15,"special_rules": ["Aura Portée variable"]},
+            {"name": "Entraînement médical","cost": 30,"special_rules": ["Aura Régénération"]}
+          ]
+        },
+        {
+          "group": "Remplacement Pistolet lourd et Bouclier de combat",
+          "type": "variable_weapon_count",
+          "description": "Remplacer n'importe quel Pistolet lourd et Bouclier de combat par (0–3) :",
+          "requires": ["Boucliers de combat"],
+          "options": [
+            {
+              "name": "ACC lourde + Bouclier de combat",
+              "cost": 5,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds","Boucliers de combat"],
+              "weapon": [
+                {"name": "ACC lourde","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": []},
+                {"name": "Bouclier de combat","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": ["Blindé"]}
+              ]
+            },
+            {
+              "name": "Pistolet lourd + ACC lourde",
+              "cost": 10,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds","Boucliers de combat"],
+              "weapon": [
+                {"name": "Pistolet lourd","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},
+                {"name": "ACC lourde","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": []}
+              ]
+            },
+            {
+              "name": "Paire de griffes énergétiques",
+              "cost": 20,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds","Boucliers de combat"],
+              "weapon": {"name": "Paire de griffes énergétiques","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": ["Perforant"]}
+            },
+            {
+              "name": "Épée tronçonneuse lourde",
+              "cost": 25,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds","Boucliers de combat"],
+              "weapon": {"name": "Épée tronçonneuse lourde","range": "Mêlée","attacks": 4,"armor_piercing": 1,"special_rules": []}
+            }
+          ]
+        },
+        {
+          "group": "Remplacement n'importe quel Pistolet lourd",
+          "type": "variable_weapon_count",
+          "description": "Remplacer n'importe quel Pistolet lourd par (0–3) :",
+          "requires": ["Pistolets lourds"],
+          "options": [
+            {
+              "name": "Pistolet antigrav",
+              "cost": 5,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds"],
+              "weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}
+            },
+            {
+              "name": "Pistolet lance-flammes",
+              "cost": 5,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds"],
+              "weapon": {"name": "Pistolet lance-flammes","range": 6,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}
+            },
+            {
+              "name": "Pistolet à plasma",
+              "cost": 5,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["Pistolets lourds"],
+              "weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}
+            }
+          ]
+        },
+        {
+          "group": "Remplacement n'importe quelle ACC lourde",
+          "type": "variable_weapon_count",
+          "description": "Remplacer n'importe quelle ACC lourde par (0–3) :",
+          "requires": ["ACC lourde"],
+          "options": [
+            {
+              "name": "Épée énergétique",
+              "cost": 5,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["ACC lourde"],
+              "weapon": {"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}
+            },
+            {
+              "name": "Poing énergétique",
+              "cost": 15,
+              "min_count": 0,
+              "max_count": {"type": "fixed","value": 3},
+              "replaces": ["ACC lourde"],
+              "weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}
+            }
+          ]
+        },
+        {
+          "group": "Réacteurs dorsaux",
+          "type": "upgrades",
+          "description": "Améliorer toutes les figurines avec :",
+          "options": [{"name": "Réacteurs dorsaux","cost": 15,"special_rules": ["Embuscade","Volant"]}]
+        },
+        {
+          "group": "Sergent",
+          "type": "conditional_weapon",
+          "description": "Remplacer un Pistolet lourd et une ACC lourde par :",
+          "options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 15,"replaces": ["Pistolets lourds","Boucliers de combat"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]
+        },
+        {
+          "group": "Remplacement Pistolet lourd de sergent",
+          "type": "conditional_weapon",
+          "description": "Remplacer le Pistolet lourd de sergent par :",
+          "requires": ["Pistolet lourd de sergent + Épée énergétique"],
+          "options": [
+            {"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},
+            {"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}
+          ]
+        },
+        {
+          "group": "Remplacement Épée énergétique",
+          "type": "conditional_weapon",
+          "description": "Remplacer l'Épée énergétique par :",
+          "requires": ["Pistolet lourd de sergent + Épée énergétique"],
+          "options": [{"name": "Poing énergétique","cost": 10,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]
+        }
       ]
     },
     {
@@ -202,14 +484,75 @@
       "defense": 3,
       "base_cost": 125,
       "special_rules": ["Attaque versatile","Guerrier né","Sans peur"],
-      "weapon": [{"name": "Fusils lourds","range": 24,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "ACC","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}],
+      "weapon": [
+        {"name": "Fusils lourds","range": 24,"attacks": 1,"armor_piercing": 1,"special_rules": []},
+        {"name": "ACC","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}
+      ],
       "upgrade_groups": [
-        {"group": "Améliorations d'unité","type": "upgrades","description": "Améliorer une figurine avec une des options suivantes :","options": [{"name": "Bannière de détachement","cost": 5,"special_rules": ["Aura Courage"]},{"name": "Bannière du Père Fondateur","cost": 15,"special_rules": ["Aura Portée variable"]},{"name": "Entraînement médical","cost": 30,"special_rules": ["Aura Régénération"]}]},
-        {"group": "Remplacement n'importe quel Fusil lourd","type": "conditional_weapon","description": "Remplacer n'importe quel Fusil lourd par :","requires": ["Fusils lourds"],"options": [{"name": "Fusil antigrav","cost": 5,"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Lance-flammes","cost": 5,"replaces": ["Fusils lourds"],"weapon": {"name": "Lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},{"name": "Fusil à plasma","cost": 15,"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil à plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": []}},{"name": "Lance-flammes lourd","cost": 15,"replaces": ["Fusils lourds"],"weapon": {"name": "Lance-flammes lourd","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": ["Explosion (3)","Fiable"]}},{"name": "Canon antigrav","cost": 20,"replaces": ["Fusils lourds"],"weapon": {"name": "Canon antigrav","range": 24,"attacks": 1,"armor_piercing": 2,"special_rules": ["Fracas"]}},{"name": "Fusil à fusion","cost": 25,"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil à fusion","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},{"name": "Fusil à fusion lourd","cost": 45,"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil à fusion lourd","range": 18,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},{"name": "Mitrailleuse lourde","cost": 55,"replaces": ["Fusils lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},{"name": "Lance-missiles","cost": 65,"replaces": ["Fusils lourds"],"weapon": {"name": "Lance-missiles","range": 30,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Imparable"]}},{"name": "Canon laser","cost": 80,"replaces": ["Fusils lourds"],"weapon": {"name": "Canon laser","range": 36,"attacks": 1,"armor_piercing": 3,"special_rules": ["Mortel (3)"]}},{"name": "Canon à plasma","cost": 85,"replaces": ["Fusils lourds"],"weapon": {"name": "Canon à plasma","range": 30,"attacks": 1,"armor_piercing": 4,"special_rules": ["Explosion (3)"]}}]},
-        {"group": "Modules sur Fusil lourd","type": "variable_weapon_count","description": "N'importe quelle figurine peut ajouter un module au Fusil lourd :","requires": ["Fusils lourds"],"options": [{"name": "Module antigrav","cost": 10,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas","Limité"]}},{"name": "Module lance-flammes","cost": 10,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable","Limité"]}},{"name": "Module plasma","cost": 10,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": ["Limité"]}},{"name": "Module fusion","cost": 15,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module fusion","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)","Limité"]}}]},
-        {"group": "Sergent","type": "conditional_weapon","description": "Remplacer un Fusil lourd et une ACC par :","options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 5,"replaces": ["Fusils lourds","ACC"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]},
-        {"group": "Remplacement Pistolet lourd de sergent","type": "conditional_weapon","description": "Remplacer le Pistolet lourd de sergent par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}]},
-        {"group": "Remplacement Épée énergétique","type": "conditional_weapon","description": "Remplacer l'Épée énergétique par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Poing énergétique","cost": 10,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]}
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec une des options suivantes :",
+          "options": [
+            {"name": "Bannière de détachement","cost": 5,"special_rules": ["Aura Courage"]},
+            {"name": "Bannière du Père Fondateur","cost": 15,"special_rules": ["Aura Portée variable"]},
+            {"name": "Entraînement médical","cost": 30,"special_rules": ["Aura Régénération"]}
+          ]
+        },
+        {
+          "group": "Remplacement n'importe quel Fusil lourd",
+          "type": "variable_weapon_count",
+          "description": "Remplacer n'importe quel Fusil lourd par (0–3) :",
+          "requires": ["Fusils lourds"],
+          "options": [
+            {"name": "Fusil antigrav","cost": 5,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},
+            {"name": "Lance-flammes","cost": 5,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable"]}},
+            {"name": "Fusil à plasma","cost": 15,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil à plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": []}},
+            {"name": "Lance-flammes lourd","cost": 15,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Lance-flammes lourd","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": ["Explosion (3)","Fiable"]}},
+            {"name": "Canon antigrav","cost": 20,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Canon antigrav","range": 24,"attacks": 1,"armor_piercing": 2,"special_rules": ["Fracas"]}},
+            {"name": "Fusil à fusion","cost": 25,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil à fusion","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},
+            {"name": "Fusil à fusion lourd","cost": 45,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Fusil à fusion lourd","range": 18,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},
+            {"name": "Mitrailleuse lourde","cost": 55,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},
+            {"name": "Lance-missiles","cost": 65,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Lance-missiles","range": 30,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Imparable"]}},
+            {"name": "Canon laser","cost": 80,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Canon laser","range": 36,"attacks": 1,"armor_piercing": 3,"special_rules": ["Mortel (3)"]}},
+            {"name": "Canon à plasma","cost": 85,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Fusils lourds"],"weapon": {"name": "Canon à plasma","range": 30,"attacks": 1,"armor_piercing": 4,"special_rules": ["Explosion (3)"]}}
+          ]
+        },
+        {
+          "group": "Modules sur Fusil lourd",
+          "type": "variable_weapon_count",
+          "description": "N'importe quelle figurine peut ajouter un module au Fusil lourd (0–3) :",
+          "requires": ["Fusils lourds"],
+          "options": [
+            {"name": "Module antigrav","cost": 10,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module antigrav","range": 18,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas","Limité"]}},
+            {"name": "Module lance-flammes","cost": 10,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module lance-flammes","range": 12,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (3)","Fiable","Limité"]}},
+            {"name": "Module plasma","cost": 10,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module plasma","range": 24,"attacks": 1,"armor_piercing": 4,"special_rules": ["Limité"]}},
+            {"name": "Module fusion","cost": 15,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": [],"weapon": {"name": "Module fusion","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)","Limité"]}}
+          ]
+        },
+        {
+          "group": "Sergent",
+          "type": "conditional_weapon",
+          "description": "Remplacer un Fusil lourd et une ACC par :",
+          "options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 5,"replaces": ["Fusils lourds","ACC"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]
+        },
+        {
+          "group": "Remplacement Pistolet lourd de sergent",
+          "type": "conditional_weapon",
+          "description": "Remplacer le Pistolet lourd de sergent par :",
+          "requires": ["Pistolet lourd de sergent + Épée énergétique"],
+          "options": [
+            {"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},
+            {"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}
+          ]
+        },
+        {
+          "group": "Remplacement Épée énergétique",
+          "type": "conditional_weapon",
+          "description": "Remplacer l'Épée énergétique par :",
+          "requires": ["Pistolet lourd de sergent + Épée énergétique"],
+          "options": [{"name": "Poing énergétique","cost": 10,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]
+        }
       ]
     },
     {
@@ -221,9 +564,25 @@
       "defense": 3,
       "base_cost": 155,
       "special_rules": ["Guerrier né","Implacable","Sans peur"],
-      "weapon": [{"name": "Lance-flammes lourds","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": ["Explosion (3)","Fiable"]},{"name": "ACC","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}],
+      "weapon": [
+        {"name": "Lance-flammes lourds","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": ["Explosion (3)","Fiable"]},
+        {"name": "ACC","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}
+      ],
       "upgrade_groups": [
-        {"group": "Remplacement n'importe quel Lance-flammes lourd","type": "conditional_weapon","description": "Remplacer n'importe quel Lance-flammes lourd par :","requires": ["Lance-flammes lourds"],"options": [{"name": "Canon antigrav","cost": 5,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon antigrav","range": 24,"attacks": 1,"armor_piercing": 2,"special_rules": ["Fracas"]}},{"name": "Mitrailleuse lourde","cost": 25,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},{"name": "Fusil à fusion lourd","cost": 25,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Fusil à fusion lourd","range": 18,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},{"name": "Lance-missiles","cost": 40,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Lance-missiles","range": 30,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Imparable"]}},{"name": "Canon laser","cost": 55,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon laser","range": 36,"attacks": 1,"armor_piercing": 3,"special_rules": ["Mortel (3)"]}},{"name": "Canon à plasma","cost": 65,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon à plasma","range": 30,"attacks": 1,"armor_piercing": 4,"special_rules": ["Explosion (3)"]}}]}
+        {
+          "group": "Remplacement n'importe quel Lance-flammes lourd",
+          "type": "variable_weapon_count",
+          "description": "Remplacer n'importe quel Lance-flammes lourd par (0–3) :",
+          "requires": ["Lance-flammes lourds"],
+          "options": [
+            {"name": "Canon antigrav","cost": 5,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon antigrav","range": 24,"attacks": 1,"armor_piercing": 2,"special_rules": ["Fracas"]}},
+            {"name": "Mitrailleuse lourde","cost": 25,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},
+            {"name": "Fusil à fusion lourd","cost": 25,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Fusil à fusion lourd","range": 18,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},
+            {"name": "Lance-missiles","cost": 40,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Lance-missiles","range": 30,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Imparable"]}},
+            {"name": "Canon laser","cost": 55,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon laser","range": 36,"attacks": 1,"armor_piercing": 3,"special_rules": ["Mortel (3)"]}},
+            {"name": "Canon à plasma","cost": 65,"min_count": 0,"max_count": {"type": "fixed","value": 3},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon à plasma","range": 30,"attacks": 1,"armor_piercing": 4,"special_rules": ["Explosion (3)"]}}
+          ]
+        }
       ]
     },
     {
