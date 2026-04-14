@@ -246,7 +246,7 @@
           "group": "Amélioration figurine spéciale",
           "type": "upgrades",
           "description": "Améliorer une figurine avec :",
-          "options": [{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]
+          "options": [{"name": "Matrice de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]
         },
         {
           "group": "Sergent",
@@ -616,7 +616,7 @@
       "upgrade_groups": [
         {"group": "Remplacement Lance-grenades","type": "conditional_weapon","description": "Remplacer n'importe quel Lance-grenades par :","requires": ["Lance-grenades"],"options": [{"name": "Fusil lourd jumelé","cost": 5,"replaces": ["Lance-grenades"],"weapon": {"name": "Fusil lourd jumelé","range": 24,"attacks": 2,"armor_piercing": 1,"special_rules": []}}]},
         {"group": "Remplacement tous Pistolets lourds et ACC","type": "weapon","description": "Remplacer tous les Pistolets lourds et ACC par :","options": [{"name": "Fusil lourd + ACC (A1)","cost": 5,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Fusil lourd","range": 24,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "ACC (A1)","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}]}]},
-        {"group": "Amélioration figurine spéciale","type": "upgrades","description": "Améliorer une figurine avec :","options": [{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]},
+        {"group": "Amélioration figurine spéciale","type": "upgrades","description": "Améliorer une figurine avec :","options": [{"name": "Matrice de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]},
         {"group": "Sergent","type": "conditional_weapon","description": "Remplacer un Pistolet lourd et une ACC par :","options": [{"name": "Pistolet lourd de sergent + Épée énergétique","cost": 5,"replaces": ["Pistolets lourds","ACC"],"weapon": [{"name": "Pistolet lourd de sergent","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},{"name": "Épée énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 1,"special_rules": ["Perforant"]}]}]},
         {"group": "Remplacement Pistolet lourd de sergent","type": "conditional_weapon","description": "Remplacer le Pistolet lourd de sergent par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Pistolet antigrav","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]}},{"name": "Pistolet à plasma","cost": 5,"replaces": ["Pistolet lourd de sergent"],"weapon": {"name": "Pistolet à plasma","range": 12,"attacks": 1,"armor_piercing": 4,"special_rules": []}}]},
         {"group": "Remplacement Épée énergétique","type": "conditional_weapon","description": "Remplacer l'Épée énergétique par :","requires": ["Pistolet lourd de sergent + Épée énergétique"],"options": [{"name": "Poing énergétique","cost": 5,"replaces": ["Épée énergétique"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 4,"special_rules": []}}]}
@@ -666,7 +666,7 @@
       "special_rules": ["Coriace (6)","Guerrier né","Impact (3)","Rapide","Sans peur","Transport (11)"],
       "weapon": [{"name": "Fusil Tempête","range": 24,"attacks": 3,"armor_piercing": 1,"special_rules": []}],
       "upgrade_groups": [
-        {"group": "Amélioration Tableau de ciblage","type": "upgrades","description": "Améliorer avec :","options": [{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]},
+        {"group": "Amélioration Matrice de ciblage","type": "upgrades","description": "Améliorer avec :","options": [{"name": "Matrice de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]},
         {"group": "Arme supplémentaire","type": "upgrades","description": "Améliorer avec une des options suivantes :","options": [{"name": "Fusil Tempête supplémentaire","cost": 45,"weapon": {"name": "Fusil Tempête supplémentaire","range": 24,"attacks": 3,"armor_piercing": 1,"special_rules": []}},{"name": "Fusil à fusion lourd","cost": 50,"weapon": {"name": "Fusil à fusion lourd","range": 18,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}}]},
         {"group": "Améliorations optionnelles","type": "upgrades","description": "Améliorer avec n'importe lesquelles :","options": [{"name": "Lame bulldozer","cost": 5,"special_rules": ["Arpenteur"]},{"name": "Missiles chasseurs","cost": 20,"special_rules": ["Limité"],"weapon": {"name": "Missiles chasseurs","range": 24,"attacks": 1,"armor_piercing": 2,"special_rules": ["Mortel (3)","Limité","Imparable"]}}]}
       ]
@@ -698,7 +698,7 @@
       "weapon": [{"name": "Lance-mort","range": 18,"attacks": 1,"armor_piercing": 0,"special_rules": ["Explosion (6)"]}],
       "upgrade_groups": [
         {"group": "Remplacement Lance-mort","type": "weapon","description": "Remplacer le Lance-mort par :","options": [{"name": "Fusil Tempête rapide","cost": 55,"replaces": ["Lance-mort"],"weapon": {"name": "Fusil Tempête rapide","range": 24,"attacks": 6,"armor_piercing": 1,"special_rules": []}}]},
-        {"group": "Amélioration Tableau de ciblage","type": "upgrades","description": "Améliorer avec :","options": [{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]}
+        {"group": "Amélioration Matrice de ciblage","type": "upgrades","description": "Améliorer avec :","options": [{"name": "Matrice de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]}
       ]
     },
     {
@@ -714,7 +714,7 @@
       "upgrade_groups": [
         {"group": "Remplacement n'importe quel Lance-flammes lourd","type": "variable_weapon_count","description": "Remplacer n'importe quel Lance-flammes lourd par :","options": [{"name": "Mitrailleuse lourde","cost": 20,"min_count": 0,"max_count": {"type": "count_in_weapons","weapon_name": "Lance-flammes lourds"},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Mitrailleuse lourde","range": 30,"attacks": 3,"armor_piercing": 1,"special_rules": []}},{"name": "Fusil à fusion lourd","cost": 20,"min_count": 0,"max_count": {"type": "count_in_weapons","weapon_name": "Lance-flammes lourds"},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Fusil à fusion lourd","range": 18,"attacks": 1,"armor_piercing": 4,"special_rules": ["Mortel (3)"]}},{"name": "Canon d'assaut","cost": 30,"min_count": 0,"max_count": {"type": "count_in_weapons","weapon_name": "Lance-flammes lourds"},"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Canon d'assaut","range": 24,"attacks": 4,"armor_piercing": 1,"special_rules": []}}]},
         {"group": "Remplacement un Lance-flammes lourd","type": "conditional_weapon","description": "Remplacer un Lance-flammes lourd par :","requires": ["Lance-flammes lourds"],"options": [{"name": "Lance-missiles Ouragan jumelé","cost": 60,"replaces": ["Lance-flammes lourds"],"weapon": {"name": "Lance-missiles Ouragan jumelé","range": 24,"attacks": 4,"armor_piercing": 2,"special_rules": ["Imparable"]}}]},
-        {"group": "Améliorations optionnelles","type": "upgrades","description": "Améliorer avec n'importe lesquelles :","options": [{"name": "Côtés ouverts","cost": 15,"special_rules": ["Transport (6)"]},{"name": "Tableau de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]}
+        {"group": "Améliorations optionnelles","type": "upgrades","description": "Améliorer avec n'importe lesquelles :","options": [{"name": "Côtés ouverts","cost": 15,"special_rules": ["Transport (6)"]},{"name": "Matrice de ciblage","cost": 35,"special_rules": ["Marque Imparable au tir"]}]}
       ]
     },
     {
