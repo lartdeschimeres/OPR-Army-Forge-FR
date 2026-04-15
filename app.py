@@ -1692,258 +1692,77 @@ if st.session_state.page == "army":
                         elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
         elif gtype == "variable_weapon_count":
-            st.markdown(f"<div style='margin:10px 0;color:#555;font-style:italic;'>{group.get('description', '')}</div>", unsafe_allow_html=True)
-            
-            for o_idx, opt in enumerate(available_options):
-                opt_name = opt.get("name", "Option")
-                opt_cost = opt.get("cost", 0)
-                replaces_list = opt.get("replaces", [])
-                
-                # 1. Calcul dynamique du MAXIMUM autorisé
-                # Le max dépend de ce qui est DÉJÀ dans la liste 'weapons' à cet instant précis.
-                mc_cfg = opt.get("max_count", {})
-                mc_type = mc_cfg.get("type", "size_based") if isinstance(mc_cfg, dict) else "size_based"
-                
-                current_max = 0
+            # Vérifier le requires du GROUPE (pas de l'option)
+            group_requires = group.get("requires", [])
+            if group_requires and not check_weapon_conditions(unit_key, group_requires, unit):
+                continue  # Groupe masqué si condition non remplie
+            st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
+            for oi,option in enumerate(group.get("options",[])):
+                req=option.get("requires",[])
+                if req and not check_weapon_conditions(unit_key,req,unit):
+                    st.markdown(f"<div style='color:#999;font-size:.9em;'>{option['name']} <em>(Non disponible)</em></div>",unsafe_allow_html=True); continue
+                # Profil(s) de l'arme sous le titre
+                _opt_nw = option.get("weapon", {})
+                _profiles = []
+                if isinstance(_opt_nw, list):
+                    _profiles = [f"⚔️ **{_w.get('name','')}** — {weapon_profile_md(_w)}" for _w in _opt_nw if isinstance(_w, dict)]
+                elif isinstance(_opt_nw, dict) and _opt_nw:
+                    _profiles = [f"⚔️ **{_opt_nw.get('name','')}** — {weapon_profile_md(_opt_nw)}"]
+                _profile_label = "  \n".join(_profiles)
+                st.markdown(f"**{option['name']}**" + (f"  \n{_profile_label}" if _profile_label else ""))
+                # ── BUG 1 FIX : max_count selon le type ──────────────────────
+                mc_cfg  = option.get("max_count", {})
+                mc_type = mc_cfg.get("type","size_based") if isinstance(mc_cfg,dict) else "size_based"
                 if mc_type == "fixed":
-                    current_max = mc_cfg.get("value", 0)
-                
+                    mc = mc_cfg.get("value",1)
+                elif mc_type == "size_based":
+                    mc = min(mc_cfg.get("value", unit.get("size",1)), unit.get("size",1))
                 elif mc_type == "count_in_weapons":
-                    # Cas critique : Frères d'Assaut Vétérans / Soutien
-                    # On compte combien d'armes cibles (ex: "Lance-flammes lourds") sont PRÉSENTES dans 'weapons'
-                    target_weapon_name = mc_cfg.get("weapon_name", "")
-                    if target_weapon_name:
-                        count_present = 0
-                        for w in weapons:
-                            if isinstance(w, dict) and w.get("name") == target_weapon_name:
-                                # Somme des counts (gère les unités combinées ou armes multiples)
-                                w_count = w.get("_count", w.get("count", 1))
-                                count_present += w_count
-                        current_max = count_present
-                    else:
-                        current_max = 0
-                
+                    # Compter les exemplaires encore présents dans weapons (courant)
+                    # _count pour les armes ajoutées par variable_weapon_count, count pour les armes de base
+                    wn = mc_cfg.get("weapon_name","")
+                    mc = sum(w.get("_count", w.get("count", 1)) for w in weapons if isinstance(w,dict) and w.get("name")==wn)
                 else:
-                    # Default: size based (taille de l'unité * multiplicateur)
-                    current_max = _effective_size
-
-                min_val = opt.get("min_count", 0)
-                # Sécurité : le max ne peut pas être inférieur au min
-                if current_max < min_val: current_max = min_val
-
-                # Clé unique pour ce slider spécifique
-                cnt_key = f"{unit_key}_{g_idx}_var_{o_idx}"
-                
-                # Récupérer la valeur précédente (pour persister entre les rerun)
-                prev_val = st.session_state.unit_selections.get(unit_key, {}).get(cnt_key, min_val)
-                
-                # Correction automatique si le max a diminué (ex: on a remplacé l'arme cible ailleurs)
-                if prev_val > current_max:
-                    prev_val = current_max
-                    # Mise à jour immédiate dans le session state pour cohérence
-                    if unit_key not in st.session_state.unit_selections:
-                        st.session_state.unit_selections[unit_key] = {}
-                    st.session_state.unit_selections[unit_key][cnt_key] = prev_val
-
-                # Affichage du Slider
-                # Label dynamique pour aider l'utilisateur (ex: "Max: 3 restants")
-                label_suffix = f" (Max: {current_max})"
-                count = st.number_input(
-                    f"{opt_name}{label_suffix}",
-                    min_value=min_val,
-                    max_value=current_max,
-                    value=prev_val,
-                    step=1,
-                    key=cnt_key,
-                    help=f"Vous pouvez remplacer jusqu'à {current_max} armes de type '{replaces_list[0] if replaces_list else 'base'}'."
-                )
-                
-                # Sauvegarde immédiate
-                st.session_state.unit_selections[unit_key][cnt_key] = count
-
-                if count > 0:
-                    total_opt_cost = count * opt_cost
-                    # Pour variable_weapon_count, le coût est généralement multiplié par le nombre d'unités si c'est une upgrade de troupe
-                    # Mais ici, le count représente déjà le nombre d'armes changées. 
-                    # Le coût dans le JSON est souvent "par arme".
-                    upgrades_cost_multi += total_opt_cost
-                    
-                    st.markdown(f":small_blue_diamond: **{opt_name}** x{count} = *{total_opt_cost} pts*")
-
-                    # --- APPLICATION DU REMPLACEMENT ---
-                    # 1. Préparer les nouvelles armes à ajouter
-                    new_weapons_to_add = []
-                    raw_w = opt.get("weapon")
-                    if isinstance(raw_w, dict): raw_w = [raw_w]
-                    
-                    for w in raw_w:
-                        if isinstance(w, dict):
-                            wc = copy.deepcopy(w)
-                            wc["_count"] = count
-                            wc["_upgraded"] = True
-                            wc["_source_var"] = True # Marqueur pour débogage
-                            new_weapons_to_add.append(wc)
-
-                    # 2. Retirer les anciennes armes (logique stricte)
-                    if replaces_list:
-                        remaining_to_remove = count
-                        cleaned_weapons = []
-                        
-                        for w in weapons:
-                            if not isinstance(w, dict) or w.get("name") not in replaces_list:
-                                cleaned_weapons.append(w)
-                                continue
-                            
-                            # C'est une arme à remplacer
-                            if remaining_to_remove <= 0:
-                                cleaned_weapons.append(w)
-                                continue
-
-                            w_count = w.get("_count", w.get("count", 1))
-                            
-                            if w_count > remaining_to_remove:
-                                # On en retire seulement une partie
-                                wc = copy.deepcopy(w)
-                                if "_count" in w: wc["_count"] -= remaining_to_remove
-                                elif "count" in w: wc["count"] -= remaining_to_remove
-                                cleaned_weapons.append(wc)
-                                remaining_to_remove = 0
-                            else:
-                                # On retire tout ce bloc d'armes
-                                remaining_to_remove -= w_count
-                                # On n'ajoute pas à cleaned_weapons (suppression)
-                        
-                        weapons = cleaned_weapons
-
-                    # 3. Ajouter les nouvelles armes
-                    weapons.extend(new_weapons_to_add)
-        elif gtype == "variable_weapon_count":
-            st.markdown(f"<div style='margin:10px 0;color:#555;font-style:italic;'>{group.get('description', '')}</div>", unsafe_allow_html=True)
-            
-            for o_idx, opt in enumerate(available_options):
-                opt_name = opt.get("name", "Option")
-                opt_cost = opt.get("cost", 0)
-                replaces_list = opt.get("replaces", [])
-                
-                # 1. Calcul dynamique du MAXIMUM autorisé
-                # Le max dépend de ce qui est DÉJÀ dans la liste 'weapons' à cet instant précis.
-                mc_cfg = opt.get("max_count", {})
-                mc_type = mc_cfg.get("type", "size_based") if isinstance(mc_cfg, dict) else "size_based"
-                
-                current_max = 0
-                if mc_type == "fixed":
-                    current_max = mc_cfg.get("value", 0)
-                
-                elif mc_type == "count_in_weapons":
-                    # Cas critique : Frères d'Assaut Vétérans / Soutien
-                    # On compte combien d'armes cibles (ex: "Lance-flammes lourds") sont PRÉSENTES dans 'weapons'
-                    target_weapon_name = mc_cfg.get("weapon_name", "")
-                    if target_weapon_name:
-                        count_present = 0
-                        for w in weapons:
-                            if isinstance(w, dict) and w.get("name") == target_weapon_name:
-                                # Somme des counts (gère les unités combinées ou armes multiples)
+                    mc = unit.get("size",1)
+                mc = max(mc, 0)
+                cnt_key = f"{unit_key}_{g_key}_cnt_{oi}"
+                prev = min(st.session_state.unit_selections[unit_key].get(cnt_key, option.get("min_count",0)), mc)
+                cnt = st.number_input(f"Nombre de {option['name']} (0 – {mc})", min_value=option.get("min_count",0), max_value=max(mc, option.get("min_count",0)), value=prev, step=1, key=cnt_key)
+                st.session_state.unit_selections[unit_key][cnt_key] = cnt
+                tc=cnt*option["cost"]
+                if _g_mult==1: upgrades_cost_unique+=tc
+                else: upgrades_cost_multi+=tc
+                if cnt > 0 or tc > 0:
+                    st.markdown(f"<div style='margin:10px 0;padding:8px;background:#f8f9fa;border-radius:4px;'><strong>{option['name']}</strong> × {cnt} = <strong style='color:#e74c3c;'>{tc} pts</strong></div>",unsafe_allow_html=True)
+                if cnt > 0:
+                    # BUG 2 FIX : fw repart de weapons COURANT (pas des armes de base)
+                    fw = copy.deepcopy(weapons)
+                    nw = option["weapon"]
+                    opt_replaces = option.get("replaces",[])
+                    # BUG 3 FIX : pour les armes avec count > 1, décrémenter count
+                    if opt_replaces:
+                        remaining = cnt
+                        new_fw = []
+                        for w in fw:
+                            if not isinstance(w,dict): new_fw.append(w); continue
+                            if w.get("name") in opt_replaces and remaining > 0:
+                                # Lire _count OU count (armes ajoutées vs armes de base)
                                 w_count = w.get("_count", w.get("count", 1))
-                                count_present += w_count
-                        current_max = count_present
-                    else:
-                        current_max = 0
-                
-                else:
-                    # Default: size based (taille de l'unité * multiplicateur)
-                    current_max = _effective_size
-
-                min_val = opt.get("min_count", 0)
-                # Sécurité : le max ne peut pas être inférieur au min
-                if current_max < min_val: current_max = min_val
-
-                # Clé unique pour ce slider spécifique
-                cnt_key = f"{unit_key}_{g_idx}_var_{o_idx}"
-                
-                # Récupérer la valeur précédente (pour persister entre les rerun)
-                prev_val = st.session_state.unit_selections.get(unit_key, {}).get(cnt_key, min_val)
-                
-                # Correction automatique si le max a diminué (ex: on a remplacé l'arme cible ailleurs)
-                if prev_val > current_max:
-                    prev_val = current_max
-                    # Mise à jour immédiate dans le session state pour cohérence
-                    if unit_key not in st.session_state.unit_selections:
-                        st.session_state.unit_selections[unit_key] = {}
-                    st.session_state.unit_selections[unit_key][cnt_key] = prev_val
-
-                # Affichage du Slider
-                # Label dynamique pour aider l'utilisateur (ex: "Max: 3 restants")
-                label_suffix = f" (Max: {current_max})"
-                count = st.number_input(
-                    f"{opt_name}{label_suffix}",
-                    min_value=min_val,
-                    max_value=current_max,
-                    value=prev_val,
-                    step=1,
-                    key=cnt_key,
-                    help=f"Vous pouvez remplacer jusqu'à {current_max} armes de type '{replaces_list[0] if replaces_list else 'base'}'."
-                )
-                
-                # Sauvegarde immédiate
-                st.session_state.unit_selections[unit_key][cnt_key] = count
-
-                if count > 0:
-                    total_opt_cost = count * opt_cost
-                    # Pour variable_weapon_count, le coût est généralement multiplié par le nombre d'unités si c'est une upgrade de troupe
-                    # Mais ici, le count représente déjà le nombre d'armes changées. 
-                    # Le coût dans le JSON est souvent "par arme".
-                    upgrades_cost_multi += total_opt_cost
-                    
-                    st.markdown(f":small_blue_diamond: **{opt_name}** x{count} = *{total_opt_cost} pts*")
-
-                    # --- APPLICATION DU REMPLACEMENT ---
-                    # 1. Préparer les nouvelles armes à ajouter
-                    new_weapons_to_add = []
-                    raw_w = opt.get("weapon")
-                    if isinstance(raw_w, dict): raw_w = [raw_w]
-                    
-                    for w in raw_w:
-                        if isinstance(w, dict):
-                            wc = copy.deepcopy(w)
-                            wc["_count"] = count
-                            wc["_upgraded"] = True
-                            wc["_source_var"] = True # Marqueur pour débogage
-                            new_weapons_to_add.append(wc)
-
-                    # 2. Retirer les anciennes armes (logique stricte)
-                    if replaces_list:
-                        remaining_to_remove = count
-                        cleaned_weapons = []
-                        
-                        for w in weapons:
-                            if not isinstance(w, dict) or w.get("name") not in replaces_list:
-                                cleaned_weapons.append(w)
-                                continue
-                            
-                            # C'est une arme à remplacer
-                            if remaining_to_remove <= 0:
-                                cleaned_weapons.append(w)
-                                continue
-
-                            w_count = w.get("_count", w.get("count", 1))
-                            
-                            if w_count > remaining_to_remove:
-                                # On en retire seulement une partie
-                                wc = copy.deepcopy(w)
-                                if "_count" in w: wc["_count"] -= remaining_to_remove
-                                elif "count" in w: wc["count"] -= remaining_to_remove
-                                cleaned_weapons.append(wc)
-                                remaining_to_remove = 0
+                                if w_count > remaining:
+                                    wc = w.copy()
+                                    # Décrémenter le bon champ
+                                    if "_count" in w: wc["_count"] = w_count - remaining
+                                    else: wc["count"] = w_count - remaining
+                                    new_fw.append(wc)
+                                    remaining = 0
+                                else:
+                                    remaining -= w_count
                             else:
-                                # On retire tout ce bloc d'armes
-                                remaining_to_remove -= w_count
-                                # On n'ajoute pas à cleaned_weapons (suppression)
-                        
-                        weapons = cleaned_weapons
-
-                    # 3. Ajouter les nouvelles armes
-                    weapons.extend(new_weapons_to_add)
-                    
+                                new_fw.append(w)
+                        fw = new_fw
+                    if isinstance(nw,dict): fw.append({**nw,"_count":cnt,"_replaces":opt_replaces,"_upgraded":True})
+                    elif isinstance(nw,list): fw.extend({**w2,"_count":cnt,"_replaces":opt_replaces,"_upgraded":True} for w2 in nw)
+                    weapons = fw
         elif gtype == "role":
             choices=["Aucun rôle"]; opt_map={}
             for o in group.get("options",[]):
