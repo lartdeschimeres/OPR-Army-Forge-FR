@@ -226,7 +226,7 @@
               "name": "Fusil de sniper",
               "cost": 20,
               "min_count": 0,
-              "max_count": {"type": "count_in_weapons","weapon_name": "Fusil lourd"},
+              "max_count": {"type": "fixed", "value": 3},
               "replaces": ["Fusil lourd"],
               "weapon": {"name": "Fusil de sniper","range": 30,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fiable","Élimination"]}
             }
