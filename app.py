@@ -1739,12 +1739,17 @@ if st.session_state.page == "army":
             else:
                 _group_budget = unit.get("size", 1)
             _group_budget = max(_group_budget, 0)
-            # Calculer la somme déjà utilisée par les AUTRES options du groupe
+            # ── Clés de toutes les options du groupe ──────────────────────────
             _group_options = group.get("options", [])
             _all_cnt_keys  = [f"{unit_key}_{g_key}_cnt_{oi2}" for oi2 in range(len(_group_options))]
-            _total_used_in_group = sum(
-                st.session_state.unit_selections[unit_key].get(k, 0) for k in _all_cnt_keys
-            )
+            # Lire les valeurs actuelles depuis st.session_state directement
+            # (Streamlit stocke les number_input dans st.session_state[key], pas dans unit_selections)
+            def _read_cnt(k):
+                # Priorité : st.session_state[k] (valeur Streamlit) puis unit_selections
+                v = st.session_state.get(k)
+                if v is not None:
+                    return int(v)
+                return st.session_state.unit_selections[unit_key].get(k, 0)
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
             for oi,option in enumerate(group.get("options",[])):
                 req=option.get("requires",[])
@@ -1779,16 +1784,15 @@ if st.session_state.page == "army":
                 else:
                     mc = unit.get("size",1)
                 mc = max(mc, 0)
-                # ── Interdépendance des sliders : limiter au budget restant ──────
+                # ── Interdépendance : recalculer le total depuis session_state à chaque option ──
                 cnt_key = f"{unit_key}_{g_key}_cnt_{oi}"
-                _my_current = st.session_state.unit_selections[unit_key].get(cnt_key, 0)
-                _others_used = _total_used_in_group - _my_current
+                _my_current = _read_cnt(cnt_key)
+                # Somme de toutes les AUTRES options du groupe (lues depuis session_state)
+                _others_used = sum(_read_cnt(k) for k in _all_cnt_keys if k != cnt_key)
                 _mc_interdep = max(min(mc, _group_budget - _others_used), 0)
-                prev = min(st.session_state.unit_selections[unit_key].get(cnt_key, option.get("min_count",0)), _mc_interdep)
+                prev = min(_my_current, _mc_interdep)
                 cnt = st.number_input(f"Nombre de {option['name']} (0 – {_mc_interdep})", min_value=option.get("min_count",0), max_value=max(_mc_interdep, option.get("min_count",0)), value=prev, step=1, key=cnt_key)
                 st.session_state.unit_selections[unit_key][cnt_key] = cnt
-                # Mettre à jour le total utilisé (pour les options suivantes dans le même groupe)
-                _total_used_in_group = _total_used_in_group - _my_current + cnt
                 tc=cnt*option["cost"]
                 if _g_mult==1: upgrades_cost_unique+=tc
                 else: upgrades_cost_multi+=tc
