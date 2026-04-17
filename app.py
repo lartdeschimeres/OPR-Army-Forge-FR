@@ -1,4 +1,3 @@
-
 import json
 import copy
 import streamlit as st
@@ -20,276 +19,91 @@ st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sideb
 # URL de l'app (pour le QR code de partage)
 APP_URL = "https://armybuilder-fra.streamlit.app/"
 
-# ── Couleur d'accent par jeu ──────────────────────────────────────────────────
-# Recalculé ICI, après set_page_config, en lisant session_state.game correctement.
-# Chaque jeu a une couleur bien distincte et lisible sur fond clair.
+# Couleur d'accent par jeu
 _GAME_COLORS = {
-    "Age of Fantasy":            "#2980b9",   # bleu
-    "Age of Fantasy Regiments":  "#8e44ad",   # violet
-    "Grimdark Future":           "#e74c3c",   # rouge vif (était #c0392b, trop sombre)
-    "Grimdark Future Firefight": "#e67e22",   # orange
-    "Age of Fantasy Skirmish":   "#27ae60",   # vert
-}
-_current_game = st.session_state.get("game") or ""
-_acc_color = _GAME_COLORS.get(_current_game, "#c0392b")
-
-# Palette grimdark par jeu
-_GAME_COLORS = {
-    "Age of Fantasy":            "#4a90d9",
-    "Age of Fantasy Regiments":  "#9b59b6",
+    "Age of Fantasy":            "#2980b9",
+    "Age of Fantasy Regiments":  "#8e44ad",
     "Grimdark Future":           "#c0392b",
-    "Grimdark Future Firefight": "#d35400",
+    "Grimdark Future Firefight": "#e67e22",
     "Age of Fantasy Skirmish":   "#27ae60",
 }
-_current_game = st.session_state.get("game") or ""
-_acc_color = _GAME_COLORS.get(_current_game, "#c0392b")
+_acc_color = _GAME_COLORS.get(st.session_state.get("game",""), "#2980b9")
 
 st.markdown(f"""<style>
-:root {{
-  --acc:      {_acc_color};
-  --bg:       #1a1a1f;
-  --bg2:      #23232a;
-  --bg3:      #2c2c35;
-  --border:   #3a3a45;
-  --text:     #d4d0c8;
-  --text-dim: #8a8680;
-  --text-hdr: #e8e0d0;
+:root {{--acc: {_acc_color};}}
+#MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{background: transparent;}}
+
+/* ── Forcer mode clair sur toute l'app ── */
+html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {{
+  color-scheme: light !important;
+  background-color: #e9ecef !important;
+  color: #212529 !important;
 }}
 
-#MainMenu {{visibility:hidden;}} footer {{visibility:hidden;}} header {{background:transparent;}}
-
-/* ══ Base ══ */
-html, body,
-.stApp,
-[data-testid="stAppViewContainer"],
-[data-testid="stMain"],
-[data-testid="stMainBlockContainer"],
-[data-testid="stVerticalBlock"],
-[data-testid="stHorizontalBlock"] {{
-  color-scheme: dark !important;
-  background-color: var(--bg) !important;
-  color: var(--text) !important;
-}}
-
-/* ══ Titres ══ */
-h1, h2, h3 {{
-  color: var(--text-hdr) !important;
-  letter-spacing: 0.06em;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 4px;
-}}
-h1 {{ font-size: clamp(1.2rem,4vw,1.6rem) !important; color: var(--acc) !important; }}
-h2 {{ font-size: clamp(1rem,3vw,1.25rem) !important; }}
-h3 {{ font-size: clamp(.9rem,2.5vw,1.05rem) !important; color: var(--text-dim) !important; border:none; }}
-
-/* ══ Markdown texte ══ */
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] li,
-[data-testid="stMarkdownContainer"] span,
-[data-testid="stMarkdownContainer"] div {{
-  color: var(--text) !important;
-}}
-strong, b {{ color: var(--text-hdr) !important; }}
-
-/* ══ Widgets : labels ══ */
-label, .stRadio label, .stCheckbox label,
-[data-testid="stSelectbox"] label,
-[data-testid="stNumberInput"] label,
-[data-testid="stTextInput"] label,
-[data-testid="stFileUploader"] label {{
-  color: var(--text-dim) !important;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}}
-
-/* ══ Inputs ══ */
-input, textarea, select,
-[data-baseweb="input"] input,
-[data-baseweb="select"] div,
-[data-baseweb="textarea"] textarea {{
-  background-color: var(--bg3) !important;
-  color: var(--text) !important;
-  border-color: var(--border) !important;
-}}
-
-/* ══ Selectbox / dropdown ══ */
-[data-testid="stSelectbox"] > div > div,
-[data-baseweb="select"] {{
-  background-color: var(--bg3) !important;
-  border-color: var(--border) !important;
-  color: var(--text) !important;
-}}
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-[role="listbox"] {{
-  background-color: var(--bg2) !important;
-  border: 1px solid var(--border) !important;
-}}
-[role="option"] {{
-  background-color: var(--bg2) !important;
-  color: var(--text) !important;
-}}
-[role="option"]:hover {{
-  background-color: var(--bg3) !important;
-  color: var(--acc) !important;
-}}
-
-/* ══ Radio ══ */
-[data-testid="stRadio"] > div {{
-  background: transparent !important;
-  gap: 6px;
-}}
-[data-testid="stRadio"] label {{
-  background: var(--bg2) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 4px;
-  padding: 5px 10px !important;
-  color: var(--text) !important;
-  font-size: 0.85rem !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  cursor: pointer;
-  transition: border-color .15s, color .15s;
-}}
-[data-testid="stRadio"] label:hover {{
-  border-color: var(--acc) !important;
-  color: var(--acc) !important;
-}}
-
-/* ══ Checkbox ══ */
-[data-testid="stCheckbox"] label {{
-  color: var(--text) !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-size: 0.9rem !important;
-}}
-
-/* ══ Expander ══ */
-[data-testid="stExpander"] {{
-  background-color: var(--bg2) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 4px;
-}}
-[data-testid="stExpander"] summary {{
-  color: var(--text-hdr) !important;
-  font-weight: 600;
-  letter-spacing: .04em;
-}}
-[data-testid="stExpanderDetails"] {{
-  background-color: var(--bg2) !important;
-  color: var(--text) !important;
-}}
-
-/* ══ Divider ══ */
-hr {{ border-color: var(--border) !important; opacity: .6; }}
-
-/* ══ Alertes ══ */
-[data-testid="stAlert"] {{
-  background-color: rgba(192,57,43,.15) !important;
-  border-left: 3px solid var(--acc) !important;
-  color: var(--text) !important;
-}}
-
-/* ══ Progress bar ══ */
-[data-testid="stProgress"] > div > div > div {{
-  background-color: var(--acc) !important;
-}}
-[data-testid="stProgress"] > div > div {{
-  background-color: var(--bg3) !important;
-}}
-
-/* ══ Boutons ══ */
-.stButton > button {{
-  background-color: var(--bg3) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 4px;
-  color: var(--text) !important;
-  font-weight: 600;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  font-size: .82rem;
-  min-height: 40px;
-  transition: border-color .15s, color .15s;
-}}
-.stButton > button:hover {{
-  border-color: var(--acc) !important;
-  color: var(--acc) !important;
-}}
-button[kind="primary"],
-.stButton > button[kind="primary"] {{
-  background: var(--acc) !important;
-  border-color: var(--acc) !important;
-  color: #fff !important;
-}}
-button[kind="primary"]:hover {{
-  filter: brightness(1.15);
-}}
-
-/* ══ Sidebar ══ */
+/* ── Sidebar : toujours fond clair, texte foncé ── */
 section[data-testid="stSidebar"],
 section[data-testid="stSidebar"] > div,
 section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {{
-  background-color: var(--bg2) !important;
-  border-right: 1px solid var(--border);
+  background-color: #dee2e6 !important;
+  color: #212529 !important;
+  border-right: 1px solid #adb5bd;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }}
+
+/* Textes dans la sidebar */
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] label,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] div,
 section[data-testid="stSidebar"] strong,
 section[data-testid="stSidebar"] .stMarkdown {{
-  color: var(--text) !important;
+  color: #212529 !important;
 }}
+
+/* Titres sidebar */
 section[data-testid="stSidebar"] h1,
 section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {{
-  color: var(--acc) !important;
-  border-color: var(--border) !important;
+  color: #202c45 !important;
 }}
+
+/* Boutons sidebar */
 section[data-testid="stSidebar"] .stButton > button {{
-  background-color: var(--bg3) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--border) !important;
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+  border: 1px solid #ced4da !important;
 }}
 
-/* ══ Composants custom ══ */
-.badge {{
-  display: inline-block;
-  padding: .25rem .65rem;
-  border-radius: 2px;
-  background: transparent;
-  border: 1px solid var(--acc);
-  color: var(--acc);
-  font-size: .75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: .6rem;
-}}
-.section-header {{
-  font-size: clamp(9px,2vw,10px);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--acc);
-  margin: 14px 0 5px;
-  padding: 3px 8px;
-  background: rgba(192,57,43,.08);
-  border-left: 2px solid var(--acc);
+/* Zone principale */
+[data-testid="stMain"], [data-testid="stMainBlockContainer"] {{
+  background-color: #e9ecef !important;
+  color: #212529 !important;
 }}
 
-/* ══ Responsive ══ */
+h1, h2, h3 {{color: #202c45; letter-spacing: 0.04em; font-weight: 600;}}
+.stSelectbox, .stNumberInput, .stTextInput {{background-color: white; border-radius: 6px; border: 1px solid #ced4da;}}
+button[kind="primary"] {{background: var(--acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
+.badge {{display: inline-block; padding: 0.35rem 0.75rem; border-radius: 4px; background: var(--acc); color: white; font-size: clamp(0.7rem,2vw,0.8rem); margin-bottom: 0.75rem; font-weight: 600;}}
+.stButton>button {{background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 6px; padding: 0.5rem 1rem; color: #212529; font-weight: 500; min-height: 44px;}}
+.stProgress > div > div > div {{background-color: var(--acc) !important;}}
+.section-sep {{background: var(--acc); opacity:.12; height:2px; margin: 8px 0 12px; border-radius:1px;}}
+.section-header {{font-size:clamp(10px,2.5vw,11px); font-weight:700; text-transform:uppercase; letter-spacing:.1em; color: var(--acc); margin: 16px 0 6px; padding: 4px 8px; background: rgba(0,0,0,.03); border-left: 3px solid var(--acc); border-radius: 0 4px 4px 0;}}
+/* ── Responsive mobile ── */
 @media (max-width: 640px) {{
-  [data-testid="column"] {{width:100% !important;flex:1 1 100% !important;min-width:100% !important;}}
-  .stButton>button {{width:100%;min-height:48px;font-size:14px;}}
-  section[data-testid="stSidebar"] {{box-shadow:none;}}
+  .stApp {{font-size: 14px;}}
+  /* Colonnes Streamlit empilées sur mobile */
+  [data-testid="column"] {{width: 100% !important; flex: 1 1 100% !important; min-width: 100% !important;}}
+  /* Boutons pleine largeur sur mobile */
+  .stButton>button {{width: 100%; min-height: 48px; font-size: 15px;}}
+  /* Agrandir les labels de formulaire */
+  .stSelectbox label, .stNumberInput label, .stTextInput label {{font-size: 14px !important;}}
+  /* Supprimer les shadows lourdes sur mobile */
+  section[data-testid="stSidebar"] {{box-shadow: none;}}
 }}
 @media (max-width: 480px) {{
-  h1 {{font-size:clamp(1.1rem,5vw,1.5rem) !important;}}
-  h2 {{font-size:clamp(.95rem,4vw,1.2rem) !important;}}
+  h1 {{font-size: clamp(1.2rem, 5vw, 1.8rem) !important;}}
+  h2 {{font-size: clamp(1rem, 4vw, 1.4rem) !important;}}
+  h3 {{font-size: clamp(0.9rem, 3.5vw, 1.2rem) !important;}}
 }}
 </style>""", unsafe_allow_html=True)
 
@@ -335,18 +149,20 @@ def export_faction_html(data):
         defe   = u.get("defense","?")
         cor    = u.get("coriace","")
         sr     = ", ".join(u.get("special_rules",[]))
-        named  = u.get("unit_detail") == "named_hero"
+        named  = u.get("unit_detail") == "named_hero" or "Unique" in u.get("special_rules",[])
         star   = "★ " if named else ""
         cor_s  = f" | Coriace {cor}" if cor else ""
         html   = f"""<div class='uc'>
 <div class='uh'><span><b>{star}{name} [{size}]</b></span><span class='uc-cost'>{cost} pts</span></div>
 <div class='us'>Qual {qual}+&nbsp;|&nbsp;Déf {defe}+{esc(cor_s)}</div>"""
         if sr: html += f"<div class='ur'>{esc(sr)}</div>"
+        # Armes de base
         wr = weapon_rows(u.get("weapon",[]))
         if wr:
             html += """<table class='wt'><thead><tr>
 <th>Arme</th><th>Portée</th><th>Att</th><th>PA</th><th>Règles spé.</th>
 </tr></thead><tbody>""" + wr + "</tbody></table>"
+        # Options
         for g in u.get("upgrade_groups",[]):
             gtype = g.get("type","")
             desc_g = esc(g.get("description",""))
@@ -357,6 +173,7 @@ def export_faction_html(data):
                 oname = esc(o.get("name",""))
                 ocost = o.get("cost",0)
                 cost_s = f"+{ocost} pts" if ocost > 0 else "Gratuit"
+                # Pour les montures, lire les SR depuis o["mount"] si présent
                 _mdata = o.get("mount",{})
                 if _mdata and gtype == "mount":
                     _msr = list(_mdata.get("special_rules",[]))
@@ -386,6 +203,7 @@ def export_faction_html(data):
                             att = w.get("attacks","?")
                             pa  = w.get("armor_piercing",0) or 0
                             sr2 = ", ".join(w.get("special_rules",[])) or ""
+                            # Ne pas répéter le nom de l'arme si identique à oname
                             _wname = w.get('name','')
                             _inner = f"{rng}, A{att}"
                             if pa: _inner += f", PA({pa})"
@@ -395,6 +213,7 @@ def export_faction_html(data):
                     det = ", ".join(parts)
                 elif osr:
                     det = esc(osr)
+                # det peut déjà contenir des parenthèses (profil arme) ou non (montures/SR)
                 label = oname if not det else (
                     f"{oname} {det}" if det.startswith("(") else f"{oname} ({det})")
                 html += (f"<div class='ol'>{label}"
@@ -402,6 +221,7 @@ def export_faction_html(data):
         html += "</div>"
         return html
 
+    # Groupes d'unités
     CATS = [
         ("Héros",                              ["hero"]),
         ("Unités de base",                    ["unit"]),
@@ -411,15 +231,18 @@ def export_faction_html(data):
         ("Personnages nommés",                 ["named_hero"]),
     ]
 
+    # Règles spéciales — catégorisation
     rules = data.get("faction_special_rules",[])
     spells = data.get("spells",{})
 
+    # Détecter la règle d'armée (première, ou celle marquée army_rule)
     army_rules = []
     aura_rules = []
     other_rules = []
     for r in rules:
         n = r.get("name","").lower()
         if r.get("army_rule") or (len(rules) > 0 and rules.index(r) == 0 and r.get("army_rule") is not False and "aura" not in n):
+            # Heuristique : première règle non-aura = règle d'armée
             if not army_rules and "aura" not in n:
                 army_rules.append(r)
                 continue
@@ -429,6 +252,7 @@ def export_faction_html(data):
             other_rules.append(r)
 
     def rules_section(title, rule_list, color="#1a1a2e"):
+        """Retourne un bloc sous-titre + règles pour insertion dans la zone column-count."""
         if not rule_list: return ""
         items = ""
         for r in rule_list:
@@ -459,10 +283,13 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 .main-title{background:#1a1a2e;color:#fff;text-align:center;padding:14px 8px 8px;font-size:20px;font-weight:700;letter-spacing:1px;}
 .main-sub{background:#16213e;color:#aab4d4;text-align:center;padding:3px;font-size:9px;}
 .intro{padding:8px 4px;font-size:10px;color:#444;border-bottom:1px solid #dee2e6;margin-bottom:8px;}
+/* Intro 2 colonnes */
 .section-hdr{font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.8px;
   color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:3px;margin-bottom:5px;}
 .intro-txt{font-size:8px;color:#333;line-height:1.45;margin:0;}
+/* Règles */
 .rules-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+/* Zone règles spéciales en 3 colonnes CSS */
 .rules-cols{column-count:3;column-gap:10px;column-rule:1px solid #dee2e6;margin:8px 0 10px;font-size:7.5px;}
 .spells-section{column-count:1;margin-top:6px;border-top:2px solid #2c3e7a;padding-top:4px;}
 .spells-hdr{background:#2c3e7a;padding:2px 6px;font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.5px;display:inline-block;width:100%;box-sizing:border-box;margin-bottom:4px;}
@@ -471,12 +298,14 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
   break-after:avoid;column-span:none;}
 .rs-hdr:first-child{margin-top:0;}
 .ri-blk{break-inside:avoid;margin-bottom:3px;line-height:1.35;}
+/* Récap */
 .recap-wrap{margin-bottom:8px;}
 .recap-banner{background:#2c3e7a;color:#fff;font-weight:700;font-size:9px;padding:3px 6px;margin-top:4px;}
 .recap-table{width:100%;border-collapse:collapse;font-size:8.5px;}
 .recap-table th{background:#eef1f8;padding:2px 4px;border:1px solid #dee2e6;font-weight:700;color:#6c757d;font-size:8px;}
 .recap-table td{padding:2px 4px;border:1px solid #dee2e6;vertical-align:top;}
 .recap-table tr:nth-child(even)td{background:#f8f9fa;}
+/* Catégories et cartes */
 .cat-banner{background:#1a1a2e;color:#fff;font-weight:700;font-size:11px;padding:4px 8px;margin:10px 0 4px;letter-spacing:.5px;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
 .uc{border:1px solid #dee2e6;border-radius:3px;overflow:hidden;}
@@ -497,24 +326,32 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 @media print{
   body{margin:0;padding:4px;}
   .page{max-width:100%;}
+  /* Chaque catégorie commence sur une nouvelle page */
   .cat-banner{page-break-before:always;break-before:page;}
+  /* Sauf la première bannière (Héros) : elle suit le récap sur la même page */
   .cat-banner:first-of-type{page-break-before:always;break-before:page;}
+  /* Les cartes d'unités ne se coupent pas */
   .uc{page-break-inside:avoid;break-inside:avoid;}
+  /* La grille 2 colonnes se coupe entre les cartes uniquement */
   .grid{page-break-inside:auto;}
+  /* Zone règles + sorts = page 1 complète */
   .rules-cols,.spells-section,.recap-wrap{page-break-inside:avoid;}
+  /* Éviter les coupures dans les titres */
   .main-title,.main-sub{page-break-after:avoid;}
   .page-gap{page-break-after:always;break-after:page;height:0;}
+  /* Ne pas sauter de page après la dernière catégorie */
   .page-gap:last-child{page-break-after:auto;break-after:auto;}
 }
 """
 
+    # Tableau récapitulatif
     def recap_row(u):
         bw = u.get("weapon",[])
         if isinstance(bw,dict): bw=[bw]
         sz = u.get("size",1)
         eq = []
         for w in bw:
-            if isinstance(w, dict):
+            if isinstance(w,dict):
                 cnt = w.get("count","")
                 cs  = f"{cnt}x " if cnt and cnt>1 else (f"{sz}x " if sz>1 else "1x ")
                 rng = fmt_r(w.get("range"))
@@ -598,6 +435,7 @@ with st.sidebar:
             heroes_now = len([u for u in st.session_state.army_list if u.get("type") == "hero"])
             st.markdown(f"**Unités :** {units_now} / {units_cap}")
             st.markdown(f"**Héros :** {heroes_now} / {heroes_cap}")
+    # ── Export HTML de faction ─────────────────────────────────────────────
     if st.session_state.get("faction_data"):
         st.subheader("📘 Fiche de faction")
         _fdata = st.session_state.faction_data
@@ -629,12 +467,15 @@ if not st.session_state.get("_qr_loaded"):
             import zlib as _z, base64 as _b64q, urllib.parse as _uq
             _raw  = _b64q.urlsafe_b64decode(_uq.unquote(_qp).encode() + b"==")
             _data = json.loads(_z.decompress(_raw).decode())
+            # Pré-remplir jeu, faction et points directement dans session_state
             if _data.get("game"):    st.session_state["game"]    = _data["game"]
             if _data.get("faction"): st.session_state["faction"] = _data["faction"]
             if _data.get("pts"):     st.session_state["points"]  = _data["pts"]
+            # Stocker army_list complète si présente
             if _data.get("army_list"):
                 st.session_state["_qr_army_list"] = _data["army_list"]
                 st.session_state["_qr_army_cost"] = _data.get("army_cost", 0)
+            # Stocker pour le bandeau info
             st.session_state["_qr_game"]    = _data.get("game", "")
             st.session_state["_qr_faction"] = _data.get("faction", "")
             st.session_state["_qr_pts"]     = _data.get("pts", 1000)
@@ -643,8 +484,7 @@ if not st.session_state.get("_qr_loaded"):
             st.query_params.clear()
             st.rerun()
     except Exception:
-        pass
-
+        pass  # paramètre invalide → ignorer silencieusement
 if "game" not in st.session_state: st.session_state.game = None
 if "faction" not in st.session_state: st.session_state.faction = None
 if "points" not in st.session_state: st.session_state.points = 0
@@ -700,17 +540,27 @@ def validate_army_rules(army_list, army_points, game):
             check_unit_copy_rule(army_list, army_points, game_config))
 
 def check_weapon_conditions(unit_key, requires, unit=None):
+    """
+    Vérifie si les conditions d'une option sont remplies.
+    Prend en compte :
+    - Les sélections explicites dans session_state (armes choisies, options nommées)
+    - Les armes de BASE de l'unité, actives sauf si remplacées par type=weapon
+    - Les armes de BASE retirées par un conditional_weapon avec replaces
+    """
     if not requires:
         return True
     current_weapons = []
     selections = st.session_state.unit_selections.get(unit_key, {})
 
+    # 1. Sélections explicites (armes choisies dans les groupes conditional/weapon)
     for v in selections.values():
         if isinstance(v, str) and v not in ("Aucune amélioration", "Aucune arme", "Aucun rôle",
                                              "Aucune monture", "Aucune option de mobilité"):
             current_weapons.append({"name": v.split(" (")[0]})
 
+    # 2. Armes de BASE — actives sauf si remplacées
     if unit is not None:
+        # a) Un groupe type=weapon actif → armes de base remplacées en bloc
         replaced_by_weapon_group = False
         for gi, g in enumerate(unit.get("upgrade_groups", [])):
             if g.get("type") != "weapon":
@@ -719,6 +569,7 @@ def check_weapon_conditions(unit_key, requires, unit=None):
             sel = selections.get(g_key, "")
             if not sel:
                 continue
+            # Reconstruire choices[0] = label de l'armement de base (= pas de remplacement)
             bw = unit.get("weapon", [])
             if isinstance(bw, list) and bw:
                 lbls = [w.get("name", "Arme") for w in bw if isinstance(w, dict)]
@@ -727,11 +578,15 @@ def check_weapon_conditions(unit_key, requires, unit=None):
                 default_lbl = bw.get("name", "Arme")
             else:
                 default_lbl = ""
+            # Remplacement actif seulement si l'utilisateur a choisi autre chose que le défaut
             if sel != default_lbl:
                 replaced_by_weapon_group = True
                 break
 
         if not replaced_by_weapon_group:
+            # Les requires vérifient l'armement de BASE de l'unité.
+            # Les retraits par d'autres conditional_weapon ne bloquent PAS les requires
+            # (ex: remplacer le Bouclier ne doit pas empêcher de remplacer l'ACC ensuite).
             for w in unit.get("weapon", []):
                 if isinstance(w, dict):
                     current_weapons.append(w)
@@ -744,8 +599,8 @@ def check_weapon_conditions(unit_key, requires, unit=None):
 def format_unit_option(u):
     name_part = u["name"] + (" [1]" if u.get("type") == "hero" else f" [{u.get('size', 10)}]")
     return f"{name_part} | Qual {u.get('quality','?')}+ | Déf {u.get('defense','?')}+ | {u.get('base_cost',0)} pts"
-
 def weapon_profile_md(weapon):
+    """Retourne une ligne de profil lisible pour l'UI : Mêlée | A2 | PA1 | Règles"""
     if not weapon or not isinstance(weapon, dict): return ""
     rng = weapon.get("range", "Mêlée")
     if rng in (None, "-", "mêlée", "Mêlée") or str(rng).lower() == "mêlée":
@@ -775,6 +630,7 @@ def format_weapon_option(weapon, cost=0):
     return profile
 
 def format_mobility_option(opt):
+    """Formate une option de mobilité GDF (données à la racine de l'option)."""
     if not opt or not isinstance(opt, dict): return "Aucune option"
     name = opt.get("name", "Option")
     cost = opt.get("cost", 0)
@@ -815,7 +671,7 @@ def format_mount_option(mount):
     return label + f" (+{cost} pts)"
 
 # ======================================================
-# EXPORT HTML — STYLE ARMYFORGE
+# EXPORT HTML — STYLE ARMYFORGE (VERSION FINALE CORRIGÉE)
 # ======================================================
 def export_html(army_list, army_name, army_limit):
 
@@ -835,6 +691,7 @@ def export_html(army_list, army_name, army_limit):
         return s if s.endswith('"') else f'{s}"'
 
     def collect_weapons(unit):
+        # unit["weapon"] contient DEJA toutes les armes consolidees par la page army
         result = []
         bw = unit.get("weapon", [])
         if isinstance(bw, dict): bw = [bw]
@@ -846,9 +703,12 @@ def export_html(army_list, army_name, army_limit):
                     wc["_is_base"] = True
                     if "_count" in wc and wc["_count"] <= 1:
                         del wc["_count"]
+                    # Arme de base sans count explicite → count implicite = unit_size
+                    # (si _count déjà défini = décrément par conditional_weapon → respecter)
                     if "_count" not in wc and "count" not in wc and _unit_size > 1:
                         wc["_count"] = _unit_size
                 result.append(wc)
+        # Armes de monture
         if unit.get("mount"):
             m = unit["mount"]
             if isinstance(m, dict):
@@ -862,6 +722,10 @@ def export_html(army_list, army_name, army_limit):
         return result
 
     def group_weapons(weapons, unit_size=1):
+        # Agrège les armes par profil.
+        # _count ou count → quantité ; sinon 1 par défaut.
+        # Le décrément des armes remplacées (variable_weapon_count) est déjà
+        # géré dans la boucle principale → pas de passe _replaces ici.
         wmap = {}
         for w in weapons:
             if not isinstance(w, dict): continue
@@ -925,9 +789,10 @@ def export_html(army_list, army_name, army_limit):
         return rows
 
     def render_upgrade_rows(unit):
-        return ""
+        return ""   # remplacé par render_upgrades_section
 
     def render_upgrades_section(unit):
+        """Bloc Améliorations sous les règles spéciales."""
         upgrades = []
         if "options" in unit and isinstance(unit["options"], dict):
             for group_opts in unit["options"].values():
@@ -967,8 +832,10 @@ def export_html(army_list, army_name, army_limit):
 {('<div style="margin-bottom:8px;">' + rhtml + '</div>') if rhtml else ""}
 <table class="weapon-table"><thead><tr><th>Arme</th><th>Por</th><th>Att</th><th>PA</th><th>Spé</th></tr></thead><tbody>{wrows}</tbody></table></div>"""
 
-    _rules_dict = dict(load_generic_rules())
-    _rules_dict.update(load_faction_rules_dict())
+    # Dictionnaire nom → description pour les tooltips (génériques + faction)
+    # Utilise le champ "key" pour le matching VF
+    _rules_dict = dict(load_generic_rules())  # génériques en base
+    _rules_dict.update(load_faction_rules_dict())  # faction par-dessus
 
     sorted_units = sorted(army_list, key=get_priority)
     total_cost = sum(u.get("cost",0) for u in sorted_units)
@@ -981,10 +848,16 @@ def export_html(army_list, army_name, army_limit):
 *{{box-sizing:border-box;}}
 body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margin:0;padding:12px;line-height:1.3;font-size:12px;}}
 .army{{max-width:210mm;margin:0 auto;}}
+
+/* ── Titre & résumé ── */
 .army-title{{text-align:center;font-size:18px;font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--accent);padding-bottom:6px;}}
 .army-summary{{display:flex;justify-content:space-between;align-items:center;background:var(--hdr);padding:8px 12px;border-radius:6px;margin:8px 0 12px;border:1px solid var(--brd);font-size:12px;}}
 .summary-cost{{font-family:monospace;font-size:16px;font-weight:bold;color:var(--red);}}
+
+/* ── Grille 2 colonnes ── */
 .units-grid{{display:grid;grid-template-columns:1fr 1fr;gap:8px;}}
+
+/* ── Carte unité ── */
 .unit-card{{background:var(--bg);border:1px solid var(--brd);border-radius:6px;break-inside:avoid;page-break-inside:avoid;font-size:11px;}}
 .unit-header{{padding:6px 8px 4px;background:var(--hdr);border-bottom:1px solid var(--brd);border-radius:6px 6px 0 0;}}
 .unit-name-container{{display:flex;justify-content:space-between;align-items:flex-start;}}
@@ -1005,11 +878,11 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
 .weapon-name{{font-weight:600;}}
 .rules-section{{margin:3px 0 0;}}
 .rules-title{{font-weight:600;margin-bottom:3px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}}
-.rule-tag{{background:var(--rule);padding:1px 6px;border-radius:3px;font-size:9px;border:1px solid var(--brd);margin-right:3px;margin-bottom:3px;display:inline-block;line-height:1.5;cursor:pointer;}}
-#opr-tooltip{{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;color:#fff;padding:12px 16px;border-radius:8px;font-size:11px;line-height:1.6;max-width:300px;white-space:pre-wrap;z-index:9999;text-align:left;box-shadow:0 4px 24px rgba(0,0,0,.5);}}
-#opr-overlay{{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.2);cursor:pointer;}}
+.rule-tag{{background:var(--rule);padding:1px 6px;border-radius:3px;font-size:9px;border:1px solid var(--brd);margin-right:3px;margin-bottom:3px;display:inline-block;line-height:1.5;cursor:pointer;}}#opr-tooltip{{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;color:#fff;padding:12px 16px;border-radius:8px;font-size:11px;line-height:1.6;max-width:300px;white-space:pre-wrap;z-index:9999;text-align:left;box-shadow:0 4px 24px rgba(0,0,0,.5);}}#opr-overlay{{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.2);cursor:pointer;}}
 .mount-section{{background:var(--mount);border:1px solid var(--brd);border-radius:4px;padding:4px 8px;margin:4px 0;font-size:10px;}}
 .mount-section .section-title{{font-size:10px;}}
+
+/* ── Page de légende (règles + sorts) ── */
 .legend-page{{page-break-before:always;break-before:page;padding:12px 0;}}
 .faction-rules{{padding:8px;border-radius:6px;border:1px solid var(--brd);}}
 .legend-title{{text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:12px;font-size:14px;font-weight:700;}}
@@ -1017,6 +890,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
 .rule-item:last-child{{border-bottom:none;margin-bottom:0;padding-bottom:0;}}
 .rule-name{{color:var(--accent);font-weight:600;font-size:8px;margin-bottom:1px;}}
 .rule-desc{{font-size:7.5px;line-height:1.28;color:#555;}}
+
 @media print{{
   body{{padding:6px;}}
   .army{{max-width:100%;}}
@@ -1042,12 +916,13 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         rules = get_rules(unit)
         def _get_rule_desc(r, rd):
             d = rd.get(r, "")
-            if not d:
+            if not d:  # matching partiel pour Coriace (9) → Coriace
                 for k, v in rd.items():
                     if r.startswith(k + " ") or r.startswith(k + "("):
                         return v
             return d
         def _safe_tip(txt):
+            """Encode la description pour data-tip."""
             return txt.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&#34;").replace("'", "&#39;")
         def _rule_tag(r):
             desc = _get_rule_desc(r, _rules_dict)
@@ -1102,18 +977,23 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
   </div>
 </div>"""
 
-    html += "</div>\n"
+    html += "</div>\n"  # ferme .units-grid
 
     try:
         faction_rules = st.session_state.get("faction_special_rules", [])
         faction_spells = st.session_state.get("faction_spells", {})
         all_rules = [r for r in faction_rules if isinstance(r, dict)]
         if all_rules or faction_spells:
+            # ── Page légende : règles + sorts en colonnes CSS auto-ajustées ──
+            # columns: auto répartit le contenu sur plusieurs colonnes en remplissant
+            # chaque colonne avant d'en créer une nouvelle → s'adapte à n'importe quel volume.
             html += """<div class="legend-page"><div class="faction-rules">"""
             html += """<div class="legend-title">📜 Règles spéciales &amp; Sorts</div>"""
             html += """<div style="columns:3;column-gap:12px;column-rule:1px solid #dee2e6;font-size:9px;">"""
 
             if all_rules:
+                if faction_spells:
+                    html += """<div style="break-after:column;"></div>""" if False else ""
                 for rule in sorted(all_rules, key=lambda x: x.get("name","").lower()):
                     html += (
                         f'<div class="rule-item" style="break-inside:avoid;">'
@@ -1137,11 +1017,16 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
                         f'</div>'
                     )
 
-            html += "</div></div></div>"
+            html += "</div></div></div>"  # ferme columns + faction-rules + legend-page
     except Exception as e:
         html += f'<div style="color:red;padding:10px;">Erreur règles faction : {esc(str(e))}</div>'
 
+    # QR code : stratégie double
+    # 1. qrcode[pil] installé → PNG base64 inline (offline)
+    # 2. fallback → URL api.qrserver.com (requiert internet à l'ouverture)
     import urllib.parse as _urlp
+    # QR code : URL vers l'app avec la liste encodée (compressée + base64)
+    # Le téléphone ouvre directement l'app au scan
     import zlib as _zlib
     _list_data = json.dumps({
         "game": st.session_state.get("game",""),
@@ -1166,6 +1051,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         _qr_b64 = _b64.b64encode(_buf.read()).decode()
         _qr_img_tag = f'<img src="data:image/png;base64,{_qr_b64}" style="width:96px;height:96px;display:block;margin:0 auto;border:1px solid var(--brd);border-radius:4px;" alt="QR code">'
     except Exception:
+        # Fallback URL externe (fonctionne si internet disponible à l'ouverture du HTML)
         _qr_url = "https://api.qrserver.com/v1/create-qr-code/?data=" + _urlp.quote(_payload) + "&size=96x96&margin=2"
         _qr_img_tag = f'<img src="{_qr_url}" style="width:96px;height:96px;display:block;margin:0 auto;border:1px solid var(--brd);border-radius:4px;" alt="QR code">'
 
@@ -1194,6 +1080,7 @@ function hideTip(){
     return html
 
 def load_generic_rules():
+    """Charge les règles génériques OPR indexées par le champ 'key' (ou 'name' si absent)."""
     try:
         _BASE = Path(__file__).resolve().parent
         for _p in [
@@ -1215,6 +1102,8 @@ def load_generic_rules():
     return {}
 
 def load_faction_rules_dict():
+    """Retourne un dict {clé VF: description} depuis les règles de la faction courante.
+    Utilise le champ 'key' si présent, sinon 'name'."""
     result = {}
     for r in st.session_state.get("faction_special_rules", []):
         if not isinstance(r, dict): continue
@@ -1247,6 +1136,7 @@ if st.session_state.page == "setup":
     factions_by_game, games = load_factions()
     if not games: st.error("Aucun jeu trouvé"); st.stop()
 
+    # ── Bandeau liste partagée reçue via QR ──────────────────────────────────
     if st.session_state.get("_qr_pending"):
         _qf = st.session_state.get("_qr_faction", "")
         _qg = st.session_state.get("_qr_game", "")
@@ -1260,12 +1150,14 @@ if st.session_state.page == "setup":
         )
         del st.session_state["_qr_pending"]
 
+    # Jeu courant
     current_game = st.session_state.get("game", games[0] if games else "")
 
+    # ── Couleurs et image par jeu ─────────────────────────────────────────────
     game_meta = {
         "Age of Fantasy":            {"color": "#2980b9", "short": "AoF"},
         "Age of Fantasy Regiments": {"color": "#8e44ad", "short": "AoF:R"},
-        "Grimdark Future":           {"color": "#e74c3c", "short": "GDF"},
+        "Grimdark Future":           {"color": "#c0392b", "short": "GDF"},
         "Grimdark Future Firefight":{"color": "#e67e22", "short": "GDF:FF"},
         "Age of Fantasy Skirmish":  {"color": "#27ae60", "short": "AoF:S"},
     }
@@ -1281,6 +1173,7 @@ if st.session_state.page == "setup":
     acc   = meta["color"]
     short = meta["short"]
 
+    # Image vignette en base64 si disponible
     vignette_html = ""
     img_path = game_images.get(current_game, "")
     if img_path and Path(img_path).exists():
@@ -1291,6 +1184,7 @@ if st.session_state.page == "setup":
         except Exception:
             pass
     if not vignette_html:
+        # Fallback : icône triangles SVG colorée par jeu
         vignette_html = f"""<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="32,6 58,54 6,54" stroke="{acc}" stroke-width="2.5" fill="none"/>
           <polygon points="32,16 50,48 14,48" stroke="{acc}" stroke-width="1.5" fill="{acc}" fill-opacity=".12"/>
@@ -1305,7 +1199,8 @@ if st.session_state.page == "setup":
         "Age of Fantasy Skirmish":   "Composez vos bandes pour l'escarmouche fantastique",
     }
     game_subtitle = game_subtitles.get(current_game, "Construisez et commandez vos armées")
-
+    # ── Hero banner ───────────────────────────────────────────────────────────
+    # SVG triangles inline (motif géométrique, pas de fichier externe)
     tri_svg = f"""<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.18;"
         viewBox="0 0 900 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
       <defs>
