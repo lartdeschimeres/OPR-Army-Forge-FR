@@ -1694,8 +1694,57 @@ if st.session_state.page == "army":
         elif gtype == "variable_weapon_count":
             # Vérifier le requires du GROUPE (pas de l'option)
             group_requires = group.get("requires", [])
-            if group_requires and not check_weapon_conditions(unit_key, group_requires, unit):
-                continue  # Groupe masqué si condition non remplie
+            if group_requires:
+                # Vérifier d'abord dans les weapons courantes (ex: Fusil lourd des Éclaireurs)
+                _req_in_current = all(
+                    any(w.get("name") == req for w in weapons if isinstance(w, dict))
+                    for req in group_requires
+                )
+                if not _req_in_current and not check_weapon_conditions(unit_key, group_requires, unit):
+                    continue  # Groupe masqué si condition non remplie
+            else:
+                # ── Auto-check : si toutes les options ont un "replaces", vérifier que
+                # ces armes existent dans weapons courants (ex: sniper des Éclaireurs) ──
+                _all_replaces = [r for opt in group.get("options", []) for r in opt.get("replaces", [])]
+                if _all_replaces:
+                    _replaces_present = any(
+                        w.get("name") in _all_replaces for w in weapons if isinstance(w, dict)
+                    )
+                    if not _replaces_present:
+                        continue  # Groupe masqué si rien à remplacer dans les weapons courantes
+            # ── Calcul du budget total du groupe (pour sliders interdépendants) ──
+            # On calcule mc_total à partir de la première option (toutes partagent le même max_count)
+            _first_opt = group.get("options", [{}])[0] if group.get("options") else {}
+            _mc_cfg_g  = _first_opt.get("max_count", {})
+            _mc_type_g = _mc_cfg_g.get("type", "size_based") if isinstance(_mc_cfg_g, dict) else "size_based"
+            if _mc_type_g == "fixed":
+                _group_budget = _mc_cfg_g.get("value", 1)
+            elif _mc_type_g == "count_in_weapons":
+                _wn_g = _mc_cfg_g.get("weapon_name", "")
+                # Les armes de base n'ont pas de _count/count explicite : elles valent size figurines
+                # Les armes ajoutées par variable_weapon_count ont _count explicite
+                _base_weapon_names = [w.get("name") for w in unit.get("weapon", []) if isinstance(w, dict)]
+                def _weapon_count(w, unit_size):
+                    if "_count" in w:
+                        return w["_count"]
+                    if "count" in w:
+                        return w["count"]
+                    # Arme de base sans count explicite → 1 exemplaire par figurine
+                    if w.get("name") in _base_weapon_names:
+                        return unit_size
+                    return 1
+                _group_budget = sum(_weapon_count(w, unit.get("size", 1)) for w in weapons if isinstance(w, dict) and w.get("name") == _wn_g)
+            elif _mc_type_g == "size_based":
+                _group_budget = min(_mc_cfg_g.get("value", unit.get("size", 1)), unit.get("size", 1))
+            else:
+                _group_budget = unit.get("size", 1)
+            _group_budget = max(_group_budget, 0)
+            # Calculer la somme déjà utilisée par les AUTRES options du groupe
+            _group_options = group.get("options", [])
+            _all_cnt_keys  = [f"{unit_key}_{g_key}_cnt_{oi2}" for oi2 in range(len(_group_options))]
+            _total_used_in_group = sum(
+                st.session_state.unit_selections[unit_key].get(k, 0) for k in _all_cnt_keys
+            )
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
             for oi,option in enumerate(group.get("options",[])):
                 req=option.get("requires",[])
@@ -1710,7 +1759,7 @@ if st.session_state.page == "army":
                     _profiles = [f"⚔️ **{_opt_nw.get('name','')}** — {weapon_profile_md(_opt_nw)}"]
                 _profile_label = "  \n".join(_profiles)
                 st.markdown(f"**{option['name']}**" + (f"  \n{_profile_label}" if _profile_label else ""))
-                # ── BUG 1 FIX : max_count selon le type ──────────────────────
+                # ── max_count selon le type ──────────────────────
                 mc_cfg  = option.get("max_count", {})
                 mc_type = mc_cfg.get("type","size_based") if isinstance(mc_cfg,dict) else "size_based"
                 if mc_type == "fixed":
@@ -1718,17 +1767,28 @@ if st.session_state.page == "army":
                 elif mc_type == "size_based":
                     mc = min(mc_cfg.get("value", unit.get("size",1)), unit.get("size",1))
                 elif mc_type == "count_in_weapons":
-                    # Compter les exemplaires encore présents dans weapons (courant)
-                    # _count pour les armes ajoutées par variable_weapon_count, count pour les armes de base
+                    # Compter les exemplaires dans weapons courants
+                    # Armes de base sans count explicite → 1 par figurine (× size)
                     wn = mc_cfg.get("weapon_name","")
-                    mc = sum(w.get("_count", w.get("count", 1)) for w in weapons if isinstance(w,dict) and w.get("name")==wn)
+                    _base_wnames = [w.get("name") for w in unit.get("weapon", []) if isinstance(w, dict)]
+                    def _wcount(w, sz):
+                        if "_count" in w: return w["_count"]
+                        if "count" in w: return w["count"]
+                        return sz if w.get("name") in _base_wnames else 1
+                    mc = sum(_wcount(w, unit.get("size",1)) for w in weapons if isinstance(w,dict) and w.get("name")==wn)
                 else:
                     mc = unit.get("size",1)
                 mc = max(mc, 0)
+                # ── Interdépendance des sliders : limiter au budget restant ──────
                 cnt_key = f"{unit_key}_{g_key}_cnt_{oi}"
-                prev = min(st.session_state.unit_selections[unit_key].get(cnt_key, option.get("min_count",0)), mc)
-                cnt = st.number_input(f"Nombre de {option['name']} (0 – {mc})", min_value=option.get("min_count",0), max_value=max(mc, option.get("min_count",0)), value=prev, step=1, key=cnt_key)
+                _my_current = st.session_state.unit_selections[unit_key].get(cnt_key, 0)
+                _others_used = _total_used_in_group - _my_current
+                _mc_interdep = max(min(mc, _group_budget - _others_used), 0)
+                prev = min(st.session_state.unit_selections[unit_key].get(cnt_key, option.get("min_count",0)), _mc_interdep)
+                cnt = st.number_input(f"Nombre de {option['name']} (0 – {_mc_interdep})", min_value=option.get("min_count",0), max_value=max(_mc_interdep, option.get("min_count",0)), value=prev, step=1, key=cnt_key)
                 st.session_state.unit_selections[unit_key][cnt_key] = cnt
+                # Mettre à jour le total utilisé (pour les options suivantes dans le même groupe)
+                _total_used_in_group = _total_used_in_group - _my_current + cnt
                 tc=cnt*option["cost"]
                 if _g_mult==1: upgrades_cost_unique+=tc
                 else: upgrades_cost_multi+=tc
