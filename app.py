@@ -4,13 +4,6 @@ import streamlit as st
 from pathlib import Path
 from datetime import datetime
 import re
-import sys, os, tempfile
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-try:
-    from generate_faction_pdf import generate_faction_pdf as _gen_faction_pdf
-    _PDF_AVAILABLE = True
-except ImportError:
-    _PDF_AVAILABLE = False
 import math
 import base64
 
@@ -32,54 +25,8 @@ _acc_color = _GAME_COLORS.get(st.session_state.get("game",""), "#2980b9")
 st.markdown(f"""<style>
 :root {{--acc: {_acc_color};}}
 #MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{background: transparent;}}
-
-/* ── Forcer mode clair sur toute l'app ── */
-html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {{
-  color-scheme: light !important;
-  background-color: #e9ecef !important;
-  color: #212529 !important;
-}}
-
-/* ── Sidebar : toujours fond clair, texte foncé ── */
-section[data-testid="stSidebar"],
-section[data-testid="stSidebar"] > div,
-section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {{
-  background-color: #dee2e6 !important;
-  color: #212529 !important;
-  border-right: 1px solid #adb5bd;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-}}
-
-/* Textes dans la sidebar */
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div,
-section[data-testid="stSidebar"] strong,
-section[data-testid="stSidebar"] .stMarkdown {{
-  color: #212529 !important;
-}}
-
-/* Titres sidebar */
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3 {{
-  color: #202c45 !important;
-}}
-
-/* Boutons sidebar */
-section[data-testid="stSidebar"] .stButton > button {{
-  background-color: #f8f9fa !important;
-  color: #212529 !important;
-  border: 1px solid #ced4da !important;
-}}
-
-/* Zone principale */
-[data-testid="stMain"], [data-testid="stMainBlockContainer"] {{
-  background-color: #e9ecef !important;
-  color: #212529 !important;
-}}
-
+.stApp {{background: #e9ecef; color: #212529;}}
+section[data-testid="stSidebar"] {{background: #dee2e6; border-right: 1px solid #adb5bd; box-shadow: 2px 0 5px rgba(0,0,0,0.1);}}
 h1, h2, h3 {{color: #202c45; letter-spacing: 0.04em; font-weight: 600;}}
 .stSelectbox, .stNumberInput, .stTextInput {{background-color: white; border-radius: 6px; border: 1px solid #ced4da;}}
 button[kind="primary"] {{background: var(--acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
@@ -107,314 +54,10 @@ button[kind="primary"] {{background: var(--acc) !important; color: white !import
 }}
 </style>""", unsafe_allow_html=True)
 
-@st.cache_data
-def export_faction_html(data):
-    """Génère un HTML complet de la fiche de faction (toutes unités, règles, sorts)."""
-    def esc(t):
-        if t is None: return ""
-        return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"',"&quot;")
-
-    faction = data.get("faction","Faction")
-    game    = data.get("game","")
-    version = data.get("version","")
-    desc    = data.get("description","")
-    history = data.get("history","")
-
-    def fmt_r(r):
-        s = str(r) if r is not None else "-"
-        return s if s in ("Mêlée","-") else f'{s}"'
-
-    def weapon_rows(weapons):
-        if not weapons: return ""
-        bw = weapons if isinstance(weapons, list) else [weapons]
-        rows = ""
-        for w in bw:
-            if not isinstance(w, dict): continue
-            cnt  = w.get("count","")
-            cn   = f"{cnt}x " if cnt and cnt > 1 else ""
-            rng  = fmt_r(w.get("range"))
-            att  = w.get("attacks","-")
-            pa   = w.get("armor_piercing",0) or "-"
-            sr   = ", ".join(w.get("special_rules",[])) or "-"
-            rows += (f"<tr><td class='wn'><b>{esc(cn+w.get('name',''))}</b></td>"
-                     f"<td>{esc(rng)}</td><td>A{att}</td><td>{pa}</td>"
-                     f"<td class='ws'>{esc(sr)}</td></tr>\n")
-        return rows
-
-    def unit_card(u):
-        name   = esc(u["name"])
-        cost   = u.get("base_cost","?")
-        size   = u.get("size",1)
-        qual   = u.get("quality","?")
-        defe   = u.get("defense","?")
-        cor    = u.get("coriace","")
-        sr     = ", ".join(u.get("special_rules",[]))
-        named  = u.get("unit_detail") == "named_hero" or "Unique" in u.get("special_rules",[])
-        star   = "★ " if named else ""
-        cor_s  = f" | Coriace {cor}" if cor else ""
-        html   = f"""<div class='uc'>
-<div class='uh'><span><b>{star}{name} [{size}]</b></span><span class='uc-cost'>{cost} pts</span></div>
-<div class='us'>Qual {qual}+&nbsp;|&nbsp;Déf {defe}+{esc(cor_s)}</div>"""
-        if sr: html += f"<div class='ur'>{esc(sr)}</div>"
-        # Armes de base
-        wr = weapon_rows(u.get("weapon",[]))
-        if wr:
-            html += """<table class='wt'><thead><tr>
-<th>Arme</th><th>Portée</th><th>Att</th><th>PA</th><th>Règles spé.</th>
-</tr></thead><tbody>""" + wr + "</tbody></table>"
-        # Options
-        for g in u.get("upgrade_groups",[]):
-            gtype = g.get("type","")
-            desc_g = esc(g.get("description",""))
-            req   = g.get("requires",[])
-            req_s = f" <i>[{esc(', '.join(req))}]</i>" if req else ""
-            html += f"<div class='og'><b>{desc_g}</b>{req_s}</div>"
-            for o in g.get("options",[]):
-                oname = esc(o.get("name",""))
-                ocost = o.get("cost",0)
-                cost_s = f"+{ocost} pts" if ocost > 0 else "Gratuit"
-                # Pour les montures, lire les SR depuis o["mount"] si présent
-                _mdata = o.get("mount",{})
-                if _mdata and gtype == "mount":
-                    _msr = list(_mdata.get("special_rules",[]))
-                    _mws = _mdata.get("weapon",[])
-                    if isinstance(_mws,dict): _mws=[_mws]
-                    _mw_parts=[]
-                    for _mw in _mws:
-                        if isinstance(_mw,dict) and _mw.get('name'):
-                            _mp=f"{_mw['name']} (A{_mw.get('attacks','?')}"
-                            if _mw.get('armor_piercing'): _mp+=f", PA({_mw['armor_piercing']})"
-                            _msr2=', '.join(_mw.get('special_rules',[]))
-                            if _msr2: _mp+=f", {_msr2}"
-                            _mp+=")"; _mw_parts.append(esc(_mp))
-                    _mcor=_mdata.get('coriace_bonus',0)
-                    _mcor_s=[f"Coriace (+{_mcor})"] if _mcor else []
-                    osr = ", ".join(_mw_parts + _mcor_s + [esc(r) for r in _msr])
-                else:
-                    osr   = ", ".join(o.get("special_rules",[]))
-                ow    = o.get("weapon") if gtype != "mount" else None
-                det   = ""
-                if ow:
-                    ws = ow if isinstance(ow,list) else [ow]
-                    parts = []
-                    for w in ws:
-                        if isinstance(w,dict):
-                            rng = fmt_r(w.get("range"))
-                            att = w.get("attacks","?")
-                            pa  = w.get("armor_piercing",0) or 0
-                            sr2 = ", ".join(w.get("special_rules",[])) or ""
-                            # Ne pas répéter le nom de l'arme si identique à oname
-                            _wname = w.get('name','')
-                            _inner = f"{rng}, A{att}"
-                            if pa: _inner += f", PA({pa})"
-                            if sr2: _inner += f", {sr2}"
-                            p = f"{_wname} ({_inner})" if _wname != o.get('name','') else f"({_inner})"
-                            parts.append(esc(p))
-                    det = ", ".join(parts)
-                elif osr:
-                    det = esc(osr)
-                # det peut déjà contenir des parenthèses (profil arme) ou non (montures/SR)
-                label = oname if not det else (
-                    f"{oname} {det}" if det.startswith("(") else f"{oname} ({det})")
-                html += (f"<div class='ol'>{label}"
-                         f"<span class='oc'>{esc(cost_s)}</span></div>")
-        html += "</div>"
-        return html
-
-    # Groupes d'unités
-    CATS = [
-        ("Héros",                              ["hero"]),
-        ("Unités de base",                    ["unit"]),
-        ("Véhicules légers / Petits monstres", ["light_vehicle"]),
-        ("Véhicules / Monstres",               ["vehicle"]),
-        ("Titans",                             ["titan"]),
-        ("Personnages nommés",                 ["named_hero"]),
-    ]
-
-    # Règles spéciales — catégorisation
-    rules = data.get("faction_special_rules",[])
-    spells = data.get("spells",{})
-
-    # Détecter la règle d'armée (première, ou celle marquée army_rule)
-    army_rules = []
-    aura_rules = []
-    other_rules = []
-    for r in rules:
-        n = r.get("name","").lower()
-        if r.get("army_rule") or (len(rules) > 0 and rules.index(r) == 0 and r.get("army_rule") is not False and "aura" not in n):
-            # Heuristique : première règle non-aura = règle d'armée
-            if not army_rules and "aura" not in n:
-                army_rules.append(r)
-                continue
-        if "aura" in n:
-            aura_rules.append(r)
-        else:
-            other_rules.append(r)
-
-    def rules_section(title, rule_list, color="#1a1a2e"):
-        """Retourne un bloc sous-titre + règles pour insertion dans la zone column-count."""
-        if not rule_list: return ""
-        items = ""
-        for r in rule_list:
-            items += (f"<div class='ri-blk'>"
-                      f"<b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}"
-                      f"</div>")
-        return (f"<div class='rs-hdr' style='border-color:{color};color:{color};'>"
-                f"{esc(title)}</div>{items}")
-
-    spells_html = ""
-    if spells:
-        items = ""
-        for sname, sdata in spells.items():
-            sdesc = sdata.get("description",sdata) if isinstance(sdata,dict) else sdata
-            items += f"<div class='ri-blk'><b>{esc(sname)}</b> : {esc(sdesc)}</div>"
-        spells_html = f"<div class='rules-cols spells-section'><div class='rs-hdr spells-hdr' style='color:#fff;border-color:#2c3e7a;'>Sorts</div>{items}</div>"
-
-    units_html = ""
-    for cat_name, types in CATS:
-        cat_units = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
-        if not cat_units: continue
-        cards = "".join(unit_card(u) for u in cat_units)
-        units_html += f"<div class='cat-banner'>{esc(cat_name)}</div><div class='grid'>{cards}</div><div class='page-gap'></div>"
-
-    css = """
-body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;background:#fff;color:#212529;font-size:11px;}
-.page{max-width:210mm;margin:0 auto;}
-.main-title{background:#1a1a2e;color:#fff;text-align:center;padding:14px 8px 8px;font-size:20px;font-weight:700;letter-spacing:1px;}
-.main-sub{background:#16213e;color:#aab4d4;text-align:center;padding:3px;font-size:9px;}
-.intro{padding:8px 4px;font-size:10px;color:#444;border-bottom:1px solid #dee2e6;margin-bottom:8px;}
-/* Intro 2 colonnes */
-.section-hdr{font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.8px;
-  color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:3px;margin-bottom:5px;}
-.intro-txt{font-size:8px;color:#333;line-height:1.45;margin:0;}
-/* Règles */
-.rules-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
-/* Zone règles spéciales en 3 colonnes CSS */
-.rules-cols{column-count:3;column-gap:10px;column-rule:1px solid #dee2e6;margin:8px 0 10px;font-size:7.5px;}
-.spells-section{column-count:1;margin-top:6px;border-top:2px solid #2c3e7a;padding-top:4px;}
-.spells-hdr{background:#2c3e7a;padding:2px 6px;font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.5px;display:inline-block;width:100%;box-sizing:border-box;margin-bottom:4px;}
-.rs-hdr{font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.6px;
-  border-bottom:2px solid currentColor;padding-bottom:2px;margin:8px 0 4px;
-  break-after:avoid;column-span:none;}
-.rs-hdr:first-child{margin-top:0;}
-.ri-blk{break-inside:avoid;margin-bottom:3px;line-height:1.35;}
-/* Récap */
-.recap-wrap{margin-bottom:8px;}
-.recap-banner{background:#2c3e7a;color:#fff;font-weight:700;font-size:9px;padding:3px 6px;margin-top:4px;}
-.recap-table{width:100%;border-collapse:collapse;font-size:8.5px;}
-.recap-table th{background:#eef1f8;padding:2px 4px;border:1px solid #dee2e6;font-weight:700;color:#6c757d;font-size:8px;}
-.recap-table td{padding:2px 4px;border:1px solid #dee2e6;vertical-align:top;}
-.recap-table tr:nth-child(even)td{background:#f8f9fa;}
-/* Catégories et cartes */
-.cat-banner{background:#1a1a2e;color:#fff;font-weight:700;font-size:11px;padding:4px 8px;margin:10px 0 4px;letter-spacing:.5px;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
-.uc{border:1px solid #dee2e6;border-radius:3px;overflow:hidden;}
-.uh{background:#eef1f8;display:flex;justify-content:space-between;align-items:center;padding:3px 5px;border-bottom:1px solid #dee2e6;}
-.uh b{font-size:9px;}
-.uc-cost{font-size:8.5px;font-weight:700;color:#c0392b;}
-.us{background:#eef1f8;font-size:7.5px;color:#6c757d;font-weight:700;padding:2px 5px;border-bottom:1px solid #dee2e6;}
-.ur{background:#eef1f8;font-size:7px;padding:2px 5px;border-bottom:1px solid #dee2e6;}
-.wt{width:100%;border-collapse:collapse;font-size:8px;}
-.wt th{background:#eef1f8;padding:1px 3px;border-bottom:1px solid #dee2e6;color:#6c757d;font-size:7px;}
-.wt td{padding:1px 3px;border-bottom:1px solid #dee2e6;vertical-align:top;}
-.wt tr:last-child td{border-bottom:none;}
-.wn{font-size:8px;font-weight:700;}
-.ws{font-size:7px;color:#444;}
-.og{font-size:7.5px;font-weight:700;padding:2px 5px 1px;background:#f8f9fa;border-top:1px solid #dee2e6;margin-top:1px;}
-.ol{font-size:7px;padding:1px 5px 1px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f0f0f0;}
-.oc{color:#c0392b;font-weight:700;white-space:nowrap;margin-left:4px;}
-@media print{
-  body{margin:0;padding:4px;}
-  .page{max-width:100%;}
-  /* Chaque catégorie commence sur une nouvelle page */
-  .cat-banner{page-break-before:always;break-before:page;}
-  /* Sauf la première bannière (Héros) : elle suit le récap sur la même page */
-  .cat-banner:first-of-type{page-break-before:always;break-before:page;}
-  /* Les cartes d'unités ne se coupent pas */
-  .uc{page-break-inside:avoid;break-inside:avoid;}
-  /* La grille 2 colonnes se coupe entre les cartes uniquement */
-  .grid{page-break-inside:auto;}
-  /* Zone règles + sorts = page 1 complète */
-  .rules-cols,.spells-section,.recap-wrap{page-break-inside:avoid;}
-  /* Éviter les coupures dans les titres */
-  .main-title,.main-sub{page-break-after:avoid;}
-  .page-gap{page-break-after:always;break-after:page;height:0;}
-  /* Ne pas sauter de page après la dernière catégorie */
-  .page-gap:last-child{page-break-after:auto;break-after:auto;}
-}
-"""
-
-    # Tableau récapitulatif
-    def recap_row(u):
-        bw = u.get("weapon",[])
-        if isinstance(bw,dict): bw=[bw]
-        sz = u.get("size",1)
-        eq = []
-        for w in bw:
-            if isinstance(w,dict):
-                cnt = w.get("count","")
-                cs  = f"{cnt}x " if cnt and cnt>1 else (f"{sz}x " if sz>1 else "1x ")
-                rng = fmt_r(w.get("range"))
-                att = w.get("attacks","?")
-                pa  = w.get("armor_piercing",0) or 0
-                sr2 = ", ".join(w.get("special_rules",[])) or ""
-                p   = f"{cs}{w['name']} ({rng}, A{att}"
-                if pa: p += f", PA({pa})"
-                if sr2: p += f", {sr2}"
-                p += ")"
-                eq.append(esc(p))
-        return (f"<tr><td><b>{esc(u['name'])} [{sz}]</b></td>"
-                f"<td>{u.get('quality','?')}</td>"
-                f"<td>{u.get('defense','?')}</td>"
-                f"<td>{' | '.join(eq)}</td>"
-                f"<td>{esc(', '.join(u.get('special_rules',[]))[:80])}</td>"
-                f"<td><b>{u.get('base_cost','?')}</b></td></tr>")
-
-    recap_html = "<div class='recap-wrap'>"
-    for cat_name, types in [("Héros",["hero","named_hero"]),("Unités de base",["unit"]),("Véhicules légers / Monstres / Titans",["light_vehicle","vehicle","titan"])]:
-        cu = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
-        if not cu: continue
-        rows = "".join(recap_row(u) for u in cu)
-        recap_html += (f"<div class='recap-banner'>{esc(cat_name)}</div>"
-                       f"<table class='recap-table'><thead><tr>"
-                       f"<th>Nom [taille]</th><th>Qua</th><th>Déf</th>"
-                       f"<th>Équipement</th><th>Règles spéciales</th><th>Coût</th>"
-                       f"</tr></thead><tbody>{rows}</tbody></table>")
-    recap_html += "</div>"
-
-    return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
-<title>{esc(faction)} — {esc(game)}</title>
-<style>{css}</style></head><body><div class="page">
-<div class="main-title">{esc(faction.upper())}</div>
-<div class="main-sub">{esc(game)} — v{esc(version)}</div>
-{f'''<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 10px;">
-  <div>
-    <div class="section-hdr">Introduction</div>
-    <div class="intro-txt">{esc(desc)}</div>
-    <div class="section-hdr" style="margin-top:8px;">Au sujet d'OPR</div>
-    <div class="intro-txt">OPR (www.onepagerules.com) héberge de nombreux jeux gratuits conçus pour être rapides à apprendre et faciles à jouer. Ce projet a été réalisé par des joueurs, pour des joueurs, et ne peut exister que grâce au généreux soutien de notre formidable communauté ! Si vous souhaitez soutenir le développement de nos jeux, vous pouvez faire un don sur : www.patreon.com/onepagerules. Merci de jouer à OPR !</div>
-  </div>
-  <div>
-    <div class="section-hdr">Histoire de la faction</div>
-    <div class="intro-txt">{esc(history).replace(chr(10)+chr(10), "</p><p class=\'intro-txt\'>")}</div>
-  </div>
-</div>''' if desc or history else ""}
-<div class='rules-cols'>
-{rules_section("Règle spéciale de l'armée", army_rules)}
-{rules_section("Règles spéciales", other_rules, "#2c3e7a")}
-{rules_section("Règles spéciales d'aura", aura_rules, "#555")}
-</div>
-{spells_html}
-{recap_html}
-{units_html}
-</div></body></html>"""
-
-
-
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("OPR ArmyBuilder FRA")
+    st.title("🛡️ OPR ArmyBuilder FR")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
@@ -435,20 +78,6 @@ with st.sidebar:
             heroes_now = len([u for u in st.session_state.army_list if u.get("type") == "hero"])
             st.markdown(f"**Unités :** {units_now} / {units_cap}")
             st.markdown(f"**Héros :** {heroes_now} / {heroes_cap}")
-    # ── Export HTML de faction ─────────────────────────────────────────────
-    if st.session_state.get("faction_data"):
-        st.subheader("📘 Fiche de faction")
-        _fdata = st.session_state.faction_data
-        _faction_slug = re.sub(r'[^a-z0-9]', '_', _fdata.get("faction","faction").lower()).strip('_')
-        _html_faction = export_faction_html(_fdata)
-        st.download_button(
-            "📄 Exporter fiche faction (HTML)",
-            data=_html_faction,
-            file_name=f"{_faction_slug}_fiche.html",
-            mime="text/html",
-            use_container_width=True,
-            key="dl_faction_html"
-        )
     st.divider()
 
 if "page" not in st.session_state: st.session_state.page = "setup"
@@ -494,9 +123,9 @@ if "faction_special_rules" not in st.session_state: st.session_state.faction_spe
 if "faction_spells" not in st.session_state: st.session_state.faction_spells = {}
 
 GAME_CONFIG = {
-    "Age of Fantasy": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
     "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
 }
@@ -1079,6 +708,7 @@ function hideTip(){
     html += f'<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">Généré par OPR ArmyBuilder FRA — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
     return html
 
+@st.cache_data
 def load_generic_rules():
     """Charge les règles génériques OPR indexées par le champ 'key' (ou 'name' si absent)."""
     try:
@@ -1286,7 +916,7 @@ if st.session_state.page == "setup":
             st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points
             st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
             fd = factions_by_game[game][faction]
-            st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{}); st.session_state.faction_data = fd
+            st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{})
             # Réinitialiser l'armée seulement si jeu ou faction a changé
             if _game_changed or _faction_changed:
                 st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
@@ -1550,34 +1180,11 @@ if st.session_state.page == "army":
 
     
     weapons = copy.deepcopy(list(unit.get("weapon",[]))); selected_options = {}; mount = None
-    weapon_cost = 0; mount_cost = 0; upgrades_cost_multi = 0; upgrades_cost_unique = 0
-
-
-    def _is_unique_upgrade(g):
-        """True si cette amélioration reste x1 même pour une unité combinée."""
-        _gtype = g.get("type","")
-        _gname = g.get("group","")
-        _desc  = g.get("description","").lower()
-        _req   = g.get("requires",[])
-        # Sergent et ses cascades → toujours unique
-        if _gname == "Sergent": return True
-        if any("+" in r for r in _req): return True  # cascade sergent
-        # Rôles et mobilité (héros) → unique
-        if _gtype in ("role","mobility"): return True
-        # Upgrades : "toutes les figurines" → multiplié, sinon unique
-        if _gtype == "upgrades":
-            return "toutes" not in _desc
-        # conditional_weapon non-sergent → multiplié
-        if _gtype == "conditional_weapon":
-            return False
-        # variable_weapon_count → multiplié
-        return False
+    weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
 
     for g_idx, group in enumerate(unit.get("upgrade_groups",[])):
         g_key = f"group_{g_idx}"
         gtype = group.get("type","")
-        _multiplier_eff = 2 if st.session_state.get(f"{unit_key}_combined") else 1
-        _g_mult = 1 if _is_unique_upgrade(group) else _multiplier_eff
         # requires au niveau du groupe
         group_requires = group.get("requires", [])
         if group_requires and not check_weapon_conditions(unit_key, group_requires, unit): continue
@@ -1647,16 +1254,11 @@ if st.session_state.page == "army":
                 ch=st.radio(group.get("description","Sélectionnez une amélioration"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_cond")
                 st.session_state.unit_selections[unit_key][g_key]=ch
                 if ch!=choices[0]:
-                    opt=opt_map[ch]
-                    if _g_mult==1: upgrades_cost_unique+=opt.get("cost",0)
-                    else: upgrades_cost_multi+=opt.get("cost",0)
+                    opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
                         nw=opt["weapon"]
                         extra={"_upgraded":True}
                         if opt.get("requires"): extra["_unique"]=True
-                        # Pour unité combinée, arme de troupe (pas sergent/cascade) → _count=multiplier
-                        if not _is_unique_upgrade(group) and _multiplier_eff > 1:
-                            extra["_count"] = _multiplier_eff
                         # Si "replaces" → décrémenter ou retirer les armes remplacées
                         _cond_replaces = opt.get("replaces", [])
                         _multiplier_eff = 2 if st.session_state.get(f"{unit_key}_combined") else 1
@@ -1729,9 +1331,7 @@ if st.session_state.page == "army":
                 prev = min(st.session_state.unit_selections[unit_key].get(cnt_key, option.get("min_count",0)), mc)
                 cnt = st.number_input(f"Nombre de {option['name']} (0 – {mc})", min_value=option.get("min_count",0), max_value=max(mc, option.get("min_count",0)), value=prev, step=1, key=cnt_key)
                 st.session_state.unit_selections[unit_key][cnt_key] = cnt
-                tc=cnt*option["cost"]
-                if _g_mult==1: upgrades_cost_unique+=tc
-                else: upgrades_cost_multi+=tc
+                tc=cnt*option["cost"]; upgrades_cost+=tc
                 if cnt > 0 or tc > 0:
                     st.markdown(f"<div style='margin:10px 0;padding:8px;background:#f8f9fa;border-radius:4px;'><strong>{option['name']}</strong> × {cnt} = <strong style='color:#e74c3c;'>{tc} pts</strong></div>",unsafe_allow_html=True)
                 if cnt > 0:
@@ -1773,10 +1373,7 @@ if st.session_state.page == "army":
             ch=st.radio(group.get("group","Rôle"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_role",horizontal=len(choices)<=4)
             st.session_state.unit_selections[unit_key][g_key]=ch
             if ch!=choices[0]:
-                opt=opt_map[ch]
-                if _g_mult==1: upgrades_cost_unique+=opt.get("cost",0)
-                else: upgrades_cost_multi+=opt.get("cost",0)
-                selected_options[group.get("group","Rôle")]=[opt]
+                opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0); selected_options[group.get("group","Rôle")]=[opt]
                 rw=opt.get("weapon",[])
                 if isinstance(rw,list): weapons.extend(copy.deepcopy(rw))
                 elif isinstance(rw,dict): weapons.append(copy.deepcopy(rw))
@@ -1789,10 +1386,7 @@ if st.session_state.page == "army":
                 sr_str = f" ({', '.join(sr_label)})" if sr_label else ""
                 chk=st.checkbox(f"{o['name']}{sr_str} (+{o['cost']} pts)",value=st.session_state.unit_selections[unit_key].get(ok,False),key=ok)
                 st.session_state.unit_selections[unit_key][ok]=chk
-                if chk:
-                    if _g_mult==1: upgrades_cost_unique+=o["cost"]
-                    else: upgrades_cost_multi+=o["cost"]
-                    selected_options.setdefault(group.get("group","Options"),[]).append(o)
+                if chk: upgrades_cost+=o["cost"]; selected_options.setdefault(group.get("group","Options"),[]).append(o)
 
         elif gtype == "mobility":
             # Mobilité GDF : comme une monture mais données à la racine de l'option
@@ -1821,7 +1415,7 @@ if st.session_state.page == "army":
     if unit.get("type")!="hero" and unit.get("size",1)>1:
         if st.checkbox("Unité combinée",key=f"{unit_key}_combined"): multiplier=2
 
-    final_cost=(unit.get("base_cost",0)+weapon_cost+upgrades_cost_multi)*multiplier+upgrades_cost_unique+mount_cost
+    final_cost=(unit.get("base_cost",0)+weapon_cost)*multiplier+upgrades_cost+mount_cost
     st.subheader("Coût de l'unité sélectionnée"); st.markdown(f"**Coût total :** {final_cost} pts"); st.divider()
 
     if st.button("➕ Ajouter à l'armée",key=f"{unit_key}_add"):
@@ -1834,8 +1428,7 @@ if st.session_state.page == "army":
             so=st.session_state.unit_selections[unit_key].get(gk,"")
             if so and so not in ("Aucune amélioration","Aucun rôle"):
                 for opt in g.get("options",[]):
-                    _so_name = so.split(" | ")[0].split(" (+")[0].strip()
-                    if "special_rules" in opt and opt.get("name","") == _so_name: asr.extend(opt["special_rules"])
+                    if "special_rules" in opt and opt.get("name","") in so: asr.extend(opt["special_rules"])
         if mount:
             for r in mount.get("mount",{}).get("special_rules",[]):
                 if not r.startswith(("Griffes","Sabots")) and "Coriace" not in r: asr.append(r)
