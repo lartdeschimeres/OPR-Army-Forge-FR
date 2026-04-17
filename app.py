@@ -1,3 +1,4 @@
+
 import json
 import copy
 import streamlit as st
@@ -30,19 +31,34 @@ _GAME_COLORS = {
     "Age of Fantasy Skirmish":   "#27ae60",   # vert
 }
 _current_game = st.session_state.get("game") or ""
-_acc_color = _GAME_COLORS.get(_current_game, "#2980b9")
+_acc_color = _GAME_COLORS.get(_current_game, "#c0392b")
 
-# ── CSS global — mode clair forcé sur TOUS les composants ────────────────────
+# Palette grimdark par jeu
+_GAME_COLORS = {
+    "Age of Fantasy":            "#4a90d9",
+    "Age of Fantasy Regiments":  "#9b59b6",
+    "Grimdark Future":           "#c0392b",
+    "Grimdark Future Firefight": "#d35400",
+    "Age of Fantasy Skirmish":   "#27ae60",
+}
+_current_game = st.session_state.get("game") or ""
+_acc_color = _GAME_COLORS.get(_current_game, "#c0392b")
+
 st.markdown(f"""<style>
-:root {{--acc: {_acc_color};}}
-#MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{background: transparent;}}
+:root {{
+  --acc:      {_acc_color};
+  --bg:       #1a1a1f;
+  --bg2:      #23232a;
+  --bg3:      #2c2c35;
+  --border:   #3a3a45;
+  --text:     #d4d0c8;
+  --text-dim: #8a8680;
+  --text-hdr: #e8e0d0;
+}}
 
-/* ══════════════════════════════════════════════
-   FORCER MODE CLAIR — couverture élargie
-   (widgets natifs Streamlit inclus)
-   ══════════════════════════════════════════════ */
+#MainMenu {{visibility:hidden;}} footer {{visibility:hidden;}} header {{background:transparent;}}
 
-/* Racine et conteneurs principaux */
+/* ══ Base ══ */
 html, body,
 .stApp,
 [data-testid="stAppViewContainer"],
@@ -50,97 +66,174 @@ html, body,
 [data-testid="stMainBlockContainer"],
 [data-testid="stVerticalBlock"],
 [data-testid="stHorizontalBlock"] {{
-  color-scheme: light !important;
-  background-color: #e9ecef !important;
-  color: #212529 !important;
+  color-scheme: dark !important;
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
 }}
 
-/* Widgets : selectbox, number_input, text_input, radio, checkbox */
-[data-testid="stSelectbox"] > div,
+/* ══ Titres ══ */
+h1, h2, h3 {{
+  color: var(--text-hdr) !important;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}}
+h1 {{ font-size: clamp(1.2rem,4vw,1.6rem) !important; color: var(--acc) !important; }}
+h2 {{ font-size: clamp(1rem,3vw,1.25rem) !important; }}
+h3 {{ font-size: clamp(.9rem,2.5vw,1.05rem) !important; color: var(--text-dim) !important; border:none; }}
+
+/* ══ Markdown texte ══ */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] span,
+[data-testid="stMarkdownContainer"] div {{
+  color: var(--text) !important;
+}}
+strong, b {{ color: var(--text-hdr) !important; }}
+
+/* ══ Widgets : labels ══ */
+label, .stRadio label, .stCheckbox label,
 [data-testid="stSelectbox"] label,
-[data-testid="stNumberInput"] > div,
 [data-testid="stNumberInput"] label,
-[data-testid="stTextInput"] > div,
 [data-testid="stTextInput"] label,
-[data-testid="stRadio"] > div,
-[data-testid="stRadio"] label,
-[data-testid="stCheckbox"] > div,
-[data-testid="stCheckbox"] label,
-[data-testid="stFileUploader"] > div,
 [data-testid="stFileUploader"] label {{
-  background-color: #ffffff !important;
-  color: #212529 !important;
+  color: var(--text-dim) !important;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
 }}
 
-/* Champs de saisie texte/nombre */
+/* ══ Inputs ══ */
 input, textarea, select,
 [data-baseweb="input"] input,
 [data-baseweb="select"] div,
 [data-baseweb="textarea"] textarea {{
-  background-color: #ffffff !important;
-  color: #212529 !important;
-  border-color: #ced4da !important;
+  background-color: var(--bg3) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
 }}
 
-/* Dropdown Streamlit (liste déroulante ouverte) */
+/* ══ Selectbox / dropdown ══ */
+[data-testid="stSelectbox"] > div > div,
+[data-baseweb="select"] {{
+  background-color: var(--bg3) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}}
 [data-baseweb="popover"],
 [data-baseweb="menu"],
-[role="listbox"],
+[role="listbox"] {{
+  background-color: var(--bg2) !important;
+  border: 1px solid var(--border) !important;
+}}
 [role="option"] {{
-  background-color: #ffffff !important;
-  color: #212529 !important;
+  background-color: var(--bg2) !important;
+  color: var(--text) !important;
 }}
 [role="option"]:hover {{
-  background-color: #f0f4f8 !important;
+  background-color: var(--bg3) !important;
+  color: var(--acc) !important;
 }}
 
-/* Expander */
-[data-testid="stExpander"],
-[data-testid="stExpander"] > div,
+/* ══ Radio ══ */
+[data-testid="stRadio"] > div {{
+  background: transparent !important;
+  gap: 6px;
+}}
+[data-testid="stRadio"] label {{
+  background: var(--bg2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px;
+  padding: 5px 10px !important;
+  color: var(--text) !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}}
+[data-testid="stRadio"] label:hover {{
+  border-color: var(--acc) !important;
+  color: var(--acc) !important;
+}}
+
+/* ══ Checkbox ══ */
+[data-testid="stCheckbox"] label {{
+  color: var(--text) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 0.9rem !important;
+}}
+
+/* ══ Expander ══ */
+[data-testid="stExpander"] {{
+  background-color: var(--bg2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px;
+}}
+[data-testid="stExpander"] summary {{
+  color: var(--text-hdr) !important;
+  font-weight: 600;
+  letter-spacing: .04em;
+}}
 [data-testid="stExpanderDetails"] {{
-  background-color: #f8f9fa !important;
-  color: #212529 !important;
-  border-color: #dee2e6 !important;
-}}
-[data-testid="stExpander"] summary,
-[data-testid="stExpander"] summary span,
-[data-testid="stExpander"] summary p {{
-  color: #212529 !important;
+  background-color: var(--bg2) !important;
+  color: var(--text) !important;
 }}
 
-/* Divider */
-hr {{border-color: #dee2e6 !important;}}
+/* ══ Divider ══ */
+hr {{ border-color: var(--border) !important; opacity: .6; }}
 
-/* Alertes / info / warning / error */
+/* ══ Alertes ══ */
 [data-testid="stAlert"] {{
-  background-color: #fff3cd !important;
-  color: #664d03 !important;
+  background-color: rgba(192,57,43,.15) !important;
+  border-left: 3px solid var(--acc) !important;
+  color: var(--text) !important;
 }}
 
-/* Texte markdown général */
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] li,
-[data-testid="stMarkdownContainer"] span {{
-  color: #212529 !important;
-}}
-
-/* Progress bar — couleur depuis --acc */
+/* ══ Progress bar ══ */
 [data-testid="stProgress"] > div > div > div {{
   background-color: var(--acc) !important;
 }}
-/* Fond de la barre de progression */
 [data-testid="stProgress"] > div > div {{
-  background-color: #dee2e6 !important;
+  background-color: var(--bg3) !important;
+}}
+
+/* ══ Boutons ══ */
+.stButton > button {{
+  background-color: var(--bg3) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px;
+  color: var(--text) !important;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  font-size: .82rem;
+  min-height: 40px;
+  transition: border-color .15s, color .15s;
+}}
+.stButton > button:hover {{
+  border-color: var(--acc) !important;
+  color: var(--acc) !important;
+}}
+button[kind="primary"],
+.stButton > button[kind="primary"] {{
+  background: var(--acc) !important;
+  border-color: var(--acc) !important;
+  color: #fff !important;
+}}
+button[kind="primary"]:hover {{
+  filter: brightness(1.15);
 }}
 
 /* ══ Sidebar ══ */
 section[data-testid="stSidebar"],
 section[data-testid="stSidebar"] > div,
 section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {{
-  background-color: #dee2e6 !important;
-  color: #212529 !important;
-  border-right: 1px solid #adb5bd;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  background-color: var(--bg2) !important;
+  border-right: 1px solid var(--border);
 }}
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] label,
@@ -148,40 +241,55 @@ section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] div,
 section[data-testid="stSidebar"] strong,
 section[data-testid="stSidebar"] .stMarkdown {{
-  color: #212529 !important;
+  color: var(--text) !important;
 }}
 section[data-testid="stSidebar"] h1,
 section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {{
-  color: #202c45 !important;
+  color: var(--acc) !important;
+  border-color: var(--border) !important;
 }}
 section[data-testid="stSidebar"] .stButton > button {{
-  background-color: #f8f9fa !important;
-  color: #212529 !important;
-  border: 1px solid #ced4da !important;
+  background-color: var(--bg3) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
 }}
 
-/* ══ Zone principale ══ */
-h1, h2, h3 {{color: #202c45; letter-spacing: 0.04em; font-weight: 600;}}
-.stSelectbox, .stNumberInput, .stTextInput {{background-color: white; border-radius: 6px; border: 1px solid #ced4da;}}
-button[kind="primary"] {{background: var(--acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
-.badge {{display: inline-block; padding: 0.35rem 0.75rem; border-radius: 4px; background: var(--acc); color: white; font-size: clamp(0.7rem,2vw,0.8rem); margin-bottom: 0.75rem; font-weight: 600;}}
-.stButton>button {{background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 6px; padding: 0.5rem 1rem; color: #212529; font-weight: 500; min-height: 44px;}}
-.section-sep {{background: var(--acc); opacity:.12; height:2px; margin: 8px 0 12px; border-radius:1px;}}
-.section-header {{font-size:clamp(10px,2.5vw,11px); font-weight:700; text-transform:uppercase; letter-spacing:.1em; color: var(--acc); margin: 16px 0 6px; padding: 4px 8px; background: rgba(0,0,0,.03); border-left: 3px solid var(--acc); border-radius: 0 4px 4px 0;}}
+/* ══ Composants custom ══ */
+.badge {{
+  display: inline-block;
+  padding: .25rem .65rem;
+  border-radius: 2px;
+  background: transparent;
+  border: 1px solid var(--acc);
+  color: var(--acc);
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .6rem;
+}}
+.section-header {{
+  font-size: clamp(9px,2vw,10px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--acc);
+  margin: 14px 0 5px;
+  padding: 3px 8px;
+  background: rgba(192,57,43,.08);
+  border-left: 2px solid var(--acc);
+}}
 
-/* ══ Responsive mobile ══ */
+/* ══ Responsive ══ */
 @media (max-width: 640px) {{
-  .stApp {{font-size: 14px;}}
-  [data-testid="column"] {{width: 100% !important; flex: 1 1 100% !important; min-width: 100% !important;}}
-  .stButton>button {{width: 100%; min-height: 48px; font-size: 15px;}}
-  .stSelectbox label, .stNumberInput label, .stTextInput label {{font-size: 14px !important;}}
-  section[data-testid="stSidebar"] {{box-shadow: none;}}
+  [data-testid="column"] {{width:100% !important;flex:1 1 100% !important;min-width:100% !important;}}
+  .stButton>button {{width:100%;min-height:48px;font-size:14px;}}
+  section[data-testid="stSidebar"] {{box-shadow:none;}}
 }}
 @media (max-width: 480px) {{
-  h1 {{font-size: clamp(1.2rem, 5vw, 1.8rem) !important;}}
-  h2 {{font-size: clamp(1rem, 4vw, 1.4rem) !important;}}
-  h3 {{font-size: clamp(0.9rem, 3.5vw, 1.2rem) !important;}}
+  h1 {{font-size:clamp(1.1rem,5vw,1.5rem) !important;}}
+  h2 {{font-size:clamp(.95rem,4vw,1.2rem) !important;}}
 }}
 </style>""", unsafe_allow_html=True)
 
