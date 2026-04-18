@@ -14,20 +14,12 @@ except ImportError:
 import math
 import base64
 
+from armybuilder import ArmyBuilderApplication, APP_URL, GAME_COLORS, GAME_CONFIG
+
 st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="auto")
-
-# URL de l'app (pour le QR code de partage)
-APP_URL = "https://armybuilder-fra.streamlit.app/"
-
-# Couleur d'accent par jeu
-_GAME_COLORS = {
-    "Age of Fantasy":            "#2980b9",
-    "Age of Fantasy Regiments":  "#8e44ad",
-    "Grimdark Future":           "#c0392b",
-    "Grimdark Future Firefight": "#e67e22",
-    "Age of Fantasy Skirmish":   "#27ae60",
-}
-_acc_color = _GAME_COLORS.get(st.session_state.get("game",""), "#2980b9")
+application = ArmyBuilderApplication(Path(__file__).resolve().parent, st.session_state)
+application.initialize()
+_acc_color = GAME_COLORS.get(st.session_state.get("game",""), "#2980b9")
 
 st.markdown(f"""<style>
 :root {{--acc: {_acc_color};}}
@@ -382,27 +374,34 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
                        f"</tr></thead><tbody>{rows}</tbody></table>")
     recap_html += "</div>"
 
-    return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
-<title>{esc(faction)} — {esc(game)}</title>
-<style>{css}</style></head><body><div class="page">
-<div class="main-title">{esc(faction.upper())}</div>
-<div class="main-sub">{esc(game)} — v{esc(version)}</div>
-{f'''<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 10px;">
+    intro_block = ""
+    if desc or history:
+        history_html = esc(history).replace(
+            chr(10) + chr(10), "</p><p class='intro-txt'>"
+        )
+        intro_block = f"""<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 10px;">
   <div>
     <div class="section-hdr">Introduction</div>
     <div class="intro-txt">{esc(desc)}</div>
     <div class="section-hdr" style="margin-top:8px;">Au sujet d'OPR</div>
-    <div class="intro-txt">OPR (www.onepagerules.com) héberge de nombreux jeux gratuits conçus pour être rapides à apprendre et faciles à jouer. Ce projet a été réalisé par des joueurs, pour des joueurs, et ne peut exister que grâce au généreux soutien de notre formidable communauté ! Si vous souhaitez soutenir le développement de nos jeux, vous pouvez faire un don sur : www.patreon.com/onepagerules. Merci de jouer à OPR !</div>
+    <div class="intro-txt">OPR (www.onepagerules.com) h??berge de nombreux jeux gratuits con??us pour ??tre rapides ?? apprendre et faciles ?? jouer. Ce projet a ??t?? r??alis?? par des joueurs, pour des joueurs, et ne peut exister que gr??ce au g??n??reux soutien de notre formidable communaut?? ! Si vous souhaitez soutenir le d??veloppement de nos jeux, vous pouvez faire un don sur : www.patreon.com/onepagerules. Merci de jouer ?? OPR !</div>
   </div>
   <div>
     <div class="section-hdr">Histoire de la faction</div>
-    <div class="intro-txt">{esc(history).replace(chr(10)+chr(10), "</p><p class=\'intro-txt\'>")}</div>
+    <div class="intro-txt">{history_html}</div>
   </div>
-</div>''' if desc or history else ""}
+</div>"""
+
+    return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<title>{esc(faction)} ??? {esc(game)}</title>
+<style>{css}</style></head><body><div class="page">
+<div class="main-title">{esc(faction.upper())}</div>
+<div class="main-sub">{esc(game)} ??? v{esc(version)}</div>
+{intro_block}
 <div class='rules-cols'>
-{rules_section("Règle spéciale de l'armée", army_rules)}
-{rules_section("Règles spéciales", other_rules, "#2c3e7a")}
-{rules_section("Règles spéciales d'aura", aura_rules, "#555")}
+{rules_section("R??gle sp??ciale de l'arm??e", army_rules)}
+{rules_section("R??gles sp??ciales", other_rules, "#2c3e7a")}
+{rules_section("R??gles sp??ciales d'aura", aura_rules, "#555")}
 </div>
 {spells_html}
 {recap_html}
@@ -451,12 +450,6 @@ with st.sidebar:
         )
     st.divider()
 
-if "page" not in st.session_state: st.session_state.page = "setup"
-if "army_list" not in st.session_state: st.session_state.army_list = []
-if "army_cost" not in st.session_state: st.session_state.army_cost = 0
-if "unit_selections" not in st.session_state: st.session_state.unit_selections = {}
-if "draft_counter" not in st.session_state: st.session_state.draft_counter = 0
-if "draft_unit_name" not in st.session_state: st.session_state.draft_unit_name = ""
 
 # ── Lecture du paramètre ?list= (QR code de partage) ────────────────────────
 if not st.session_state.get("_qr_loaded"):
@@ -485,52 +478,28 @@ if not st.session_state.get("_qr_loaded"):
             st.rerun()
     except Exception:
         pass  # paramètre invalide → ignorer silencieusement
-if "game" not in st.session_state: st.session_state.game = None
-if "faction" not in st.session_state: st.session_state.faction = None
-if "points" not in st.session_state: st.session_state.points = 0
-if "list_name" not in st.session_state: st.session_state.list_name = ""
-if "units" not in st.session_state: st.session_state.units = []
-if "faction_special_rules" not in st.session_state: st.session_state.faction_special_rules = []
-if "faction_spells" not in st.session_state: st.session_state.faction_spells = {}
-
-GAME_CONFIG = {
-    "Age of Fantasy": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
-    "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
-}
 
 def check_hero_limit(army_list, army_points, game_config):
-    max_heroes = math.floor(army_points / game_config["hero_limit"])
-    hero_count = sum(1 for unit in army_list if unit.get("type") == "hero")
-    if hero_count > max_heroes:
-        st.error(f"Limite de héros dépassée! Max: {max_heroes} (1 héros/{game_config['hero_limit']} pts)")
+    error = application.validator.check_hero_limit(army_list, army_points, game_config)
+    if error:
+        st.error(error)
         return False
     return True
 
 def check_unit_max_cost(army_list, army_points, game_config, new_unit_cost=None):
-    max_cost = army_points * game_config["unit_max_cost_ratio"]
-    for unit in army_list:
-        if unit["cost"] > max_cost:
-            st.error(f"Unité {unit['name']} dépasse {int(max_cost)} pts (35% du total)")
-            return False
-    if new_unit_cost and new_unit_cost > max_cost:
-        st.error(f"Cette unité dépasse {int(max_cost)} pts (35% du total)")
+    error = application.validator.check_unit_max_cost(
+        army_list, army_points, game_config, new_unit_cost
+    )
+    if error:
+        st.error(error)
         return False
     return True
 
 def check_unit_copy_rule(army_list, army_points, game_config):
-    x_value = math.floor(army_points / game_config["unit_copy_rule"])
-    max_copies = 1 + x_value
-    unit_counts = {}
-    for unit in army_list:
-        name = unit["name"]
-        unit_counts[name] = unit_counts.get(name, 0) + 1
-    for unit_name, count in unit_counts.items():
-        if count > max_copies:
-            st.error(f"Trop de copies de {unit_name}! Max: {max_copies}")
-            return False
+    error = application.validator.check_unit_copy_rule(army_list, army_points, game_config)
+    if error:
+        st.error(error)
+        return False
     return True
 
 def validate_army_rules(army_list, army_points, game):
@@ -701,10 +670,9 @@ def export_html(army_list, army_name, army_limit):
                 wc = w.copy(); wc.setdefault("range", "Mêlée")
                 if not wc.get("_upgraded") and not wc.get("_mount_weapon"):
                     wc["_is_base"] = True
-                    if "_count" in wc and wc["_count"] <= 1:
-                        del wc["_count"]
-                    # Arme de base sans count explicite → count implicite = unit_size
-                    # (si _count déjà défini = décrément par conditional_weapon → respecter)
+                    # _count explicite = décrément partiel (ex: 1 Épée restante sur 3 après remplacement)
+                    # → on le respecte tel quel, on ne le supprime plus.
+                    # Seulement si pas de count du tout → count implicite = unit_size
                     if "_count" not in wc and "count" not in wc and _unit_size > 1:
                         wc["_count"] = _unit_size
                 result.append(wc)
@@ -1080,26 +1048,10 @@ function hideTip(){
     return html
 
 def load_generic_rules():
-    """Charge les règles génériques OPR indexées par le champ 'key' (ou 'name' si absent)."""
     try:
-        _BASE = Path(__file__).resolve().parent
-        for _p in [
-            _BASE / "repositories" / "data" / "generic_rules.json",
-            _BASE / "generic_rules.json",
-        ]:
-            if _p.exists():
-                with open(_p, encoding="utf-8") as f:
-                    data = json.load(f)
-                result = {}
-                for r in data.get("rules", []):
-                    if "name" not in r: continue
-                    desc = r.get("description", "")
-                    for k in r.get("key", [r["name"]]):
-                        result[k] = desc
-                return result
+        return application.load_generic_rules()
     except Exception:
-        pass
-    return {}
+        return {}
 
 def load_faction_rules_dict():
     """Retourne un dict {clé VF: description} depuis les règles de la faction courante.
@@ -1114,23 +1066,11 @@ def load_faction_rules_dict():
 
 @st.cache_data
 def load_factions():
-    factions = {}; games = set()
     try:
-        FACTIONS_DIR = Path(__file__).resolve().parent / "repositories" / "data" / "factions"
-        for fp in FACTIONS_DIR.glob("*.json"):
-            try:
-                with open(fp, encoding="utf-8") as f:
-                    data = json.load(f)
-                game = data.get("game"); faction = data.get("faction")
-                if game and faction:
-                    if game not in factions: factions[game] = {}
-                    data.setdefault("faction_special_rules", []); data.setdefault("spells", {}); data.setdefault("units", [])
-                    factions[game][faction] = data; games.add(game)
-            except Exception as e:
-                st.warning(f"Erreur chargement {fp.name}: {e}")
+        return application.load_factions()
     except Exception as e:
-        st.error(f"Erreur chargement des factions: {e}"); return {}, []
-    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
+        st.error(f"Erreur chargement des factions: {e}")
+        return {}, []
 
 if st.session_state.page == "setup":
     factions_by_game, games = load_factions()
@@ -1280,21 +1220,20 @@ if st.session_state.page == "setup":
     with colB:
         st.markdown("<span class='badge'>Action</span>", unsafe_allow_html=True)
         st.markdown("<p>Prêt à forger votre armée ?</p>", unsafe_allow_html=True)
-        if st.button("🔥 Construire l'armée", use_container_width=True, type="primary", disabled=not all([game, faction, points > 0]), key="build_army"):
+        if st.button("Construire l'armee", use_container_width=True, type="primary", disabled=not all([game, faction, points > 0]), key="build_army"):
             _game_changed    = st.session_state.get("game")    != game
             _faction_changed = st.session_state.get("faction") != faction
-            st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points
-            st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
             fd = factions_by_game[game][faction]
-            st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{}); st.session_state.faction_data = fd
-            # Réinitialiser l'armée seulement si jeu ou faction a changé
+            application.session.apply_faction_selection(
+                game=game,
+                faction=faction,
+                points=points,
+                list_name=list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}",
+                faction_data=fd,
+            )
             if _game_changed or _faction_changed:
-                st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
-            # Si une liste QR est en attente, l'injecter
-            if st.session_state.get("_qr_army_list"):
-                st.session_state.army_list = st.session_state.pop("_qr_army_list")
-                st.session_state.army_cost = st.session_state.pop("_qr_army_cost", 0)
-                st.session_state.unit_selections = {}
+                application.session.reset_army()
+            application.session.load_qr_army_if_pending()
             st.session_state.page = "army"; st.rerun()
 
 if st.session_state.page == "army":
@@ -1337,9 +1276,7 @@ if st.session_state.page == "army":
             try:
                 imported_data = json.loads(uploaded_file.getvalue().decode("utf-8"))
                 if not isinstance(imported_data, dict) or "army_list" not in imported_data: st.error("Fichier invalide."); st.stop()
-                st.session_state.list_name = imported_data.get("list_name", st.session_state.list_name)
-                st.session_state.army_list = imported_data["army_list"]
-                st.session_state.army_cost = imported_data.get("army_cost", sum(u["cost"] for u in imported_data["army_list"]))
+                application.session.load_imported_army(imported_data)
                 st.success(f"Liste importée ! ({len(imported_data['army_list'])} unités)"); st.rerun()
             except Exception as e: st.error(f"Erreur import: {e}")
 
