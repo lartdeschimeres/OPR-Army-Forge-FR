@@ -1807,16 +1807,22 @@ if st.session_state.page == "army":
                     if opt_replaces:
                         remaining = cnt
                         new_fw = []
+                        _base_w_names_vwc = [bw.get("name") for bw in unit.get("weapon", []) if isinstance(bw, dict)]
+                        _unit_sz_vwc = unit.get("size", 1)
                         for w in fw:
                             if not isinstance(w,dict): new_fw.append(w); continue
                             if w.get("name") in opt_replaces and remaining > 0:
-                                # Lire _count OU count (armes ajoutées vs armes de base)
-                                w_count = w.get("_count", w.get("count", 1))
+                                # Arme de base sans _count ni count → count implicite = unit.size
+                                if "_count" not in w and "count" not in w and w.get("name") in _base_w_names_vwc:
+                                    w_count = _unit_sz_vwc
+                                else:
+                                    w_count = w.get("_count", w.get("count", 1))
                                 if w_count > remaining:
                                     wc = w.copy()
                                     # Décrémenter le bon champ
                                     if "_count" in w: wc["_count"] = w_count - remaining
-                                    else: wc["count"] = w_count - remaining
+                                    elif "count" in w: wc["count"] = w_count - remaining
+                                    else: wc["_count"] = w_count - remaining  # arme de base → on pose _count
                                     new_fw.append(wc)
                                     remaining = 0
                                 else:
