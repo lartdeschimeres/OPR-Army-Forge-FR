@@ -26,7 +26,7 @@
             "description": "Une fois par partie, lors de son activation, lorsque cette figurine traverse des unités ennemies, choisissez-en une et lancez X dés. Pour chaque résultat de 4+, elle inflige trois blessures avec PA (1)."
         },
         {
-            "name": "Disentegrate [Désintégration]",
+            "name": "Disintegrate [Désintégration]",
             "description": "Ignore la règle spéciale Régénération, et contre les unités dont la plupart des figurines possèdent une Défense comprise entre 2+ et 3+, cette arme gagne PA (+2)."
         },
         {
