@@ -1,0 +1,1915 @@
+{
+  "faction": "Disciples de la Luxure",
+  "game": "Age of Fantasy",
+  "version": "FR-3.5.2",
+  "status": "complete",
+  "description": "Les Disciples du Havoc sont ceux qui ont embrassé un Dieu du Havoc en particulier. Chaque dieu accorde à ses fidèles des dons et des pouvoirs uniques. Leurs bandes de guerre sont ainsi spécialisées, façonnées selon les caprices de leur divinité.\n\nAbandonnées par l'Empire, les tribus du nord furent approchées par différents dieux qui leur offrirent une chance de survivre en échange de leur adoration. Chaque dieu renforça ses fidèles à sa manière, les reforgeant selon sa volonté. Après leur défaite lors des Guerres du Havoc, les Disciples furent coupés de leurs anciens patrons, mais avec l'ouverture de la Faille, ils brûlent de renouer leurs pactes après de longues années d'exil amer.",
+  "history": "L'arrivée des Dieux du Havoc en Tyria provoqua une grande instabilité, car certains commencèrent à vénérer ces nouvelles divinités. L'Empire rappela nombre de ses troupes pour défendre sa capitale et les régions voisines, espérant y écraser toute rébellion, tandis que les tribus du nord furent abandonnées à leur sort face aux dangers qui les entouraient.\n\nLe regard des Dieux du Havoc se tourna bientôt vers cette province délaissée, à la recherche de convertis et de champions potentiels. Chaque Dieu du Havoc chercha à attirer à lui des individus prometteurs et des tribus puissantes, accordant divers bienfaits à ses favoris en échange de leur adoration.\n\nLe Dieu de la Guerre offrait la force, permettant à ses Disciples de triompher de leurs ennemis. Le Changement apportait le savoir et une puissante magie. La Peste promettait une vitalité renouvelée à ceux que la maladie emportait. Quant à la Luxure, elle offrait rédemption et puissance à ceux que l'Empire avait rejetés.\n\nCes dons rendirent espoir et vigueur aux tribus désespérées que l'Empire avait abandonnées. Ceux qui acceptèrent le pacte reçurent de puissants bienfaits de leurs patrons, qui les reforgèrent à leur image. Ces Disciples du Havoc remboursèrent ces faveurs par une loyauté fanatique, prêts à consacrer leur vie au dieu qui les avait choisis. Chaque tribu se définit désormais par son culte, s'affirmant à travers sa dévotion envers son patron particulier. Lorsque les Guerres du Havoc éclatèrent pleinement, les tribus du nord qui subsistaient avaient complètement changé, embrassant chacune un ou plusieurs Dieux du Havoc.\n\nLorsque les Dieux du Havoc furent capturés, leurs fidèles les plus fanatiques furent soudain privés du sens même de leur existence. Certains se battirent jusqu'à la mort, désireux d'offrir leur vie pour venger leur dieu. D'autres s'enfuirent vers le nord, dispersés et affaiblis, mais toujours vivants. Ils menèrent une longue veille, infligeant les représailles qu'ils pouvaient en attendant le retour de leur patron. Cependant, sans direction ni espoir, beaucoup sombrèrent dans le désespoir. De mesquins conflits éclatèrent entre les bandes vouées à différents dieux, chacune cherchant à faire porter la responsabilité de la défaite aux autres.\n\nPuis la Grande Faille s'ouvrit et libéra leurs dieux en Tyria. Les Disciples du Havoc retrouvent alors un espoir renouvelé, impatients de prouver leur fidélité à leurs anciens maîtres. Pourtant, l'amertume de la défaite et les rivalités demeurent, car beaucoup se souviennent de leurs années passées dans l'ombre, et ils ne sont plus la force unie qui ravageait jadis le monde.\n\nComment ta dévotion te guidera-t-elle '",
+  "faction_special_rules": [
+    {
+      "name": "Lustbound [ Lié à la Luxure ]",
+      "detail": "Règle spéciale de l'armée",
+      "description": "Se deplace de +1\" avec Avance, et de +3\" avec Rush/Charge."
+    },
+    {
+      "name": "Sergeant [ Sergent ]",
+      "detail": "Règles spéciales",
+      "description": "lorsque cette figurine attaque, les résultats non modifiés de 6 pour toucher infligent 1 touche supplémentaire (seule la touche initiale compte pour un 6 en regard des règles spéciales)."
+    },
+    {
+      "name": "Unpredictable Fighter [ Combattant imprévisible ]",
+      "detail": "Règles spéciales",
+      "description": "Lors d'une attaque en mêlée, pour toutes les figurines disposant de cette régle, 1D6: sur 1-3 ils gagnent PA(1), sur 4-6 ils gagnent +1 pour toucher."
+    },
+    {
+      "name": "Breath Attack [ Attaque de souffle ]",
+      "detail": "Règles spéciales",
+      "description": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6. Sur un résultat de 2+, une unité ennemie dans un rayon de 6” en ligne de vue subit 1 touche avec Explosion(3) et PA(1)."
+    },
+    {
+      "name": "Slam [ Éclatement ]",
+      "detail": "Règles spéciales",
+      "description": "Ignore les Couverts et, sur des resultats non modifiés de 1 pour bloquer, cette arme inflige 1 blessure supplementaire."
+    },
+    {
+      "name": "Melee Slayer [ Tueur en mêlée ]",
+      "detail": "Règles spéciales",
+      "description": "Les armes de mêlée de cette figurine gagnent PA(+2) contre les unités dont la majorité des figurines possèdent Coriace(3) ou plus."
+    },
+    {
+      "name": "Versatile Attack [ Attaque versatile ]",
+      "detail": "Règles spéciales",
+      "description": "Quand cette unité est activée, choisissez un effet : jusqu'à la fin de l'activation, toutes les figurines de l'unité avec cette règle gagnent soit PA(+1), soit +1 aux jets pour toucher."
+    },
+    {
+      "name": "Shred in Melee [ Dechiquetage en mêlée ]",
+      "detail": "Règles spéciales",
+      "description": "Ce modele gagne Dechiquetage en mêlée."
+    },
+    {
+      "name": "Precision Fighter Buff [ Bonus de Combattant precis ]",
+      "detail": "Règles spéciales",
+      "description": "Une fois par activation, avant d'attaquer, choisissez une unité alliée à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    {
+      "name": "Steadfast Buff [ Bonus d’Inébranlable ]",
+      "detail": "Règles spéciales",
+      "description": "Une fois par activation, avant d'attaquer, choisissez une unité alliée a  12” ou moins, elle gagne Inébranlable une fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    {
+      "name": "Ignores Cover [ Ignore le couvert ]",
+      "detail": "Règles spéciales",
+      "description": "Cette arme ignore le couvert."
+    },
+    {
+      "name": "Versatile Defense [ Défense versatile ]",
+      "detail": "Règles spéciales",
+      "description": "Quand une unité où toutes les figurines possèdent cette règle est déployée ou activée, choisissez un effet jusqu'à la prochaine activation: lorsqu'elle est prise pour cible par un tir ou une charge a plus de 9”, l'unité gagne soit +1 aux jets de défense, soit les unités ennemies subissent -1 aux tests de touche contre elle."
+    },
+    {
+      "name": "Defense [ Defense ]",
+      "detail": "Règles spéciales",
+      "description": "Ce modele gagne +X a ses jets de Defense."
+    },
+    {
+      "name": "Shred [ Lacération ]",
+      "detail": "Règles spéciales",
+      "description": "Sur des résultats non modifiés de 1 pour bloquer des touches, cette arme inflige une blessure supplémentaire."
+    },
+    {
+      "name": "Unpredictable [ Imprévisible ]",
+      "detail": "Règles spéciales",
+      "description": "Pour toutes les figurines disposant de cette régle, lors d'une attaque, 1D6: sur 1-3 ils gagnent PA(1), sur 4-6 ils gagnent +1 pour toucher."
+    },
+    {
+      "name": "Ranged Shrouding [ Voile fluctuant ]",
+      "detail": "Règles spéciales",
+      "description": "Les ennemis ont -6” de portee lorsqu'ils tentent de tirer sur des unités où toutes les figurines possèdent cette règle."
+    },
+    {
+      "name": "Lustbound Boost [ Renforcement Lié à la Luxure ]",
+      "detail": "Règles spéciales",
+      "description": "Si ce modele a Lié à la Luxure, il se deplace de +2\" en Avance et +6\" en Rush/Charge grace a cette règle (au lieu de seulement +1\" et +3\")."
+    },
+    {
+      "name": "Steadfast [ Inébranlable ]",
+      "detail": "Règles spéciales",
+      "description": "Si une unité où toutes les figurines possèdent cette règle est Ébranlée au debut du round, 1D6: Sur 4+, elle cesse d'être Ébranlée."
+    },
+    {
+      "name": "Melee Evasion [ Esquive en mêlée ]",
+      "detail": "Règles spéciales",
+      "description": "Les ennemis subissent un malus de -1 pour toucher en mêlée lorsqu'ils attaquent une unité où toutes les figurines possèdent cette règle."
+    },
+    {
+      "name": "Quick Shot [ Tir rapide ]",
+      "detail": "Règles spéciales",
+      "description": "Ce modele peut tirer apres avoir utilise une action Rush."
+    },
+    {
+      "name": "Shatter [ Fracasse ]",
+      "detail": "Règles spéciales",
+      "description": "Ignore la Régénération et, contre les unités dont la majorite des modeles ont Tough(3) a Tough(9), cette arme gagne AP(+2)."
+    },
+    {
+      "name": "Versatile Defense Aura [ Aura de Défense versatile ]",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité gagnent Défense versatile."
+    },
+    {
+      "name": "Shred when Shooting Aura [ Aura de Dechiquetage au Tir ]",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité gagnent Dechiquetage au tir."
+    },
+    {
+      "name": "Scout Aura [ Aura d’Éclaireur ]",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité gagnent Éclaireur."
+    },
+    {
+      "name": "Unpredictable Fighter Aura [ Aura de Combattant Imprévisible ]",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité gagnent Combattant Imprévisible."
+    },
+    {
+      "name": "Ranged Shrouding Aura [ Aura de Voile fluctuant ]",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité gagnent Voile fluctuant."
+    },
+    {
+      "name": "Lustbound Boost Aura [ Aura de Renforcement Lié à la Luxure ]",
+      "detail": "Règles spéciales d'Aura",
+      "description": "Cette figurine et son unité gagnent Renforcement Lié à la Luxure."
+    }
+  ],
+  "spells": {
+    "Extase de Combat (1)": {
+      "cost": 1,
+      "description": "Choisissez une unité ennemie a 18\", contre laquelle les unités alliées gagnent Tir rapide une fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    "Belle Douleur (1)": {
+      "cost": 1,
+      "description": "Choisissez une unité ennemie a 12\", qui subit 2 touches avec Fracasse."
+    },
+    "Danse Extatique (2)": {
+      "cost": 2,
+      "description": "Choisissez jusqu'à deux unités alliées a 12\", qui gagnent Esquive en mêlée une fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    "Paralysie Totale (2)": {
+      "cost": 2,
+      "description": "Choisissez un modele ennemi a 18\", qui subit 4 touches avec AP(1)."
+    },
+    "Don de la Luxure (3)": {
+      "cost": 3,
+      "description": "Choisissez jusqu'à trois unités alliées a 12\", qui gagnent Renforcement Lié à la Luxure une fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    "Fouet Ecrasant (3)": {
+      "cost": 3,
+      "description": "Choisissez une unité ennemie a 12\", qui subit 6 touches avec AP(1) et Laceration."
+    }
+  },
+  "units": [
+    {
+      "name": "Maître du Ravage de la Luxure Élu",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 65,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Héros",
+        "Attaque versatile",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Arme à une main lourde",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacer l'Arme à une main lourde par :",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Hallebarde lourde",
+              "cost": 5,
+              "weapon": {
+                "name": "Hallebarde lourde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Paire d'armes à une main lourdes",
+              "cost": 5,
+              "weapon": {
+                "name": "Paire d'armes à une main lourdes",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Grande arme lourde",
+              "cost": 10,
+              "weapon": {
+                "name": "Grande arme lourden",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 3,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Lance lourde",
+              "cost": 5,
+              "weapon": {
+                "name": "Lance lourde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Percée"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Montures",
+          "type": "mount",
+          "description": "Ajoutez une monture",
+          "options": [
+            {
+              "name": "Cheval",
+              "cost": 15,
+              "mount":  {
+                            "name":  "Cheval",
+                            "weapon":  [
+                                       ],
+                            "special_rules":  [
+                                               "Impact (1)",
+                                               "Rapide"
+                                              ]
+                         }
+            },
+            {
+              "name": "Bête de la Luxure",
+              "cost": 20,
+              "special_rules": [
+                "Griffes empoisonnées",
+                "Rapide"
+              ]
+            },
+            {
+              "name": "Monture démoniaque",
+              "cost": 80,
+              "mount": {
+                        "name": "Monture démoniaque",
+                        "coriace_bonus": 3,
+                        "weapon": [
+                                   {
+                                    "Name":  "Griffes lourdes",
+                                    "range":  "Mêlée",
+                                    "attacks":  1,
+                                    "armor_piercing":  1,
+                                    "special_rules":  [
+                                                      ]
+                                    }
+                                  ],                          
+                        "special_rules": [
+                                           "Rapide",
+                                           "Effrayant",
+                                          "Impact (2)"
+                                         ]
+                        }
+            },
+                        {
+              "name": "Chariot",
+              "cost": 130,
+              "special_rules": [
+                "Hooves",
+                "Rapide",
+                "Impact",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Beast Chariot",
+              "cost": 145,
+              "special_rules": [
+                "Heavy Claws",
+                "Rapide",
+                "Effrayant",
+                "Impact",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Manticore",
+              "cost": 165,
+              "special_rules": [
+                "Perforant Claws",
+                "Effrayant",
+                "Volant",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Havoc Dragon",
+              "cost": 335,
+              "weapon": {
+                "name": "Havoc Dragon",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Coriace",
+                  "Attaque de souffle",
+                  "Effrayant",
+                  "Volant",
+                  "Stomp",
+                  "Heavy Claws"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations de rôle",
+          "type": "role",
+          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "options": [
+            {
+              "name": "Lord of Lust",
+              "cost": 15,
+              "weapon": {
+                "name": "Lord of Lust",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Renforcement Lié à la Luxure"
+                ]
+              }
+            },
+            {
+              "name": "Conqueror",
+              "cost": 50,
+              "weapon": {
+                "name": "Conqueror",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura d’Éclaireur"
+                ]
+              }
+            },
+            {
+              "name": "Marauder",
+              "cost": 30,
+              "weapon": {
+                "name": "Marauder",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Combattant Imprévisible"
+                ]
+              }
+            },
+            {
+              "name": "Army Standard Bearer",
+              "cost": 30,
+              "special_rules": [
+                "Effrayant"
+              ]
+            },
+            {
+              "name": "Warlock",
+              "cost": 35,
+              "weapon": {
+                "name": "Warlock",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Voile fluctuant"
+                ]
+              }
+            },
+            {
+              "name": "Sorcerer",
+              "cost": 40,
+              "special_rules": [
+                "Lanceur de sorts"
+              ]
+            },
+            {
+              "name": "Master Sorcerer",
+              "cost": 60,
+              "special_rules": [
+                "Lanceur de sorts"
+              ]
+            }
+          ]
+        }
+      ],
+      "coriace": 3
+    },
+    {
+      "name": "Lust Master",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 55,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Héros",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Heavy Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Replace Heavy Hand Weapon",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Heavy Halberd",
+              "cost": 5,
+              "weapon": {
+                "name": "Heavy Halberd",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Dual Heavy Hand Weapons",
+              "cost": 5,
+              "weapon": {
+                "name": "Dual Heavy Hand Weapons",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Heavy Great Weapon",
+              "cost": 10,
+              "weapon": {
+                "name": "Heavy Great Weapon",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 3,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Heavy Lance",
+              "cost": 5,
+              "weapon": {
+                "name": "Heavy Lance",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Percée"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade with one",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Horse",
+              "cost": 15,
+              "special_rules": [
+                "Rapide",
+                "Impact"
+              ]
+            },
+            {
+              "name": "Lust Beast",
+              "cost": 20,
+              "special_rules": [
+                "Toxin Claws",
+                "Rapide"
+              ]
+            },
+            {
+              "name": "Daemon Mount",
+              "cost": 80,
+              "special_rules": [
+                "Heavy Claws",
+                "Rapide",
+                "Effrayant",
+                "Impact",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Chariot",
+              "cost": 130,
+              "special_rules": [
+                "Hooves",
+                "Rapide",
+                "Impact",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Beast Chariot",
+              "cost": 145,
+              "special_rules": [
+                "Heavy Claws",
+                "Rapide",
+                "Effrayant",
+                "Impact",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Manticore",
+              "cost": 165,
+              "special_rules": [
+                "Perforant Claws",
+                "Effrayant",
+                "Volant",
+                "Coriace"
+              ]
+            },
+            {
+              "name": "Havoc Dragon",
+              "cost": 335,
+              "weapon": {
+                "name": "Havoc Dragon",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Coriace",
+                  "Attaque de souffle",
+                  "Effrayant",
+                  "Volant",
+                  "Stomp",
+                  "Heavy Claws"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade with one",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Lord of Lust",
+              "cost": 15,
+              "weapon": {
+                "name": "Lord of Lust",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Renforcement Lié à la Luxure"
+                ]
+              }
+            },
+            {
+              "name": "Conqueror",
+              "cost": 50,
+              "weapon": {
+                "name": "Conqueror",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura d’Éclaireur"
+                ]
+              }
+            },
+            {
+              "name": "Marauder",
+              "cost": 30,
+              "weapon": {
+                "name": "Marauder",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Combattant Imprévisible"
+                ]
+              }
+            },
+            {
+              "name": "Army Standard Bearer",
+              "cost": 30,
+              "special_rules": [
+                "Effrayant"
+              ]
+            },
+            {
+              "name": "Warlock",
+              "cost": 35,
+              "weapon": {
+                "name": "Warlock",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Voile fluctuant"
+                ]
+              }
+            },
+            {
+              "name": "Sorcerer",
+              "cost": 40,
+              "special_rules": [
+                "Lanceur de sorts"
+              ]
+            },
+            {
+              "name": "Master Sorcerer",
+              "cost": 60,
+              "special_rules": [
+                "Lanceur de sorts"
+              ]
+            }
+          ]
+        }
+      ],
+      "coriace": 3
+    },
+    {
+      "name": "Lust Barbarian Champion",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 30,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Furieux",
+        "Héros",
+        "Éclaireur",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Replace Hand Weapon",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Dual Hand Weapons",
+              "cost": 5,
+              "weapon": {
+                "name": "Dual Hand Weapons",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Lance",
+              "cost": 5,
+              "weapon": {
+                "name": "Lance",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Percée"
+                ]
+              }
+            },
+            {
+              "name": "Halberd",
+              "cost": 5,
+              "weapon": {
+                "name": "Halberd",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Great Weapon",
+              "cost": 5,
+              "weapon": {
+                "name": "Great Weapon",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 2,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade with one",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Shortbow",
+              "cost": 5,
+              "weapon": {
+                "name": "Shortbow",
+                "range": 18,
+                "attacks": 2,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Barbed Javelin",
+              "cost": 10,
+              "weapon": {
+                "name": "Barbed Javelin",
+                "range": 12,
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Éclatement"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade with one",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Horse",
+              "cost": 10,
+              "special_rules": [
+                "Rapide",
+                "Impact"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Upgrade with one",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Lord of Lust",
+              "cost": 15,
+              "weapon": {
+                "name": "Lord of Lust",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Renforcement Lié à la Luxure"
+                ]
+              }
+            },
+            {
+              "name": "Herald",
+              "cost": 30,
+              "weapon": {
+                "name": "Herald",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Dechiquetage au Tir"
+                ]
+              }
+            },
+            {
+              "name": "Marauder",
+              "cost": 30,
+              "weapon": {
+                "name": "Marauder",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Combattant Imprévisible"
+                ]
+              }
+            },
+            {
+              "name": "Warlock",
+              "cost": 35,
+              "weapon": {
+                "name": "Warlock",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Voile fluctuant"
+                ]
+              }
+            },
+            {
+              "name": "Sorcerer",
+              "cost": 40,
+              "special_rules": [
+                "Lanceur de sorts"
+              ]
+            }
+          ]
+        }
+      ],
+      "coriace": 3
+    },
+    {
+      "name": "Lust Barbarian Raiders",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 10,
+      "base_cost": 95,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Furieux",
+        "Éclaireur",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade up to three models with one",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Sergeant",
+              "cost": 5,
+              "special_rules": [
+                "Sergent"
+              ]
+            },
+            {
+              "name": "Banner",
+              "cost": 15,
+              "special_rules": [
+                "Bannière"
+              ]
+            },
+            {
+              "name": "Musician",
+              "cost": 10,
+              "special_rules": [
+                "Musicien"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Replace all Hand Weapons",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Flail",
+              "cost": 10,
+              "weapon": {
+                "name": "Flail",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Spear",
+              "cost": 35,
+              "weapon": {
+                "name": "Spear",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Contre-charge"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade one model with",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Icon of Havoc",
+              "cost": 20,
+              "weapon": {
+                "name": "Icon of Havoc",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Défense versatile"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Warriors",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 80,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Heavy Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade up to three models with one",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Sergeant",
+              "cost": 5,
+              "special_rules": [
+                "Sergent"
+              ]
+            },
+            {
+              "name": "Banner",
+              "cost": 15,
+              "special_rules": [
+                "Bannière"
+              ]
+            },
+            {
+              "name": "Musician",
+              "cost": 10,
+              "special_rules": [
+                "Musicien"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Replace all Heavy Hand Weapons",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Heavy Halberd",
+              "cost": 10,
+              "weapon": {
+                "name": "Heavy Halberd",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Heavy Great Weapon",
+              "cost": 20,
+              "weapon": {
+                "name": "Heavy Great Weapon",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 3,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Dual Heavy Hand Weapons",
+              "cost": 35,
+              "weapon": {
+                "name": "Dual Heavy Hand Weapons",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade one model with",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Icon of Havoc",
+              "cost": 20,
+              "weapon": {
+                "name": "Icon of Havoc",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Défense versatile"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chosen Lust Warriors",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 100,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Attaque versatile",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Heavy Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade up to three models with one",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Sergeant",
+              "cost": 5,
+              "special_rules": [
+                "Sergent"
+              ]
+            },
+            {
+              "name": "Banner",
+              "cost": 15,
+              "special_rules": [
+                "Bannière"
+              ]
+            },
+            {
+              "name": "Musician",
+              "cost": 10,
+              "special_rules": [
+                "Musicien"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Replace all Heavy Hand Weapons",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Heavy Halberd",
+              "cost": 10,
+              "weapon": {
+                "name": "Heavy Halberd",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Heavy Great Weapon",
+              "cost": 20,
+              "weapon": {
+                "name": "Heavy Great Weapon",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 3,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Dual Heavy Hand Weapons",
+              "cost": 35,
+              "weapon": {
+                "name": "Dual Heavy Hand Weapons",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade one model with",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Icon of Havoc",
+              "cost": 20,
+              "weapon": {
+                "name": "Icon of Havoc",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Défense versatile"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Mutants",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 95,
+      "quality": 4,
+      "defense": 4,
+      "special_rules": [
+        "Sans peur",
+        "Combattant imprévisible",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Mutated Limbs",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": []
+    },
+    {
+      "name": "Lust Pain Warriors",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 100,
+      "quality": 3,
+      "defense": 4,
+      "special_rules": [
+        "Lié à la Luxure",
+        "Furieux"
+      ],
+      "weapon": [
+        {
+          "name": "Pain Sword",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": []
+    },
+    {
+      "name": "Lust Twin Warriors",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 100,
+      "quality": 3,
+      "defense": 4,
+      "special_rules": [
+        "Lié à la Luxure",
+        "Tueur en mêlée"
+      ],
+      "weapon": [
+        {
+          "name": "Great Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 2,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Replace any Great Weapon",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Dual Hand Weapons",
+              "cost": 5,
+              "weapon": {
+                "name": "Dual Hand Weapons",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Fiend Brutes",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 3,
+      "base_cost": 135,
+      "quality": 4,
+      "defense": 4,
+      "special_rules": [
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Rending Claws",
+          "range": "Mêlée",
+          "attacks": 4,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": [],
+      "coriace": 3
+    },
+    {
+      "name": "Lust Barbarian Hunters",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 60,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Éclaireur",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Shortbow",
+          "range": 18,
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        },
+        {
+          "name": "Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade one model with",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Icon of Havoc",
+              "cost": 20,
+              "weapon": {
+                "name": "Icon of Havoc",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Défense versatile"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Replace all Shortbows",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Barbed Javelin",
+              "cost": 5,
+              "weapon": {
+                "name": "Barbed Javelin",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Éclatement"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Bliss Archers",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 65,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Hexed Bow",
+          "range": 18,
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Perforant"
+          ]
+        },
+        {
+          "name": "Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": []
+    },
+    {
+      "name": "Lust Hounds",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 70,
+      "quality": 4,
+      "defense": 5,
+      "special_rules": [
+        "Rapide",
+        "Arpenteur",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Rending Claws",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade all models with any",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Vicious",
+              "cost": 5,
+              "special_rules": [
+                "Dechiquetage en mêlée"
+              ]
+            },
+            {
+              "name": "Bounding Advance",
+              "cost": 10,
+              "special_rules": [
+                "Éclaireur"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Barbarian Horsemen",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 80,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Rapide",
+        "Furieux",
+        "Impact(1)",
+        "Éclaireur",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Replace all Hand Weapons",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Flail",
+              "cost": 5,
+              "weapon": {
+                "name": "Flail",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade all models with one",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Shortbow",
+              "cost": 20,
+              "weapon": {
+                "name": "Shortbow",
+                "range": 18,
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Barbed Javelin",
+              "cost": 15,
+              "weapon": {
+                "name": "Barbed Javelin",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Éclatement"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade one model with",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Icon of Havoc",
+              "cost": 20,
+              "weapon": {
+                "name": "Icon of Havoc",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Défense versatile"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Bliss Beast Riders",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 70,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Rapide",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Lance",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Percée"
+          ]
+        },
+        {
+          "name": "Toxin Claws",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Fléau"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade up to three models with one",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Sergeant",
+              "cost": 5,
+              "special_rules": [
+                "Sergent"
+              ]
+            },
+            {
+              "name": "Banner",
+              "cost": 15,
+              "special_rules": [
+                "Bannière"
+              ]
+            },
+            {
+              "name": "Musician",
+              "cost": 10,
+              "special_rules": [
+                "Musicien"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Replace all Lances",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Hexed Bow",
+              "cost": 30,
+              "weapon": {
+                "name": "Hexed Bow",
+                "range": 18,
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Barbed Whip",
+              "cost": 35,
+              "weapon": {
+                "name": "Barbed Whip",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant",
+                  "Fiable"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Knights",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 120,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Rapide",
+        "Impact(1)",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Heavy Hand Weapon",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade up to three models with one",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Sergeant",
+              "cost": 5,
+              "special_rules": [
+                "Sergent"
+              ]
+            },
+            {
+              "name": "Banner",
+              "cost": 15,
+              "special_rules": [
+                "Bannière"
+              ]
+            },
+            {
+              "name": "Musician",
+              "cost": 10,
+              "special_rules": [
+                "Musicien"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Replace all Heavy Hand Weapons",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Heavy Lance",
+              "cost": 5,
+              "weapon": {
+                "name": "Heavy Lance",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Percée"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade one model with",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Icon of Havoc",
+              "cost": 20,
+              "weapon": {
+                "name": "Icon of Havoc",
+                "range": "Mêlée",
+                "attacks": 0,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Aura de Défense versatile"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lust Shrine",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 1,
+      "base_cost": 225,
+      "quality": 4,
+      "defense": 3,
+      "special_rules": [
+        "Effrayant(2)",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Giant Fists",
+          "range": "Mêlée",
+          "attacks": 8,
+          "armor_piercing": 2,
+          "special_rules": []
+        },
+        {
+          "name": "Stomp",
+          "range": "Mêlée",
+          "attacks": 4,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade with",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Battle Aura",
+              "cost": 20,
+              "special_rules": [
+                "Bonus de Combattant precis"
+              ]
+            }
+          ]
+        }
+      ],
+      "coriace": 12
+    },
+    {
+      "name": "Lust Chariot",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 130,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Rapide",
+        "Impact(4)",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Heavy Crew Attacks",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 2,
+          "special_rules": []
+        },
+        {
+          "name": "Hooves",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Replace Heavy Crew Attack",
+          "type": "weapon",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Barbed Javelin Crew",
+              "cost": 40,
+              "weapon": {
+                "name": "Barbed Javelin Crew",
+                "range": 12,
+                "attacks": 6,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Éclatement"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Upgrade with",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Havoc Favour",
+              "cost": 15,
+              "special_rules": [
+                "Bonus d’Inébranlable"
+              ]
+            }
+          ]
+        }
+      ],
+      "coriace": 6
+    },
+    {
+      "name": "Lust Beast Chariot",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 145,
+      "quality": 3,
+      "defense": 3,
+      "special_rules": [
+        "Rapide",
+        "Effrayant(1)",
+        "Impact(4)",
+        "Lié à la Luxure"
+      ],
+      "weapon": [
+        {
+          "name": "Heavy Claws",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 1,
+          "special_rules": []
+        },
+        {
+          "name": "Heavy Crew Attacks",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 2,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Upgrade with",
+          "type": "upgrades",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Havoc Favour",
+              "cost": 15,
+              "special_rules": [
+                "Bonus d’Inébranlable"
+              ]
+            }
+          ]
+        }
+      ],
+      "coriace": 6
+    }
+  ]
+}

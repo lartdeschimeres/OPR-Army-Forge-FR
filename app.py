@@ -521,8 +521,52 @@ def check_weapon_conditions(unit_key, requires, unit=None):
     current_weapons = []
     selections = st.session_state.unit_selections.get(unit_key, {})
 
+    def _selected_group_weapons(group, selected_value):
+        if not unit or not isinstance(selected_value, str):
+            return []
+        gtype = group.get("type", "")
+        if gtype not in ("weapon", "conditional_weapon"):
+            return []
+
+        if gtype == "weapon":
+            bw = unit.get("weapon", [])
+            if isinstance(bw, list) and bw:
+                lbls = [w.get("name", "Arme") for w in bw if isinstance(w, dict)]
+                default_lbl = lbls[0] if len(lbls) == 1 else " et ".join(lbls)
+            elif isinstance(bw, dict):
+                default_lbl = bw.get("name", "Arme")
+            else:
+                default_lbl = ""
+            if selected_value == default_lbl:
+                return []
+
+        for option in group.get("options", []):
+            weapon_data = option.get("weapon", {})
+            if gtype == "weapon":
+                option_label = (" et ".join(w.get("name", "Arme") for w in weapon_data) + f" (+{option['cost']} pts)") if isinstance(weapon_data, list) else format_weapon_option(weapon_data, option.get("cost", 0))
+            else:
+                option_label = format_weapon_option(weapon_data, option.get("cost", 0)) if isinstance(weapon_data, dict) and weapon_data else f"{option.get('name', 'Amélioration')} (+{option.get('cost', 0)} pts)"
+            if option_label != selected_value:
+                continue
+            if isinstance(weapon_data, list):
+                return [w for w in weapon_data if isinstance(w, dict)]
+            if isinstance(weapon_data, dict) and weapon_data:
+                return [weapon_data]
+            return []
+        return []
+
     # 1. Sélections explicites (armes choisies dans les groupes conditional/weapon)
-    for v in selections.values():
+    for key, v in selections.items():
+        if key.startswith("group_") and unit is not None:
+            try:
+                group_idx = int(key.split("_", 1)[1])
+            except (IndexError, ValueError):
+                group_idx = None
+            if group_idx is not None and group_idx < len(unit.get("upgrade_groups", [])):
+                selected_weapons = _selected_group_weapons(unit.get("upgrade_groups", [])[group_idx], v)
+                if selected_weapons:
+                    current_weapons.extend(selected_weapons)
+                    continue
         if isinstance(v, str) and v not in ("Aucune amélioration", "Aucune arme", "Aucun rôle",
                                              "Aucune monture", "Aucune option de mobilité"):
             current_weapons.append({"name": v.split(" (")[0]})
