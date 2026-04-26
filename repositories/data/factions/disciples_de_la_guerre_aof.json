@@ -2181,5 +2181,698 @@
                                          ]
                   }
               ],
-    "history":  "L\u0027arrivée des Dieux du Ravage sur Tyria provoqua une grande instabilité, car certains commencèrent à vénérer ces nouvelles divinités. L\u0027Empire rappela une grande partie de ses troupes pour défendre sa capitale et les régions avoisinantes, dans l\u0027espoir de mater les rébellions qui s\u0027y produisaient, tandis que les tribus du Nord étaient abandonnées à leur compte pour faire face aux dangers par leurs propres moyens.\n\nLes yeux des Dieux du Ravage se tournèrent rapidement vers cette province abandonnée, à la recherche de peuples à convertir et de champions potentiels. Chaque Dieu du Ravage chercha à rallier à son influence des individus prometteurs et les plus puissantes tribus, accordant à leurs favoris divers bienfaits en échange de leur dévotion.\n\nLe Dieu de la Guerre offre la force, permettant à ses disciples de triompher de leurs ennemis. Le Dieu du Changement confère la connaissance et une magie puissante. Le Dieu de la Peste octroie un regain de vitalité aux victimes de maladies. Le Dieu de la Luxure accorde la rédemption et le pouvoir à ceux qui furent chassés par l\u0027Empire.\n\nCes présents redonnèrent l\u0027espoir d\u0027une meilleure vie aux tribus désespérées que l\u0027Empire avait abandonnées. Ceux qui acceptèrent ces pactes reçurent de puissants dons de leurs bienfaiteurs, qui les reforgèrent à leur image. Les Disciples du Ravage répondirent à ces faveurs par une loyauté fanatique, prêts à dévouer leur vie au dieu qui les choisit. Chaque tribu se définit en fonction de son culte, s\u0027établissant par leur dévotion envers leur protecteur. Lorsque les Guerres du Ravage éclatèrent, les tribus nordiques survivantes avaient indubitablement changé, chacune d\u0027entre elles s\u0027étant ralliée à un ou plusieurs Dieux du Ravage.\n\nLorsque les Dieux du Ravage furent capturés, leurs adeptes les plus fanatiques perdirent soudain le but de leur vie. Certains se battirent jusqu\u0027à la mort, désireux de donner leur vie pour venger leur dieu. D\u0027autres fuirent vers le Nord, dispersés et affaiblis, mais vivant. Ils se maintinrent en veille, infligeant ce qu\u0027ils pouvaient pour se venger en attendant le retour de leur dieu tutélaire. Sans maître ni espoir, beaucoup tombèrent dans le désespoir. Des conflits mineurs commencèrent à éclater entre bandes adeptes de dieux différents, cherchant à se rejeter mutuellement la responsabilité de la défaite.\n\nC\u0027est alors que la Grande Faille s\u0027ouvrit et libéra leurs dieux sur Tyria. Les Disciples du Ravage retrouvèrent alors l\u0027espoir, désireux de prouver à nouveau leur loyauté envers leurs anciens maîtres. Pourtant, l\u0027amertume de la défaite et les rivalités demeurent, car beaucoup se souviennent de leurs années de clandestinité, et ils ne sont plus la force unifiée qui sévissait autrefois à travers tout le pays.\n\nSur quel chemin votre dévotion vous guidera-t-elle ?"
+              "replaces":  [
+                 "Armes à une main lourdes"
+              ],
+              "weapon": {
+                "name": "Grande arme lourde",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 3,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Sergent",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Guerriers Moissonneurs de Mort",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 3,
+      "base_cost": 170,
+      "quality": 3,
+      "defense": 4,
+      "coriace": 3,
+      "special_rules": [
+        "Guerrier-né",
+        "Impact (2)"
+      ],
+      "weapon": [
+        {
+          "name": "Paire de marteau-fléaux",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 2,
+          "special_rules": []
+        }
+      ]
+    },
+    {
+      "name": "Guerriers Semeurs de Mort",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 3,
+      "base_cost": 200,
+      "quality": 3,
+      "defense": 4,
+      "coriace": 3,
+      "special_rules": [
+        "Assaut tranchant",
+        "Guerrier-né"
+      ],
+      "weapon": [
+        {
+          "name": "Paires d'armes ensorcelées",
+          "range": "Mêlée",
+          "attacks": 4,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez toutes les armes de base par :",
+          "options": [
+            {
+              "name": "Grande arme ensorcelée",
+              "cost": 15,
+              "weapon": {
+                "name": "Grande arme ensorcelée",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 2,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Sergent",
+              "cost": 10,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chasseurs barbares de la Guerre",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 65,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Eclaireur",
+        "Guerrier-né"
+      ],
+      "weapon": [
+        {
+          "name": "Arcs courts",
+          "range": 18,
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        },
+        {
+          "name": "Armes à une main",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez tous les Arcs courts par :",
+          "options": [
+            {
+              "name": "Javelots barbelés",
+              "cost": 5,
+              "weapon": {
+                "name": "Javelots barbelés",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Eclatement"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Icône du Ravage",
+              "cost": 20,
+              "special_rules": [
+                "Aura de Défense versatile"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Limiers du Ravage de la Guerre",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 70,
+      "quality": 4,
+      "defense": 5,
+      "special_rules": [
+        "Arpenteur",
+        "Guerrier-né",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Griffes perforantes",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Vicieux",
+              "cost": 5,
+              "special_rules": [
+                "Lacération en mêlée"
+              ]
+            },
+            {
+              "name": "Eclaireur",
+              "cost": 10,
+              "special_rules": [
+                "Eclaireur"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cavaliers barbares de la Guerre",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 80,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Eclaireur",
+        "Furieux",
+        "Guerrier-né",
+        "Impact (1)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Armes à une main",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez toutes les armes à une main par :",
+          "options": [
+            {
+              "name": "Fléau",
+              "cost": 10,
+              "weapon": {
+                "name": "Fléau",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'armes",
+          "type": "conditional_weapon",
+          "description": "Améliorer toutes les figurines avec une des options suivantes (un seul choix possible)",
+          "options": [
+            {
+              "name": "Arc court",
+              "cost": 25,
+              "weapon": {
+                "name": "Arc court",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Javelot barbelé",
+              "cost": 30,
+              "weapon": {
+                "name": "Javelot barbelé",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Eclatement"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Icône du Ravage",
+              "cost": 20,
+              "special_rules": [
+                "Aura de Défense versatile"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chevaliers du Ravage de la Guerre",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 125,
+      "quality": 3,
+      "defense": 3,
+      "coriace": 3,
+      "special_rules": [
+        "Guerrier-né",
+        "Impact (1)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Armes à une main lourdes",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez toutes les armes à une main lourdes par :",
+          "options": [
+            {
+              "name": "Lance lourde",
+              "cost": 25,
+              "weapon": {
+                "name": "Lance lourde",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Percée"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Icône du Ravage",
+              "cost": 20,
+              "special_rules": [
+                "Aura de Défense versatile"
+              ]
+            },
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Sergent",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chevaliers sur Bêtes de Guerre",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 3,
+      "base_cost": 190,
+      "quality": 3,
+      "defense": 3,
+      "coriace": 3,
+      "special_rules": [
+        "Guerrier-né",
+        "Impact (2)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Griffes lourdes",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        },
+        {
+          "name": "Armes à une main lourdes",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez les Armes à une main lourdes par des Lances lourdes",
+          "options": [
+            {
+              "name": "Lances lourdes",
+              "cost": 25,
+              "weapon": {
+                "name": "Lances lourdes",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Percée"
+                ]
+              },
+              "replaces": [
+                "Armes à une main lourdes"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Sergent",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bête furieuse de la Guerre",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 135,
+      "quality": 3,
+      "defense": 4,
+      "coriace": 6,
+      "special_rules": [
+        "Effrayant (1)",
+        "Furieux",
+        "Guerrier-né"
+      ],
+      "weapon": [
+        {
+          "name": "Griffes perforantes",
+          "range": "Mêlée",
+          "attacks": 6,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Maître des Bêtes",
+              "cost": 30,
+              "special_rules": [
+                "Régénération",
+                "Sans peur"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Char du Ravage de la Guerre",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 130,
+      "quality": 3,
+      "defense": 3,
+      "coriace": 6,
+      "special_rules": [
+        "Guerrier-né",
+        "Impact (4)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Sabots",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": []
+        },
+        {
+          "name": "Attaques de l'équipage",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 2,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacez les Attaques de l'équipage par des Javelots barbelés",
+          "options": [
+            {
+              "name": "Javelots barbelés",
+              "cost": 50,
+              "weapon": {
+                "name": "Javelots barbelés",
+                "range": 12,
+                "attacks": 6,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Eclatement"
+                ]
+              },
+              "replaces": [
+                "Attaques de l'équipage"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Faveur du Ravage",
+              "cost": 15,
+              "special_rules": [
+                "Bonus d'Inébranlable"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Char Bestial de la Guerre",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 145,
+      "quality": 3,
+      "defense": 3,
+      "coriace": 6,
+      "special_rules": [
+        "Effrayant (1)",
+        "Guerrier-né",
+        "Impact (4)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Griffes lourdes",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 1,
+          "special_rules": []
+        },
+        {
+          "name": "Attaques lourdes de l'équipage",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 2,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Faveur du Ravage",
+              "cost": 15,
+              "special_rules": [
+                "Bonus d'Inébranlable"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sanctuaire du Ravage de la Guerre",
+      "type": "unit",
+      "unit_detail": "vehicle",
+      "size": 1,
+      "base_cost": 225,
+      "quality": 3,
+      "defense": 3,
+      "coriace": 12,
+      "special_rules": [
+        "Effrayant (2)",
+        "Guerrier-né"
+      ],
+      "weapon": [
+        {
+          "name": "Poings géants",
+          "range": "Mêlée",
+          "attacks": 8,
+          "armor_piercing": 2,
+          "special_rules": []
+        },
+        {
+          "name": "Piétinement",
+          "range": "Mêlée",
+          "attacks": 4,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Aura de bataille",
+              "cost": 15,
+              "special_rules": [
+                "Bonus de Combattant précis"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "history": "L'arrivée des Dieux du Ravage sur Tyria provoqua une grande instabilité, car certains commencèrent à vénérer ces nouvelles divinités. L'Empire rappela une grande partie de ses troupes pour défendre sa capitale et les régions avoisinantes, dans l'espoir de mater les rébellions qui s'y produisaient, tandis que les tribus du Nord étaient abandonnées à leur compte pour faire face aux dangers par leurs propres moyens.\n\nLes yeux des Dieux du Ravage se tournèrent rapidement vers cette province abandonnée, à la recherche de peuples à convertir et de champions potentiels. Chaque Dieu du Ravage chercha à rallier à son influence des individus prometteurs et les plus puissantes tribus, accordant à leurs favoris divers bienfaits en échange de leur dévotion.\n\nLe Dieu de la Guerre offre la force, permettant à ses disciples de triompher de leurs ennemis. Le Dieu du Changement confère la connaissance et une magie puissante. Le Dieu de la Peste octroie un regain de vitalité aux victimes de maladies. Le Dieu de la Luxure accorde la rédemption et le pouvoir à ceux qui furent chassés par l'Empire.\n\nCes présents redonnèrent l'espoir d'une meilleure vie aux tribus désespérées que l'Empire avait abandonnées. Ceux qui acceptèrent ces pactes reçurent de puissants dons de leurs bienfaiteurs, qui les reforgèrent à leur image. Les Disciples du Ravage répondirent à ces faveurs par une loyauté fanatique, prêts à dévouer leur vie au dieu qui les choisit. Chaque tribu se définit en fonction de son culte, s'établissant par leur dévotion envers leur protecteur. Lorsque les Guerres du Ravage éclatèrent, les tribus nordiques survivantes avaient indubitablement changé, chacune d'entre elles s'étant ralliée à un ou plusieurs Dieux du Ravage.\n\nLorsque les Dieux du Ravage furent capturés, leurs adeptes les plus fanatiques perdirent soudain le but de leur vie. Certains se battirent jusqu'à la mort, désireux de donner leur vie pour venger leur dieu. D'autres fuirent vers le Nord, dispersés et affaiblis, mais vivant. Ils se maintinrent en veille, infligeant ce qu'ils pouvaient pour se venger en attendant le retour de leur dieu tutélaire. Sans maître ni espoir, beaucoup tombèrent dans le désespoir. Des conflits mineurs commencèrent à éclater entre bandes adeptes de dieux différents, cherchant à se rejeter mutuellement la responsabilité de la défaite.\n\nC'est alors que la Grande Faille s'ouvrit et libéra leurs dieux sur Tyria. Les Disciples du Ravage retrouvèrent alors l'espoir, désireux de prouver à nouveau leur loyauté envers leurs anciens maîtres. Pourtant, l'amertume de la défaite et les rivalités demeurent, car beaucoup se souviennent de leurs années de clandestinité, et ils ne sont plus la force unifiée qui sévissait autrefois à travers tout le pays.\n\nSur quel chemin votre dévotion vous guidera-t-elle ?"
 }

@@ -1,0 +1,178 @@
+{
+  "faction": "Nom de la faction",
+  "game": "Grimdark Future",
+  "version": "FR-3.5.3",
+  "status": "draft",
+  "description": "Description courte de la faction.",
+  "faction_special_rules": [
+    {
+      "name": "Nom de la regle speciale",
+      "description": "Description de la regle speciale."
+    }
+  ],
+  "spells": {
+    "Nom du sort (1)": {
+      "cost": 1,
+      "description": "Description du sort.",
+      "range": "12\"",
+      "target": "1 unite"
+    }
+  },
+  "units": [
+    {
+      "name": "Nom de l'unite",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 100,
+      "quality": 3,
+      "defense": 3,
+      "coriace": 3,
+      "special_rules": [
+        "Heros",
+        "Sans peur"
+      ],
+      "weapon": [
+        {
+          "name": "Arme de base",
+          "range": "Melee",
+          "attacks": 3,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Ameliorations de role",
+          "type": "role",
+          "description": "Choisissez une seule option :",
+          "options": [
+            {
+              "name": "Sorcier",
+              "cost": 35,
+              "special_rules": [
+                "Lanceur de sorts (2)"
+              ]
+            },
+            {
+              "name": "Porte-etendard",
+              "cost": 20,
+              "special_rules": [
+                "Effrayant (1)"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Remplacement d'arme",
+          "type": "weapon",
+          "description": "Remplacer l'arme de base par :",
+          "options": [
+            {
+              "name": "Grande arme",
+              "cost": 10,
+              "replaces": [
+                "Arme de base"
+              ],
+              "weapon": {
+                "name": "Grande arme",
+                "range": "Melee",
+                "attacks": 2,
+                "armor_piercing": 3,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Ajout d'une arme a distance",
+          "type": "conditional_weapon",
+          "description": "Ajouter une seule arme a distance :",
+          "options": [
+            {
+              "name": "Arc long",
+              "cost": 15,
+              "weapon": {
+                "name": "Arc long",
+                "range": 24,
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        },
+        {
+          "group": "Monture",
+          "type": "mount",
+          "description": "Ajouter une monture :",
+          "options": [
+            {
+              "name": "Monture lourde",
+              "cost": 60,
+              "mount": {
+                "name": "Monture lourde",
+                "coriace_bonus": 3,
+                "weapon": [
+                  {
+                    "name": "Griffes",
+                    "range": "Melee",
+                    "attacks": 2,
+                    "armor_piercing": 1,
+                    "special_rules": []
+                  }
+                ],
+                "special_rules": [
+                  "Rapide"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Options d'unite",
+          "type": "upgrades",
+          "description": "Ajouter n'importe quelles options :",
+          "options": [
+            {
+              "name": "Banniere",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        },
+        {
+          "group": "Remplacement multiple",
+          "type": "variable_weapon_count",
+          "description": "Remplacer plusieurs armes identiques :",
+          "options": [
+            {
+              "name": "Lance-flammes",
+              "cost": 5,
+              "min_count": 0,
+              "max_count": {
+                "type": "size_based",
+                "value": 3
+              },
+              "replaces": [
+                "Arme de base"
+              ],
+              "weapon": {
+                "name": "Lance-flammes",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Explosion (3)",
+                  "Fiable"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "faction_image_url": "https://example.com/image-de-faction.avif",
+  "history": "Historique long de la faction."
+}
